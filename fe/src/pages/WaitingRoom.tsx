@@ -2,16 +2,19 @@ import { motion } from 'framer-motion'
 
 interface Player {
   socketId: string
+  userId?: string
   name: string
 }
 
 interface WaitingRoomProps {
   roomId: string
   players: Player[]
-  hostSocketId: string
+  hostSocketId: string // Actually hostUserId from backend
   mySocketId: string
+  myUserId?: string
   onStartGame: () => void
   onLeave: () => void
+  onAddFakePlayers?: () => void
 }
 
 export default function WaitingRoom({
@@ -19,17 +22,28 @@ export default function WaitingRoom({
   players,
   hostSocketId,
   mySocketId,
+  myUserId,
   onStartGame,
   onLeave,
+  onAddFakePlayers,
 }: WaitingRoomProps) {
-  const isHost = mySocketId === hostSocketId
-  const canStart = players.length >= 2
+  // hostSocketId is actually hostUserId now (backend sends room.host which is userId)
+  const hostUserId = hostSocketId
+  
+  // Find host player by userId
+  const hostPlayer = players.find(p => p.userId === hostUserId)
+  
+  // Check if I'm the host
+  const isHost = myUserId === hostUserId
+  const canStart = players.length >= 7
+  
+  console.log('[WaitingRoom] hostUserId:', hostUserId, 'myUserId:', myUserId, 'isHost:', isHost, 'hostPlayer:', hostPlayer)
 
   return (
-    <div className="min-h-screen bg-[#FAFAF8] flex items-center justify-center p-4">
-      <div className="w-full max-w-sm mx-auto rounded-3xl border-4 border-black bg-white p-6 flex flex-col gap-5">
+    <div className="h-screen bg-[#FAFAF8] flex items-center justify-center overflow-hidden">
+      <div className="w-full max-w-sm h-full bg-white p-6 flex flex-col gap-5">
         {/* Header */}
-        <div className="text-center">
+        <div className="text-center pt-8">
           <div className="text-4xl mb-2">🎴</div>
           <h2 className="text-xl font-black text-gray-800 mb-1">Phòng chờ</h2>
           <div className="inline-flex items-center gap-2 bg-[#F0F5FF] px-4 py-2 rounded-full border-2 border-black">
@@ -41,15 +55,15 @@ export default function WaitingRoom({
         {/* Member count */}
         <div className="bg-[#FFF9C4] rounded-xl p-3 border-2 border-black text-center">
           <span className="text-sm font-bold text-gray-700">
-            Thành viên: {players.length} / 8
+            Thành viên: {players.length} / 11
           </span>
         </div>
 
         {/* Player list */}
-        <div className="flex flex-col gap-2 max-h-64 overflow-y-auto">
+        <div className="flex flex-col gap-2 flex-1 overflow-y-auto">
           {players.map((player, idx) => {
-            const isMe = player.socketId === mySocketId
-            const isPlayerHost = player.socketId === hostSocketId
+            const isMe = player.userId === myUserId
+            const isPlayerHost = player.userId === hostUserId
             return (
               <motion.div
                 key={player.socketId}
@@ -79,17 +93,29 @@ export default function WaitingRoom({
         </div>
 
         {/* Actions */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 pb-6">
           {isHost ? (
-            <button
-              onClick={onStartGame}
-              disabled={!canStart}
-              className="w-full py-4 rounded-2xl border-[3px] border-black bg-[#6BCB77]
-                         text-base font-bold hover:bg-[#5BB767] active:scale-[0.98]
-                         disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-            >
-              {canStart ? 'Bắt đầu chơi' : 'Cần ít nhất 2 người'}
-            </button>
+            <>
+              <button
+                onClick={onStartGame}
+                disabled={!canStart}
+                className="w-full py-4 rounded-2xl border-[3px] border-black bg-[#6BCB77]
+                           text-base font-bold hover:bg-[#5BB767] active:scale-[0.98]
+                           disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+              >
+                {canStart ? 'Bắt đầu chơi' : 'Cần ít nhất 7 người'}
+              </button>
+              
+              {onAddFakePlayers && players.length < 11 && (
+                <button
+                  onClick={onAddFakePlayers}
+                  className="w-full py-3 rounded-2xl border-2 border-black bg-[#FFE5B4]
+                             text-sm font-bold hover:bg-[#FFD89B] active:scale-[0.98] transition-all"
+                >
+                  🤖 Thêm Bot +1 (Debug)
+                </button>
+              )}
+            </>
           ) : (
             <div className="w-full py-4 rounded-2xl border-[3px] border-black bg-[#F0F5FF]
                             text-base font-bold text-center text-gray-600">

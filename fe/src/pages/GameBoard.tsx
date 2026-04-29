@@ -1,18 +1,32 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useSocket } from '../hooks/useSocket'
+import { CARD_IMAGES, ROLE_TO_IMAGE } from '../constants/cardImages'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type CoinType = 'red' | 'yellow' | 'green'
-type GamePhase = 'day' | 'night-healer' | 'night-silencer' | 'night-guide'
+type GamePhase = 'role-reveal' | 'night' | 'day'
+type CardCategory = 'situation' | 'emotion' | 'reflection' | 'selfcare'
+type EmotionSubType = 'basic' | 'light' | 'strong' | 'advanced'
 
 interface Player {
   id: string
   name: string
   role: string
   isMe: boolean
+  isNarrator?: boolean
+  isSender?: boolean
   isMuted?: boolean
   isHealed?: boolean
   coins: { red: number; yellow: number; green: number }
+}
+
+interface CardData {
+  id: string
+  frontImage: string
+  backImage: string
+  category: CardCategory
+  subType?: EmotionSubType
 }
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
@@ -22,30 +36,171 @@ const PASTEL_BG: Record<string, string> = {
   p6: '#FFF5F0', p7: '#F0FFF8', p8: '#FAFFF0',
 }
 
-const INITIAL_PLAYERS: Player[] = [
-  { id: 'p0', name: 'Mình', role: 'Người Kết Nối', isMe: true, coins: { red: 0, yellow: 0, green: 0 } },
-  { id: 'p1', name: 'An', role: 'Người Im Lặng', isMe: false, coins: { red: 0, yellow: 0, green: 0 } },
-  { id: 'p2', name: 'Bình', role: 'Người Dẫn Lối', isMe: false, coins: { red: 0, yellow: 0, green: 0 } },
-  { id: 'p3', name: 'Chi', role: 'Người Gợi Mở', isMe: false, coins: { red: 0, yellow: 0, green: 0 } },
-  { id: 'p4', name: 'Dung', role: 'Người Chữa Lành', isMe: false, coins: { red: 0, yellow: 0, green: 0 } },
-  { id: 'p5', name: 'Em', role: 'Người Kết Nối', isMe: false, coins: { red: 0, yellow: 0, green: 0 } },
-  { id: 'p6', name: 'Phong', role: 'Người Trao Gửi', isMe: false, coins: { red: 0, yellow: 0, green: 0 } },
-  { id: 'p7', name: 'Giang', role: 'Người Im Lặng', isMe: false, coins: { red: 0, yellow: 0, green: 0 } },
-  { id: 'p8', name: 'Hà', role: 'Người Kết Nối', isMe: false, coins: { red: 0, yellow: 0, green: 0 } },
-]
-
-const COIN_COLORS: Record<CoinType, { bg: string; label: string; emoji: string }> = {
-  red:    { bg: '#FF6B6B', label: 'Lòng tốt', emoji: '❤️' },
-  yellow: { bg: '#FFD93D', label: 'Trao yêu thương', emoji: '💛' },
-  green:  { bg: '#6BCB77', label: 'Được yêu thương', emoji: '💚' },
+const COIN_COLORS: Record<CoinType, { bg: string; label: string; emoji: string; color: string }> = {
+  red:    { bg: '#FF6B6B', label: 'Lòng tốt', emoji: '❤️', color: '#FF6B6B' },
+  yellow: { bg: '#FFD93D', label: 'Trao yêu thương', emoji: '💛', color: '#FFD93D' },
+  green:  { bg: '#6BCB77', label: 'Được yêu thương', emoji: '💚', color: '#6BCB77' },
 }
 
-const SYSTEM_MESSAGES: Record<GamePhase, string> = {
-  'day': 'Trời sáng! Mọi người mở mắt ☀️',
-  'night-healer': 'Người Chữa Lành hãy tỉnh giấc... 🌿',
-  'night-silencer': 'Người Im Lặng hãy tỉnh giấc... 🤫',
-  'night-guide': 'Người Dẫn Lối hãy tỉnh giấc... 🗺️',
+// Build card data from real images
+const buildCardData = (): Record<CardCategory, CardData[]> & { emotionsByType: Record<EmotionSubType, CardData[]> } => {
+  const situationCards: CardData[] = Object.entries(CARD_IMAGES.situation)
+    .filter(([key]) => key !== 'back')
+    .map(([key, url]) => ({
+      id: `situation-${key}`,
+      frontImage: url,
+      backImage: CARD_IMAGES.situation.back,
+      category: 'situation' as CardCategory,
+    }))
+
+  const reflectionCards: CardData[] = Object.entries(CARD_IMAGES.reflection)
+    .filter(([key]) => key !== 'back')
+    .map(([key, url]) => ({
+      id: `reflection-${key}`,
+      frontImage: url,
+      backImage: CARD_IMAGES.reflection.back,
+      category: 'reflection' as CardCategory,
+    }))
+
+  const selfcareCards: CardData[] = Object.entries(CARD_IMAGES.selfcare)
+    .filter(([key]) => key !== 'back')
+    .map(([key, url]) => ({
+      id: `selfcare-${key}`,
+      frontImage: url,
+      backImage: CARD_IMAGES.selfcare.back,
+      category: 'selfcare' as CardCategory,
+    }))
+
+  // Emotion cards - basic
+  const emotionBasicCards: CardData[] = Object.entries(CARD_IMAGES.emotionBasic).map(([key, images]) => ({
+    id: `emotion-basic-${key}`,
+    frontImage: images.front,
+    backImage: images.back,
+    category: 'emotion' as CardCategory,
+    subType: 'basic' as EmotionSubType,
+  }))
+
+  // Emotion cards - light
+  const emotionLightCards: CardData[] = CARD_IMAGES.emotionLight.map((images, idx) => ({
+    id: `emotion-light-${idx + 1}`,
+    frontImage: images.front,
+    backImage: images.back,
+    category: 'emotion' as CardCategory,
+    subType: 'light' as EmotionSubType,
+  }))
+
+  // Emotion cards - strong
+  const emotionStrongCards: CardData[] = CARD_IMAGES.emotionStrong.map((images, idx) => ({
+    id: `emotion-strong-${idx + 1}`,
+    frontImage: images.front,
+    backImage: images.back,
+    category: 'emotion' as CardCategory,
+    subType: 'strong' as EmotionSubType,
+  }))
+
+  // Emotion cards - advanced
+  const emotionAdvancedCards: CardData[] = CARD_IMAGES.emotionAdvanced.map((images, idx) => ({
+    id: `emotion-advanced-${idx + 1}`,
+    frontImage: images.front,
+    backImage: images.back,
+    category: 'emotion' as CardCategory,
+    subType: 'advanced' as EmotionSubType,
+  }))
+
+  const allEmotionCards = [...emotionBasicCards, ...emotionLightCards, ...emotionStrongCards, ...emotionAdvancedCards]
+
+  return {
+    situation: situationCards,
+    emotion: allEmotionCards,
+    reflection: reflectionCards,
+    selfcare: selfcareCards,
+    emotionsByType: {
+      basic: emotionBasicCards,
+      light: emotionLightCards,
+      strong: emotionStrongCards,
+      advanced: emotionAdvancedCards,
+    },
+  }
 }
+
+const CARD_DATA = buildCardData()
+
+// ─── Coin Stack (Top Left) ────────────────────────────────────────────────────
+function CoinStack({ coins }: { coins: { red: number; yellow: number; green: number } }) {
+  return (
+    <div className="absolute top-2 left-2 flex gap-2 z-10">
+      {(['yellow', 'green', 'red'] as CoinType[]).map(type => (
+        <motion.div
+          key={type}
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="relative"
+        >
+          <div
+            className="w-12 h-12 rounded-full border-[3px] border-black flex items-center justify-center
+                       text-lg font-black shadow-lg"
+            style={{
+              background: `linear-gradient(135deg, ${COIN_COLORS[type].color} 0%, ${COIN_COLORS[type].bg} 100%)`,
+            }}
+          >
+            {COIN_COLORS[type].emoji}
+          </div>
+          <div className="absolute -top-1 -right-1 min-w-[20px] h-5 rounded-full bg-black text-white
+                        text-[10px] font-bold flex items-center justify-center px-1">
+            {coins[type]}
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  )
+}
+
+// ─── Card Fan ─────────────────────────────────────────────────────────────────
+function CardFan({
+  cards,
+  position,
+  onCardClick,
+}: {
+  cards: GameCard[]
+  position: 'left' | 'right'
+  onCardClick: (card: GameCard) => void
+}) {
+  return (
+    <div className={`absolute bottom-2 ${position === 'left' ? 'left-2' : 'right-2'} flex gap-0.5`}>
+      {cards.slice(0, 3).map((card, idx) => {
+        const rotation = position === 'left' ? -10 + idx * 5 : 10 - idx * 5
+        
+        return (
+          <motion.div
+            key={card.id}
+            initial={{ y: 50, rotate: 0, opacity: 0 }}
+            animate={{
+              y: 0,
+              rotate: rotation,
+              opacity: 1,
+            }}
+            transition={{ delay: idx * 0.1, type: 'spring', stiffness: 200 }}
+            whileHover={{ y: -15, rotate: 0, scale: 1.05, zIndex: 50 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => onCardClick(card)}
+            className="w-12 h-16 rounded-lg border-2 border-black cursor-pointer
+                       flex items-center justify-center text-[8px] font-bold text-center p-1
+                       select-none"
+            style={{
+              background: card.color,
+              marginLeft: idx > 0 ? '-8px' : '0',
+            }}
+          >
+            {card.title}
+          </motion.div>
+        )
+      })}
+    </div>
+  )
+}
+
+// ─── Zoomed Card Overlay ──────────────────────────────────────────────────────
+// Removed - now using FlipCard component directly
 
 // ─── Coin Popup ───────────────────────────────────────────────────────────────
 function CoinPopup({ onSend, onClose }: { onSend: (c: CoinType) => void; onClose: () => void }) {
@@ -77,9 +232,140 @@ function CoinPopup({ onSend, onClose }: { onSend: (c: CoinType) => void; onClose
   )
 }
 
-// ─── Expanded Card Overlay ────────────────────────────────────────────────────
-function ExpandedCard({ player, onClose }: { player: Player; onClose: () => void }) {
+// ─── Flip Card Component (Reusable) ───────────────────────────────────────────
+function FlipCard({
+  frontImage,
+  backImage,
+  altText,
+  size = 'large',
+  onClose,
+}: {
+  frontImage: string
+  backImage: string
+  altText: string
+  size?: 'small' | 'large'
+  onClose?: () => void
+}) {
   const [flipped, setFlipped] = useState(false)
+  
+  const dimensions = size === 'large' 
+    ? { maxWidth: '70vw', maxHeight: '65vh' }
+    : { maxWidth: '35vw', maxHeight: '32vh' }
+
+  return (
+    <motion.div
+      initial={{ scale: 0.5, y: 100 }}
+      animate={{ scale: 1, y: 0 }}
+      exit={{ scale: 0.5, y: 100 }}
+      drag={onClose ? "y" : false}
+      dragConstraints={{ top: 0, bottom: 0 }}
+      dragElastic={0.2}
+      onDragEnd={onClose ? (_, info) => {
+        if (info.offset.y > 100) onClose()
+      } : undefined}
+      className="relative"
+      style={{ 
+        perspective: '1000px',
+        ...dimensions,
+      }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* Inner card container that rotates */}
+      <motion.div
+        animate={{ rotateY: flipped ? 180 : 0 }}
+        transition={{ duration: 0.8, ease: 'easeInOut' }}
+        style={{ 
+          transformStyle: 'preserve-3d',
+          position: 'relative',
+          cursor: 'pointer',
+        }}
+        onClick={() => setFlipped(f => !f)}
+      >
+        {/* Front face */}
+        <div
+          style={{ 
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
+            borderRadius: size === 'large' ? '30px' : '16px',
+            overflow: 'hidden',
+            boxShadow: '0 8px 16px rgba(0,0,0,0.3)',
+          }}
+        >
+          <img 
+            src={frontImage}
+            alt={`${altText} - front`}
+            style={{ 
+              display: 'block',
+              ...dimensions,
+              width: 'auto',
+              height: 'auto',
+            }}
+            draggable={false}
+          />
+        </div>
+
+        {/* Back face */}
+        <div
+          style={{ 
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden',
+            transform: 'rotateY(180deg)',
+            borderRadius: size === 'large' ? '30px' : '16px',
+            overflow: 'hidden',
+            boxShadow: '0 8px 16px rgba(0,0,0,0.3)',
+          }}
+        >
+          <img 
+            src={backImage}
+            alt={`${altText} - back`}
+            style={{ 
+              display: 'block',
+              ...dimensions,
+              width: 'auto',
+              height: 'auto',
+            }}
+            draggable={false}
+          />
+        </div>
+      </motion.div>
+
+      {/* Hint for large cards */}
+      {size === 'large' && onClose && (
+        <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-white text-sm whitespace-nowrap text-center">
+          <div>{flipped ? 'Nhấn để úp lại' : 'Nhấn để lật thẻ'}</div>
+          <div className="text-xs text-gray-300 mt-1">👆 Vuốt xuống để đóng</div>
+        </div>
+      )}
+    </motion.div>
+  )
+}
+
+// ─── Card Inventory Overlay ───────────────────────────────────────────────────
+function CardInventory({ onClose }: { onClose: () => void }) {
+  const [selectedCard, setSelectedCard] = useState<CardData | null>(null)
+  const [activeTab, setActiveTab] = useState<CardCategory>('situation')
+  const [emotionSubTab, setEmotionSubTab] = useState<EmotionSubType>('basic')
+
+  const tabs: { key: CardCategory; label: string; emoji: string }[] = [
+    { key: 'situation', label: 'Tình huống', emoji: '📋' },
+    { key: 'emotion', label: 'Cảm xúc', emoji: '💭' },
+    { key: 'reflection', label: 'Phản tư', emoji: '🤔' },
+    { key: 'selfcare', label: 'Bí kíp', emoji: '🌟' },
+  ]
+
+  const emotionTabs: { key: EmotionSubType; label: string }[] = [
+    { key: 'basic', label: 'Cơ bản' },
+    { key: 'light', label: 'Nhẹ' },
+    { key: 'strong', label: 'Mạnh' },
+    { key: 'advanced', label: 'Nâng cao' },
+  ]
+
+  const currentCards = activeTab === 'emotion' 
+    ? CARD_DATA.emotionsByType[emotionSubTab]
+    : CARD_DATA[activeTab]
 
   return (
     <motion.div
@@ -89,85 +375,143 @@ function ExpandedCard({ player, onClose }: { player: Player; onClose: () => void
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
       onClick={onClose}
     >
-      {/* Card wrapper */}
+      {/* Grid view - always visible */}
       <motion.div
-        initial={{ scale: 0.4, y: 80 }}
+        initial={{ scale: 0.9, y: 50 }}
         animate={{ scale: 1, y: 0 }}
-        exit={{ scale: 0.4, y: 80 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-        className="relative cursor-pointer"
-        style={{ 
-          perspective: '1000px',
-          width: '190px',
-          height: '254px',
-        }}
-        onClick={(e) => { e.stopPropagation(); setFlipped(f => !f) }}
+        exit={{ scale: 0.9, y: 50 }}
+        onClick={(e) => e.stopPropagation()}
+        className="w-[90vw] max-w-md max-h-[85vh] bg-white rounded-3xl border-4 border-black flex flex-col overflow-hidden"
       >
-        <motion.div
-          animate={{ rotateY: flipped ? 180 : 0 }}
-          transition={{ duration: 0.8, ease: 'easeInOut' }}
-          style={{ 
-            transformStyle: 'preserve-3d',
-            width: '100%',
-            height: '100%',
-            position: 'relative',
-          }}
-        >
-          {/* Front — decorative back-of-card */}
-          <div
-            className="absolute inset-0 rounded-2xl border border-[coral] flex flex-col items-center justify-center select-none"
-            style={{ 
-              backfaceVisibility: 'hidden',
-              background: 'linear-gradient(120deg, bisque 60%, rgb(255, 231, 222) 88%, rgb(255, 211, 195) 40%, rgba(255, 127, 80, 0.603) 48%)',
-              boxShadow: '0 8px 14px 0 rgba(0,0,0,0.2)',
-            }}
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b-2 border-black">
+          <h2 className="text-lg font-black text-gray-800">🎴 Túi thẻ bài</h2>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full border-2 border-black bg-gray-100 flex items-center justify-center hover:bg-gray-200"
           >
-            <div className="w-full h-full rounded-2xl overflow-hidden relative flex flex-col items-center justify-center gap-3">
-              <div className="text-6xl">🃏</div>
-              <div className="text-base font-black tracking-widest uppercase" style={{ color: 'coral' }}>
-                EmCoin
-              </div>
-              <div className="text-xs mt-2" style={{ color: 'coral', opacity: 0.7 }}>
-                Nhấn để lật thẻ
-              </div>
-            </div>
-          </div>
+            ✕
+          </button>
+        </div>
 
-          {/* Back — role reveal */}
-          <div
-            className="absolute inset-0 rounded-2xl border border-[coral] flex flex-col items-center justify-center gap-4 select-none"
-            style={{ 
-              backfaceVisibility: 'hidden',
-              transform: 'rotateY(180deg)',
-              background: 'linear-gradient(120deg, rgb(255, 174, 145) 30%, coral 88%, bisque 40%, rgb(255, 185, 160) 78%)',
-              boxShadow: '0 8px 14px 0 rgba(0,0,0,0.2)',
-            }}
-          >
-            <div className="text-5xl">✨</div>
-            <div className="text-center px-4">
-              <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'rgba(255,255,255,0.8)' }}>
-                Vai trò của bạn
-              </div>
-              <div className="text-xl font-black text-white leading-tight">
-                {player.role}
-              </div>
-            </div>
-            <div className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.8)' }}>
-              Giữ bí mật nhé! 🤫
-            </div>
-          </div>
-        </motion.div>
+        {/* Main tabs */}
+        <div className="flex border-b-2 border-black bg-gray-50">
+          {tabs.map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex-1 py-2 text-xs font-bold transition-colors ${
+                activeTab === tab.key
+                  ? 'bg-white text-gray-800 border-b-4 border-blue-500'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              {tab.emoji} {tab.label}
+            </button>
+          ))}
+        </div>
 
-        {/* Hint */}
-        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-white text-xs whitespace-nowrap">
-          {flipped ? 'Nhấn để úp lại' : 'Nhấn để xem vai trò'}
+        {/* Emotion sub-tabs */}
+        {activeTab === 'emotion' && (
+          <div className="flex border-b border-gray-200 bg-gray-50 px-2">
+            {emotionTabs.map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setEmotionSubTab(tab.key)}
+                className={`flex-1 py-1.5 text-[10px] font-bold transition-colors ${
+                  emotionSubTab === tab.key
+                    ? 'text-blue-600 border-b-2 border-blue-500'
+                    : 'text-gray-400 hover:text-gray-600'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Card grid */}
+        <div className="flex-1 overflow-y-auto p-4">
+          <div className="grid grid-cols-4 gap-2">
+            {currentCards.map(card => (
+              <motion.button
+                key={card.id}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setSelectedCard(card)}
+                className="aspect-[2/3] rounded-lg border-2 border-black overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow"
+              >
+                <img 
+                  src={card.backImage} 
+                  alt={card.id}
+                  className="w-full h-full object-cover"
+                  draggable={false}
+                />
+              </motion.button>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer info */}
+        <div className="p-2 border-t border-gray-200 bg-gray-50 text-center text-[10px] text-gray-500">
+          {currentCards.length} thẻ • Click để xem chi tiết
         </div>
       </motion.div>
+
+      {/* Zoomed card view - overlay on top */}
+      <AnimatePresence>
+        {selectedCard && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/20 backdrop-blur-sm"
+            onClick={(e) => {
+              e.stopPropagation()
+              setSelectedCard(null)
+            }}
+          >
+            <FlipCard
+              frontImage={selectedCard.backImage}
+              backImage={selectedCard.frontImage}
+              altText={selectedCard.id}
+              size="large"
+              onClose={() => setSelectedCard(null)}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }
 
-// ─── Player Card ──────────────────────────────────────────────────────────────
+// ─── Expanded Card Overlay ────────────────────────────────────────────────────
+function ExpandedCard({ player, onClose }: { player: Player; onClose: () => void }) {
+  const roleImageUrl = ROLE_TO_IMAGE[player.role] || CARD_IMAGES.roles.back
+  const backImageUrl = CARD_IMAGES.roles.back
+  
+  console.log('[ExpandedCard] Player role:', player.role)
+  console.log('[ExpandedCard] Back image URL:', backImageUrl)
+  console.log('[ExpandedCard] Role image URL:', roleImageUrl)
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <FlipCard
+        frontImage={backImageUrl}
+        backImage={roleImageUrl}
+        altText={player.role}
+        size="large"
+        onClose={onClose}
+      />
+    </motion.div>
+  )
+}
 function PlayerCard({
   player,
   onExpand,
@@ -185,33 +529,44 @@ function PlayerCard({
 }) {
   const [showCoins, setShowCoins] = useState(false)
   const bg = PASTEL_BG[player.id]
-
-  console.log('[PlayerCard] Rendering:', player.name, 'isMe:', player.isMe, 'id:', player.id)
+  
+  // Check if player has public role
+  const isNarrator = player.role === 'Người Quản trò'
+  const isSender = player.role === 'Người Trao Gửi'
+  const hasPublicRole = isNarrator || isSender
 
   const handleClick = () => {
-    console.log('[PlayerCard] Click:', player.name, 'isMe:', player.isMe)
     // Luôn cho phép xem vai trò của mình
     if (player.isMe) {
-      console.log('[PlayerCard] Calling onExpand for Me')
+      console.log('[PlayerCard] Opening role card for:', player.name)
       onExpand()
-    } else if (isNightPhase && onNightAction) {
-      // Night phase: click vào người khác để thực hiện action
-      console.log('[PlayerCard] Night action for:', player.name)
-      onNightAction(player.id)
-    } else {
-      // Day phase: click vào người khác để tặng coin
-      console.log('[PlayerCard] Toggle coins for:', player.name)
-      setShowCoins(s => !s)
+      return
     }
+    
+    if (isNightPhase && onNightAction) {
+      // Night phase: click vào người khác để thực hiện action
+      console.log('[PlayerCard] Night action on:', player.name)
+      onNightAction(player.id)
+      return
+    }
+    
+    // Day phase: click vào người khác để tặng coin
+    console.log('[PlayerCard] Toggle coin popup for:', player.name)
+    setShowCoins(s => !s)
   }
 
   return (
     <div className="relative flex flex-col">
-      {player.isMe && (
-        <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10">
-          👆 Click me
+      {/* Public role badge - above card */}
+      {hasPublicRole && (
+        <div className="absolute -top-7 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap">
+          <div className={`text-[11px] font-black px-3 py-1.5 rounded-full border-[3px] border-black shadow-lg
+                          ${isNarrator ? 'bg-purple-300 text-purple-900' : 'bg-yellow-300 text-yellow-900'}`}>
+            {isNarrator ? 'Quản trò' : 'Trao gửi'}
+          </div>
         </div>
       )}
+      
       <motion.div
         whileTap={{ scale: 0.93 }}
         onClick={handleClick}
@@ -223,10 +578,10 @@ function PlayerCard({
           ],
         } : {}}
         transition={isGlowing ? { duration: 1.5, repeat: Infinity } : {}}
-        className={`rounded-2xl border-[3px] ${player.isMe ? 'border-blue-500' : 'border-black'}
+        className={`rounded-2xl border-[3px] ${player.isMe ? 'border-blue-500 shadow-xl' : 'border-black'}
                    flex flex-col items-center justify-center gap-1 cursor-pointer
                    select-none aspect-[3/4] relative overflow-hidden
-                   ${player.isMe ? 'ring-2 ring-blue-300' : ''}`}
+                   ${player.isMe ? 'ring-4 ring-blue-300' : ''}`}
         style={{ background: bg }}
       >
         {/* Muted badge */}
@@ -253,24 +608,13 @@ function PlayerCard({
           {player.name}
         </div>
 
-        {/* Coin count */}
-        <div className="flex gap-1 mt-0.5 pointer-events-none">
-          {player.coins.red > 0 && <span className="text-[9px]">❤️{player.coins.red}</span>}
-          {player.coins.yellow > 0 && <span className="text-[9px]">💛{player.coins.yellow}</span>}
-          {player.coins.green > 0 && <span className="text-[9px]">💚{player.coins.green}</span>}
-        </div>
-
         {/* Me indicator */}
         {player.isMe && (
-          <>
-            <div className="absolute bottom-1 left-1/2 -translate-x-1/2
-                            bg-black text-white text-[8px] font-bold px-2 py-0.5 rounded-full">
-              Mình
-            </div>
-            <div className="absolute top-1 right-1 text-xs animate-pulse">
-              🔄
-            </div>
-          </>
+          <div className="absolute bottom-1 left-1/2 -translate-x-1/2
+                          bg-blue-500 text-white text-[9px] font-bold px-2 py-1 rounded-full
+                          border-2 border-white shadow-lg">
+            👤 Mình
+          </div>
         )}
       </motion.div>
 
@@ -285,30 +629,106 @@ function PlayerCard({
 }
 
 // ─── Main GameBoard ───────────────────────────────────────────────────────────
-export default function GameBoard() {
-  // Ensure "Me" is always first
-  const sortedInitialPlayers = [...INITIAL_PLAYERS].sort((a, b) => {
-    if (a.isMe) return -1
-    if (b.isMe) return 1
-    return 0
-  })
+interface RoomState {
+  id: string
+  host: string
+  players: Array<{
+    socketId: string
+    userId?: string
+    name: string
+    role?: string
+    isNarrator?: boolean
+    isSender?: boolean
+    coins?: { red: number; yellow: number; green: number }
+  }>
+  status: string
+  phase?: GamePhase
+  turn?: number
+  currentRound?: number
+  totalRounds?: number
+  currentNTG?: string | null
+  currentNarrator?: string | null
+  mutedPlayer?: string | null
+}
+
+interface GameBoardProps {
+  roomId: string
+  roomState: RoomState
+  mySocketId: string
+  myUserId: string
+  onLeave: () => void
+}
+
+export default function GameBoard({ roomState, mySocketId, myUserId, onLeave }: GameBoardProps) {
+  const { nextTurn, nightAction: emitNightAction } = useSocket()
   
-  const [players, setPlayers] = useState<Player[]>(sortedInitialPlayers)
+  console.log('[GameBoard] Render with mySocketId:', mySocketId, 'myUserId:', myUserId)
+  
+  // Convert room players to game players
+  const convertPlayers = useCallback((roomPlayers: RoomState['players']): Player[] => {
+    const converted = roomPlayers.map((p) => {
+      // Match by userId first (most reliable), fallback to socketId
+      const isMe = p.userId ? p.userId === myUserId : p.socketId === mySocketId
+      console.log(`[GameBoard] Player ${p.name}: userId=${p.userId}, socketId=${p.socketId}, myUserId=${myUserId}, mySocketId=${mySocketId}, isMe=${isMe}`)
+      
+      return {
+        id: p.socketId,
+        name: p.name,
+        role: p.role || 'Chưa chia vai trò',
+        isMe,
+        isNarrator: p.isNarrator,
+        isSender: p.isSender,
+        coins: p.coins || { red: 0, yellow: 0, green: 0 },
+      }
+    })
+    
+    // Sort: "Me" always first
+    const sorted = converted.sort((a, b) => {
+      if (a.isMe) return -1
+      if (b.isMe) return 1
+      return 0
+    })
+    
+    const myPlayer = sorted.find(p => p.isMe)
+    console.log('[GameBoard] My player:', myPlayer ? { name: myPlayer.name, role: myPlayer.role, isNarrator: myPlayer.isNarrator } : 'NOT FOUND')
+    
+    return sorted
+  }, [mySocketId, myUserId])
+
+  const [players, setPlayers] = useState<Player[]>(convertPlayers(roomState.players))
   const [expandedPlayer, setExpandedPlayer] = useState<Player | null>(null)
-  const [gamePhase, setGamePhase] = useState<GamePhase>('day')
   const [flyCoins, setFlyCoins] = useState<{ id: number; emoji: string; x: number; y: number }[]>([])
+  const [hasShownRole, setHasShownRole] = useState(false)
+  const [showInventory, setShowInventory] = useState(false)
+
+  // Update players when roomState changes
+  useEffect(() => {
+    const updatedPlayers = convertPlayers(roomState.players)
+    setPlayers(updatedPlayers)
+  }, [roomState.players, convertPlayers])
+
+  const gamePhase = roomState.phase || 'role-reveal'
+  const currentTurn = roomState.turn || 1
+  const currentRound = roomState.currentRound || 1
+  const totalRounds = roomState.totalRounds || 1
 
   const myPlayer = players.find(p => p.isMe)
-  const isMyTurn = gamePhase !== 'day' && (
-    (gamePhase === 'night-healer' && myPlayer?.role === 'Người Chữa Lành') ||
-    (gamePhase === 'night-silencer' && myPlayer?.role === 'Người Im Lặng') ||
-    (gamePhase === 'night-guide' && myPlayer?.role === 'Người Dẫn Lối')
-  )
+  const myCoinCount = myPlayer?.coins || { red: 0, yellow: 0, green: 0 }
+  const isNarrator = myPlayer?.isNarrator || false
 
-  console.log('[GameBoard] Players order:', players.map(p => `${p.name}(${p.isMe ? 'ME' : 'other'})`))
-  console.log('[GameBoard] First player:', players[0]?.name, 'isMe:', players[0]?.isMe)
+  // Auto-show role card when game starts
+  useEffect(() => {
+    if (!hasShownRole && myPlayer && myPlayer.role && myPlayer.role !== 'Chưa chia vai trò') {
+      const timer = setTimeout(() => {
+        setExpandedPlayer(myPlayer)
+        setHasShownRole(true)
+      }, 800)
+      return () => clearTimeout(timer)
+    }
+  }, [myPlayer, hasShownRole])
 
   const sendCoin = (targetId: string, coin: CoinType) => {
+    // TODO: Emit socket event to server
     setPlayers(prev => prev.map(p =>
       p.id === targetId ? { ...p, coins: { ...p.coins, [coin]: p.coins[coin] + 1 } } : p
     ))
@@ -320,73 +740,82 @@ export default function GameBoard() {
   }
 
   const handleNightAction = (targetId: string) => {
-    if (gamePhase === 'night-healer') {
-      setPlayers(prev => prev.map(p => ({ ...p, isHealed: p.id === targetId })))
-      nextPhase()
-    } else if (gamePhase === 'night-silencer') {
-      setPlayers(prev => prev.map(p => ({ ...p, isMuted: p.id === targetId })))
-      nextPhase()
-    } else if (gamePhase === 'night-guide') {
-      // Guide logic here
-      nextPhase()
+    if (gamePhase === 'night' && myPlayer) {
+      if (myPlayer.role === 'Người Chữa Lành') {
+        emitNightAction(roomState.id, 'heal', targetId)
+      } else if (myPlayer.role === 'Người Im Lặng') {
+        emitNightAction(roomState.id, 'silence', targetId)
+      }
     }
   }
 
-  const nextPhase = () => {
-    const phases: GamePhase[] = ['day', 'night-healer', 'night-silencer', 'night-guide']
-    const currentIndex = phases.indexOf(gamePhase)
-    const nextIndex = (currentIndex + 1) % phases.length
-    setGamePhase(phases[nextIndex])
+  const handleNextTurn = () => {
+    nextTurn(roomState.id)
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAF8] flex items-center justify-center p-4">
+    <div className="h-screen bg-[#FAFAF8] flex items-center justify-center overflow-hidden">
       <div
-        className="relative w-full max-w-sm mx-auto rounded-3xl border-4 border-black
-                   bg-white p-4 flex flex-col gap-4"
+        className="relative w-full max-w-sm h-full bg-white p-4 flex flex-col gap-4"
       >
-        {/* Debug button */}
-        <button
-          onClick={() => {
-            console.log('[Debug] Test button clicked')
-            const mePlayer = players.find(p => p.isMe)
-            if (mePlayer) {
-              console.log('[Debug] Setting expanded player:', mePlayer)
-              setExpandedPlayer(mePlayer)
-            }
-          }}
-          className="absolute top-2 right-2 z-10 bg-red-500 text-white text-xs px-2 py-1 rounded"
-        >
-          Test Me Card
-        </button>
+        {/* Coin Stack - Top Left */}
+        <CoinStack coins={myCoinCount} />
+
+        {/* Back button */}
+        {onLeave && (
+          <button
+            onClick={onLeave}
+            className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full border-2 border-black
+                       bg-white flex items-center justify-center hover:bg-gray-100 active:scale-95"
+          >
+            ←
+          </button>
+        )}
+
+        {/* Room info - Top center */}
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 text-center">
+          <div className="bg-white border-2 border-black rounded-xl px-3 py-1">
+            <div className="text-[10px] font-bold text-gray-500">
+              Round {currentRound}/{totalRounds} • Lượt {currentTurn}
+            </div>
+          </div>
+        </div>
 
         {/* 3x3 Grid */}
-        <div className="grid grid-cols-3 gap-2 w-full">
+        <div className="grid grid-cols-3 gap-4 w-full flex-1 mt-16 mb-20 px-2">
           {players.map(player => (
             <PlayerCard
               key={player.id}
               player={player}
-              onExpand={() => {
-                console.log('[GameBoard] onExpand called for:', player.name)
-                setExpandedPlayer(player)
-              }}
+              onExpand={() => setExpandedPlayer(player)}
               onSendCoin={(coin) => sendCoin(player.id, coin)}
-              onNightAction={isMyTurn ? handleNightAction : undefined}
-              isGlowing={isMyTurn && player.isMe}
-              isNightPhase={gamePhase !== 'day'}
+              onNightAction={gamePhase === 'night' ? handleNightAction : undefined}
+              isGlowing={false}
+              isNightPhase={gamePhase === 'night'}
             />
           ))}
         </div>
 
-        {/* Bottom message bar */}
-        <motion.button
-          whileTap={{ scale: 0.97 }}
-          onClick={nextPhase}
-          className="w-full rounded-2xl border-[3px] border-black bg-[#FFF9C4]
-                     px-4 py-3 text-left"
+        {/* Bottom button - Only show for Narrator */}
+        {isNarrator && (
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={handleNextTurn}
+            className="w-full py-3 rounded-2xl border-[3px] border-black bg-[#6BCB77]
+                       text-sm font-bold hover:bg-[#5BB767] active:scale-[0.98] transition-all"
+          >
+            👑 Chuyển lượt tiếp theo
+          </motion.button>
+        )}
+
+        {/* Card inventory button */}
+        <button
+          onClick={() => setShowInventory(true)}
+          className="absolute bottom-2 right-2 w-12 h-12 rounded-full border-3 border-black bg-gradient-to-br from-purple-400 to-pink-400
+                     flex items-center justify-center text-2xl hover:scale-110 active:scale-95 transition-transform shadow-lg"
         >
-          <TypewriterText key={gamePhase} text={SYSTEM_MESSAGES[gamePhase]} />
-        </motion.button>
+          🎴
+        </button>
       </div>
 
       {/* Floating coins */}
@@ -409,6 +838,13 @@ export default function GameBoard() {
       <AnimatePresence>
         {expandedPlayer && (
           <ExpandedCard player={expandedPlayer} onClose={() => setExpandedPlayer(null)} />
+        )}
+      </AnimatePresence>
+
+      {/* Card inventory overlay */}
+      <AnimatePresence>
+        {showInventory && (
+          <CardInventory onClose={() => setShowInventory(false)} />
         )}
       </AnimatePresence>
     </div>

@@ -3,12 +3,17 @@ import Lobby from './Lobby'
 import WaitingRoom from './WaitingRoom'
 import GameBoard from './GameBoard'
 import { useSocket } from '../hooks/useSocket'
+import { getUserId } from '../utils/userId'
 
 type GameState = 'lobby' | 'waiting' | 'playing'
 
 export default function GameContainer() {
   const [gameState, setGameState] = useState<GameState>('lobby')
-  const { socket, isConnected, roomState, availableRooms, error, joinRoom, startGame, listRooms, clearSession } = useSocket()
+  const { socket, isConnected, roomState, availableRooms, error, currentSocketId, joinRoom, startGame, listRooms, clearSession, addFakePlayers } = useSocket()
+  
+  const mySocketId = currentSocketId || socket?.id || ''
+  const myUserId = getUserId()
+  console.log('[GameContainer] Current socket.id:', mySocketId, 'userId:', myUserId)
 
   const handleJoinRoom = (roomId: string, userName: string) => {
     joinRoom(roomId, userName, false)
@@ -33,6 +38,11 @@ export default function GameContainer() {
     setGameState('lobby')
   }
 
+  const handleAddFakePlayers = () => {
+    if (!roomState) return
+    addFakePlayers(roomState.id)
+  }
+
   // Update game state based on room state
   useEffect(() => {
     if (!roomState) return
@@ -46,8 +56,8 @@ export default function GameContainer() {
 
   if (!isConnected) {
     return (
-      <div className="min-h-screen bg-[#FAFAF8] flex items-center justify-center p-4">
-        <div className="w-full max-w-sm mx-auto rounded-3xl border-4 border-black bg-white p-8 text-center">
+      <div className="h-screen bg-[#FAFAF8] flex items-center justify-center overflow-hidden">
+        <div className="w-full max-w-sm h-full bg-white p-8 flex flex-col items-center justify-center text-center">
           <div className="text-5xl mb-4 animate-bounce">🎴</div>
           <h2 className="text-xl font-black text-gray-800 mb-2">Đang kết nối...</h2>
           <p className="text-sm text-gray-600">Vui lòng đợi</p>
@@ -58,8 +68,8 @@ export default function GameContainer() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#FAFAF8] flex items-center justify-center p-4">
-        <div className="w-full max-w-sm mx-auto rounded-3xl border-4 border-black bg-white p-8 text-center">
+      <div className="h-screen bg-[#FAFAF8] flex items-center justify-center overflow-hidden">
+        <div className="w-full max-w-sm h-full bg-white p-8 flex flex-col items-center justify-center text-center">
           <div className="text-5xl mb-4">⚠️</div>
           <h2 className="text-xl font-black text-gray-800 mb-2">Lỗi</h2>
           <p className="text-sm text-gray-600 mb-4">{error}</p>
@@ -92,15 +102,26 @@ export default function GameContainer() {
         roomId={roomState.id}
         players={roomState.players}
         hostSocketId={roomState.host}
-        mySocketId={socket.id || ''}
+        mySocketId={mySocketId}
+        myUserId={myUserId}
         onStartGame={handleStartGame}
         onLeave={handleLeaveRoom}
+        onAddFakePlayers={handleAddFakePlayers}
       />
     )
   }
 
-  if (gameState === 'playing') {
-    return <GameBoard />
+  if (gameState === 'playing' && roomState && socket) {
+    console.log('[GameContainer] Rendering GameBoard with socket.id:', mySocketId, 'userId:', myUserId)
+    return (
+      <GameBoard
+        roomId={roomState.id}
+        roomState={roomState}
+        mySocketId={mySocketId}
+        myUserId={myUserId}
+        onLeave={handleLeaveRoom}
+      />
+    )
   }
 
   return null
