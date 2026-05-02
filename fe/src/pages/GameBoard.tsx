@@ -1,13 +1,15 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSocket } from '../hooks/useSocket'
 import { CARD_IMAGES, ROLE_TO_IMAGE } from '../constants/cardImages'
+import { useGameStore, useUIStore } from '../stores'
+import { useGameState, useGameActions, useGameUI } from '../hooks/useGameState'
+import { useGameFlow } from '../hooks/useGameFlow'
+import type { CardData, CardCategory, EmotionSubType, SelectedCards } from '../stores/types'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type CoinType = 'red' | 'yellow' | 'green'
 type GamePhase = 'role-reveal' | 'night' | 'day'
-type CardCategory = 'situation' | 'emotion' | 'reflection' | 'selfcare'
-type EmotionSubType = 'basic' | 'light' | 'strong' | 'advanced'
 
 interface Player {
   id: string
@@ -20,15 +22,6 @@ interface Player {
   isHealed?: boolean
   coins: { red: number; yellow: number; green: number }
 }
-
-interface CardData {
-  id: string
-  frontImage: string
-  backImage: string
-  category: CardCategory
-  subType?: EmotionSubType
-}
-
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const PASTEL_BG: Record<string, string> = {
   p0: '#FFF0F5', p1: '#F0F5FF', p2: '#F0FFF4',
@@ -125,6 +118,111 @@ const buildCardData = (): Record<CardCategory, CardData[]> & { emotionsByType: R
 
 const CARD_DATA = buildCardData()
 
+// ─── Center Board Component ───────────────────────────────────────────────────
+function CenterBoard({ 
+  selectedCards,
+}: { 
+  selectedCards: SelectedCards
+}) {
+  return (
+    <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20 w-[90%] max-w-xs">
+      {/* Situation Card */}
+      {selectedCards.situation && (
+        <motion.div
+          initial={{ scale: 0, y: -50 }}
+          animate={{ scale: 1, y: 0 }}
+          className="flex flex-col items-center gap-2 mb-3"
+        >
+          <div className="text-[10px] font-bold text-gray-600 bg-white/90 px-2 py-1 rounded-full">
+            📋 Tình huống
+          </div>
+          <div className="w-24 h-32 rounded-lg border-2 border-black shadow-lg">
+            <img 
+              src={selectedCards.situation.frontImage}
+              alt="situation"
+              className="w-full h-full object-cover rounded-md"
+              draggable={false}
+            />
+          </div>
+        </motion.div>
+      )}
+
+      {/* Emotion Card */}
+      {selectedCards.emotion && (
+        <motion.div
+          initial={{ scale: 0, rotate: -10 }}
+          animate={{ scale: 1, rotate: 0 }}
+          className="flex flex-col items-center gap-2 mb-3"
+        >
+          <div className="text-[10px] font-bold text-gray-600 bg-pink-100 px-2 py-1 rounded-full border border-pink-300">
+            💭 Cảm xúc của NTG
+          </div>
+          <div className="w-28 h-36 rounded-lg border-3 border-pink-400 shadow-xl">
+            <img 
+              src={selectedCards.emotion.frontImage}
+              alt="emotion"
+              className="w-full h-full object-cover rounded-md"
+              draggable={false}
+            />
+          </div>
+        </motion.div>
+      )}
+
+      {/* Reflection Cards */}
+      {selectedCards.reflections.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex flex-col items-center gap-2"
+        >
+          <div className="text-[10px] font-bold text-gray-600 bg-blue-100 px-2 py-1 rounded-full border border-blue-300">
+            🤔 Phản tư
+          </div>
+          <div className="flex gap-1">
+            {selectedCards.reflections.map((card, idx) => (
+              <motion.div
+                key={card.id}
+                initial={{ scale: 0, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                className="w-16 h-20 rounded-md border-2 border-black shadow-md"
+              >
+                <img 
+                  src={card.frontImage}
+                  alt="reflection"
+                  className="w-full h-full object-cover rounded-sm"
+                  draggable={false}
+                />
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* Selfcare Card */}
+      {selectedCards.selfcare && (
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="flex flex-col items-center gap-2 mt-3"
+        >
+          <div className="text-[10px] font-bold text-gray-600 bg-green-100 px-2 py-1 rounded-full border border-green-300">
+            🌟 Bí kíp ôm
+          </div>
+          <div className="w-28 h-36 rounded-lg border-3 border-green-400 shadow-xl">
+            <img 
+              src={selectedCards.selfcare.frontImage}
+              alt="selfcare"
+              className="w-full h-full object-cover rounded-md"
+              draggable={false}
+            />
+          </div>
+        </motion.div>
+      )}
+    </div>
+  )
+}
+
 // ─── Coin Stack (Top Left) ────────────────────────────────────────────────────
 function CoinStack({ coins }: { coins: { red: number; yellow: number; green: number } }) {
   return (
@@ -154,53 +252,6 @@ function CoinStack({ coins }: { coins: { red: number; yellow: number; green: num
     </div>
   )
 }
-
-// ─── Card Fan ─────────────────────────────────────────────────────────────────
-function CardFan({
-  cards,
-  position,
-  onCardClick,
-}: {
-  cards: GameCard[]
-  position: 'left' | 'right'
-  onCardClick: (card: GameCard) => void
-}) {
-  return (
-    <div className={`absolute bottom-2 ${position === 'left' ? 'left-2' : 'right-2'} flex gap-0.5`}>
-      {cards.slice(0, 3).map((card, idx) => {
-        const rotation = position === 'left' ? -10 + idx * 5 : 10 - idx * 5
-        
-        return (
-          <motion.div
-            key={card.id}
-            initial={{ y: 50, rotate: 0, opacity: 0 }}
-            animate={{
-              y: 0,
-              rotate: rotation,
-              opacity: 1,
-            }}
-            transition={{ delay: idx * 0.1, type: 'spring', stiffness: 200 }}
-            whileHover={{ y: -15, rotate: 0, scale: 1.05, zIndex: 50 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => onCardClick(card)}
-            className="w-12 h-16 rounded-lg border-2 border-black cursor-pointer
-                       flex items-center justify-center text-[8px] font-bold text-center p-1
-                       select-none"
-            style={{
-              background: card.color,
-              marginLeft: idx > 0 ? '-8px' : '0',
-            }}
-          >
-            {card.title}
-          </motion.div>
-        )
-      })}
-    </div>
-  )
-}
-
-// ─── Zoomed Card Overlay ──────────────────────────────────────────────────────
-// Removed - now using FlipCard component directly
 
 // ─── Coin Popup ───────────────────────────────────────────────────────────────
 function CoinPopup({ onSend, onClose }: { onSend: (c: CoinType) => void; onClose: () => void }) {
@@ -344,9 +395,20 @@ function FlipCard({
 }
 
 // ─── Card Inventory Overlay ───────────────────────────────────────────────────
-function CardInventory({ onClose }: { onClose: () => void }) {
+function CardInventory({ 
+  onClose,
+  onSelectCard,
+  allowedCategory,
+  showConfirmButton = false,
+}: { 
+  onClose: () => void
+  onSelectCard?: (card: CardData) => void
+  allowedCategory?: CardCategory
+  showConfirmButton?: boolean
+}) {
   const [selectedCard, setSelectedCard] = useState<CardData | null>(null)
-  const [activeTab, setActiveTab] = useState<CardCategory>('situation')
+  const [confirmedCard, setConfirmedCard] = useState<CardData | null>(null)
+  const [activeTab, setActiveTab] = useState<CardCategory>(allowedCategory || 'situation')
   const [emotionSubTab, setEmotionSubTab] = useState<EmotionSubType>('basic')
 
   const tabs: { key: CardCategory; label: string; emoji: string }[] = [
@@ -366,6 +428,21 @@ function CardInventory({ onClose }: { onClose: () => void }) {
   const currentCards = activeTab === 'emotion' 
     ? CARD_DATA.emotionsByType[emotionSubTab]
     : CARD_DATA[activeTab]
+
+  const handleCardClick = (card: CardData) => {
+    if (showConfirmButton) {
+      setConfirmedCard(card)
+    } else {
+      setSelectedCard(card)
+    }
+  }
+
+  const handleConfirm = () => {
+    if (confirmedCard && onSelectCard) {
+      onSelectCard(confirmedCard)
+      onClose()
+    }
+  }
 
   return (
     <motion.div
@@ -395,21 +472,23 @@ function CardInventory({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* Main tabs */}
-        <div className="flex border-b-2 border-black bg-gray-50">
-          {tabs.map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`flex-1 py-2 text-xs font-bold transition-colors ${
-                activeTab === tab.key
-                  ? 'bg-white text-gray-800 border-b-4 border-blue-500'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              {tab.emoji} {tab.label}
-            </button>
-          ))}
-        </div>
+        {!allowedCategory && (
+          <div className="flex border-b-2 border-black bg-gray-50">
+            {tabs.map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`flex-1 py-2 text-xs font-bold transition-colors ${
+                  activeTab === tab.key
+                    ? 'bg-white text-gray-800 border-b-4 border-blue-500'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {tab.emoji} {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Emotion sub-tabs */}
         {activeTab === 'emotion' && (
@@ -438,8 +517,10 @@ function CardInventory({ onClose }: { onClose: () => void }) {
                 key={card.id}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setSelectedCard(card)}
-                className="aspect-[2/3] rounded-lg border-2 border-black overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow"
+                onClick={() => handleCardClick(card)}
+                className={`aspect-[2/3] rounded-lg border-2 overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow ${
+                  confirmedCard?.id === card.id ? 'border-blue-500 ring-2 ring-blue-300' : 'border-black'
+                }`}
               >
                 <img 
                   src={card.backImage} 
@@ -452,15 +533,28 @@ function CardInventory({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        {/* Footer info */}
-        <div className="p-2 border-t border-gray-200 bg-gray-50 text-center text-[10px] text-gray-500">
-          {currentCards.length} thẻ • Click để xem chi tiết
+        {/* Footer */}
+        <div className="p-2 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
+          <div className="text-[10px] text-gray-500">
+            {currentCards.length} thẻ • Click để xem chi tiết
+          </div>
+          {showConfirmButton && confirmedCard && (
+            <motion.button
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleConfirm}
+              className="px-4 py-1.5 rounded-lg border-2 border-black bg-green-400 text-xs font-bold hover:bg-green-500"
+            >
+              ✓ Chọn thẻ này
+            </motion.button>
+          )}
         </div>
       </motion.div>
 
       {/* Zoomed card view - overlay on top */}
       <AnimatePresence>
-        {selectedCard && (
+        {selectedCard && !showConfirmButton && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -628,7 +722,7 @@ function PlayerCard({
   )
 }
 
-// ─── Main GameBoard ───────────────────────────────────────────────────────────
+// ─── Player Card ──────────────────────────────────────────────────────────────
 interface RoomState {
   id: string
   host: string
@@ -660,16 +754,33 @@ interface GameBoardProps {
 }
 
 export default function GameBoard({ roomState, mySocketId, myUserId, onLeave }: GameBoardProps) {
-  const { nextTurn, nightAction: emitNightAction } = useSocket()
+  const { nightAction: emitNightAction } = useSocket()
   
   console.log('[GameBoard] Render with mySocketId:', mySocketId, 'myUserId:', myUserId)
   
-  // Convert room players to game players
-  const convertPlayers = useCallback((roomPlayers: RoomState['players']): Player[] => {
-    const converted = roomPlayers.map((p) => {
+  // Zustand stores
+  const { players, myPlayer, isNarrator, selectedCards } = useGameState()
+  const { setPlayers, updatePlayer, selectCard, clearSelectedCards } = useGameActions()
+  const { expandedPlayer, showInventory, inventoryMode, setExpandedPlayer, setShowInventory, setInventoryMode } = useGameUI()
+  const { gameStep, handleSelectCard } = useGameFlow()
+  const flyCoins = useUIStore(state => state.flyCoins)
+  const addFlyingCoin = useUIStore(state => state.addFlyingCoin)
+  const setMyIds = useGameStore(state => state.setMyIds)
+  const setGameStep = useGameStore(state => state.setGameStep)
+  
+  // Track if role card has been shown
+  const hasShownRoleRef = useRef(false)
+
+  // Initialize my IDs in store
+  useEffect(() => {
+    setMyIds(mySocketId, myUserId)
+  }, [mySocketId, myUserId, setMyIds])
+
+  // Update players when roomState changes
+  useEffect(() => {
+    const converted = roomState.players.map((p) => {
       // Match by userId first (most reliable), fallback to socketId
       const isMe = p.userId ? p.userId === myUserId : p.socketId === mySocketId
-      console.log(`[GameBoard] Player ${p.name}: userId=${p.userId}, socketId=${p.socketId}, myUserId=${myUserId}, mySocketId=${mySocketId}, isMe=${isMe}`)
       
       return {
         id: p.socketId,
@@ -689,54 +800,44 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave }: 
       return 0
     })
     
-    const myPlayer = sorted.find(p => p.isMe)
-    console.log('[GameBoard] My player:', myPlayer ? { name: myPlayer.name, role: myPlayer.role, isNarrator: myPlayer.isNarrator } : 'NOT FOUND')
-    
-    return sorted
-  }, [mySocketId, myUserId])
-
-  const [players, setPlayers] = useState<Player[]>(convertPlayers(roomState.players))
-  const [expandedPlayer, setExpandedPlayer] = useState<Player | null>(null)
-  const [flyCoins, setFlyCoins] = useState<{ id: number; emoji: string; x: number; y: number }[]>([])
-  const [hasShownRole, setHasShownRole] = useState(false)
-  const [showInventory, setShowInventory] = useState(false)
-
-  // Update players when roomState changes
-  useEffect(() => {
-    const updatedPlayers = convertPlayers(roomState.players)
-    setPlayers(updatedPlayers)
-  }, [roomState.players, convertPlayers])
+    setPlayers(sorted)
+  }, [roomState.players, mySocketId, myUserId, setPlayers])
 
   const gamePhase = roomState.phase || 'role-reveal'
-  const currentTurn = roomState.turn || 1
   const currentRound = roomState.currentRound || 1
   const totalRounds = roomState.totalRounds || 1
 
-  const myPlayer = players.find(p => p.isMe)
   const myCoinCount = myPlayer?.coins || { red: 0, yellow: 0, green: 0 }
-  const isNarrator = myPlayer?.isNarrator || false
 
-  // Auto-show role card when game starts
+  // Reset role card flag when game restarts
   useEffect(() => {
-    if (!hasShownRole && myPlayer && myPlayer.role && myPlayer.role !== 'Chưa chia vai trò') {
+    if (gameStep === 'role-reveal' && !myPlayer?.role) {
+      hasShownRoleRef.current = false
+    }
+  }, [gameStep, myPlayer?.role])
+
+  // Auto-show role card when game starts (only once per game)
+  useEffect(() => {
+    if (!myPlayer) return
+    if (!hasShownRoleRef.current && myPlayer.role && myPlayer.role !== 'Chưa chia vai trò') {
+      hasShownRoleRef.current = true
       const timer = setTimeout(() => {
         setExpandedPlayer(myPlayer)
-        setHasShownRole(true)
       }, 800)
       return () => clearTimeout(timer)
     }
-  }, [myPlayer, hasShownRole])
+  }, [myPlayer, setExpandedPlayer])
 
   const sendCoin = (targetId: string, coin: CoinType) => {
     // TODO: Emit socket event to server
-    setPlayers(prev => prev.map(p =>
-      p.id === targetId ? { ...p, coins: { ...p.coins, [coin]: p.coins[coin] + 1 } } : p
-    ))
+    const targetPlayer = players.find(p => p.id === targetId)
+    if (targetPlayer) {
+      updatePlayer(targetId, {
+        coins: { ...targetPlayer.coins, [coin]: targetPlayer.coins[coin] + 1 }
+      })
+    }
     // fly animation
-    const id = Date.now()
-    const x = Math.random() * 200 - 100
-    setFlyCoins(prev => [...prev, { id, emoji: COIN_COLORS[coin].emoji, x, y: 0 }])
-    setTimeout(() => setFlyCoins(prev => prev.filter(c => c.id !== id)), 900)
+    addFlyingCoin(COIN_COLORS[coin].emoji)
   }
 
   const handleNightAction = (targetId: string) => {
@@ -749,8 +850,75 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave }: 
     }
   }
 
-  const handleNextTurn = () => {
-    nextTurn(roomState.id)
+  // Game step handlers
+  const handleDrawSituation = () => {
+    // Random pick a situation card
+    const randomCard = CARD_DATA.situation[Math.floor(Math.random() * CARD_DATA.situation.length)]
+    selectCard(randomCard, 'situation')
+    setGameStep('day-emotion')
+  }
+
+  const openEmotionSelection = () => {
+    setInventoryMode({ category: 'emotion', showConfirm: true })
+    setShowInventory(true)
+  }
+
+  const openReflectionSelection = () => {
+    setInventoryMode({ category: 'reflection', showConfirm: true })
+    setShowInventory(true)
+  }
+
+  const openSelfcareSelection = () => {
+    setInventoryMode({ category: 'selfcare', showConfirm: true })
+    setShowInventory(true)
+  }
+
+  const handleInventorySelect = (card: CardData) => {
+    if (gameStep === 'day-emotion') {
+      handleSelectCard(card, 'emotion')
+    } else if (gameStep === 'reflection') {
+      handleSelectCard(card, 'reflection')
+    } else if (gameStep === 'selfcare') {
+      handleSelectCard(card, 'selfcare')
+    }
+  }
+
+  // Step progression
+  const handleNextStep = () => {
+    switch (gameStep) {
+      case 'role-reveal':
+        setGameStep('night')
+        break
+      case 'night':
+        setGameStep('day-draw')
+        break
+      case 'day-draw':
+        // NTG draws situation - handled by handleDrawSituation
+        break
+      case 'day-emotion':
+        // After emotion selected, move to story
+        setGameStep('day-story')
+        break
+      case 'day-story':
+        setGameStep('reflection')
+        break
+      case 'reflection':
+        if (selectedCards.reflections.length >= 1) {
+          setGameStep('selfcare')
+        }
+        break
+      case 'selfcare':
+        setGameStep('guess-role')
+        break
+      case 'guess-role':
+        setGameStep('reward')
+        break
+      case 'reward':
+        // Reset for next round
+        clearSelectedCards()
+        setGameStep('role-reveal')
+        break
+    }
   }
 
   return (
@@ -776,10 +944,15 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave }: 
         <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 text-center">
           <div className="bg-white border-2 border-black rounded-xl px-3 py-1">
             <div className="text-[10px] font-bold text-gray-500">
-              Round {currentRound}/{totalRounds} • Lượt {currentTurn}
+              Round {currentRound}/{totalRounds} • {gameStep}
             </div>
           </div>
         </div>
+
+        {/* Center Board */}
+        <CenterBoard 
+          selectedCards={selectedCards}
+        />
 
         {/* 3x3 Grid */}
         <div className="grid grid-cols-3 gap-4 w-full flex-1 mt-16 mb-20 px-2">
@@ -796,21 +969,89 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave }: 
           ))}
         </div>
 
-        {/* Bottom button - Only show for Narrator */}
-        {isNarrator && (
-          <motion.button
-            whileTap={{ scale: 0.97 }}
-            onClick={handleNextTurn}
-            className="w-full py-3 rounded-2xl border-[3px] border-black bg-[#6BCB77]
-                       text-sm font-bold hover:bg-[#5BB767] active:scale-[0.98] transition-all"
-          >
-            👑 Chuyển lượt tiếp theo
-          </motion.button>
-        )}
+        {/* Bottom controls */}
+        <div className="flex flex-col gap-2">
+          {/* Moderator controls */}
+          {isNarrator && (
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={handleNextStep}
+              className="w-full py-3 rounded-2xl border-[3px] border-black bg-[#6BCB77]
+                         text-sm font-bold hover:bg-[#5BB767] active:scale-[0.98] transition-all"
+            >
+              👑 {gameStep === 'role-reveal' ? 'Chuyển sang Night' :
+                  gameStep === 'night' ? 'Chuyển sang Day' :
+                  gameStep === 'day-draw' ? 'Chờ NTG bốc thẻ' :
+                  gameStep === 'day-emotion' ? 'Chờ NTG chọn cảm xúc' :
+                  gameStep === 'day-story' ? 'Chọn Reflection' :
+                  gameStep === 'reflection' ? 'Chọn Bí kíp' :
+                  gameStep === 'selfcare' ? 'Đoán vai trò' :
+                  gameStep === 'guess-role' ? 'Tặng coin' :
+                  'Kết thúc round'}
+            </motion.button>
+          )}
+
+          {/* NTG controls */}
+          {myPlayer?.isSender && (
+            <>
+              {gameStep === 'day-draw' && (
+                <motion.button
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleDrawSituation}
+                  className="w-full py-3 rounded-2xl border-[3px] border-black bg-yellow-300
+                             text-sm font-bold hover:bg-yellow-400 active:scale-[0.98] transition-all"
+                >
+                  📋 Bốc thẻ Tình huống
+                </motion.button>
+              )}
+              {gameStep === 'day-emotion' && (
+                <motion.button
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={openEmotionSelection}
+                  className="w-full py-3 rounded-2xl border-[3px] border-black bg-pink-300
+                             text-sm font-bold hover:bg-pink-400 active:scale-[0.98] transition-all"
+                >
+                  💭 Chọn thẻ Cảm xúc
+                </motion.button>
+              )}
+              {gameStep === 'reflection' && selectedCards.reflections.length < 3 && (
+                <motion.button
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={openReflectionSelection}
+                  className="w-full py-3 rounded-2xl border-[3px] border-black bg-blue-300
+                             text-sm font-bold hover:bg-blue-400 active:scale-[0.98] transition-all"
+                >
+                  🤔 Chọn Reflection ({selectedCards.reflections.length}/3)
+                </motion.button>
+              )}
+              {gameStep === 'selfcare' && !selectedCards.selfcare && (
+                <motion.button
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={openSelfcareSelection}
+                  className="w-full py-3 rounded-2xl border-[3px] border-black bg-green-300
+                             text-sm font-bold hover:bg-green-400 active:scale-[0.98] transition-all"
+                >
+                  🌟 Chọn Bí kíp ôm
+                </motion.button>
+              )}
+            </>
+          )}
+        </div>
 
         {/* Card inventory button */}
         <button
-          onClick={() => setShowInventory(true)}
+          onClick={() => {
+            setInventoryMode({ showConfirm: false })
+            setShowInventory(true)
+          }}
           className="absolute bottom-2 right-2 w-12 h-12 rounded-full border-3 border-black bg-gradient-to-br from-purple-400 to-pink-400
                      flex items-center justify-center text-2xl hover:scale-110 active:scale-95 transition-transform shadow-lg"
         >
@@ -844,27 +1085,14 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave }: 
       {/* Card inventory overlay */}
       <AnimatePresence>
         {showInventory && (
-          <CardInventory onClose={() => setShowInventory(false)} />
+          <CardInventory 
+            onClose={() => setShowInventory(false)}
+            onSelectCard={handleInventorySelect}
+            allowedCategory={inventoryMode.category}
+            showConfirmButton={inventoryMode.showConfirm}
+          />
         )}
       </AnimatePresence>
     </div>
   )
-}
-
-// ─── Typewriter ───────────────────────────────────────────────────────────────
-function TypewriterText({ text }: { text: string }) {
-  const [displayed, setDisplayed] = useState('')
-
-  useEffect(() => {
-    setDisplayed('')
-    let i = 0
-    const interval = setInterval(() => {
-      i++
-      setDisplayed(text.slice(0, i))
-      if (i >= text.length) clearInterval(interval)
-    }, 35)
-    return () => clearInterval(interval)
-  }, [text])
-
-  return <span className="text-sm font-bold text-gray-700">{displayed}</span>
 }

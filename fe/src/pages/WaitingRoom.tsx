@@ -21,7 +21,7 @@ export default function WaitingRoom({
   roomId,
   players,
   hostSocketId,
-  mySocketId,
+  mySocketId: _mySocketId,
   myUserId,
   onStartGame,
   onLeave,

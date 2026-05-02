@@ -1,0 +1,132 @@
+import { create } from 'zustand'
+import { devtools } from 'zustand/middleware'
+import type { Player, GameStep, SelectedCards, CardData, CardCategory } from './types'
+
+interface GameState {
+  // Game data
+  gameStep: GameStep
+  selectedCards: SelectedCards
+  players: Player[]
+  mySocketId: string
+  myUserId: string
+
+  // UI state
+  expandedPlayer: Player | null
+  showInventory: boolean
+  inventoryMode: {
+    category?: CardCategory
+    showConfirm: boolean
+  }
+
+  // Actions - Game
+  setGameStep: (step: GameStep) => void
+  setPlayers: (players: Player[]) => void
+  updatePlayer: (playerId: string, updates: Partial<Player>) => void
+  setMyIds: (socketId: string, userId: string) => void
+
+  // Actions - Cards
+  selectCard: (card: CardData, category: CardCategory | 'situation') => void
+  clearSelectedCards: () => void
+
+  // Actions - UI
+  setExpandedPlayer: (player: Player | null) => void
+  setShowInventory: (show: boolean) => void
+  setInventoryMode: (mode: { category?: CardCategory; showConfirm: boolean }) => void
+
+  // Computed
+  myPlayer: () => Player | undefined
+  isNarrator: () => boolean
+  isSender: () => boolean
+  canSelectCard: (category: CardCategory) => boolean
+}
+
+export const useGameStore = create<GameState>()(
+  devtools(
+    (set, get) => ({
+      // Initial state
+      gameStep: 'role-reveal',
+      selectedCards: { reflections: [] },
+      players: [],
+      mySocketId: '',
+      myUserId: '',
+      expandedPlayer: null,
+      showInventory: false,
+      inventoryMode: { showConfirm: false },
+
+      // Game actions
+      setGameStep: (step) => set({ gameStep: step }),
+
+      setPlayers: (players) => set({ players }),
+
+      updatePlayer: (playerId, updates) =>
+        set((state) => ({
+          players: state.players.map((p) => (p.id === playerId ? { ...p, ...updates } : p)),
+        })),
+
+      setMyIds: (socketId, userId) => set({ mySocketId: socketId, myUserId: userId }),
+
+      // Card actions
+      selectCard: (card, category) =>
+        set((state) => {
+          if (category === 'reflection') {
+            return {
+              selectedCards: {
+                ...state.selectedCards,
+                reflections: [...state.selectedCards.reflections, card].slice(0, 3),
+              },
+            }
+          }
+          if (category === 'situation') {
+            return {
+              selectedCards: {
+                ...state.selectedCards,
+                situation: card,
+              },
+            }
+          }
+          return {
+            selectedCards: {
+              ...state.selectedCards,
+              [category]: card,
+            },
+          }
+        }),
+
+      clearSelectedCards: () => set({ selectedCards: { reflections: [] } }),
+
+      // UI actions
+      setExpandedPlayer: (player) => set({ expandedPlayer: player }),
+
+      setShowInventory: (show) => set({ showInventory: show }),
+
+      setInventoryMode: (mode) => set({ inventoryMode: mode }),
+
+      // Computed
+      myPlayer: () => {
+        const state = get()
+        return state.players.find((p) => p.isMe)
+      },
+
+      isNarrator: () => {
+        const myPlayer = get().myPlayer()
+        return myPlayer?.isNarrator || false
+      },
+
+      isSender: () => {
+        const myPlayer = get().myPlayer()
+        return myPlayer?.isSender || false
+      },
+
+      canSelectCard: (category) => {
+        const { gameStep, isSender } = get()
+        if (!isSender()) return false
+
+        if (category === 'emotion') return gameStep === 'day-emotion'
+        if (category === 'reflection') return gameStep === 'reflection'
+        if (category === 'selfcare') return gameStep === 'selfcare'
+        return false
+      },
+    }),
+    { name: 'GameStore' }
+  )
+)

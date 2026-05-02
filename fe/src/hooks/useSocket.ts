@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { io, Socket } from 'socket.io-client'
 import { getUserId } from '../utils/userId'
+import { useGameStore } from '../stores/gameStore'
 
 const SOCKET_URL = 'http://localhost:3001'
 const SESSION_KEY = 'emcoin_session'
@@ -138,6 +139,11 @@ export function useSocket(): UseSocketReturn {
       console.log('[Socket] Room state:', state)
       setRoomState(state)
       setError(null)
+      
+      // Sync gameStep with server phase
+      if (state.phase) {
+        useGameStore.getState().setGameStep(state.phase as any)
+      }
     })
 
     socket.on('player_joined', ({ players }: { socketId: string; name: string; players: Player[] }) => {
@@ -153,6 +159,11 @@ export function useSocket(): UseSocketReturn {
     socket.on('game_started', (state: RoomState) => {
       console.log('[Socket] Game started:', state)
       setRoomState(state)
+      
+      // Sync gameStep with server phase
+      if (state.phase) {
+        useGameStore.getState().setGameStep(state.phase as any)
+      }
     })
 
     socket.on('night_action_completed', ({ action, room }: { action: string; room: RoomState }) => {
@@ -163,11 +174,21 @@ export function useSocket(): UseSocketReturn {
     socket.on('phase_changed', (state: RoomState) => {
       console.log('[Socket] Phase changed:', state.phase)
       setRoomState(state)
+      
+      // Sync gameStep with server phase
+      if (state.phase) {
+        useGameStore.getState().setGameStep(state.phase as any)
+      }
     })
 
     socket.on('turn_changed', (state: RoomState) => {
       console.log('[Socket] Turn changed:', state.turn, state.phase)
       setRoomState(state)
+      
+      // Sync gameStep with server phase
+      if (state.phase) {
+        useGameStore.getState().setGameStep(state.phase as any)
+      }
     })
 
     socket.on('coin_given', ({ giver, receiver, coinType, room }: { giver: string; receiver: string; coinType: string; room: RoomState }) => {

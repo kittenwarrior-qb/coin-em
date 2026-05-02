@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # Backend - Node.js with hot reload
+  backend:
+    build:
+      context: ./be
+      dockerfile: Dockerfile.dev
+    container_name: emcoin-backend-dev
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./be:/app
+      - /app/node_modules
+      - ./be/data:/app/data
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - CLIENT_ORIGIN=http://localhost:5173
+    command: npm run dev
+    networks:
+      - emcoin-network
+    restart: unless-stopped
+
+  # Frontend - Vite dev server with HMR
+  frontend:
+    build:
+      context: ./fe
+      dockerfile: Dockerfile.dev
+    container_name: emcoin-frontend-dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./fe:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:3001
+    command: npm run dev -- --host 0.0.0.0
+    networks:
+      - emcoin-network
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+networks:
+  emcoin-network:
+    driver: bridge

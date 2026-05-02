@@ -191,3 +191,219 @@ Mọi người cùng trả lời các câu hỏi: Hôm nay gọi tên rõ nhất
 Ý nghĩa các đồng xu: Xu Xanh là lời ôm bạn nhận được, Xu Vàng là lời ôm bạn trao đi, Xu Đỏ là lòng tốt vô tận trong tim bạn. Mỗi đồng xu chính là một lời ôm và sự chữa lành.
 Nghi thức kết thúc: Cả nhóm đứng thành vòng tròn, nắm tay và đồng thanh: "CẢM ƠN MÌNH, CẢM ƠN BẠN đã chia sẻ và lắng nghe cảm xúc!".
 
+2. GAME FLOW (6 STEPS)
+---
+
+STEP 0–1: SETUP + NIGHT PHASE
+
+Step 0:
+
+Hiển thị 5 deck giữa bàn
+
+Moderator bấm: [Draw Situation]
+
+Card úp (hidden global)
+
+
+Step 1: Role Assignment
+
+Mỗi player nhận 1 card (animation bay vào → flip)
+
+Public hiển thị:
+
+Mod 👑 | NTG 💖 | Others 🎭
+
+
+
+
+---
+
+NIGHT MODE
+
+Trigger: Moderator → [Trời Tối]
+
+System:
+
+Lock mic + public chat
+
+UI chuyển dark (blue/purple)
+
+
+Moderator actions:
+
+Gửi private chat tới role đặc biệt:
+
+Người Dẫn Lối
+
+Người Im Lặng
+
+Người Chữa Lành
+
+
+Nhận decision (server xử lý)
+
+
+
+---
+
+DAY MODE
+
+Trigger: [Trời Sáng]
+
+System:
+
+Unlock mic/chat (trừ player bị mute)
+
+Flip Situation Card:
+
+Zoom center (3s) → đặt giữa bàn
+
+
+
+
+---
+
+STEP 2: NTG CHỌN CẢM XÚC
+
+NTG UI:
+
+Mở My Deck → 64 cards (carousel + lazy load)
+
+Tap → flip xem nội dung
+
+Tap ✔ → chọn
+
+
+Effect:
+
+Card bay ra center → zoom + glow (3s)
+
+Sau đó đặt trước avatar NTG
+
+
+Interaction:
+
+NTG kể chuyện (mic)
+
+Player khác tương tác theo role
+
+
+
+---
+
+STEP 3: REFLECTION
+
+Trigger: [Next Step]
+
+UI:
+
+3 cards úp giữa bàn
+
+
+Interaction:
+
+NTG chọn 1–3 cards
+
+Flip + zoom → hiển thị câu hỏi
+
+
+System:
+
+NTG trả lời qua mic
+
+Cards thu nhỏ → đặt cạnh Situation Card
+
+
+
+---
+
+STEP 4: SELF-CARE CARD (BÍ KÍP)
+
+Trigger: [Next Step]
+
+Logic:
+
+Case 1 – Có Người Dẫn Lối:
+
+Card đã chọn từ Night → auto reveal
+
+
+Case 2 – Không có:
+
+NTG mở carousel (15 cards)
+
+Chọn 1 card
+
+
+Effect (global):
+
+Card full screen + glow pastel
+
+Animation: ripple / heartbeat
+
+
+
+---
+
+STEP 5: GUESS ROLE
+
+Trigger: [Next Step]
+
+UI:
+
+Question: “Ai là vai trò bí ẩn?”
+
+Click avatar để vote (multi-choice logic)
+
+
+System:
+
+Countdown: 10s
+
+Reveal:
+
+Mask break effect (particle)
+
+Show real roles
+
+
+
+
+---
+
+STEP 6: REWARD (EMCOIN)
+
+Trigger: [Next Step]
+
+UI:
+
+3 loại coin (Đỏ/Vàng/Xanh)
+
+
+Interaction:
+
+Drag & drop coin → avatar
+
+
+Effect:
+
+Sound “ting”
+
+Mini confetti
+
+
+End screen:
+
+Prompt: “Hôm nay bạn gọi tên cảm xúc nào?”
+
+Input: text hoặc voice
+
+
+Moderator:
+
+[End Game] → reset + chọn NTG mới
+
+
+
+---
+

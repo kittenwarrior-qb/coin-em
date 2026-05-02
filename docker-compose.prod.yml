@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # Backend - Node.js production
+  backend:
+    build:
+      context: ./be
+      dockerfile: Dockerfile.prod
+    container_name: emcoin-backend-prod
+    expose:
+      - "3001"
+    volumes:
+      - backend-data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - CLIENT_ORIGIN=https://emcoin.example.com
+    networks:
+      - emcoin-network
+    restart: always
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Caddy - Reverse proxy with auto HTTPS
+  caddy:
+    image: caddy:2-alpine
+    container_name: emcoin-caddy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./fe/dist:/var/www/html:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks:
+      - emcoin-network
+    depends_on:
+      - backend
+    restart: always
+
+networks:
+  emcoin-network:
+    driver: bridge
+
+volumes:
+  backend-data:
+  caddy-data:
+  caddy-config:
