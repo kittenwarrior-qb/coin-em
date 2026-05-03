@@ -108,6 +108,11 @@ export class BotPlayer {
 
   // ── Actions ──────────────────────────────────────────────────────────────────
 
+  updateRoomSettings(roomId: string, settings: { situationGroups: string[]; emotionGroups: string[] }) {
+    this.logger.info('BOT', `${this.name} updating room settings`)
+    this.socket.emit('update_room_settings', { roomId, userId: this.id, settings })
+  }
+
   joinRoom(roomId: string, createIfMissing = false) {
     this.logger.info('BOT', `${this.name} joining room ${roomId}`)
     this.socket.emit('join_room', { name: this.name, roomId, userId: this.id, createIfMissing })
