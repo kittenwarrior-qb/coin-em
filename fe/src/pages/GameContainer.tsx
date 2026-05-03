@@ -1,58 +1,56 @@
-import { useState, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import Lobby from './Lobby'
 import WaitingRoom from './WaitingRoom'
 import GameBoard from './GameBoard'
 import { useSocket } from '../hooks/useSocket'
 import { getUserId } from '../utils/userId'
 
-type GameState = 'lobby' | 'waiting' | 'playing'
-
 export default function GameContainer() {
-  const [gameState, setGameState] = useState<GameState>('lobby')
+  const [forcelobby, setForceLobby] = useState(false)
   const { socket, isConnected, roomState, availableRooms, error, currentSocketId, joinRoom, startGame, listRooms, clearSession, addFakePlayers } = useSocket()
   
   const mySocketId = currentSocketId || socket?.id || ''
   const myUserId = getUserId()
-  console.log('[GameContainer] Current socket.id:', mySocketId, 'userId:', myUserId)
 
-  const handleJoinRoom = (roomId: string, userName: string) => {
+  const handleJoinRoom = useCallback((roomId: string, userName: string) => {
     joinRoom(roomId, userName, false)
-  }
+  }, [joinRoom])
 
-  const handleCreateRoom = (userName: string) => {
+  const handleCreateRoom = useCallback((userName: string) => {
     const roomId = Math.random().toString(36).substring(2, 8).toUpperCase()
     joinRoom(roomId, userName, true)
-  }
+  }, [joinRoom])
 
-  const handleStartGame = () => {
+  const handleStartGame = useCallback(() => {
     if (!roomState) return
     startGame(roomState.id)
-  }
+  }, [roomState, startGame])
 
-  const handleLeaveRoom = () => {
+  const handleLeaveRoom = useCallback(() => {
     clearSession()
+    setForceLobby(true)
     if (socket) {
       socket.disconnect()
       socket.connect()
     }
-    setGameState('lobby')
-  }
+  }, [clearSession, socket])
 
-  const handleAddFakePlayers = () => {
+  const handleAddFakePlayers = useCallback(() => {
     if (!roomState) return
     addFakePlayers(roomState.id)
+  }, [roomState, addFakePlayers])
+
+  // Derive game state directly from roomState to avoid race conditions
+  const gameState = !forcelobby && roomState
+    ? roomState.status === 'waiting' ? 'waiting'
+    : roomState.status === 'playing' ? 'playing'
+    : 'lobby'
+    : 'lobby'
+
+  // Reset forceLobby when roomState is cleared
+  if (forcelobby && !roomState) {
+    setForceLobby(false)
   }
-
-  // Update game state based on room state
-  useEffect(() => {
-    if (!roomState) return
-
-    if (roomState.status === 'waiting') {
-      setGameState('waiting')
-    } else if (roomState.status === 'playing') {
-      setGameState('playing')
-    }
-  }, [roomState])
 
   if (!isConnected) {
     return (
@@ -101,7 +99,6 @@ export default function GameContainer() {
   }
 
   if (gameState === 'playing' && roomState && socket) {
-    console.log('[GameContainer] Rendering GameBoard with socket.id:', mySocketId, 'userId:', myUserId)
     return (
       <GameBoard
         roomId={roomState.id}
@@ -113,8 +110,6 @@ export default function GameContainer() {
     )
   }
 
-  // Fallback: gameState is waiting/playing but roomState not yet restored (e.g. after reload)
-  // Show lobby so tests can detect a known data-testid
   return (
     <Lobby
       availableRooms={availableRooms}

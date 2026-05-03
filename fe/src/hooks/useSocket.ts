@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { io, Socket } from 'socket.io-client'
 import { getUserId } from '../utils/userId'
 import { useGameStore } from '../stores/gameStore'
@@ -254,108 +254,93 @@ export function useSocket(): UseSocketReturn {
     }
   }, [])
 
-  const joinRoom = (roomId: string, name: string, createIfMissing = false) => {
+  const joinRoom = useCallback((roomId: string, name: string, createIfMissing = false) => {
     if (!socketRef.current) return
     const userId = getUserId()
     console.log('[Socket] Emit join_room:', { roomId, name, userId, createIfMissing })
     socketRef.current.emit('join_room', { roomId, name, userId, createIfMissing })
-    // Save session
     saveSession({ roomId, userName: name, userId, oldSocketId: socketRef.current.id })
-  }
+  }, [])
 
-  const startGame = (roomId: string) => {
+  const startGame = useCallback((roomId: string) => {
     if (!socketRef.current) return
-    console.log('[Socket] Emit start_game:', { roomId })
     socketRef.current.emit('start_game', { roomId })
-  }
+  }, [])
 
-  const getRoomState = (roomId: string) => {
+  const getRoomState = useCallback((roomId: string) => {
     if (!socketRef.current) return
-    console.log('[Socket] Emit get_room_state:', { roomId })
     socketRef.current.emit('get_room_state', { roomId })
-  }
+  }, [])
 
-  const listRooms = () => {
+  const listRooms = useCallback(() => {
     if (!socketRef.current) return
-    console.log('[Socket] Emit list_rooms')
     socketRef.current.emit('list_rooms')
-  }
+  }, [])
 
-  const nightAction = (roomId: string, action: string, targetSocketId?: string, cardData?: object) => {
+  const nightAction = useCallback((roomId: string, action: string, targetSocketId?: string, cardData?: object) => {
     if (!socketRef.current) return
-    console.log('[Socket] Emit night_action:', action)
     socketRef.current.emit('night_action', { roomId, action, targetSocketId, cardData })
-  }
+  }, [])
 
-  const nextPhase = (roomId: string) => {
+  const nextPhase = useCallback((roomId: string) => {
     if (!socketRef.current) return
-    console.log('[Socket] Emit next_phase')
     socketRef.current.emit('next_phase', { roomId })
-  }
+  }, [])
 
-  const giveCoin = (roomId: string, receiverSocketId: string, coinType: string) => {
+  const giveCoin = useCallback((roomId: string, receiverSocketId: string, coinType: string) => {
     if (!socketRef.current) return
-    console.log('[Socket] Emit give_coin:', coinType)
     socketRef.current.emit('give_coin', { roomId, receiverSocketId, coinType })
-  }
+  }, [])
 
-  const submitVote = (roomId: string, suspectSocketId: string) => {
+  const submitVote = useCallback((roomId: string, suspectSocketId: string) => {
     if (!socketRef.current) return
-    console.log('[Socket] Emit submit_vote')
     socketRef.current.emit('submit_vote', { roomId, suspectSocketId })
-  }
+  }, [])
 
-  const endGame = (roomId: string) => {
+  const endGame = useCallback((roomId: string) => {
     if (!socketRef.current) return
-    console.log('[Socket] Emit end_game')
     socketRef.current.emit('end_game', { roomId })
-  }
+  }, [])
 
-  const clearSession = () => {
+  const clearSession = useCallback(() => {
     clearSessionStorage()
     reconnectAttempted.current = false
-  }
+  }, [])
 
-  const addFakePlayers = (roomId: string) => {
+  const addFakePlayers = useCallback((roomId: string) => {
     if (!socketRef.current) return
-    console.log('[Socket] Emit add_fake_players')
     socketRef.current.emit('add_fake_players', { roomId })
-  }
+  }, [])
 
   const lastNextTurnRef = useRef<number>(0)
 
-  const nextTurn = (roomId: string) => {
+  const nextTurn = useCallback((roomId: string) => {
     if (!socketRef.current) return
     const now = Date.now()
-    if (now - lastNextTurnRef.current < 800) return // debounce 800ms on client
+    if (now - lastNextTurnRef.current < 800) return
     lastNextTurnRef.current = now
-    console.log('[Socket] Emit next_turn')
     socketRef.current.emit('next_turn', { roomId })
-  }
+  }, [])
 
-  const selectCard = (roomId: string, card: object, type: 'SELECT_CARD' | 'SELECT_SELFCARE_CARD' = 'SELECT_CARD') => {
+  const selectCard = useCallback((roomId: string, card: object, type: 'SELECT_CARD' | 'SELECT_SELFCARE_CARD' = 'SELECT_CARD') => {
     if (!socketRef.current) return
-    console.log('[Socket] Emit select_card:', type)
     socketRef.current.emit('select_card', { roomId, card, type })
-  }
+  }, [])
 
-  const sendResponse = (roomId: string, message: string) => {
+  const sendResponse = useCallback((roomId: string, message: string) => {
     if (!socketRef.current) return
-    console.log('[Socket] Emit send_response')
     socketRef.current.emit('send_response', { roomId, message })
-  }
+  }, [])
 
-  const ntgVote = (roomId: string, targetSocketId: string) => {
+  const ntgVote = useCallback((roomId: string, targetSocketId: string) => {
     if (!socketRef.current) return
-    console.log('[Socket] Emit ntg_vote')
     socketRef.current.emit('ntg_vote', { roomId, targetSocketId })
-  }
+  }, [])
 
-  const shareReflection = (roomId: string, message: string) => {
+  const shareReflection = useCallback((roomId: string, message: string) => {
     if (!socketRef.current) return
-    console.log('[Socket] Emit share_reflection')
     socketRef.current.emit('share_reflection', { roomId, message })
-  }
+  }, [])
 
   return {
     socket: socketRef.current,
