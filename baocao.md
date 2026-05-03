@@ -1,100 +1,126 @@
-## 3. Plan tối ưu hiệu năng
+# Project EmCoin
 
-### Bối cảnh hiện tại
+## 1. Tổng quan app
 
-Stack hiện tại: Node.js + Express + Socket.IO, lưu trữ bằng `rooms.json` (1 file duy nhất), chạy trong Docker với Caddy làm reverse proxy, pm2 để monitor.
+### 1.1 Techstack
 
-Bottleneck chính:
-- Node.js chạy 1 process → chỉ dùng 1 core, lãng phí 2 core còn lại
-- Mỗi lần có action (vote, give_coin, next_turn...) → ghi toàn bộ `rooms.json` dù chỉ 1 room thay đổi
-- pm2 thừa khi đã có Docker (`restart: always` đã lo việc recover)
+| Layer | Tech | Dùng để làm gì |
+|---|---|---|
+| Backend | Node.js + Express | HTTP server, REST API, Socket.IO server |
+| Realtime | Socket.IO | Đồng bộ trạng thái game giữa các client |
+| Frontend | React + Vite | SPA, Socket.IO client |
+| State FE | Zustand | Quản lý global state phía client |
+| Unit test | Vitest | Kiểm thử logic nghiệp vụ backend |
+| Integration test | Vitest + socket.io-client | Kiểm thử luồng socket trong process: join room → start game → phase transitions |
+| E2E test | Playwright | Kiểm thử giao diện đa người dùng, kiểm tra sync realtime |
+| Container | Docker | Đóng gói project, orchestrate môi trường dev/prod |
+| Network | Caddy | Reverse proxy, tự động HTTPS |
+| Storage | Redis + JSON file (backup) | Redis là primary store; JSON file là fallback khi restart |
+| Pub/Sub | Redis Adapter (Socket.IO) | Đồng bộ Socket.IO events giữa nhiều container backend |
+| CI/CD | GitHub Actions | Build, test, deploy GitHub → VPS |
 
-Giới hạn thực tế hiện tại: ~100–150 concurrent users ổn định.
+### 1.2 Tradeoff
 
----
-
-### Giai đoạn 1 — Dọn dẹp + tách file JSON (không đổi kiến trúc)
-
-**Mục tiêu:** giảm I/O bottleneck, bỏ layer thừa
-
-#### 1.1 Bỏ pm2, chạy Node trực tiếp trong Docker
-
-pm2 thừa khi đã có Docker. `restart: always` trong compose đã xử lý crash recovery.
-
-Sửa Dockerfile.prod: thay `CMD ["pm2-runtime", ...]` thành `CMD ["node", "dist/index.js"]`
-
-Lợi ích: bỏ 1 layer, giảm memory overhead ~20–30MB, log đơn giản hơn.
-
-#### 1.2 Tách `rooms.json` thành file riêng theo room
-
-Hiện tại: mỗi action → ghi toàn bộ `rooms.json` (tất cả room).
-Sau: mỗi room lưu `data/rooms/{roomId}.json` → chỉ ghi file của room đang thay đổi.
-
-File cần sửa: `be/src/persistence.ts`, `be/src/modules/room/repository/RoomRepository.ts`
-
-#### 1.3 Tăng debounce từ 1s lên 3s
-
-Game có nhiều event liên tiếp (vote → give_coin → next_turn trong vài giây). Debounce 1s vẫn trigger nhiều lần không cần thiết.
-
-File cần sửa: `be/src/persistence.ts` — đổi `1000` thành `3000`
+- Node.js chạy single-thread → dùng Redis Adapter + nhiều container để tận dụng nhiều core
+- Redis là in-memory → bật AOF persistence để tránh mất data khi restart
+- JSON file vẫn giữ lại làm backup layer (ghi per-room, debounce 3s)
 
 ---
 
-### Giai đoạn 2 — Redis (thay storage, bước quan trọng nhất)
+## 2. Các luồng chính
 
-**Mục tiêu:** loại bỏ file I/O hoàn toàn, cho phép scale nhiều container
+### 2.1 Nhận diện user
 
-#### 2.1 Thêm Redis vào docker-compose.prod.yml
+- Frontend kết nối Socket.IO, gửi `join_room` kèm `{ userId, name, roomId }`
+- Server lưu player vào room với cả `socketId` và `userId`
+- Mất kết nối: nếu game đang chạy thì giữ nguyên player trong room
+- Reconnect: gửi `reconnect_room` với `userId` cũ → server cập nhật `socketId` mới, tiếp tục session
 
-```yaml
-redis:
-  image: redis:7-alpine
-  container_name: emcoin-redis
-  restart: always
-  volumes:
-    - redis-data:/data
-  networks:
-    - emcoin-network
+### 2.2 Tạo, lưu, xóa room data
+
+- Client gửi `join_room` với `createIfMissing: true` để server tạo room mới
+- Mỗi thay đổi → ghi ngay vào Redis (`room:{roomId}`) + debounce 3s ghi file `data/rooms/{roomId}.json`
+- Server restart → load toàn bộ room từ Redis (AOF đảm bảo data còn đó); JSON file là fallback thủ công nếu cần
+- Mỗi 1 giờ → dọn room rỗng hoặc không hoạt động quá 24 giờ (xóa cả Redis key lẫn file)
+- Người cuối rời phòng (lúc đang chờ) → room bị xóa ngay
+
+### 2.3 Tính coin
+
+- Khởi tạo: mỗi người nhận vàng = số người trong phòng, đỏ = 3, xanh = 0
+- Cơ chế thưởng coin vàng:
+  - NTG chia sẻ phản tư (`reflection-sharing`): NTG +5 vàng
+  - NTG vote người phản hồi hay nhất (`group-response`): người được vote +5 vàng
+  - Người Kết Nối / Người Gợi Mở: phản hồi + được NTG vote → +5 vàng; chỉ phản hồi → +2 vàng
+  - Người Dẫn Lối: hoàn thành role + phản hồi + được NTG vote → +5 vàng; chỉ phản hồi → +2 vàng
+  - Người Im Lặng: không bị đoán ra → +7 vàng; bị đoán ra → +2 vàng
+  - NTG: nhóm đoán đúng Người Im Lặng → +N xanh; đoán sai → +(N-3) xanh (N = số người chơi)
+- Nếu Người Kết Nối / Người Gợi Mở / Người Dẫn Lối bị mute thì không được vàng
+
+### 2.4 Logic gameplay theo từng phase
+
+| Phase | Mô tả |
+|---|---|
+| `role-reveal` | Mỗi người chơi được phân role và hiện vai trò round này |
+| `night` | Đêm bắt đầu (logic frontend) |
+| `healer-turn` | Người Chữa Lành hành động |
+| `silencer-turn` | Người Im Lặng hành động |
+| `situation-card` | NTG rút thẻ tình huống |
+| `emotion-card` | NTG rút thẻ cảm xúc |
+| `story-telling` | NTG kể chuyện |
+| `group-response` | Cả nhóm phản hồi, NTG vote người phản hồi hay nhất (+5 vàng) |
+| `reflection-card` | Rút thẻ phản tư |
+| `reflection-sharing` | NTG chia sẻ phản tư |
+| `selfcare-card` | Quản trò hoặc Người Dẫn Lối rút thẻ bí kíp tự ôm (tránh lộ role) |
+| `hug-action` | Hành động kết nối |
+| `guess-silencer` | Vote đoán Người Im Lặng |
+| `reveal-silencer` | Công bố kết quả và toàn bộ role |
+| `give-coins` | Các người chơi tặng coin vàng và đỏ |
+| `reward` | Tổng kết lượt, thống kê coin → lặp lại từ đầu hoặc kết thúc game |
+
+---
+
+## 3. Kiến trúc hệ thống
+
+```
+[Client Browser]
+      │ Socket.IO / HTTPS
+      ▼
+[Caddy] ── reverse proxy, TLS termination
+      │
+      ├── /api/*  ──────────────► [Backend container(s)]
+      └── /socket.io/*  ────────► [Backend container(s)]  ← ip_hash (sticky session)
+                                        │
+                                   [Redis container]
+                                   - Primary store (room state)
+                                   - Socket.IO pub/sub adapter
+                                   - AOF persistence
 ```
 
-#### 2.2 Thay RoomRepository dùng Redis thay vì Map in-memory
-
-`RoomRepository` hiện dùng `Map<string, Room>` → thay bằng Redis (`ioredis`).
-- `findById` → `redis.get(roomId)` + JSON.parse
-- `save` → `redis.set(roomId, JSON.stringify(room))`
-- `delete` → `redis.del(roomId)`
-
-Packages cần thêm: `ioredis`
-
-#### 2.3 Thêm Socket.IO Redis Adapter
-
-Cần thiết để nhiều container backend share cùng Socket.IO rooms/events.
-
-Package: `@socket.io/redis-adapter`
-
-Sửa `be/src/index.ts`:
-```ts
-import { createAdapter } from '@socket.io/redis-adapter'
-import { createClient } from 'ioredis'
-
-const pubClient = createClient({ host: 'redis', port: 6379 })
-const subClient = pubClient.duplicate()
-io.adapter(createAdapter(pubClient, subClient))
-```
-
-#### 2.4 Giữ file JSON làm snapshot backup
-
-Redis mất data khi restart nếu không config persistence. Giải pháp:
-- Bật Redis AOF persistence trong config (`appendonly yes`)
-- Hoặc giữ job snapshot mỗi 5 phút ra file JSON (không phải mỗi action)
-
 ---
 
-### Giai đoạn 3 — Scale nhiều container (sau khi có Redis)
+## 4. Plan tối ưu hiệu năng
 
-**Mục tiêu:** tận dụng 3 core VPS, tăng concurrent users lên 300–600
+### Giai đoạn 1 — Đã hoàn thành ✅
 
-#### 3.1 Scale backend lên 3 container
+| Thay đổi | Chi tiết |
+|---|---|
+| Tách file JSON per-room | `data/rooms/{roomId}.json` thay vì 1 file duy nhất |
+| Tăng debounce lên 3s | Giảm số lần ghi disk |
+| Atomic write | Ghi `.tmp` rồi `rename` để tránh corrupt |
+| Build TypeScript | Dockerfile dùng `tsc` + `node dist/index.js` thay vì `tsx` |
+
+### Giai đoạn 2 — Đã hoàn thành ✅
+
+| Thay đổi | Chi tiết |
+|---|---|
+| Redis làm primary store | `RoomRepository` ghi/đọc Redis, in-memory Map làm cache |
+| Socket.IO Redis Adapter | `@socket.io/redis-adapter` — nhiều container share events |
+| Redis container | `redis:7-alpine` với AOF, healthcheck, volume persistent |
+| `/metrics` endpoint | rooms, uptime, memory, pid |
+
+### Giai đoạn 3 — Sẵn sàng scale
+
+Sau khi có Redis, scale backend lên nhiều container chỉ cần:
 
 ```yaml
 # docker-compose.prod.yml
@@ -103,9 +129,7 @@ backend:
     replicas: 3
 ```
 
-Hoặc dùng: `docker compose up --scale backend=3`
-
-#### 3.2 Cập nhật Caddyfile để load balance
+Cập nhật Caddyfile thêm `lb_policy`:
 
 ```
 handle /api/* {
@@ -115,40 +139,11 @@ handle /api/* {
 }
 handle /socket.io/* {
     reverse_proxy backend:3001 {
-        lb_policy ip_hash   # sticky session cho WebSocket
+        lb_policy ip_hash
     }
 }
 ```
 
-`ip_hash` quan trọng cho Socket.IO — đảm bảo cùng 1 client luôn vào cùng 1 container (dù đã có Redis adapter, sticky session vẫn giảm overhead).
-
-#### 3.3 Thêm metrics endpoint để monitor
-
-```ts
-app.get('/metrics', (_, res) => res.json({
-  rooms: roomRepository.count(),
-  uptime: process.uptime(),
-  memory: process.memoryUsage(),
-  pid: process.pid,
-}))
-```
-
----
-
-### Thứ tự thực hiện
-
-| Bước | Effort | Impact | Rủi ro |
+| Config | Trước | Sau giai đoạn 2 | Sau giai đoạn 3 |
 |---|---|---|---|
-| 1.1 Bỏ pm2 | rất thấp | nhỏ | không |
-| 1.3 Tăng debounce | rất thấp | nhỏ | không |
-| 1.2 Tách file JSON | thấp | trung bình | thấp |
-| 2.1–2.3 Redis | trung bình | rất cao | trung bình |
-| 3.1–3.2 Scale + Caddy LB | thấp (sau Redis) | cao | thấp |
-
-**Kết quả kỳ vọng sau tối ưu:**
-
-| Config | Trước | Sau |
-|---|---|---|
-| 3 core / 3GB RAM | ~100–150 users | ~300–600 users |
-
----
+| 3 core / 3GB RAM | ~100–150 users | ~150–200 users | ~300–600 users |
