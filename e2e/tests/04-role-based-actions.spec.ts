@@ -124,6 +124,9 @@ test.describe('Role-based Actions', () => {
     await player1.p.click(`[data-testid="player-card-${player1.name}"][data-is-me="true"]`)
     await expect(player1.p.locator('[data-testid="coin-btn-yellow"]')).not.toBeVisible()
 
+    // Dismiss the role card overlay before next click
+    await player1.dismissOverlay()
+
     // Click another player → coin popup appears
     await player1.p.click(`[data-testid="player-card-${player2.name}"]`)
     await expect(player1.p.locator('[data-testid="coin-btn-yellow"]')).toBeVisible({ timeout: 3_000 })

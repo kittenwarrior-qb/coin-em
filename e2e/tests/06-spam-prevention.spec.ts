@@ -74,13 +74,18 @@ test.describe('Spam Prevention', () => {
 
     const [player1] = orchestrator.getPlayers()
 
-    // Act - click own card multiple times
+    // Act - click own card (opens role card overlay, not coin popup)
     const myCard = player1.p.locator('[data-testid^="player-card-"][data-is-me="true"]')
-    await myCard.click()
-    await myCard.click()
     await myCard.click()
 
     // Assert - coin popup never appears
+    await expect(player1.p.locator('[data-testid="coin-btn-yellow"]')).not.toBeVisible()
+
+    // Dismiss role overlay before further clicks
+    await player1.dismissOverlay()
+
+    // Click again after dismiss — still no coin popup for own card
+    await myCard.click()
     await expect(player1.p.locator('[data-testid="coin-btn-yellow"]')).not.toBeVisible()
   })
 
