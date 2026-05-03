@@ -14,7 +14,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3001
-      - CLIENT_ORIGIN=https://emcoin.example.com
+      - CLIENT_ORIGIN=https://quocbui.site
     networks:
       - emcoin-network
     restart: always
