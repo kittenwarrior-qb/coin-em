@@ -4,7 +4,7 @@ import { getUserId } from '../utils/userId'
 import { useGameStore } from '../stores/gameStore'
 import type { GamePhase } from '../stores/types'
 
-const SOCKET_URL = 'http://localhost:3001'
+const SOCKET_URL = import.meta.env.VITE_API_URL ?? window.location.origin
 const SESSION_KEY = 'emcoin_session'
 
 interface Player {
