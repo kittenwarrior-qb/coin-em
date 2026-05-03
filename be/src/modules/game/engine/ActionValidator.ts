@@ -123,17 +123,13 @@ export class ActionValidator {
   }
 
   /**
-   * Validate select selfcare card action (Guide selects during selfcare-card phase)
+   * Validate select selfcare card action
+   * Actor: Người Dẫn Lối (Guide) nếu có trong round, ngược lại NTG (Sender) bốc thay
    */
   private validateSelectSelfcareCard(room: Room, actor: any, action: GameAction): { valid: boolean; error?: string } {
     // Must be selfcare-card phase
     if (room.phase !== 'selfcare-card') {
       return { valid: false, error: 'Not selfcare-card phase' }
-    }
-
-    // Actor must be guide
-    if (actor.role !== Role.GUIDE) {
-      return { valid: false, error: 'Not a guide' }
     }
 
     // Check idempotency - already selected card
@@ -144,6 +140,24 @@ export class ActionValidator {
     // Must have card data
     if (!action.data?.card) {
       return { valid: false, error: 'No card data' }
+    }
+
+    // Determine who is allowed to draw:
+    // Guide (originalRole) if present in this round, otherwise NTG (isSender)
+    const guideInRound = room.players.find(
+      (p) => p.originalRole === Role.GUIDE && !p.isFake
+    )
+
+    if (guideInRound) {
+      // Guide must draw
+      if (actor.originalRole !== Role.GUIDE) {
+        return { valid: false, error: 'Only Guide can draw selfcare card this round' }
+      }
+    } else {
+      // No Guide → NTG draws
+      if (!actor.isSender) {
+        return { valid: false, error: 'Only NTG can draw selfcare card when no Guide is present' }
+      }
     }
 
     return { valid: true }
