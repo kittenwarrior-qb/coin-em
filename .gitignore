@@ -34,3 +34,5 @@ Thumbs.db
 # Room data files (runtime state, not source code)
 be/data/
 be/test-data/
+
+/images_raw
