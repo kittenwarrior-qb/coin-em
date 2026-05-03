@@ -8,6 +8,8 @@ export interface OrchestratorConfig {
   roomId: string
   botCount: number
   logger?: TestLogger
+  situationGroups?: string[]
+  emotionGroups?: string[]
 }
 
 export type PhaseHandler = (bots: BotPlayer[], roomState: any) => Promise<void>
@@ -74,6 +76,17 @@ export class BotOrchestrator {
       if (isHost && !hasStartedGame && state.players.length === this.config.botCount && state.status === 'waiting') {
         hasStartedGame = true
         this.logger.info('ORCHESTRATOR', `Starting game with ${state.players.length} players`)
+
+        // Apply room settings before starting if configured
+        const situationGroups = this.config.situationGroups
+        const emotionGroups = this.config.emotionGroups
+        if (situationGroups || emotionGroups) {
+          bot.updateRoomSettings(this.config.roomId, {
+            situationGroups: situationGroups ?? ['light', 'medium', 'sensitive'],
+            emotionGroups: emotionGroups ?? ['basic', 'light', 'strong', 'advanced'],
+          })
+        }
+
         bot.startGame(this.config.roomId)
       }
     })

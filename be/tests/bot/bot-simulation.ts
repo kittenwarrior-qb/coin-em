@@ -18,9 +18,25 @@ const ROOM_ID = process.env.ROOM_ID || `bot-${Date.now()}`
 const BOT_COUNT = parseInt(process.env.BOT_COUNT || '7')
 const LOG_LEVEL = process.env.LOG_LEVEL || 'INFO'
 
+// Card group selection — comma-separated env vars
+// e.g. SITUATION_GROUPS=light,sensitive EMOTION_GROUPS=basic,strong
+const SITUATION_GROUPS = process.env.SITUATION_GROUPS
+  ? process.env.SITUATION_GROUPS.split(',').map(s => s.trim())
+  : ['light', 'medium', 'sensitive']
+const EMOTION_GROUPS = process.env.EMOTION_GROUPS
+  ? process.env.EMOTION_GROUPS.split(',').map(s => s.trim())
+  : ['basic', 'light', 'strong', 'advanced']
+
 const logger = new TestLogger(LogLevel[LOG_LEVEL as keyof typeof LogLevel], true)
 const reporter = new TestReporter()
-const orchestrator = new BotOrchestrator({ serverUrl: SERVER_URL, roomId: ROOM_ID, botCount: BOT_COUNT, logger })
+const orchestrator = new BotOrchestrator({
+  serverUrl: SERVER_URL,
+  roomId: ROOM_ID,
+  botCount: BOT_COUNT,
+  logger,
+  situationGroups: SITUATION_GROUPS,
+  emotionGroups: EMOTION_GROUPS,
+})
 
 const tick = () => new Promise(r => setTimeout(r, 50))
 const coinTick = () => new Promise(r => setTimeout(r, 1100))  // > 1000ms give_coin rate limit
@@ -269,6 +285,8 @@ async function main() {
   console.log('🎮  BOT SIMULATION — EmCoin (fast mode, rate limit disabled)')
   console.log('='.repeat(70))
   console.log(`  Server : ${SERVER_URL}  |  Room : ${ROOM_ID}  |  Bots : ${BOT_COUNT}`)
+  console.log(`  Situation groups : ${SITUATION_GROUPS.join(', ')}`)
+  console.log(`  Emotion groups   : ${EMOTION_GROUPS.join(', ')}`)
   console.log('='.repeat(70) + '\n')
 
   reporter.startSuite('Bot Simulation')

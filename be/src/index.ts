@@ -3,10 +3,10 @@ import { createServer } from 'http'
 import { Server } from 'socket.io'
 import { createAdapter } from '@socket.io/redis-adapter'
 import cors from 'cors'
-import { connectRedis, pubClient, subClient } from './redis'
+import { connectRedis, redisAvailable, pubClient, subClient } from './redis'
 import { registerSocketHandlers } from './socket/handlers/index'
 import { roomRepository } from './modules/room/repository/RoomRepository'
-import { cleanupRooms } from './persistence'
+import { cleanupRooms, loadRooms } from './persistence'
 
 const PORT = process.env.PORT || 3001
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173'
@@ -23,6 +23,7 @@ app.get('/metrics', (_, res) =>
     uptime: process.uptime(),
     memory: process.memoryUsage(),
     pid: process.pid,
+    redis: redisAvailable,
   }),
 )
 
@@ -32,26 +33,28 @@ const io = new Server(httpServer, {
 })
 
 async function start(): Promise<void> {
-  // Connect Redis clients
-  await connectRedis()
+  const hasRedis = await connectRedis()
 
-  // Attach Redis adapter so all containers share Socket.IO rooms/events
-  io.adapter(createAdapter(pubClient, subClient))
-
-  // Load existing rooms from Redis into memory cache
-  await roomRepository.loadFromRedis()
+  if (hasRedis) {
+    // Production path: Redis adapter + load rooms from Redis
+    io.adapter(createAdapter(pubClient, subClient))
+    await roomRepository.loadFromRedis()
+    console.log('✅ Redis: Connected — multi-instance mode')
+  } else {
+    // Fallback path: no adapter, load rooms from JSON files
+    const rooms = loadRooms()
+    roomRepository.load(rooms)
+    console.log('⚠️  Redis: Unavailable — single-instance mode (JSON fallback)')
+  }
 
   registerSocketHandlers(io)
 
-  // Periodic cleanup every 1 hour
   setInterval(() => {
     cleanupRooms(roomRepository.getRawMap())
   }, 60 * 60 * 1000)
 
   httpServer.listen(PORT, () => {
     console.log(`🚀 Backend running on http://localhost:${PORT}`)
-    console.log(`✅ Redis: Connected`)
-    console.log(`✅ Socket.IO: Redis adapter attached`)
     console.log(`✅ Game Engine: Active`)
     console.log(`✅ Socket Handlers: Registered`)
     console.log(`✅ Cleanup: Scheduled (every 1 hour)`)

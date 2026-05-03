@@ -1,5 +1,7 @@
 import { vi } from 'vitest'
 
+export const redisAvailable = true
+
 export const redisClient = {
   set: vi.fn().mockResolvedValue('OK'),
   get: vi.fn().mockResolvedValue(null),
