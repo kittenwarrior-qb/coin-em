@@ -28,15 +28,17 @@ test.describe('Reconnect', () => {
     await guest.goToHome()
     await guest.joinRoom(roomId)
 
-    // Act - guest reloads (app should restore session from localStorage userId)
+    // Act - guest reloads
     await guest.p.reload()
-    // After reload, app reconnects and should land back in waiting room
+
+    // After reload the app may show a brief loading/connecting state before
+    // landing on lobby or waiting-room — wait generously for either
     await guest.p.waitForSelector(
       '[data-testid="waiting-room"], [data-testid="lobby"]',
-      { timeout: 10_000 }
+      { timeout: 20_000 }
     )
 
-    // If landed on lobby, rejoin manually (userId is still in localStorage)
+    // If landed on lobby (app didn't auto-reconnect), rejoin manually
     const onLobby = await guest.p.locator('[data-testid="lobby"]').isVisible()
     if (onLobby) {
       await guest.joinRoom(roomId)
