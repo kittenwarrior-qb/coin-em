@@ -130,6 +130,7 @@ export class PlayerContext {
 
   /** Narrator: advance to next phase */
   async clickNextTurn() {
+    await this.p.waitForSelector('[data-testid="btn-next-turn"]', { timeout: 10_000 })
     await this.p.click('[data-testid="btn-next-turn"]')
   }
 
