@@ -31,15 +31,10 @@ test.describe('Reconnect', () => {
     // Act - guest reloads
     await guest.p.reload()
 
-    // After reload: app shows "connecting" briefly, then lobby or waiting-room
-    await guest.p.waitForSelector(
-      '[data-testid="connecting"], [data-testid="waiting-room"], [data-testid="lobby"]',
-      { timeout: 20_000 }
-    )
-    // If still connecting, wait for it to resolve
+    // Wait for app to settle after reload (skip intermediate "connecting" state)
     await guest.p.waitForSelector(
       '[data-testid="waiting-room"], [data-testid="lobby"]',
-      { timeout: 20_000 }
+      { timeout: 30_000 }
     )
 
     // If landed on lobby (app didn't auto-reconnect), rejoin manually

@@ -1,9 +1,8 @@
 {
   "name": "emcoin-backend",
   "version": "1.0.0",
-  "type": "module",
   "scripts": {
-    "start": "node --experimental-specifier-resolution=node dist/index.js",
+    "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "test": "vitest run",
