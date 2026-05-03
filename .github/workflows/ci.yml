@@ -52,6 +52,17 @@ jobs:
     needs: test
     timeout-minutes: 20
 
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
 
@@ -75,6 +86,8 @@ jobs:
           NODE_ENV: test
           PORT: 3001
           CLIENT_ORIGIN: http://localhost:5173
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
         run: |
           npm run dev &
           timeout 30 bash -c 'until curl -sf http://localhost:3001/health; do sleep 2; done'
