@@ -90,10 +90,11 @@ export class PlayerContext {
   /** Dismiss any full-screen overlay (role card, etc) by clicking backdrop */
   async dismissOverlay() {
     try {
-      const overlay = this.p.locator('.fixed.inset-0.z-50.bg-black\\/60')
-      if (await overlay.isVisible({ timeout: 1_000 })) {
+      const overlay = this.p.locator('[data-testid="role-card-overlay"]')
+      if (await overlay.isVisible({ timeout: 2_000 })) {
         await overlay.click({ position: { x: 10, y: 10 } })
-        await this.p.waitForTimeout(300)
+        // Wait for overlay to fully disappear (Framer Motion exit animation)
+        await overlay.waitFor({ state: 'hidden', timeout: 3_000 })
       }
     } catch {
       // No overlay, continue

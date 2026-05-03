@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Lobby from './Lobby'
 import WaitingRoom from './WaitingRoom'
 import GameBoard from './GameBoard'
@@ -15,33 +15,33 @@ export default function GameContainer() {
   const myUserId = getUserId()
   console.log('[GameContainer] Current socket.id:', mySocketId, 'userId:', myUserId)
 
-  const handleJoinRoom = (roomId: string, userName: string) => {
+  const handleJoinRoom = useCallback((roomId: string, userName: string) => {
     joinRoom(roomId, userName, false)
-  }
+  }, [joinRoom])
 
-  const handleCreateRoom = (userName: string) => {
+  const handleCreateRoom = useCallback((userName: string) => {
     const roomId = Math.random().toString(36).substring(2, 8).toUpperCase()
     joinRoom(roomId, userName, true)
-  }
+  }, [joinRoom])
 
-  const handleStartGame = () => {
+  const handleStartGame = useCallback(() => {
     if (!roomState) return
     startGame(roomState.id)
-  }
+  }, [roomState, startGame])
 
-  const handleLeaveRoom = () => {
+  const handleLeaveRoom = useCallback(() => {
     clearSession()
     if (socket) {
       socket.disconnect()
       socket.connect()
     }
     setGameState('lobby')
-  }
+  }, [clearSession, socket])
 
-  const handleAddFakePlayers = () => {
+  const handleAddFakePlayers = useCallback(() => {
     if (!roomState) return
     addFakePlayers(roomState.id)
-  }
+  }, [roomState, addFakePlayers])
 
   // Update game state based on room state
   useEffect(() => {
