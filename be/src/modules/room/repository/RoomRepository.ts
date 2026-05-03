@@ -1,5 +1,5 @@
 import { Room } from '../../game/types'
-import { redisClient } from '../../../redis'
+import { redisClient, redisAvailable } from '../../../redis'
 
 const ROOM_PREFIX = 'room:'
 const ROOM_INDEX = 'rooms:index'
@@ -12,6 +12,7 @@ export class RoomRepository {
   private cache: Map<string, Room> = new Map()
 
   private async redisSave(room: Room): Promise<void> {
+    if (!redisAvailable) return
     try {
       await Promise.all([
         redisClient.set(roomKey(room.id), JSON.stringify(room)),
@@ -23,6 +24,7 @@ export class RoomRepository {
   }
 
   private async redisDelete(roomId: string): Promise<void> {
+    if (!redisAvailable) return
     try {
       await Promise.all([
         redisClient.del(roomKey(roomId)),
