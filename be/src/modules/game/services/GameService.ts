@@ -1,5 +1,5 @@
 import { GameEngine } from '../engine/GameEngine'
-import { Room, GameAction, GameResult } from '../types'
+import { Room, GameAction, GameResult, Role } from '../types'
 
 export class GameService {
   private gameEngine: GameEngine
@@ -40,6 +40,14 @@ export class GameService {
    * Get public room state (for broadcasting)
    */
   getPublicState(room: Room): any {
+    // Determine who draws selfcare card this round
+    const guideInRound = room.players.find(
+      (p) => p.originalRole === Role.GUIDE && !p.isFake
+    )
+    const selfcareActor = guideInRound
+      ? guideInRound.userId   // Guide draws
+      : room.currentNTG       // No Guide → NTG draws
+
     return {
       id: room.id,
       host: room.host,
@@ -62,6 +70,7 @@ export class GameService {
       mutedPlayer: room.mutedPlayer,
       selectedCard: room.selectedCard,
       votes: room.votes,
+      selfcareActor, // userId of who draws selfcare card (Guide or NTG fallback)
     }
   }
 }

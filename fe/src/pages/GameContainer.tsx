@@ -56,7 +56,7 @@ export default function GameContainer() {
 
   if (!isConnected) {
     return (
-      <div className="h-screen bg-[#FAFAF8] flex items-center justify-center overflow-hidden">
+      <div data-testid="connecting" className="h-screen bg-[#FAFAF8] flex items-center justify-center overflow-hidden">
         <div className="w-full max-w-sm h-full bg-white p-8 flex flex-col items-center justify-center text-center">
           <div className="text-5xl mb-4 animate-bounce">🎴</div>
           <h2 className="text-xl font-black text-gray-800 mb-2">Đang kết nối...</h2>
