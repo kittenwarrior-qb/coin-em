@@ -100,6 +100,7 @@ export class BotPlayer {
     this.socket.on('ntg_vote_cast', (data: any) => this.emit('ntg_vote_cast', data))
     this.socket.on('reflection_shared', (data: any) => this.emit('reflection_shared', data))
 
+    this.socket.on('room_settings_updated', (settings: any) => this.emit('room_settings_updated', settings))
     this.socket.on('game_ended', (data: any) => {
       this.logger.success('BOT', `${this.name} game ended`)
       this.emit('game_ended', data)
