@@ -1,13 +1,11 @@
 import fs from 'fs'
 import path from 'path'
-import { fileURLToPath } from 'url'
 import { Room } from './modules/game/types'
 import { redisClient } from './redis'
 
 const ROOM_PREFIX = 'room:'
 const ROOM_INDEX = 'rooms:index'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
 export const DATA_DIR = path.join(__dirname, '../data/rooms')
 
 // Ensure data directory exists
