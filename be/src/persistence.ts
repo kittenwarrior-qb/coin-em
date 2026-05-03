@@ -2,58 +2,111 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { Room } from './modules/game/types'
+import { redisClient } from './redis'
+
+const ROOM_PREFIX = 'room:'
+const ROOM_INDEX = 'rooms:index'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const DATA_FILE = path.join(__dirname, '../data/rooms.json')
+export const DATA_DIR = path.join(__dirname, '../data/rooms')
 
 // Ensure data directory exists
-const dataDir = path.dirname(DATA_FILE)
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true })
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true })
+}
+
+function roomFilePath(roomId: string): string {
+  return path.join(DATA_DIR, `${roomId}.json`)
 }
 
 /**
- * Load rooms from disk
+ * Load all rooms from per-room JSON files
  */
 export function loadRooms(): Map<string, Room> {
+  const rooms = new Map<string, Room>()
   try {
-    if (!fs.existsSync(DATA_FILE)) {
+    if (!fs.existsSync(DATA_DIR)) {
       console.log('[Persistence] No saved rooms found, starting fresh')
-      return new Map()
+      return rooms
     }
-    const data = fs.readFileSync(DATA_FILE, 'utf-8')
-    const parsed = JSON.parse(data)
-    const rooms = new Map(Object.entries(parsed))
+    const files = fs.readdirSync(DATA_DIR).filter((f) => f.endsWith('.json'))
+    for (const file of files) {
+      try {
+        const roomId = file.replace('.json', '')
+        const data = fs.readFileSync(path.join(DATA_DIR, file), 'utf-8')
+        const room = JSON.parse(data) as Room
+        rooms.set(roomId, room)
+      } catch (err) {
+        console.error(`[Persistence] Error loading room file ${file}:`, err)
+      }
+    }
     console.log(`[Persistence] Loaded ${rooms.size} room(s) from disk`)
-    return rooms as Map<string, Room>
   } catch (err) {
-    console.error('[Persistence] Error loading rooms:', err)
-    return new Map()
+    console.error('[Persistence] Error reading data directory:', err)
+  }
+  return rooms
+}
+
+/**
+ * Save a single room to its own file
+ */
+export function saveRoom(room: Room): void {
+  try {
+    const filePath = roomFilePath(room.id)
+    const tmpPath = filePath + '.tmp'
+    fs.writeFileSync(tmpPath, JSON.stringify(room, null, 2), 'utf-8')
+    fs.renameSync(tmpPath, filePath)
+  } catch (err) {
+    console.error(`[Persistence] Error saving room ${room.id}:`, err)
   }
 }
 
 /**
- * Save rooms to disk
+ * Save all rooms (used by cleanup)
  */
 export function saveRooms(rooms: Map<string, Room>): void {
-  try {
-    const obj = Object.fromEntries(rooms)
-    fs.writeFileSync(DATA_FILE, JSON.stringify(obj, null, 2), 'utf-8')
-    console.log(`[Persistence] Saved ${rooms.size} room(s) to disk`)
-  } catch (err) {
-    console.error('[Persistence] Error saving rooms:', err)
+  for (const room of rooms.values()) {
+    saveRoom(room)
   }
 }
 
 /**
- * Auto-save with debounce
+ * Delete a room file from disk
  */
-let saveTimeout: NodeJS.Timeout | null = null
+export function deleteRoomFile(roomId: string): void {
+  try {
+    const filePath = roomFilePath(roomId)
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath)
+    }
+  } catch (err) {
+    console.error(`[Persistence] Error deleting room file ${roomId}:`, err)
+  }
+}
+
+/**
+ * Auto-save a single room with debounce per room
+ */
+const saveTimeouts = new Map<string, NodeJS.Timeout>()
+
 export function autoSave(rooms: Map<string, Room>): void {
-  if (saveTimeout) clearTimeout(saveTimeout)
-  saveTimeout = setTimeout(() => {
-    saveRooms(rooms)
-  }, 1000) // Save after 1s of inactivity
+  // Legacy: debounce-save all dirty rooms — kept for compatibility
+  // Prefer autoSaveRoom for per-room saves
+  for (const room of rooms.values()) {
+    autoSaveRoom(room)
+  }
+}
+
+export function autoSaveRoom(room: Room): void {
+  const existing = saveTimeouts.get(room.id)
+  if (existing) clearTimeout(existing)
+  saveTimeouts.set(
+    room.id,
+    setTimeout(() => {
+      saveRoom(room)
+      saveTimeouts.delete(room.id)
+    }, 3000), // 3s debounce
+  )
 }
 
 /**
@@ -61,30 +114,30 @@ export function autoSave(rooms: Map<string, Room>): void {
  */
 export function cleanupRooms(rooms: Map<string, Room>): void {
   const now = Date.now()
-  const MAX_AGE = 24 * 60 * 60 * 1000 // 24 hours
-  const MAX_AGE_FAKE = 2 * 60 * 60 * 1000 // 2 hours for fake player rooms
+  const MAX_AGE = 24 * 60 * 60 * 1000
+  const MAX_AGE_FAKE = 2 * 60 * 60 * 1000
 
   for (const [roomId, room] of rooms.entries()) {
-    // Remove empty rooms
     if (room.players.length === 0) {
       rooms.delete(roomId)
+      deleteRoomFile(roomId)
+      void redisClient.del(`${ROOM_PREFIX}${roomId}`)
+      void redisClient.srem(ROOM_INDEX, roomId)
       console.log(`[Cleanup] Removed empty room: ${roomId}`)
       continue
     }
 
-    // Check if room has only fake players
     const hasOnlyFakePlayers = room.players.every((p) => p.isFake)
     const maxAge = hasOnlyFakePlayers ? MAX_AGE_FAKE : MAX_AGE
 
-    // Remove old inactive rooms
     if (room.lastActivity && now - room.lastActivity > maxAge) {
       rooms.delete(roomId)
-      console.log(
-        `[Cleanup] Removed inactive room: ${roomId} (${hasOnlyFakePlayers ? 'fake players only' : 'normal'})`
-      )
+      deleteRoomFile(roomId)
+      void redisClient.del(`${ROOM_PREFIX}${roomId}`)
+      void redisClient.srem(ROOM_INDEX, roomId)
+      console.log(`[Cleanup] Removed inactive room: ${roomId}`)
     }
   }
 
-  saveRooms(rooms)
   console.log(`[Cleanup] Completed. Active rooms: ${rooms.size}`)
 }

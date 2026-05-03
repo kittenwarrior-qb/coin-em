@@ -1,112 +1,122 @@
-import { Room, Player } from '../../game/types'
-import { loadRooms, autoSave } from '../../../persistence'
+import { Room } from '../../game/types'
+import { redisClient } from '../../../redis'
+
+const ROOM_PREFIX = 'room:'
+const ROOM_INDEX = 'rooms:index'
+
+function roomKey(roomId: string): string {
+  return `${ROOM_PREFIX}${roomId}`
+}
 
 export class RoomRepository {
-  private rooms: Map<string, Room>
+  private cache: Map<string, Room> = new Map()
 
-  constructor() {
-    // Load rooms from disk on startup
-    this.rooms = loadRooms()
+  private async redisSave(room: Room): Promise<void> {
+    try {
+      await Promise.all([
+        redisClient.set(roomKey(room.id), JSON.stringify(room)),
+        redisClient.sadd(ROOM_INDEX, room.id),
+      ])
+    } catch (err) {
+      console.error(`[RoomRepository] Redis save error for ${room.id}:`, err)
+    }
   }
 
-  /**
-   * Find room by ID
-   */
+  private async redisDelete(roomId: string): Promise<void> {
+    try {
+      await Promise.all([
+        redisClient.del(roomKey(roomId)),
+        redisClient.srem(ROOM_INDEX, roomId),
+      ])
+    } catch (err) {
+      console.error(`[RoomRepository] Redis delete error for ${roomId}:`, err)
+    }
+  }
+
+  async loadFromRedis(): Promise<void> {
+    try {
+      const ids = await redisClient.smembers(ROOM_INDEX)
+      if (ids.length === 0) return
+
+      const pipeline = redisClient.pipeline()
+      ids.forEach((id) => pipeline.get(roomKey(id)))
+      const results = await pipeline.exec()
+
+      results?.forEach((result) => {
+        const [err, value] = result
+        if (!err && typeof value === 'string') {
+          try {
+            const room = JSON.parse(value) as Room
+            this.cache.set(room.id, room)
+          } catch {
+            // skip corrupted entry
+          }
+        }
+      })
+
+      console.log(`[RoomRepository] Loaded ${this.cache.size} room(s) from Redis`)
+    } catch (err) {
+      console.error('[RoomRepository] Failed to load from Redis:', err)
+    }
+  }
+
   findById(roomId: string): Room | null {
-    return this.rooms.get(roomId) || null
+    return this.cache.get(roomId) ?? null
   }
 
-  /**
-   * Find room by socket ID
-   */
   findBySocketId(socketId: string): Room | null {
-    for (const room of this.rooms.values()) {
-      if (room.players.find((p) => p.socketId === socketId)) {
-        return room
-      }
+    for (const room of this.cache.values()) {
+      if (room.players.find((p) => p.socketId === socketId)) return room
     }
     return null
   }
 
-  /**
-   * Find room by user ID
-   */
   findByUserId(userId: string): Room | null {
-    for (const room of this.rooms.values()) {
-      if (room.players.find((p) => p.userId === userId)) {
-        return room
-      }
+    for (const room of this.cache.values()) {
+      if (room.players.find((p) => p.userId === userId)) return room
     }
     return null
   }
 
-  /**
-   * Get all rooms
-   */
   findAll(): Room[] {
-    return Array.from(this.rooms.values())
+    return Array.from(this.cache.values())
   }
 
-  /**
-   * Save room (with auto-persist)
-   */
   save(room: Room): void {
-    this.rooms.set(room.id, room)
-    autoSave(this.rooms) // Debounced write to disk
+    this.cache.set(room.id, room)
+    void this.redisSave(room)
   }
 
-  /**
-   * Update room (with auto-persist)
-   */
   update(roomId: string, updates: Partial<Room>): Room | null {
-    const room = this.rooms.get(roomId)
+    const room = this.cache.get(roomId)
     if (!room) return null
-
     const updated = { ...room, ...updates, lastActivity: Date.now() }
-    this.rooms.set(roomId, updated)
-    autoSave(this.rooms) // Debounced write to disk
+    this.cache.set(roomId, updated)
+    void this.redisSave(updated)
     return updated
   }
 
-  /**
-   * Delete room (with auto-persist)
-   */
   delete(roomId: string): boolean {
-    const result = this.rooms.delete(roomId)
-    if (result) {
-      autoSave(this.rooms) // Debounced write to disk
-    }
-    return result
+    const existed = this.cache.delete(roomId)
+    if (existed) void this.redisDelete(roomId)
+    return existed
   }
 
-  /**
-   * Get room count
-   */
   count(): number {
-    return this.rooms.size
+    return this.cache.size
   }
 
-  /**
-   * Clear all rooms (for testing)
-   */
-  clear(): void {
-    this.rooms.clear()
-  }
-
-  /**
-   * Load rooms from data (for persistence)
-   */
-  load(data: Map<string, Room>): void {
-    this.rooms = data
-  }
-
-  /**
-   * Get raw map (for persistence)
-   */
   getRawMap(): Map<string, Room> {
-    return this.rooms
+    return this.cache
+  }
+
+  clear(): void {
+    this.cache.clear()
+  }
+
+  load(data: Map<string, Room>): void {
+    this.cache = data
   }
 }
 
-// Singleton instance
 export const roomRepository = new RoomRepository()
