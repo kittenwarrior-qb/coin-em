@@ -322,8 +322,13 @@ export function useSocket(): UseSocketReturn {
     socketRef.current.emit('add_fake_players', { roomId })
   }
 
+  const lastNextTurnRef = useRef<number>(0)
+
   const nextTurn = (roomId: string) => {
     if (!socketRef.current) return
+    const now = Date.now()
+    if (now - lastNextTurnRef.current < 800) return // debounce 800ms on client
+    lastNextTurnRef.current = now
     console.log('[Socket] Emit next_turn')
     socketRef.current.emit('next_turn', { roomId })
   }
