@@ -83,6 +83,21 @@ export class PlayerContext {
 
   async waitForGameBoard() {
     await this.p.waitForSelector('[data-testid="game-phase"]', { timeout: 15_000 })
+    // Dismiss role card overlay if present
+    await this.dismissOverlay()
+  }
+
+  /** Dismiss any full-screen overlay (role card, etc) by clicking backdrop */
+  async dismissOverlay() {
+    try {
+      const overlay = this.p.locator('.fixed.inset-0.z-50.bg-black\\/60')
+      if (await overlay.isVisible({ timeout: 1_000 })) {
+        await overlay.click({ position: { x: 10, y: 10 } })
+        await this.p.waitForTimeout(300)
+      }
+    } catch {
+      // No overlay, continue
+    }
   }
 
   async getCurrentPhase(): Promise<string> {
@@ -193,8 +208,11 @@ export class PlayerContext {
 
   async reload() {
     await this.p.reload()
-    // Wait for reconnect
-    await this.p.waitForTimeout(2_000)
+    // Wait for reconnect — either waiting room or game board
+    await this.p.waitForSelector(
+      '[data-testid="waiting-room"], [data-testid="game-phase"]',
+      { timeout: 10_000 }
+    )
   }
 
   async close() {
