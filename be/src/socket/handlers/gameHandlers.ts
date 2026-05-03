@@ -85,8 +85,8 @@ export function registerGameHandlers(io: Server, socket: Socket) {
    * Advance turn
    */
   socket.on('next_turn', async ({ roomId }, callback) => {
-    // Rate limit: max 1 advance per 200ms to prevent spam clicks
-    if (!rateLimitAction(socket, 'next_turn', 200)) {
+    // Rate limit: max 1 advance per 1000ms to prevent spam clicks
+    if (!rateLimitAction(socket, 'next_turn', 1000)) {
       if (callback) callback({ success: false, error: 'RATE_LIMITED', message: 'Vui lòng chờ.' })
       return
     }
