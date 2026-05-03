@@ -5,11 +5,11 @@ import { CARD_IMAGES, ROLE_TO_IMAGE } from '../constants/cardImages'
 import { useGameStore, useUIStore } from '../stores'
 import { useGameState, useGameActions, useGameUI } from '../hooks/useGameState'
 import { useGameFlow } from '../hooks/useGameFlow'
-import type { CardData, CardCategory, EmotionSubType, SelectedCards } from '../stores/types'
+import type { CardData, CardCategory, EmotionSubType, SelectedCards, GamePhase } from '../stores/types'
+import { PHASE_LABELS, NIGHT_PHASES } from '../stores/types'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type CoinType = 'red' | 'yellow' | 'green'
-type GamePhase = 'role-reveal' | 'night' | 'day'
 
 interface Player {
   id: string
@@ -266,6 +266,7 @@ function CoinPopup({ onSend, onClose }: { onSend: (c: CoinType) => void; onClose
       {(Object.keys(COIN_COLORS) as CoinType[]).map(c => (
         <button
           key={c}
+          data-testid={`coin-btn-${c}`}
           onClick={() => { onSend(c); onClose() }}
           className="w-10 h-10 rounded-full border-2 border-black flex items-center justify-center
                      text-lg hover:scale-110 active:scale-95 transition-transform"
@@ -611,6 +612,7 @@ function PlayerCard({
   onExpand,
   onSendCoin,
   onNightAction,
+  onVote,
   isGlowing,
   isNightPhase,
 }: {
@@ -618,34 +620,30 @@ function PlayerCard({
   onExpand: () => void
   onSendCoin: (coin: CoinType) => void
   onNightAction?: (playerId: string) => void
+  onVote?: (playerId: string) => void
   isGlowing?: boolean
   isNightPhase?: boolean
 }) {
   const [showCoins, setShowCoins] = useState(false)
   const bg = PASTEL_BG[player.id]
   
-  // Check if player has public role
   const isNarrator = player.role === 'Người Quản trò'
   const isSender = player.role === 'Người Trao Gửi'
   const hasPublicRole = isNarrator || isSender
 
   const handleClick = () => {
-    // Luôn cho phép xem vai trò của mình
     if (player.isMe) {
-      console.log('[PlayerCard] Opening role card for:', player.name)
       onExpand()
       return
     }
-    
     if (isNightPhase && onNightAction) {
-      // Night phase: click vào người khác để thực hiện action
-      console.log('[PlayerCard] Night action on:', player.name)
       onNightAction(player.id)
       return
     }
-    
-    // Day phase: click vào người khác để tặng coin
-    console.log('[PlayerCard] Toggle coin popup for:', player.name)
+    if (onVote) {
+      onVote(player.id)
+      return
+    }
     setShowCoins(s => !s)
   }
 
@@ -672,6 +670,10 @@ function PlayerCard({
           ],
         } : {}}
         transition={isGlowing ? { duration: 1.5, repeat: Infinity } : {}}
+        data-testid={`player-card-${player.name}`}
+        data-player-id={player.id}
+        data-is-me={player.isMe}
+        data-role={player.role}
         className={`rounded-2xl border-[3px] ${player.isMe ? 'border-blue-500 shadow-xl' : 'border-black'}
                    flex flex-col items-center justify-center gap-1 cursor-pointer
                    select-none aspect-[3/4] relative overflow-hidden
@@ -722,7 +724,6 @@ function PlayerCard({
   )
 }
 
-// ─── Player Card ──────────────────────────────────────────────────────────────
 interface RoomState {
   id: string
   host: string
@@ -754,19 +755,26 @@ interface GameBoardProps {
 }
 
 export default function GameBoard({ roomState, mySocketId, myUserId, onLeave }: GameBoardProps) {
-  const { nightAction: emitNightAction } = useSocket()
+  const { nightAction: emitNightAction, nextTurn, selectCard: emitSelectCard, sendResponse, ntgVote, shareReflection, giveCoin, submitVote } = useSocket()
+  
+  // Local state for phase-specific inputs
+  const [responseText, setResponseText] = useState('')
+  const [reflectionShareText, setReflectionShareText] = useState('')
+  const [hasResponded, setHasResponded] = useState(false)
+  const [hasNTGVoted, setHasNTGVoted] = useState(false)
+  const [hasSharedReflection, setHasSharedReflection] = useState(false)
+  const [hasVoted, setHasVoted] = useState(false)
   
   console.log('[GameBoard] Render with mySocketId:', mySocketId, 'myUserId:', myUserId)
   
   // Zustand stores
   const { players, myPlayer, isNarrator, selectedCards } = useGameState()
-  const { setPlayers, updatePlayer, selectCard, clearSelectedCards } = useGameActions()
+  const { setPlayers, updatePlayer, selectCard } = useGameActions()
   const { expandedPlayer, showInventory, inventoryMode, setExpandedPlayer, setShowInventory, setInventoryMode } = useGameUI()
   const { gameStep, handleSelectCard } = useGameFlow()
   const flyCoins = useUIStore(state => state.flyCoins)
   const addFlyingCoin = useUIStore(state => state.addFlyingCoin)
   const setMyIds = useGameStore(state => state.setMyIds)
-  const setGameStep = useGameStore(state => state.setGameStep)
   
   // Track if role card has been shown
   const hasShownRoleRef = useRef(false)
@@ -809,6 +817,16 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave }: 
 
   const myCoinCount = myPlayer?.coins || { red: 0, yellow: 0, green: 0 }
 
+  // Reset per-phase local state when phase changes
+  useEffect(() => {
+    setResponseText('')
+    setReflectionShareText('')
+    setHasResponded(false)
+    setHasNTGVoted(false)
+    setHasSharedReflection(false)
+    setHasVoted(false)
+  }, [gameStep])
+
   // Reset role card flag when game restarts
   useEffect(() => {
     if (gameStep === 'role-reveal' && !myPlayer?.role) {
@@ -829,19 +847,23 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave }: 
   }, [myPlayer, setExpandedPlayer])
 
   const sendCoin = (targetId: string, coin: CoinType) => {
-    // TODO: Emit socket event to server
-    const targetPlayer = players.find(p => p.id === targetId)
-    if (targetPlayer) {
-      updatePlayer(targetId, {
-        coins: { ...targetPlayer.coins, [coin]: targetPlayer.coins[coin] + 1 }
-      })
+    if (gameStep === 'give-coins') {
+      // Real socket emit in give-coins phase
+      giveCoin(roomState.id, targetId, coin)
+    } else {
+      // Local optimistic update for other phases (visual only)
+      const targetPlayer = players.find(p => p.id === targetId)
+      if (targetPlayer) {
+        updatePlayer(targetId, {
+          coins: { ...targetPlayer.coins, [coin]: targetPlayer.coins[coin] + 1 },
+        })
+      }
     }
-    // fly animation
     addFlyingCoin(COIN_COLORS[coin].emoji)
   }
 
   const handleNightAction = (targetId: string) => {
-    if (gamePhase === 'night' && myPlayer) {
+    if (NIGHT_PHASES.includes(gamePhase) && myPlayer) {
       if (myPlayer.role === 'Người Chữa Lành') {
         emitNightAction(roomState.id, 'heal', targetId)
       } else if (myPlayer.role === 'Người Im Lặng') {
@@ -852,10 +874,33 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave }: 
 
   // Game step handlers
   const handleDrawSituation = () => {
-    // Random pick a situation card
     const randomCard = CARD_DATA.situation[Math.floor(Math.random() * CARD_DATA.situation.length)]
     selectCard(randomCard, 'situation')
-    setGameStep('day-emotion')
+    emitSelectCard(roomState.id, randomCard)
+  }
+
+  const handleSendResponse = () => {
+    if (!responseText.trim() || hasResponded) return
+    sendResponse(roomState.id, responseText.trim())
+    setHasResponded(true)
+  }
+
+  const handleNTGVote = (targetSocketId: string) => {
+    if (hasNTGVoted) return
+    ntgVote(roomState.id, targetSocketId)
+    setHasNTGVoted(true)
+  }
+
+  const handleShareReflection = () => {
+    if (hasSharedReflection) return
+    shareReflection(roomState.id, reflectionShareText.trim())
+    setHasSharedReflection(true)
+  }
+
+  const handleVoteSilencer = (targetSocketId: string) => {
+    if (hasVoted) return
+    submitVote(roomState.id, targetSocketId)
+    setHasVoted(true)
   }
 
   const openEmotionSelection = () => {
@@ -874,51 +919,18 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave }: 
   }
 
   const handleInventorySelect = (card: CardData) => {
-    if (gameStep === 'day-emotion') {
+    if (gameStep === 'emotion-card') {
       handleSelectCard(card, 'emotion')
-    } else if (gameStep === 'reflection') {
+    } else if (gameStep === 'reflection-card') {
       handleSelectCard(card, 'reflection')
-    } else if (gameStep === 'selfcare') {
+    } else if (gameStep === 'selfcare-card') {
       handleSelectCard(card, 'selfcare')
     }
   }
 
-  // Step progression
+  // Narrator advances turn — delegates to server
   const handleNextStep = () => {
-    switch (gameStep) {
-      case 'role-reveal':
-        setGameStep('night')
-        break
-      case 'night':
-        setGameStep('day-draw')
-        break
-      case 'day-draw':
-        // NTG draws situation - handled by handleDrawSituation
-        break
-      case 'day-emotion':
-        // After emotion selected, move to story
-        setGameStep('day-story')
-        break
-      case 'day-story':
-        setGameStep('reflection')
-        break
-      case 'reflection':
-        if (selectedCards.reflections.length >= 1) {
-          setGameStep('selfcare')
-        }
-        break
-      case 'selfcare':
-        setGameStep('guess-role')
-        break
-      case 'guess-role':
-        setGameStep('reward')
-        break
-      case 'reward':
-        // Reset for next round
-        clearSelectedCards()
-        setGameStep('role-reveal')
-        break
-    }
+    nextTurn(roomState.id)
   }
 
   return (
@@ -943,7 +955,11 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave }: 
         {/* Room info - Top center */}
         <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 text-center">
           <div className="bg-white border-2 border-black rounded-xl px-3 py-1">
-            <div className="text-[10px] font-bold text-gray-500">
+            <div
+              data-testid="game-phase"
+              data-phase={gameStep}
+              className="text-[10px] font-bold text-gray-500"
+            >
               Round {currentRound}/{totalRounds} • {gameStep}
             </div>
           </div>
@@ -955,16 +971,17 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave }: 
         />
 
         {/* 3x3 Grid */}
-        <div className="grid grid-cols-3 gap-4 w-full flex-1 mt-16 mb-20 px-2">
+        <div data-testid="players-grid" className="grid grid-cols-3 gap-4 w-full flex-1 mt-16 mb-20 px-2">
           {players.map(player => (
             <PlayerCard
               key={player.id}
               player={player}
               onExpand={() => setExpandedPlayer(player)}
               onSendCoin={(coin) => sendCoin(player.id, coin)}
-              onNightAction={gamePhase === 'night' ? handleNightAction : undefined}
+              onNightAction={NIGHT_PHASES.includes(gamePhase) ? handleNightAction : undefined}
+              onVote={gameStep === 'guess-silencer' ? handleVoteSilencer : undefined}
               isGlowing={false}
-              isNightPhase={gamePhase === 'night'}
+              isNightPhase={NIGHT_PHASES.includes(gamePhase)}
             />
           ))}
         </div>
@@ -974,28 +991,22 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave }: 
           {/* Moderator controls */}
           {isNarrator && (
             <motion.button
+              data-testid="btn-next-turn"
               whileTap={{ scale: 0.97 }}
               onClick={handleNextStep}
               className="w-full py-3 rounded-2xl border-[3px] border-black bg-[#6BCB77]
                          text-sm font-bold hover:bg-[#5BB767] active:scale-[0.98] transition-all"
             >
-              👑 {gameStep === 'role-reveal' ? 'Chuyển sang Night' :
-                  gameStep === 'night' ? 'Chuyển sang Day' :
-                  gameStep === 'day-draw' ? 'Chờ NTG bốc thẻ' :
-                  gameStep === 'day-emotion' ? 'Chờ NTG chọn cảm xúc' :
-                  gameStep === 'day-story' ? 'Chọn Reflection' :
-                  gameStep === 'reflection' ? 'Chọn Bí kíp' :
-                  gameStep === 'selfcare' ? 'Đoán vai trò' :
-                  gameStep === 'guess-role' ? 'Tặng coin' :
-                  'Kết thúc round'}
+              👑 {PHASE_LABELS[gameStep] ?? gameStep}
             </motion.button>
           )}
 
           {/* NTG controls */}
           {myPlayer?.isSender && (
             <>
-              {gameStep === 'day-draw' && (
+              {gameStep === 'situation-card' && (
                 <motion.button
+                  data-testid="btn-draw-situation"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   whileTap={{ scale: 0.97 }}
@@ -1006,8 +1017,9 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave }: 
                   📋 Bốc thẻ Tình huống
                 </motion.button>
               )}
-              {gameStep === 'day-emotion' && (
+              {gameStep === 'emotion-card' && (
                 <motion.button
+                  data-testid="btn-select-emotion"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   whileTap={{ scale: 0.97 }}
@@ -1018,8 +1030,9 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave }: 
                   💭 Chọn thẻ Cảm xúc
                 </motion.button>
               )}
-              {gameStep === 'reflection' && selectedCards.reflections.length < 3 && (
+              {gameStep === 'reflection-card' && selectedCards.reflections.length < 3 && (
                 <motion.button
+                  data-testid="btn-select-reflection"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   whileTap={{ scale: 0.97 }}
@@ -1030,8 +1043,9 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave }: 
                   🤔 Chọn Reflection ({selectedCards.reflections.length}/3)
                 </motion.button>
               )}
-              {gameStep === 'selfcare' && !selectedCards.selfcare && (
+              {gameStep === 'selfcare-card' && !selectedCards.selfcare && (
                 <motion.button
+                  data-testid="btn-select-selfcare"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   whileTap={{ scale: 0.97 }}
@@ -1058,6 +1072,344 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave }: 
           🎴
         </button>
       </div>
+
+      {/* ── Phase-specific overlays ─────────────────────────────────────────── */}
+
+      {/* group-response: text input + NTG vote */}
+      <AnimatePresence>
+        {gameStep === 'group-response' && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-sm z-40
+                       bg-white border-t-4 border-black rounded-t-3xl p-4 flex flex-col gap-3"
+          >
+            <div className="text-sm font-black text-gray-700">💬 Phản hồi nhóm</div>
+
+            {/* All players: send response */}
+            {!hasResponded ? (
+              <div className="flex gap-2">
+                <input
+                  data-testid="input-response"
+                  type="text"
+                  value={responseText}
+                  onChange={e => setResponseText(e.target.value)}
+                  placeholder="Chia sẻ cảm nhận của bạn..."
+                  className="flex-1 px-3 py-2 rounded-xl border-2 border-black text-sm focus:outline-none"
+                  onKeyDown={e => e.key === 'Enter' && handleSendResponse()}
+                />
+                <button
+                  data-testid="btn-send-response"
+                  onClick={handleSendResponse}
+                  disabled={!responseText.trim()}
+                  className="px-4 py-2 rounded-xl border-2 border-black bg-blue-300 text-sm font-bold
+                             disabled:opacity-40 hover:bg-blue-400 active:scale-95"
+                >
+                  Gửi
+                </button>
+              </div>
+            ) : (
+              <div className="text-xs text-green-600 font-bold">✅ Đã gửi phản hồi</div>
+            )}
+
+            {/* NTG only: vote for best responder */}
+            {myPlayer?.isSender && !hasNTGVoted && (
+              <div>
+                <div className="text-xs font-bold text-gray-500 mb-2">
+                  👑 Chọn người phản hồi hay nhất (+5 💛)
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {players.filter(p => !p.isMe).map(p => (
+                    <button
+                      key={p.id}
+                      data-testid={`btn-ntg-vote-${p.name}`}
+                      onClick={() => handleNTGVote(p.id)}
+                      className="px-3 py-1.5 rounded-xl border-2 border-black bg-yellow-200
+                                 text-xs font-bold hover:bg-yellow-300 active:scale-95"
+                    >
+                      {p.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {myPlayer?.isSender && hasNTGVoted && (
+              <div className="text-xs text-green-600 font-bold">✅ Đã vote người phản hồi hay nhất</div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* reflection-sharing: NTG shares reflection */}
+      <AnimatePresence>
+        {gameStep === 'reflection-sharing' && myPlayer?.isSender && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-sm z-40
+                       bg-white border-t-4 border-black rounded-t-3xl p-4 flex flex-col gap-3"
+          >
+            <div className="text-sm font-black text-gray-700">🤔 Chia sẻ Phản tư (+5 💛)</div>
+            {!hasSharedReflection ? (
+              <div className="flex gap-2">
+                <input
+                  data-testid="input-reflection-share"
+                  type="text"
+                  value={reflectionShareText}
+                  onChange={e => setReflectionShareText(e.target.value)}
+                  placeholder="Chia sẻ suy nghĩ về thẻ phản tư..."
+                  className="flex-1 px-3 py-2 rounded-xl border-2 border-black text-sm focus:outline-none"
+                />
+                <button
+                  data-testid="btn-share-reflection"
+                  onClick={handleShareReflection}
+                  className="px-4 py-2 rounded-xl border-2 border-black bg-blue-300 text-sm font-bold
+                             hover:bg-blue-400 active:scale-95"
+                >
+                  Chia sẻ
+                </button>
+              </div>
+            ) : (
+              <div className="text-xs text-green-600 font-bold">✅ Đã chia sẻ phản tư</div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* guess-silencer: vote for silencer */}
+      <AnimatePresence>
+        {gameStep === 'guess-silencer' && !hasVoted && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-sm z-40
+                       bg-white border-t-4 border-black rounded-t-3xl p-4 flex flex-col gap-3"
+          >
+            <div className="text-sm font-black text-gray-700">🕵️ Đoán Người Im Lặng</div>
+            <div className="flex flex-wrap gap-2">
+              {players.filter(p => !p.isMe).map(p => (
+                <button
+                  key={p.id}
+                  data-testid={`btn-vote-silencer-${p.name}`}
+                  onClick={() => handleVoteSilencer(p.id)}
+                  className="px-3 py-1.5 rounded-xl border-2 border-black bg-red-200
+                             text-xs font-bold hover:bg-red-300 active:scale-95"
+                >
+                  {p.name}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+        {gameStep === 'guess-silencer' && hasVoted && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-sm z-40
+                       bg-white border-t-4 border-black rounded-t-3xl p-4"
+          >
+            <div className="text-sm font-bold text-green-600">✅ Đã vote — chờ kết quả...</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* reveal-silencer: show all roles */}
+      <AnimatePresence>
+        {gameStep === 'reveal-silencer' && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 flex items-end justify-center bg-black/40"
+          >
+            <motion.div
+              initial={{ y: 100 }}
+              animate={{ y: 0 }}
+              exit={{ y: 100 }}
+              className="w-full max-w-sm bg-white border-t-4 border-black rounded-t-3xl p-4 flex flex-col gap-3 max-h-[60vh] overflow-y-auto"
+            >
+              <div className="text-sm font-black text-gray-700">🎭 Tiết lộ vai trò</div>
+              <div className="flex flex-col gap-2">
+                {players.map(p => (
+                  <div key={p.id} className="flex items-center justify-between px-3 py-2 rounded-xl border-2 border-black bg-gray-50">
+                    <span className="text-sm font-bold">{p.name}{p.isMe ? ' (Bạn)' : ''}</span>
+                    <span className={`text-xs font-black px-2 py-1 rounded-full border border-black
+                      ${p.role === 'Người Im Lặng' ? 'bg-red-200' :
+                        p.role === 'Người Quản trò' ? 'bg-purple-200' :
+                        p.role === 'Người Trao Gửi' ? 'bg-yellow-200' :
+                        p.role === 'Người Chữa Lành' ? 'bg-green-200' : 'bg-blue-100'}`}>
+                      {p.role}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* reward: round summary — coin tally, no ranking */}
+      <AnimatePresence>
+        {gameStep === 'reward' && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 flex items-end justify-center bg-black/40"
+          >
+            <motion.div
+              initial={{ y: 100 }}
+              animate={{ y: 0 }}
+              exit={{ y: 100 }}
+              className="w-full max-w-sm bg-white border-t-4 border-black rounded-t-3xl p-4 flex flex-col gap-3 max-h-[70vh] overflow-y-auto"
+            >
+              <div className="text-sm font-black text-gray-700">
+                🌀 Tổng kết lượt {currentRound}/{totalRounds}
+              </div>
+
+              {/* Coin meaning reminder */}
+              <div className="bg-[#FFF9C4] rounded-xl p-3 border border-black text-[11px] text-gray-600 leading-relaxed">
+                💚 Xu Xanh = lời ôm bạn nhận được &nbsp;·&nbsp;
+                💛 Xu Vàng = lời ôm bạn trao đi &nbsp;·&nbsp;
+                ❤️ Xu Đỏ = lòng tốt trong tim bạn
+              </div>
+
+              {/* Coin counts — no ranking */}
+              <div className="flex flex-col gap-2">
+                {players.filter(p => !p.role?.includes('Bot')).map(p => (
+                  <div key={p.id} className="flex items-center justify-between px-3 py-2 rounded-xl border-2 border-black bg-gray-50">
+                    <span className="text-sm font-bold">{p.name}{p.isMe ? ' (Bạn)' : ''}</span>
+                    <div className="flex gap-3 text-xs font-black">
+                      <span>💚 {p.coins.green}</span>
+                      <span>💛 {p.coins.yellow}</span>
+                      <span>❤️ {p.coins.red}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {isNarrator && (
+                <button
+                  data-testid="btn-next-round"
+                  onClick={handleNextStep}
+                  className="w-full py-3 rounded-2xl border-[3px] border-black bg-[#6BCB77]
+                             text-sm font-bold hover:bg-[#5BB767] active:scale-[0.98]"
+                >
+                  {currentRound >= totalRounds ? '🎉 Kết thúc game' : '▶ Lượt tiếp theo'}
+                </button>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ended: closing ritual screen */}
+      <AnimatePresence>
+        {gameStep === 'ended' && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#FFFBF0] px-6 gap-6 overflow-y-auto"
+          >
+            {/* Header */}
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="text-center"
+            >
+              <div className="text-5xl mb-2">🫂</div>
+              <h2 className="text-xl font-black text-gray-800">Hành trình kết thúc</h2>
+              <p className="text-xs text-gray-500 mt-1">Cảm ơn mọi người đã chia sẻ và lắng nghe</p>
+            </motion.div>
+
+            {/* Coin summary */}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="w-full max-w-sm"
+            >
+              <div className="bg-white rounded-2xl border-2 border-black p-4 flex flex-col gap-2">
+                <div className="text-xs font-black text-gray-500 mb-1">Những lời ôm của bạn</div>
+                {players.filter(p => !p.role?.includes('Bot')).map(p => (
+                  <div key={p.id} className="flex items-center justify-between">
+                    <span className="text-sm font-bold text-gray-700">{p.name}{p.isMe ? ' (Bạn)' : ''}</span>
+                    <div className="flex gap-3 text-sm font-black">
+                      <span title="Lời ôm nhận được">💚 {p.coins.green}</span>
+                      <span title="Lời ôm trao đi">💛 {p.coins.yellow}</span>
+                      <span title="Lòng tốt">❤️ {p.coins.red}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Coin meaning */}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="w-full max-w-sm bg-[#F0FFF4] rounded-2xl border-2 border-black p-4 flex flex-col gap-2"
+            >
+              <div className="text-xs font-black text-gray-600">Ý nghĩa đồng xu</div>
+              <div className="text-xs text-gray-600 leading-relaxed">
+                💚 <b>Xu Xanh</b> — lời ôm bạn nhận được<br />
+                💛 <b>Xu Vàng</b> — lời ôm bạn trao đi<br />
+                ❤️ <b>Xu Đỏ</b> — lòng tốt vô tận trong tim bạn<br />
+                <span className="text-gray-400 mt-1 block">Mỗi đồng xu là một lời ôm và sự chữa lành.</span>
+              </div>
+            </motion.div>
+
+            {/* Reflection questions */}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.8 }}
+              className="w-full max-w-sm bg-[#F0F5FF] rounded-2xl border-2 border-black p-4 flex flex-col gap-2"
+            >
+              <div className="text-xs font-black text-gray-600">Cùng nhau trả lời</div>
+              <div className="text-xs text-gray-700 leading-relaxed flex flex-col gap-1.5">
+                <div>🌿 Hôm nay gọi tên rõ nhất cảm xúc nào?</div>
+                <div>🔍 Học được gì về bản thân?</div>
+                <div>💌 Muốn gửi lời cảm ơn đến ai?</div>
+              </div>
+            </motion.div>
+
+            {/* Closing ritual */}
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 1.0 }}
+              className="w-full max-w-sm bg-[#FFF0F5] rounded-2xl border-[3px] border-black p-4 text-center"
+            >
+              <div className="text-xs font-black text-gray-600 mb-2">Nghi thức kết thúc</div>
+              <div className="text-xs text-gray-600 mb-3">
+                Cả nhóm đứng thành vòng tròn, nắm tay và đồng thanh:
+              </div>
+              <div className="text-sm font-black text-pink-700 leading-relaxed">
+                "CẢM ƠN MÌNH,<br />CẢM ƠN BẠN<br />đã chia sẻ và lắng nghe cảm xúc!"
+              </div>
+            </motion.div>
+
+            {/* Leave button */}
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.2 }}
+              onClick={onLeave}
+              className="w-full max-w-sm py-3 rounded-2xl border-2 border-black bg-white
+                         text-sm font-bold hover:bg-gray-100 active:scale-[0.98] mb-8"
+            >
+              Rời phòng
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Floating coins */}
       <AnimatePresence>

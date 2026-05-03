@@ -167,4 +167,85 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
     console.log(`[add_fake_players] Added ${result.added} fake player(s) to room ${roomId}`)
     io.to(roomId).emit('room_state', roomService.getPublicState(result.room))
   })
+
+  /**
+   * Update room settings (host only)
+   */
+  socket.on('update_room_settings', ({ roomId, userId, settings }) => {
+    if (!roomId || !userId || !settings) {
+      return socket.emit('error', {
+        code: 'invalid_params',
+        message: 'roomId, userId và settings là bắt buộc.',
+      })
+    }
+
+    const room = roomRepository.findById(roomId)
+    if (!room) {
+      return socket.emit('error', {
+        code: 'room_not_found',
+        message: 'Phòng không tồn tại.',
+      })
+    }
+
+    // Only host can update settings
+    if (room.host !== userId) {
+      return socket.emit('error', {
+        code: 'not_host',
+        message: 'Chỉ host mới có thể thay đổi cài đặt.',
+      })
+    }
+
+    // Can only update in waiting phase
+    if (room.status !== 'waiting') {
+      return socket.emit('error', {
+        code: 'game_in_progress',
+        message: 'Không thể thay đổi cài đặt khi game đã bắt đầu.',
+      })
+    }
+
+    // Validate settings
+    const { situationGroups, emotionGroups } = settings
+
+    if (!situationGroups || !Array.isArray(situationGroups) || situationGroups.length === 0) {
+      return socket.emit('error', {
+        code: 'invalid_settings',
+        message: 'Phải chọn ít nhất 1 nhóm tình huống.',
+      })
+    }
+
+    if (!emotionGroups || !Array.isArray(emotionGroups) || emotionGroups.length === 0) {
+      return socket.emit('error', {
+        code: 'invalid_settings',
+        message: 'Phải chọn ít nhất 1 nhóm cảm xúc.',
+      })
+    }
+
+    const validSituationGroups = ['light', 'medium', 'sensitive']
+    const validEmotionGroups = ['basic', 'light', 'strong', 'advanced']
+
+    if (!situationGroups.every((g: string) => validSituationGroups.includes(g))) {
+      return socket.emit('error', {
+        code: 'invalid_settings',
+        message: 'Nhóm tình huống không hợp lệ.',
+      })
+    }
+
+    if (!emotionGroups.every((g: string) => validEmotionGroups.includes(g))) {
+      return socket.emit('error', {
+        code: 'invalid_settings',
+        message: 'Nhóm cảm xúc không hợp lệ.',
+      })
+    }
+
+    // Update settings
+    const updatedRoom = roomRepository.update(roomId, {
+      settings: {
+        situationGroups,
+        emotionGroups,
+      },
+    })
+
+    console.log(`[update_room_settings] Room ${roomId} settings updated by ${userId}`)
+    io.to(roomId).emit('room_settings_updated', updatedRoom!.settings)
+  })
 }

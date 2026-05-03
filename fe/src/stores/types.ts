@@ -1,27 +1,27 @@
-// Store Types
+// ─── Phase types — mirror backend TurnManager exactly ─────────────────────────
 export type GamePhase =
   | 'role-reveal'
   | 'night'
-  | 'day-draw'
-  | 'day-emotion'
-  | 'day-story'
-  | 'reflection'
-  | 'selfcare'
-  | 'guess-role'
+  | 'healer-turn'
+  | 'silencer-turn'
+  | 'situation-card'
+  | 'emotion-card'
+  | 'story-telling'
+  | 'group-response'
+  | 'reflection-card'
+  | 'reflection-sharing'
+  | 'selfcare-card'
+  | 'hug-action'
+  | 'guess-silencer'
+  | 'reveal-silencer'
+  | 'give-coins'
   | 'reward'
   | 'ended'
-export type GameStatus = 'waiting' | 'playing' | 'ended'
 
-export type GameStep =
-  | 'role-reveal'     // Step 1: Chia vai trò
-  | 'night'           // Step 2: Night mode
-  | 'day-draw'        // Step 3a: NTG bốc thẻ Tình huống
-  | 'day-emotion'     // Step 3b: NTG chọn Cảm xúc
-  | 'day-story'       // Step 3c: NTG kể chuyện
-  | 'reflection'      // Step 4: Chọn reflection cards
-  | 'selfcare'        // Step 5: Bí kíp
-  | 'guess-role'      // Step 6: Đoán vai trò
-  | 'reward'          // Step 7: Tặng coin
+// GameStep = alias for GamePhase (used in store/UI)
+export type GameStep = GamePhase
+
+export type GameStatus = 'waiting' | 'playing' | 'ended'
 
 export type CardCategory = 'situation' | 'emotion' | 'reflection' | 'selfcare'
 export type EmotionSubType = 'basic' | 'light' | 'strong' | 'advanced'
@@ -70,4 +70,42 @@ export interface RoomState {
   currentNTG?: string | null
   currentNarrator?: string | null
   mutedPlayer?: string | null
+}
+
+// ─── Phase grouping helpers ────────────────────────────────────────────────────
+
+/** Night sub-phases where silencer/healer act */
+export const NIGHT_PHASES: GamePhase[] = ['night', 'healer-turn', 'silencer-turn']
+
+/** Day phases where NTG (sender) acts */
+export const SENDER_PHASES: GamePhase[] = [
+  'situation-card',
+  'emotion-card',
+  'story-telling',
+  'group-response',
+  'reflection-card',
+  'reflection-sharing',
+  'selfcare-card',
+  'hug-action',
+]
+
+/** Phase display labels in Vietnamese */
+export const PHASE_LABELS: Record<GamePhase, string> = {
+  'role-reveal':       'Chia vai trò',
+  'night':             'Đêm',
+  'healer-turn':       'Người Chữa Lành hành động',
+  'silencer-turn':     'Người Im Lặng hành động',
+  'situation-card':    'Bốc thẻ Tình huống',
+  'emotion-card':      'Chọn thẻ Cảm xúc',
+  'story-telling':     'Kể chuyện',
+  'group-response':    'Phản hồi nhóm',
+  'reflection-card':   'Chọn thẻ Phản tư',
+  'reflection-sharing':'Chia sẻ Phản tư',
+  'selfcare-card':     'Chọn Bí kíp ôm',
+  'hug-action':        'Hành động ôm',
+  'guess-silencer':    'Đoán Người Im Lặng',
+  'reveal-silencer':   'Tiết lộ Người Im Lặng',
+  'give-coins':        'Tặng coin',
+  'reward':            'Kết thúc lượt',
+  'ended':             'Kết thúc game',
 }

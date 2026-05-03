@@ -5,9 +5,9 @@ import { GamePhase } from './types'
  * Phases not listed here have no timeout (manual advance only)
  */
 const PHASE_TIMEOUTS: Partial<Record<GamePhase, number>> = {
-  night: 60_000, // 60 seconds for night actions
-  'guess-role': 120_000, // 2 minutes for voting
-  reward: 90_000, // 90 seconds to give coins
+  'guess-silencer': 120_000, // 2 minutes for voting
+  'give-coins': 90_000,      // 90 seconds to give coins
+  'group-response': 120_000, // 2 minutes for responses
 }
 
 export class PhaseTimer {

@@ -21,10 +21,20 @@ export class RoomService {
       healedPlayer: null,
       selectedCard: null,
       votes: {},
+      ntgVotes: {},
       nightActions: { silenced: false, healed: false, cardSelected: false },
-      coinsGiven: {},
+      redCoinsGiven: {},
+      yellowCoinsGiven: {},
+      roleCompletions: {},
+      responses: {},
+      bonusesGiven: { healerBonus: false },
       gameLog: [],
       lastActivity: Date.now(),
+      // Default settings: all groups enabled
+      settings: {
+        situationGroups: ['light', 'medium', 'sensitive'],
+        emotionGroups: ['basic', 'light', 'strong', 'advanced'],
+      },
     }
 
     roomRepository.save(room)

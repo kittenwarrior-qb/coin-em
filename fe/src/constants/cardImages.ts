@@ -51,9 +51,10 @@ export const CARD_IMAGES = {
     PT14: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469138/emcoin/phan-tu/PT14.png',
   },
   
-  // Tình huống (Situation cards)
+  // Tình huống (Situation cards) - organized by difficulty level
   situation: {
     back: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469152/emcoin/tinh-huong/M%E1%BA%B7t%201%20TH.png',
+    // Nhẹ (Light): TH1-TH13
     TH1: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469154/emcoin/tinh-huong/TH1.png',
     TH2: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469175/emcoin/tinh-huong/TH2.png',
     TH3: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469186/emcoin/tinh-huong/TH3.png',
@@ -67,6 +68,7 @@ export const CARD_IMAGES = {
     TH11: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469159/emcoin/tinh-huong/TH11.png',
     TH12: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469161/emcoin/tinh-huong/TH12.png',
     TH13: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469164/emcoin/tinh-huong/TH13.png',
+    // Vừa (Medium): TH14-TH24
     TH14: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469166/emcoin/tinh-huong/TH14.png',
     TH15: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469168/emcoin/tinh-huong/TH15.png',
     TH16: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469169/emcoin/tinh-huong/TH16.png',
@@ -78,6 +80,7 @@ export const CARD_IMAGES = {
     TH22: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469178/emcoin/tinh-huong/TH22.png',
     TH23: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469179/emcoin/tinh-huong/TH23.png',
     TH24: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469180/emcoin/tinh-huong/TH24.png',
+    // Nhạy cảm (Sensitive): TH25-TH32
     TH25: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469181/emcoin/tinh-huong/TH25.png',
     TH26: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469182/emcoin/tinh-huong/TH26.png',
     TH27: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469183/emcoin/tinh-huong/TH27.png',

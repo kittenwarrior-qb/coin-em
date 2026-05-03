@@ -3,11 +3,13 @@ import { Room, Player, Role } from '../types'
 export class RoleManager {
   /**
    * Rotate narrator and sender to next players
+   * IMPORTANT: Sender and Narrator must NEVER be the same person in a round
+   * NOTE: Other roles (Healer, Silencer, etc.) stay with their original players
+   *       We use originalRole to restore roles after rotation
    */
   rotateRoles(room: Room): Room {
     const players = [...room.players]
 
-    // Find current narrator and sender indices
     const currentNarratorIndex = players.findIndex((p) => p.isNarrator)
     const currentSenderIndex = players.findIndex((p) => p.isSender)
 
@@ -15,19 +17,48 @@ export class RoleManager {
       throw new Error('Cannot find current narrator or sender')
     }
 
-    // Clear current roles
-    players[currentNarratorIndex].isNarrator = false
-    players[currentSenderIndex].isSender = false
+    // Restore original roles — clear narrator/sender flags
+    players[currentNarratorIndex] = {
+      ...players[currentNarratorIndex],
+      role: players[currentNarratorIndex].originalRole,
+      isNarrator: false,
+      isSender: false,
+    }
+    players[currentSenderIndex] = {
+      ...players[currentSenderIndex],
+      role: players[currentSenderIndex].originalRole,
+      isNarrator: false,
+      isSender: false,
+    }
 
-    // Assign to next players (circular)
+    // Next narrator (circular)
     const nextNarratorIndex = (currentNarratorIndex + 1) % players.length
-    const nextSenderIndex = (currentSenderIndex + 1) % players.length
 
-    players[nextNarratorIndex].role = Role.NARRATOR
-    players[nextNarratorIndex].isNarrator = true
+    // Next sender: start after current sender, skip if same as new narrator
+    let nextSenderIndex = (currentSenderIndex + 1) % players.length
+    if (nextSenderIndex === nextNarratorIndex) {
+      nextSenderIndex = (nextSenderIndex + 1) % players.length
+    }
+    // Edge case: still same after second skip (very small player count)
+    if (nextSenderIndex === nextNarratorIndex) {
+      nextSenderIndex = (nextSenderIndex + 1) % players.length
+    }
 
-    players[nextSenderIndex].role = Role.SENDER
-    players[nextSenderIndex].isSender = true
+    // Assign new narrator
+    players[nextNarratorIndex] = {
+      ...players[nextNarratorIndex],
+      role: Role.NARRATOR,
+      isNarrator: true,
+      isSender: false,
+    }
+
+    // Assign new sender
+    players[nextSenderIndex] = {
+      ...players[nextSenderIndex],
+      role: Role.SENDER,
+      isNarrator: false,
+      isSender: true,
+    }
 
     return {
       ...room,
@@ -51,43 +82,114 @@ export class RoleManager {
     // Shuffle roles
     const shuffledRoles = this.shuffleArray([...roles])
 
-    // Assign roles to players
+    // Assign roles to players with initial coins
+    // UPDATED LOGIC:
+    // - Red = 3 (reset each round)
+    // - Yellow = 5-10 random (ONLY given in round 1, kept in other rounds)
+    // - Green = 0 (received when others give coins)
     return players.map((player, index) => {
       const role = shuffledRoles[index]
+      const initialYellow = Math.floor(Math.random() * 6) + 5 // Random 5-10
+      
       return {
         ...player,
         role,
+        originalRole: role, // Lưu role gốc
         isNarrator: role === Role.NARRATOR,
         isSender: role === Role.SENDER,
-        coins: { red: 0, yellow: 0, green: 0 },
+        coins: { 
+          red: 3,              // 3 red coins (reset each round)
+          yellow: initialYellow, // Random 5-10 (only round 1)
+          green: 0             // Start with 0 green (received from others)
+        },
       }
     })
   }
 
   /**
    * Get roles for specific player count
+   * Based on game rules:
+   * 5 người: Quản trò, Trao Gửi, Im Lặng, Kết Nối, Gợi Mở
+   * 6 người: Quản trò, Trao Gửi, Im Lặng, Kết Nối, Gợi Mở, Dẫn Lối
+   * 7 người: Quản trò, Trao Gửi, Im Lặng, Kết Nối, Gợi Mở, Dẫn Lối, Chữa Lành
+   * 8 người: Quản trò, Trao Gửi, 2 Im Lặng, Kết Nối, Gợi Mở, Dẫn Lối, Chữa Lành
+   * 9 người: Quản trò, Trao Gửi, 2 Im Lặng, 2 Kết Nối, Gợi Mở, Dẫn Lối, Chữa Lành
+   * 10 người: Quản trò, Trao Gửi, 2 Im Lặng, 2 Kết Nối, 2 Gợi Mở, Dẫn Lối, Chữa Lành
    */
   private getRolesForPlayerCount(count: number): Role[] {
-    // Base roles (always present)
-    const baseRoles = [Role.NARRATOR, Role.SENDER, Role.SILENCER, Role.HEALER]
-
-    // Additional roles based on player count
-    const additionalRoles = [
-      Role.CONNECTOR,
-      Role.OPENER,
-      Role.GUIDE,
-      Role.CONNECTOR, // Duplicate for more players
-      Role.OPENER, // Duplicate for more players
-    ]
-
-    const roles = [...baseRoles]
-    const remaining = count - baseRoles.length
-
-    for (let i = 0; i < remaining && i < additionalRoles.length; i++) {
-      roles.push(additionalRoles[i])
+    switch (count) {
+      case 5:
+        return [
+          Role.NARRATOR,    // Quản trò
+          Role.SENDER,      // Trao Gửi
+          Role.SILENCER,    // Im Lặng
+          Role.CONNECTOR,   // Kết Nối
+          Role.OPENER,      // Gợi Mở
+        ]
+      
+      case 6:
+        return [
+          Role.NARRATOR,    // Quản trò
+          Role.SENDER,      // Trao Gửi
+          Role.SILENCER,    // Im Lặng
+          Role.CONNECTOR,   // Kết Nối
+          Role.OPENER,      // Gợi Mở
+          Role.GUIDE,       // Dẫn Lối
+        ]
+      
+      case 7:
+        return [
+          Role.NARRATOR,    // Quản trò
+          Role.SENDER,      // Trao Gửi
+          Role.SILENCER,    // Im Lặng
+          Role.CONNECTOR,   // Kết Nối
+          Role.OPENER,      // Gợi Mở
+          Role.GUIDE,       // Dẫn Lối
+          Role.HEALER,      // Chữa Lành
+        ]
+      
+      case 8:
+        return [
+          Role.NARRATOR,    // Quản trò
+          Role.SENDER,      // Trao Gửi
+          Role.SILENCER,    // Im Lặng 1
+          Role.SILENCER,    // Im Lặng 2
+          Role.CONNECTOR,   // Kết Nối
+          Role.OPENER,      // Gợi Mở
+          Role.GUIDE,       // Dẫn Lối
+          Role.HEALER,      // Chữa Lành
+        ]
+      
+      case 9:
+        return [
+          Role.NARRATOR,    // Quản trò
+          Role.SENDER,      // Trao Gửi
+          Role.SILENCER,    // Im Lặng 1
+          Role.SILENCER,    // Im Lặng 2
+          Role.CONNECTOR,   // Kết Nối 1
+          Role.CONNECTOR,   // Kết Nối 2
+          Role.OPENER,      // Gợi Mở
+          Role.GUIDE,       // Dẫn Lối
+          Role.HEALER,      // Chữa Lành
+        ]
+      
+      case 10:
+        return [
+          Role.NARRATOR,    // Quản trò
+          Role.SENDER,      // Trao Gửi
+          Role.SILENCER,    // Im Lặng 1
+          Role.SILENCER,    // Im Lặng 2
+          Role.CONNECTOR,   // Kết Nối 1
+          Role.CONNECTOR,   // Kết Nối 2
+          Role.OPENER,      // Gợi Mở 1
+          Role.OPENER,      // Gợi Mở 2
+          Role.GUIDE,       // Dẫn Lối
+          Role.HEALER,      // Chữa Lành
+        ]
+      
+      default:
+        throw new Error(`Invalid player count: ${count}. Must be between 5 and 10.`)
     }
-
-    return roles
   }
 
   /**

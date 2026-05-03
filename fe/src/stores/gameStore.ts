@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import type { Player, GameStep, SelectedCards, CardData, CardCategory } from './types'
+import { NIGHT_PHASES, SENDER_PHASES } from './types'
 
 interface GameState {
   // Game data
@@ -37,6 +38,8 @@ interface GameState {
   myPlayer: () => Player | undefined
   isNarrator: () => boolean
   isSender: () => boolean
+  isNightPhase: () => boolean
+  isSenderPhase: () => boolean
   canSelectCard: (category: CardCategory) => boolean
 }
 
@@ -55,14 +58,13 @@ export const useGameStore = create<GameState>()(
 
       // Game actions
       setGameStep: (step) => set({ gameStep: step }),
-
       setPlayers: (players) => set({ players }),
-
       updatePlayer: (playerId, updates) =>
         set((state) => ({
-          players: state.players.map((p) => (p.id === playerId ? { ...p, ...updates } : p)),
+          players: state.players.map((p) =>
+            p.id === playerId ? { ...p, ...updates } : p
+          ),
         })),
-
       setMyIds: (socketId, userId) => set({ mySocketId: socketId, myUserId: userId }),
 
       // Card actions
@@ -77,53 +79,35 @@ export const useGameStore = create<GameState>()(
             }
           }
           if (category === 'situation') {
-            return {
-              selectedCards: {
-                ...state.selectedCards,
-                situation: card,
-              },
-            }
+            return { selectedCards: { ...state.selectedCards, situation: card } }
           }
-          return {
-            selectedCards: {
-              ...state.selectedCards,
-              [category]: card,
-            },
-          }
+          return { selectedCards: { ...state.selectedCards, [category]: card } }
         }),
 
       clearSelectedCards: () => set({ selectedCards: { reflections: [] } }),
 
       // UI actions
       setExpandedPlayer: (player) => set({ expandedPlayer: player }),
-
       setShowInventory: (show) => set({ showInventory: show }),
-
       setInventoryMode: (mode) => set({ inventoryMode: mode }),
 
       // Computed
-      myPlayer: () => {
-        const state = get()
-        return state.players.find((p) => p.isMe)
-      },
+      myPlayer: () => get().players.find((p) => p.isMe),
 
-      isNarrator: () => {
-        const myPlayer = get().myPlayer()
-        return myPlayer?.isNarrator || false
-      },
+      isNarrator: () => get().myPlayer()?.isNarrator || false,
 
-      isSender: () => {
-        const myPlayer = get().myPlayer()
-        return myPlayer?.isSender || false
-      },
+      isSender: () => get().myPlayer()?.isSender || false,
+
+      isNightPhase: () => NIGHT_PHASES.includes(get().gameStep),
+
+      isSenderPhase: () => SENDER_PHASES.includes(get().gameStep),
 
       canSelectCard: (category) => {
         const { gameStep, isSender } = get()
         if (!isSender()) return false
-
-        if (category === 'emotion') return gameStep === 'day-emotion'
-        if (category === 'reflection') return gameStep === 'reflection'
-        if (category === 'selfcare') return gameStep === 'selfcare'
+        if (category === 'emotion')     return gameStep === 'emotion-card'
+        if (category === 'reflection')  return gameStep === 'reflection-card'
+        if (category === 'selfcare')    return gameStep === 'selfcare-card'
         return false
       },
     }),

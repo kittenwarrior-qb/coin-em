@@ -44,7 +44,7 @@ export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefr
   }
 
   return (
-    <div className="h-screen bg-[#FAFAF8] flex items-center justify-center overflow-hidden">
+    <div className="h-screen bg-[#FAFAF8] flex items-center justify-center overflow-hidden" data-testid="lobby">
       <div className="w-full max-w-sm h-full bg-white">
         <AnimatePresence mode="wait">
           {screen === 'menu' && (
@@ -54,6 +54,7 @@ export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefr
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               className="h-full flex flex-col justify-center p-8 gap-4"
+              data-testid="lobby-menu"
             >
               <div className="text-center mb-4">
                 <div className="text-5xl mb-3">🎴</div>
@@ -62,6 +63,7 @@ export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefr
               </div>
 
               <button
+                data-testid="btn-join-room"
                 onClick={() => setScreen('join')}
                 className="w-full py-4 rounded-2xl border-[3px] border-black bg-[#F0F5FF]
                            text-base font-bold hover:bg-[#E0E5FF] active:scale-[0.98] transition-all"
@@ -70,6 +72,7 @@ export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefr
               </button>
 
               <button
+                data-testid="btn-create-room"
                 onClick={() => setScreen('create')}
                 className="w-full py-4 rounded-2xl border-[3px] border-black bg-[#FFF0F5]
                            text-base font-bold hover:bg-[#FFE0E5] active:scale-[0.98] transition-all"
@@ -86,6 +89,7 @@ export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefr
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               className="h-full flex flex-col p-8 gap-5 overflow-y-auto"
+              data-testid="lobby-join"
             >
               <div className="flex items-center gap-3 mb-2">
                 <button
@@ -149,6 +153,7 @@ export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefr
                   Hoặc nhập mã phòng
                 </label>
                 <input
+                  data-testid="input-room-id"
                   type="text"
                   value={selectedRoom ? selectedRoom.id : roomId}
                   onChange={e => { setRoomId(e.target.value); setSelectedRoom(null) }}
@@ -163,6 +168,7 @@ export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefr
               <div>
                 <label className="block text-sm font-bold text-gray-600 mb-2">Tên của bạn</label>
                 <input
+                  data-testid="input-username-join"
                   type="text"
                   value={userName}
                   onChange={e => setUserName(e.target.value)}
@@ -173,6 +179,7 @@ export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefr
               </div>
 
               <button
+                data-testid="btn-confirm-join"
                 onClick={handleJoin}
                 disabled={!userName.trim() || (!selectedRoom && !roomId.trim())}
                 className="w-full py-4 rounded-2xl border-[3px] border-black bg-[#6BCB77]
@@ -191,6 +198,7 @@ export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefr
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               className="h-full flex flex-col justify-center p-8 gap-5"
+              data-testid="lobby-create"
             >
               <div className="flex items-center gap-3 mb-2">
                 <button
@@ -206,6 +214,7 @@ export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefr
               <div>
                 <label className="block text-sm font-bold text-gray-600 mb-2">Tên của bạn</label>
                 <input
+                  data-testid="input-username-create"
                   type="text"
                   value={userName}
                   onChange={e => setUserName(e.target.value)}
@@ -222,6 +231,7 @@ export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefr
               </div>
 
               <button
+                data-testid="btn-confirm-create"
                 onClick={handleCreate}
                 disabled={!userName.trim()}
                 className="w-full py-4 rounded-2xl border-[3px] border-black bg-[#FFD93D]

@@ -43,7 +43,15 @@ export class GameService {
     return {
       id: room.id,
       host: room.host,
-      players: room.players,
+      players: room.players.map(p => ({
+        ...p,
+        // Display role: current round role (narrator/sender override), else originalRole
+        role: p.isNarrator
+          ? p.role  // 'Người Quản trò'
+          : p.isSender
+            ? p.role  // 'Người Trao Gửi'
+            : p.originalRole ?? p.role,  // everyone else shows their fixed original role
+      })),
       status: room.status,
       phase: room.phase,
       turn: room.turn,
@@ -53,6 +61,7 @@ export class GameService {
       currentNarrator: room.currentNarrator,
       mutedPlayer: room.mutedPlayer,
       selectedCard: room.selectedCard,
+      votes: room.votes,
     }
   }
 }

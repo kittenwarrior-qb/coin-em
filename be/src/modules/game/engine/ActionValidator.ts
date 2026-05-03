@@ -25,6 +25,12 @@ export class ActionValidator {
         return this.validateGiveCoin(room, actor, action)
       case 'VOTE':
         return this.validateVote(room, actor, action)
+      case 'SEND_RESPONSE':
+        return this.validateSendResponse(room, actor, action)
+      case 'NTG_VOTE':
+        return this.validateNTGVote(room, actor, action)
+      case 'SHARE_REFLECTION':
+        return this.validateShareReflection(room, actor, action)
       default:
         return { valid: false, error: 'Unknown action type' }
     }
@@ -34,13 +40,13 @@ export class ActionValidator {
    * Validate silence action
    */
   private validateSilence(room: Room, actor: any, action: GameAction): { valid: boolean; error?: string } {
-    // Must be night phase
-    if (room.phase !== 'night') {
-      return { valid: false, error: 'Not night phase' }
+    // Must be silencer-turn phase
+    if (room.phase !== 'silencer-turn') {
+      return { valid: false, error: 'Not silencer turn' }
     }
 
-    // Actor must be silencer
-    if (actor.role !== Role.SILENCER) {
+    // Actor must be silencer (check originalRole)
+    if (actor.originalRole !== Role.SILENCER) {
       return { valid: false, error: 'Not a silencer' }
     }
 
@@ -71,13 +77,13 @@ export class ActionValidator {
    * Validate heal action
    */
   private validateHeal(room: Room, actor: any, action: GameAction): { valid: boolean; error?: string } {
-    // Must be night phase
-    if (room.phase !== 'night') {
-      return { valid: false, error: 'Not night phase' }
+    // Must be healer-turn phase
+    if (room.phase !== 'healer-turn') {
+      return { valid: false, error: 'Not healer turn' }
     }
 
-    // Actor must be healer
-    if (actor.role !== Role.HEALER) {
+    // Actor must be healer (check originalRole)
+    if (actor.originalRole !== Role.HEALER) {
       return { valid: false, error: 'Not a healer' }
     }
 
@@ -117,12 +123,12 @@ export class ActionValidator {
   }
 
   /**
-   * Validate select selfcare card action (Guide selects during night)
+   * Validate select selfcare card action (Guide selects during selfcare-card phase)
    */
   private validateSelectSelfcareCard(room: Room, actor: any, action: GameAction): { valid: boolean; error?: string } {
-    // Must be night phase
-    if (room.phase !== 'night') {
-      return { valid: false, error: 'Not night phase' }
+    // Must be selfcare-card phase
+    if (room.phase !== 'selfcare-card') {
+      return { valid: false, error: 'Not selfcare-card phase' }
     }
 
     // Actor must be guide
@@ -145,12 +151,12 @@ export class ActionValidator {
 
   /**
    * Validate give coin action
+   * UPDATED: Support flexible amounts, multiple recipients
    */
   private validateGiveCoin(room: Room, actor: any, action: GameAction): { valid: boolean; error?: string } {
-    // Must be day phase (any day sub-phase)
-    const dayPhases = ['day-draw', 'day-emotion', 'day-story', 'reflection', 'selfcare']
-    if (!dayPhases.includes(room.phase)) {
-      return { valid: false, error: 'Not day phase' }
+    // Must be give-coins phase
+    if (room.phase !== 'give-coins') {
+      return { valid: false, error: 'Not give-coins phase' }
     }
 
     // Target must exist
@@ -173,11 +179,21 @@ export class ActionValidator {
       return { valid: false, error: 'No coin type specified' }
     }
 
-    // Check coin limit - max 1 of each type per person
-    const MAX_PER_TYPE = 1
-    const given = room.coinsGiven?.[actor.userId]?.[action.targetId]
-    if (given && given[action.data.coinType as keyof typeof given] >= MAX_PER_TYPE) {
-      return { valid: false, error: 'COIN_LIMIT_REACHED' }
+    const coinType = action.data.coinType
+    const amount = action.data.amount || 1
+
+    // Cannot give green coins
+    if (coinType === 'green') {
+      return { valid: false, error: 'Cannot give green coins' }
+    }
+
+    // Check if actor has enough coins
+    if (coinType === 'red' && actor.coins.red < amount) {
+      return { valid: false, error: 'Insufficient red coins' }
+    }
+
+    if (coinType === 'yellow' && actor.coins.yellow < amount) {
+      return { valid: false, error: 'Insufficient yellow coins' }
     }
 
     return { valid: true }
@@ -187,8 +203,8 @@ export class ActionValidator {
    * Validate vote action
    */
   private validateVote(room: Room, actor: any, action: GameAction): { valid: boolean; error?: string } {
-    // Must be guess-role phase
-    if (room.phase !== 'guess-role') {
+    // Must be guess-silencer phase
+    if (room.phase !== 'guess-silencer') {
       return { valid: false, error: 'NOT_VOTE_PHASE' }
     }
 
@@ -215,5 +231,67 @@ export class ActionValidator {
    */
   canAdvanceTurn(room: Room, userId: string): boolean {
     return room.currentNarrator === userId
+  }
+
+  /**
+   * Validate send response action
+   */
+  private validateSendResponse(room: Room, actor: any, action: GameAction): { valid: boolean; error?: string } {
+    // Must be group-response phase
+    if (room.phase !== 'group-response') {
+      return { valid: false, error: 'Not group-response phase' }
+    }
+
+    // Must have message
+    if (!action.data?.message) {
+      return { valid: false, error: 'No message provided' }
+    }
+
+    return { valid: true }
+  }
+
+  /**
+   * Validate NTG vote (best responder) in group-response phase
+   */
+  private validateNTGVote(room: Room, actor: any, action: GameAction): { valid: boolean; error?: string } {
+    if (room.phase !== 'group-response') {
+      return { valid: false, error: 'Not group-response phase' }
+    }
+    if (!actor.isSender) {
+      return { valid: false, error: 'ONLY_NTG_CAN_VOTE' }
+    }
+    if (!action.targetId) {
+      return { valid: false, error: 'No target specified' }
+    }
+    const target = room.players.find((p) => p.userId === action.targetId)
+    if (!target) {
+      return { valid: false, error: 'Target not found' }
+    }
+    if (action.targetId === action.actorId) {
+      return { valid: false, error: 'Cannot vote for self' }
+    }
+    // Check duplicate vote for same target (array format)
+    const existing: string[] = (room.ntgVotes as any)?.[actor.userId] ?? []
+    if (existing.includes(action.targetId)) {
+      return { valid: false, error: 'ALREADY_VOTED_FOR_THIS_PLAYER' }
+    }
+    return { valid: true }
+  }
+
+  /**
+   * Validate share reflection (NTG shares in reflection-sharing phase)
+   */
+  private validateShareReflection(room: Room, actor: any, action: GameAction): { valid: boolean; error?: string } {
+    // Must be reflection-sharing phase
+    if (room.phase !== 'reflection-sharing') {
+      return { valid: false, error: 'Not reflection-sharing phase' }
+    }
+
+    // Only NTG can share
+    if (!actor.isSender) {
+      return { valid: false, error: 'ONLY_NTG_CAN_SHARE' }
+    }
+
+    return { valid: true }
   }
 }

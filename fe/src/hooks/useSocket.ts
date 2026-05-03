@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { io, Socket } from 'socket.io-client'
 import { getUserId } from '../utils/userId'
 import { useGameStore } from '../stores/gameStore'
+import type { GamePhase } from '../stores/types'
 
 const SOCKET_URL = 'http://localhost:3001'
 const SESSION_KEY = 'emcoin_session'
@@ -16,7 +17,7 @@ interface RoomState {
   host: string
   players: Player[]
   status: 'waiting' | 'playing' | 'ended'
-  phase?: 'role-reveal' | 'night' | 'day'
+  phase?: GamePhase
   turn?: number
   currentRound: number
   totalRounds?: number
@@ -58,6 +59,10 @@ interface UseSocketReturn {
   endGame: (roomId: string) => void
   addFakePlayers: (roomId: string) => void
   nextTurn: (roomId: string) => void
+  selectCard: (roomId: string, card: object, type?: 'SELECT_CARD' | 'SELECT_SELFCARE_CARD') => void
+  sendResponse: (roomId: string, message: string) => void
+  ntgVote: (roomId: string, targetSocketId: string) => void
+  shareReflection: (roomId: string, message: string) => void
 }
 
 // Session helpers
@@ -142,7 +147,7 @@ export function useSocket(): UseSocketReturn {
       
       // Sync gameStep with server phase
       if (state.phase) {
-        useGameStore.getState().setGameStep(state.phase as any)
+        useGameStore.getState().setGameStep(state.phase)
       }
     })
 
@@ -162,7 +167,7 @@ export function useSocket(): UseSocketReturn {
       
       // Sync gameStep with server phase
       if (state.phase) {
-        useGameStore.getState().setGameStep(state.phase as any)
+        useGameStore.getState().setGameStep(state.phase)
       }
     })
 
@@ -177,7 +182,7 @@ export function useSocket(): UseSocketReturn {
       
       // Sync gameStep with server phase
       if (state.phase) {
-        useGameStore.getState().setGameStep(state.phase as any)
+        useGameStore.getState().setGameStep(state.phase)
       }
     })
 
@@ -187,12 +192,32 @@ export function useSocket(): UseSocketReturn {
       
       // Sync gameStep with server phase
       if (state.phase) {
-        useGameStore.getState().setGameStep(state.phase as any)
+        useGameStore.getState().setGameStep(state.phase)
       }
     })
 
     socket.on('coin_given', ({ giver, receiver, coinType, room }: { giver: string; receiver: string; coinType: string; room: RoomState }) => {
       console.log('[Socket] Coin given:', coinType, 'from', giver, 'to', receiver)
+      setRoomState(room)
+    })
+
+    socket.on('card_selected', ({ type, room }: { actorId: string; card: object; type: string; room: RoomState }) => {
+      console.log('[Socket] Card selected:', type)
+      setRoomState(room)
+    })
+
+    socket.on('response_received', ({ actorName, message, room }: { actorId: string; actorName: string; message: string; room: RoomState }) => {
+      console.log('[Socket] Response received from:', actorName, message)
+      setRoomState(room)
+    })
+
+    socket.on('ntg_vote_cast', ({ votedName, bonus, room }: { ntgId: string; votedId: string; votedName: string; bonus: number; room: RoomState }) => {
+      console.log('[Socket] NTG voted for:', votedName, '+', bonus, 'yellow')
+      setRoomState(room)
+    })
+
+    socket.on('reflection_shared', ({ ntgName, message, room }: { ntgId: string; ntgName: string; message: string; bonus: number; room: RoomState }) => {
+      console.log('[Socket] Reflection shared by:', ntgName, message)
       setRoomState(room)
     })
 
@@ -204,9 +229,9 @@ export function useSocket(): UseSocketReturn {
       console.log('[Socket] Voting complete:', votes)
     })
 
-    socket.on('game_ended', ({ scores }: { scores: Array<{ socketId: string; name: string; role: string; score: number }> }) => {
-      console.log('[Socket] Game ended. Scores:', scores)
-      // Could show scores in a modal
+    socket.on('game_ended', ({ coinSummary }: { coinSummary: Array<{ userId: string; name: string; coins: { red: number; yellow: number; green: number } }> }) => {
+      console.log('[Socket] Game ended. Coin summary:', coinSummary)
+      // GameBoard listens to roomState.phase === 'ended' for UI
     })
 
     socket.on('rooms_list', (rooms: RoomListItem[]) => {
@@ -303,6 +328,30 @@ export function useSocket(): UseSocketReturn {
     socketRef.current.emit('next_turn', { roomId })
   }
 
+  const selectCard = (roomId: string, card: object, type: 'SELECT_CARD' | 'SELECT_SELFCARE_CARD' = 'SELECT_CARD') => {
+    if (!socketRef.current) return
+    console.log('[Socket] Emit select_card:', type)
+    socketRef.current.emit('select_card', { roomId, card, type })
+  }
+
+  const sendResponse = (roomId: string, message: string) => {
+    if (!socketRef.current) return
+    console.log('[Socket] Emit send_response')
+    socketRef.current.emit('send_response', { roomId, message })
+  }
+
+  const ntgVote = (roomId: string, targetSocketId: string) => {
+    if (!socketRef.current) return
+    console.log('[Socket] Emit ntg_vote')
+    socketRef.current.emit('ntg_vote', { roomId, targetSocketId })
+  }
+
+  const shareReflection = (roomId: string, message: string) => {
+    if (!socketRef.current) return
+    console.log('[Socket] Emit share_reflection')
+    socketRef.current.emit('share_reflection', { roomId, message })
+  }
+
   return {
     socket: socketRef.current,
     isConnected,
@@ -322,5 +371,9 @@ export function useSocket(): UseSocketReturn {
     endGame,
     addFakePlayers,
     nextTurn,
+    selectCard,
+    sendResponse,
+    ntgVote,
+    shareReflection,
   }
 }

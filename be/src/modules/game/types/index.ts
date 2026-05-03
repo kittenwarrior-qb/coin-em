@@ -2,12 +2,19 @@
 export type GamePhase =
   | 'role-reveal'
   | 'night'
-  | 'day-draw'
-  | 'day-emotion'
-  | 'day-story'
-  | 'reflection'
-  | 'selfcare'
-  | 'guess-role'
+  | 'healer-turn'
+  | 'silencer-turn'
+  | 'situation-card'
+  | 'emotion-card'
+  | 'story-telling'
+  | 'group-response'
+  | 'reflection-card'
+  | 'reflection-sharing'
+  | 'selfcare-card'
+  | 'hug-action'
+  | 'guess-silencer'
+  | 'reveal-silencer'
+  | 'give-coins'
   | 'reward'
   | 'ended'
 export type GameStatus = 'waiting' | 'playing' | 'ended'
@@ -27,6 +34,7 @@ export interface Player {
   userId: string
   name: string
   role?: Role
+  originalRole?: Role // Role gốc ban đầu (không thay đổi khi rotate)
   isNarrator?: boolean
   isSender?: boolean
   isMuted?: boolean
@@ -37,6 +45,12 @@ export interface Player {
     yellow: number
     green: number
   }
+  collectedGreenCoins?: number // Total green coins collected as Sender across all rounds
+}
+
+export interface RoomSettings {
+  situationGroups: ('light' | 'medium' | 'sensitive')[] // At least 1 required
+  emotionGroups: ('basic' | 'light' | 'strong' | 'advanced')[] // At least 1 required
 }
 
 export interface Room {
@@ -55,15 +69,37 @@ export interface Room {
   selectedCard: any | null
   gameLog: GameLogEntry[]
   lastActivity: number
+  // Room settings (card groups)
+  settings: RoomSettings
   // Phase 1 additions
-  votes: Record<string, string> // voterId → targetId
+  votes: Record<string, string> // voterId → targetId (silencer guess)
+  ntgVotes: Record<string, string[]> // NTG votes: ntgId → [targetId, ...] (best responders, multiple allowed)
   nightActions: {
     silenced: boolean
     healed: boolean
     cardSelected: boolean
   }
-  coinsGiven: Record<string, Record<string, { red: number; yellow: number; green: number }>>
-  // coinsGiven[giverId][receiverId] = { red: 1, yellow: 0, green: 0 }
+  // Coin giving tracking (flexible amounts)
+  redCoinsGiven: Record<string, Record<string, number>> // giverId → { recipientId: amount }
+  yellowCoinsGiven: Record<string, Record<string, number>> // giverId → { recipientId: amount }
+  
+  // Role completion tracking (simplified - only track red coin reception)
+  roleCompletions: Record<
+    string,
+    {
+      receivedRedFromGame: boolean // From game system (NTG giving without revealing identity)
+      receivedRedFromSilenced: boolean
+      receivedRedFromAnyone: boolean
+    }
+  >
+  
+  // Response tracking
+  responses: Record<string, string> // playerId → response message
+  
+  // Bonus tracking
+  bonusesGiven: {
+    healerBonus: boolean
+  }
 }
 
 export interface GameLogEntry {
@@ -75,7 +111,16 @@ export interface GameLogEntry {
 }
 
 export interface GameAction {
-  type: 'SILENCE' | 'HEAL' | 'SELECT_CARD' | 'SELECT_SELFCARE_CARD' | 'GIVE_COIN' | 'VOTE'
+  type:
+    | 'SILENCE'
+    | 'HEAL'
+    | 'SELECT_CARD'
+    | 'SELECT_SELFCARE_CARD'
+    | 'GIVE_COIN'
+    | 'VOTE'
+    | 'SEND_RESPONSE'
+    | 'NTG_VOTE'
+    | 'SHARE_REFLECTION'
   actorId: string
   targetId?: string
   data?: any

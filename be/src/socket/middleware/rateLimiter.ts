@@ -15,6 +15,9 @@ const actionTimestamps = new Map<string, number[]>()
  * @returns true if allowed, false if rate limited
  */
 export function rateLimitAction(socket: Socket, action: string, limitMs = 500): boolean {
+  // Bypass rate limiting in test mode
+  if (process.env.DISABLE_RATE_LIMIT === 'true') return true
+
   const key = `${socket.id}:${action}`
   const now = Date.now()
   const last = actionTimestamps.get(key) || []

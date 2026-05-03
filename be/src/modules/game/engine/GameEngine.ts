@@ -1,20 +1,26 @@
-import { Room, GameAction, GameResult, GameLogEntry } from '../types'
+import { Room, GameAction, GameResult, Role } from '../types'
 import { StateMachine } from './StateMachine'
 import { TurnManager } from './TurnManager'
 import { RoleManager } from './RoleManager'
 import { ActionValidator } from './ActionValidator'
+import { CommandFactory } from '../commands/CommandFactory'
+import { RewardCalculator } from '../services/RewardCalculator'
 
 export class GameEngine {
   private stateMachine: StateMachine
   private turnManager: TurnManager
   private roleManager: RoleManager
   private actionValidator: ActionValidator
+  private commandFactory: CommandFactory
+  private rewardCalculator: RewardCalculator
 
   constructor() {
     this.stateMachine = new StateMachine()
     this.turnManager = new TurnManager()
     this.roleManager = new RoleManager()
     this.actionValidator = new ActionValidator()
+    this.commandFactory = new CommandFactory()
+    this.rewardCalculator = new RewardCalculator()
   }
 
   /**
@@ -47,28 +53,43 @@ export class GameEngine {
       // Rotate roles
       updatedRoom = this.roleManager.rotateRoles(updatedRoom)
 
-      // Reset night actions, votes, and coins given for new round
+      // Reset per-round state
       updatedRoom.mutedPlayer = null
       updatedRoom.healedPlayer = null
       updatedRoom.selectedCard = null
       updatedRoom.votes = {}
+      updatedRoom.ntgVotes = {}
       updatedRoom.nightActions = { silenced: false, healed: false, cardSelected: false }
-      updatedRoom.coinsGiven = {}
+      updatedRoom.redCoinsGiven = {}
+      updatedRoom.yellowCoinsGiven = {}
+      updatedRoom.roleCompletions = {}
+      updatedRoom.responses = {}
+      updatedRoom.bonusesGiven = { healerBonus: false }
 
-      // Log role rotation
+      // Reset red to 3 each round; yellow and green ACCUMULATE (never reset)
+      updatedRoom.players = updatedRoom.players.map((p) => ({
+        ...p,
+        coins: {
+          red: 3,
+          yellow: p.coins.yellow,  // keep
+          green: p.coins.green,    // keep — accumulates across all rounds
+        },
+      }))
+
       updatedRoom.gameLog = [
         ...updatedRoom.gameLog,
         {
-          type: 'ROLE_ROTATION',
+          type: 'ROUND_STARTED',
           actorId: 'system',
           timestamp: Date.now(),
-          data: {
-            round: updatedRoom.currentRound,
-            narrator: updatedRoom.currentNarrator,
-            sender: updatedRoom.currentNTG,
-          },
+          data: { round: updatedRoom.currentRound },
         },
       ]
+    }
+
+    // Calculate rewards when entering reward phase
+    if (nextPhase === 'reward') {
+      updatedRoom = this.calculateRewards(updatedRoom)
     }
 
     // Reset night actions when entering night phase
@@ -79,14 +100,20 @@ export class GameEngine {
       updatedRoom.selectedCard = null
     }
 
-    // Reset votes when entering guess-role phase
-    if (nextPhase === 'guess-role') {
+    // Auto-advance from night to healer-turn
+    if (nextPhase === 'healer-turn') {
+      // Just transition, healer will act
+    }
+
+    // Reset votes when entering guess-silencer phase
+    if (nextPhase === 'guess-silencer') {
       updatedRoom.votes = {}
     }
 
-    // Reset coins given when entering day-draw phase
-    if (nextPhase === 'day-draw') {
-      updatedRoom.coinsGiven = {}
+    // Reset coin tracking when entering give-coins phase
+    if (nextPhase === 'give-coins') {
+      updatedRoom.redCoinsGiven = {}
+      updatedRoom.yellowCoinsGiven = {}
     }
 
     // Log phase change
@@ -106,7 +133,7 @@ export class GameEngine {
   }
 
   /**
-   * Execute game action
+   * Execute game action using Command Pattern
    */
   executeAction(room: Room, action: GameAction): GameResult {
     // Validate action
@@ -115,201 +142,23 @@ export class GameEngine {
       return { success: false, error: validation.error }
     }
 
-    // Execute based on action type
-    switch (action.type) {
-      case 'SILENCE':
-        return this.executeSilence(room, action)
-      case 'HEAL':
-        return this.executeHeal(room, action)
-      case 'SELECT_CARD':
-        return this.executeSelectCard(room, action)
-      case 'SELECT_SELFCARE_CARD':
-        return this.executeSelectSelfcareCard(room, action)
-      case 'GIVE_COIN':
-        return this.executeGiveCoin(room, action)
-      case 'VOTE':
-        return this.executeVote(room, action)
-      default:
-        return { success: false, error: 'UNKNOWN_ACTION' }
+    // Get command and execute
+    const command = this.commandFactory.getCommand(action)
+    if (!command) {
+      return { success: false, error: 'UNKNOWN_ACTION' }
     }
+
+    return command.execute(room, action)
   }
 
-  /**
-   * Execute silence action
-   */
-  private executeSilence(room: Room, action: GameAction): GameResult {
-    const updatedRoom: Room = {
-      ...room,
-      mutedPlayer: action.targetId!,
-      nightActions: {
-        ...room.nightActions,
-        silenced: true,
-      },
-      lastActivity: Date.now(),
-      gameLog: [
-        ...room.gameLog,
-        {
-          type: 'SILENCE',
-          actorId: action.actorId,
-          targetId: action.targetId,
-          timestamp: Date.now(),
-        },
-      ],
-    }
 
-    return { success: true, room: updatedRoom }
-  }
 
   /**
-   * Execute heal action
+   * Calculate and apply rewards at end of round (reward phase)
+   * Delegated to RewardCalculator service
    */
-  private executeHeal(room: Room, action: GameAction): GameResult {
-    const updatedRoom: Room = {
-      ...room,
-      healedPlayer: action.targetId!,
-      // Remove mute if healed player was muted
-      mutedPlayer: room.mutedPlayer === action.targetId ? null : room.mutedPlayer,
-      nightActions: {
-        ...room.nightActions,
-        healed: true,
-      },
-      lastActivity: Date.now(),
-      gameLog: [
-        ...room.gameLog,
-        {
-          type: 'HEAL',
-          actorId: action.actorId,
-          targetId: action.targetId,
-          timestamp: Date.now(),
-        },
-      ],
-    }
-
-    return { success: true, room: updatedRoom }
-  }
-
-  /**
-   * Execute select card action (NTG draws situation card)
-   */
-  private executeSelectCard(room: Room, action: GameAction): GameResult {
-    const updatedRoom: Room = {
-      ...room,
-      selectedCard: action.data?.card,
-      lastActivity: Date.now(),
-      gameLog: [
-        ...room.gameLog,
-        {
-          type: 'SELECT_CARD',
-          actorId: action.actorId,
-          timestamp: Date.now(),
-          data: action.data,
-        },
-      ],
-    }
-
-    return { success: true, room: updatedRoom }
-  }
-
-  /**
-   * Execute select selfcare card action (Guide selects during night)
-   */
-  private executeSelectSelfcareCard(room: Room, action: GameAction): GameResult {
-    const updatedRoom: Room = {
-      ...room,
-      selectedCard: action.data?.card,
-      nightActions: {
-        ...room.nightActions,
-        cardSelected: true,
-      },
-      lastActivity: Date.now(),
-      gameLog: [
-        ...room.gameLog,
-        {
-          type: 'SELECT_SELFCARE_CARD',
-          actorId: action.actorId,
-          timestamp: Date.now(),
-          data: action.data,
-        },
-      ],
-    }
-
-    return { success: true, room: updatedRoom }
-  }
-
-  /**
-   * Execute give coin action
-   */
-  private executeGiveCoin(room: Room, action: GameAction): GameResult {
-    const { targetId, data } = action
-    const { coinType } = data || {}
-
-    // Update coins given tracking
-    const coinsGiven = { ...room.coinsGiven }
-    if (!coinsGiven[action.actorId]) {
-      coinsGiven[action.actorId] = {}
-    }
-    if (!coinsGiven[action.actorId][targetId!]) {
-      coinsGiven[action.actorId][targetId!] = { red: 0, yellow: 0, green: 0 }
-    }
-    coinsGiven[action.actorId][targetId!][coinType as keyof typeof coinsGiven[string][string]]++
-
-    // Update players
-    const updatedPlayers = room.players.map((p) => {
-      if (p.userId === targetId) {
-        return {
-          ...p,
-          coins: {
-            ...p.coins,
-            [coinType]: p.coins[coinType as keyof typeof p.coins] + 1,
-          },
-        }
-      }
-      return p
-    })
-
-    const updatedRoom: Room = {
-      ...room,
-      players: updatedPlayers,
-      coinsGiven,
-      lastActivity: Date.now(),
-      gameLog: [
-        ...room.gameLog,
-        {
-          type: 'GIVE_COIN',
-          actorId: action.actorId,
-          targetId: action.targetId,
-          timestamp: Date.now(),
-          data: { coinType },
-        },
-      ],
-    }
-
-    return { success: true, room: updatedRoom }
-  }
-
-  /**
-   * Execute vote action
-   */
-  private executeVote(room: Room, action: GameAction): GameResult {
-    const newVotes = { ...room.votes, [action.actorId]: action.targetId! }
-    const allVoted = room.players.length === Object.keys(newVotes).length
-
-    const updatedRoom: Room = {
-      ...room,
-      votes: newVotes,
-      lastActivity: Date.now(),
-      gameLog: [
-        ...room.gameLog,
-        {
-          type: 'VOTE',
-          actorId: action.actorId,
-          targetId: action.targetId,
-          timestamp: Date.now(),
-        },
-      ],
-    }
-
-    return { success: true, room: updatedRoom, autoAdvance: allVoted }
+  private calculateRewards(room: Room): Room {
+    return this.rewardCalculator.calculateRewards(room)
   }
 
   /**
@@ -342,11 +191,11 @@ export class GameEngine {
       return { success: false, error: 'GAME_ALREADY_STARTED' }
     }
 
-    if (room.players.length < 7) {
+    if (room.players.length < 5) {
       return { success: false, error: 'NOT_ENOUGH_PLAYERS' }
     }
 
-    if (room.players.length > 11) {
+    if (room.players.length > 10) {
       return { success: false, error: 'TOO_MANY_PLAYERS' }
     }
 
@@ -358,6 +207,18 @@ export class GameEngine {
       return { success: false, error: 'ROLE_ASSIGNMENT_FAILED', message: error.message }
     }
 
+    // Initialize coins: Yellow = player count, Red = 3, Green = 0
+    const playerCount = room.players.length
+    playersWithRoles = playersWithRoles.map((p) => ({
+      ...p,
+      coins: {
+        red: 3,
+        yellow: playerCount,
+        green: 0,
+      },
+      collectedGreenCoins: 0,
+    }))
+
     // Ensure host is narrator
     const hostIndex = playersWithRoles.findIndex((p) => p.userId === room.host)
     if (hostIndex !== -1) {
@@ -368,10 +229,12 @@ export class GameEngine {
         const narratorRole = playersWithRoles[narratorIndex].role
 
         playersWithRoles[hostIndex].role = narratorRole
+        playersWithRoles[hostIndex].originalRole = narratorRole  // update originalRole too
         playersWithRoles[hostIndex].isNarrator = true
         playersWithRoles[hostIndex].isSender = false
 
         playersWithRoles[narratorIndex].role = hostRole
+        playersWithRoles[narratorIndex].originalRole = hostRole  // update originalRole too
         playersWithRoles[narratorIndex].isNarrator = false
         playersWithRoles[narratorIndex].isSender = hostRole === 'Người Trao Gửi'
       }
@@ -396,7 +259,11 @@ export class GameEngine {
       selectedCard: null,
       votes: {},
       nightActions: { silenced: false, healed: false, cardSelected: false },
-      coinsGiven: {},
+      redCoinsGiven: {},
+      yellowCoinsGiven: {},
+      roleCompletions: {},
+      responses: {},
+      bonusesGiven: { healerBonus: false },
       gameLog: [
         {
           type: 'GAME_STARTED',
@@ -416,6 +283,10 @@ export class GameEngine {
   getPlayerView(room: Room, playerId: string): any {
     const player = room.players.find((p) => p.userId === playerId)
     const isNarrator = player?.isNarrator
+    
+    // Night phases where narrator can see all roles
+    const nightPhases = ['night', 'healer-turn', 'silencer-turn']
+    const isNightPhase = nightPhases.includes(room.phase)
 
     return {
       ...room,
@@ -426,7 +297,7 @@ export class GameEngine {
           p.userId === playerId ||
           p.isNarrator ||
           p.isSender ||
-          (isNarrator && room.phase === 'night')
+          (isNarrator && isNightPhase)
             ? p.role
             : undefined,
       })),
