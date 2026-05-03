@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # Backend - Node.js production
   backend:
     build:
       context: ./be
@@ -25,7 +24,18 @@ services:
       retries: 3
       start_period: 40s
 
-  # Caddy - Reverse proxy with auto HTTPS
+  frontend:
+    build:
+      context: ./fe
+      dockerfile: Dockerfile.prod
+      args:
+        - VITE_API_URL=https://quocbui.site
+    container_name: emcoin-frontend-prod
+    volumes:
+      - fe-dist:/var/www/html
+    networks:
+      - emcoin-network
+
   caddy:
     image: caddy:2-alpine
     container_name: emcoin-caddy
@@ -35,13 +45,14 @@ services:
       - "443:443/udp"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./fe/dist:/var/www/html:ro
+      - fe-dist:/var/www/html:ro
       - caddy-data:/data
       - caddy-config:/config
     networks:
       - emcoin-network
     depends_on:
       - backend
+      - frontend
     restart: always
 
 networks:
@@ -50,5 +61,6 @@ networks:
 
 volumes:
   backend-data:
+  fe-dist:
   caddy-data:
   caddy-config:

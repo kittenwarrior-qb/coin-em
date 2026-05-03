@@ -22,16 +22,8 @@ jobs:
           script: |
             set -e
             cd ${{ secrets.APP_PATH }}
-
             git pull origin main
-
-            # Build frontend
-            cd fe && npm ci && npm run build && cd ..
-
-            # Restart containers
             docker compose -f docker-compose.prod.yml down
             docker compose -f docker-compose.prod.yml up -d --build
-
-            # Health check
             timeout 30 bash -c 'until curl -sf http://localhost:3001/health; do sleep 2; done'
             echo "✅ Deploy done"
