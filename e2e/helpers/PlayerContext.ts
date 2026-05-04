@@ -131,6 +131,8 @@ export class PlayerContext {
 
   /** Narrator: advance to next phase */
   async clickNextTurn() {
+    // Wait > 800ms debounce on server/client side
+    await this.p.waitForTimeout(900)
     await this.p.waitForSelector('[data-testid="btn-next-turn"]', { timeout: 10_000 })
     await this.p.click('[data-testid="btn-next-turn"]')
   }

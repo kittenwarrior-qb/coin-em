@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import {
+  CartoonButton, CartoonCircleButton, CartoonInput, CartoonCard, CartoonBadge, CartoonScreen,
+} from '@/components/cartoon'
 
 type Screen = 'menu' | 'join' | 'create'
 
@@ -16,234 +19,234 @@ interface LobbyProps {
   onRefreshRooms: () => void
 }
 
-export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefreshRooms }: LobbyProps) {
-  const [screen, setScreen] = useState<Screen>('menu')
+// ─── Sub-screens ──────────────────────────────────────────────────────────────
+
+function MenuScreen({ onJoin, onCreate }: { onJoin: () => void; onCreate: () => void }) {
+  return (
+    <motion.div
+      key="menu"
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      className="flex-1 flex flex-col justify-center p-8 gap-4"
+      data-testid="lobby-menu"
+    >
+      <div className="text-center mb-4">
+        <div className="text-6xl mb-3">🎴</div>
+        <h1 className="font-display text-3xl text-[var(--c-black)]">EmCoin</h1>
+        <p className="font-body text-sm text-[var(--c-gray)] mt-1">Hành trình cảm xúc</p>
+      </div>
+
+      <CartoonButton color="blue" size="lg" onClick={onJoin} data-testid="btn-join-room">
+        🚪 Tham gia phòng
+      </CartoonButton>
+
+      <CartoonButton color="pink" size="lg" onClick={onCreate} data-testid="btn-create-room">
+        ✨ Tạo phòng mới
+      </CartoonButton>
+    </motion.div>
+  )
+}
+
+function JoinScreen({
+  availableRooms,
+  onBack,
+  onJoin,
+  onRefresh,
+}: {
+  availableRooms: RoomListItem[]
+  onBack: () => void
+  onJoin: (roomId: string, userName: string) => void
+  onRefresh: () => void
+}) {
   const [roomId, setRoomId] = useState('')
   const [userName, setUserName] = useState('')
   const [selectedRoom, setSelectedRoom] = useState<RoomListItem | null>(null)
 
-  // Auto-refresh rooms when on join screen
+  const targetRoomId = selectedRoom ? selectedRoom.id : roomId.trim()
+  const canJoin = !!userName.trim() && !!targetRoomId
+
+  return (
+    <motion.div
+      key="join"
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      className="flex-1 flex flex-col p-6 gap-4 overflow-y-auto scroll-cartoon"
+      data-testid="lobby-join"
+    >
+      {/* Header */}
+      <div className="flex items-center gap-3 pt-2">
+        <CartoonCircleButton color="gray" size="sm" onClick={onBack} aria-label="Quay lại">←</CartoonCircleButton>
+        <h2 className="font-display text-xl">Tham gia phòng</h2>
+      </div>
+
+      {/* Room list */}
+      {availableRooms.length > 0 ? (
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <span className="font-display text-sm text-[var(--c-gray-dark)]">Phòng đang chờ</span>
+            <button onClick={onRefresh} className="text-xs font-display text-[var(--c-blue-mid)] hover:underline">
+              🔄 Làm mới
+            </button>
+          </div>
+          <div className="flex flex-col gap-2 max-h-44 overflow-y-auto scroll-cartoon">
+            {availableRooms.map(room => (
+              <RoomListItem
+                key={room.id}
+                room={room}
+                selected={selectedRoom?.id === room.id}
+                onSelect={() => { setSelectedRoom(room); setRoomId('') }}
+              />
+            ))}
+          </div>
+        </div>
+      ) : (
+        <CartoonCard pastel="yellow" variant="sm" className="p-3 text-center">
+          <p className="font-body text-sm text-[var(--c-gray-dark)]">Chưa có phòng nào đang chờ</p>
+        </CartoonCard>
+      )}
+
+      {/* Manual input */}
+      <CartoonInput
+        label="Hoặc nhập mã phòng"
+        data-testid="input-room-id"
+        value={selectedRoom ? selectedRoom.id : roomId}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setRoomId(e.target.value); setSelectedRoom(null) }}
+        placeholder="Nhập mã phòng"
+        disabled={!!selectedRoom}
+      />
+
+      <CartoonInput
+        label="Tên của bạn"
+        data-testid="input-username-join"
+        value={userName}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUserName(e.target.value)}
+        placeholder="Nhập tên"
+      />
+
+      <CartoonButton
+        color="green"
+        size="lg"
+        className="mt-auto self-center"
+        disabled={!canJoin}
+        onClick={() => onJoin(targetRoomId, userName.trim())}
+        data-testid="btn-confirm-join"
+      >
+        Vào phòng 🎮
+      </CartoonButton>
+    </motion.div>
+  )
+}
+
+function CreateScreen({ onBack, onCreate }: { onBack: () => void; onCreate: (name: string) => void }) {
+  const [userName, setUserName] = useState('')
+
+  return (
+    <motion.div
+      key="create"
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      className="flex-1 flex flex-col justify-center p-6 gap-4"
+      data-testid="lobby-create"
+    >
+      <div className="flex items-center gap-3">
+        <CartoonCircleButton color="gray" size="sm" onClick={onBack} aria-label="Quay lại">←</CartoonCircleButton>
+        <h2 className="font-display text-xl">Tạo phòng mới</h2>
+      </div>
+
+      <CartoonInput
+        label="Tên của bạn"
+        data-testid="input-username-create"
+        value={userName}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUserName(e.target.value)}
+        placeholder="Nhập tên"
+      />
+
+      <CartoonCard pastel="yellow" variant="sm" className="p-3">
+        <p className="font-body text-sm text-[var(--c-gray-dark)]">
+          💡 Mã phòng sẽ được tạo tự động sau khi bạn tạo phòng
+        </p>
+      </CartoonCard>
+
+      <CartoonButton
+        color="yellow"
+        size="lg"
+        className="self-center"
+        disabled={!userName.trim()}
+        onClick={() => onCreate(userName.trim())}
+        data-testid="btn-confirm-create"
+      >
+        Tạo phòng 🏠
+      </CartoonButton>
+    </motion.div>
+  )
+}
+
+function RoomListItem({
+  room, selected, onSelect,
+}: { room: RoomListItem; selected: boolean; onSelect: () => void }) {
+  return (
+    <button
+      onClick={onSelect}
+      className={[
+        'p-3 rounded-xl border-[3px] text-left transition-all w-full',
+        selected
+          ? 'border-[var(--c-blue-mid)] bg-[var(--c-sky-mist)] shadow-cartoon'
+          : 'border-[var(--c-black)] bg-white hover:bg-[var(--c-sky-mist)]',
+      ].join(' ')}
+    >
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="font-display text-sm">{room.id}</div>
+          <div className="font-body text-xs text-[var(--c-gray)]">Host: {room.hostName}</div>
+        </div>
+        <CartoonBadge color={room.playerCount >= 7 ? 'green' : 'blue'}>
+          {room.playerCount}/11
+        </CartoonBadge>
+      </div>
+    </button>
+  )
+}
+
+// ─── Main Lobby ───────────────────────────────────────────────────────────────
+
+export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefreshRooms }: LobbyProps) {
+  const [screen, setScreen] = useState<Screen>('menu')
+
   useEffect(() => {
     if (screen === 'join') {
       onRefreshRooms()
-      const interval = setInterval(onRefreshRooms, 3000) // Refresh every 3s
-      return () => clearInterval(interval)
+      const id = setInterval(onRefreshRooms, 3000)
+      return () => clearInterval(id)
     }
   }, [screen, onRefreshRooms])
 
-  const handleJoin = () => {
-    if (!userName.trim()) return
-    const targetRoomId = selectedRoom ? selectedRoom.id : roomId.trim()
-    if (!targetRoomId) return
-    onJoinRoom(targetRoomId, userName.trim())
-  }
-
-  const handleCreate = () => {
-    if (!userName.trim()) return
-    onCreateRoom(userName.trim())
-  }
-
   return (
-    <div className="h-screen bg-[#FAFAF8] flex items-center justify-center overflow-hidden" data-testid="lobby">
-      <div className="w-full max-w-sm h-full bg-white">
-        <AnimatePresence mode="wait">
-          {screen === 'menu' && (
-            <motion.div
-              key="menu"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="h-full flex flex-col justify-center p-8 gap-4"
-              data-testid="lobby-menu"
-            >
-              <div className="text-center mb-4">
-                <div className="text-5xl mb-3">🎴</div>
-                <h1 className="text-2xl font-black text-gray-800">EmCoin</h1>
-                <p className="text-sm text-gray-500 mt-1">Hành trình cảm xúc</p>
-              </div>
-
-              <button
-                data-testid="btn-join-room"
-                onClick={() => setScreen('join')}
-                className="w-full py-4 rounded-2xl border-[3px] border-black bg-[#F0F5FF]
-                           text-base font-bold hover:bg-[#E0E5FF] active:scale-[0.98] transition-all"
-              >
-                Tham gia phòng
-              </button>
-
-              <button
-                data-testid="btn-create-room"
-                onClick={() => setScreen('create')}
-                className="w-full py-4 rounded-2xl border-[3px] border-black bg-[#FFF0F5]
-                           text-base font-bold hover:bg-[#FFE0E5] active:scale-[0.98] transition-all"
-              >
-                Tạo phòng mới
-              </button>
-            </motion.div>
-          )}
-
-          {screen === 'join' && (
-            <motion.div
-              key="join"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="h-full flex flex-col p-8 gap-5 overflow-y-auto"
-              data-testid="lobby-join"
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <button
-                  onClick={() => { setScreen('menu'); setSelectedRoom(null); setRoomId(''); setUserName('') }}
-                  className="w-8 h-8 rounded-full border-2 border-black flex items-center justify-center
-                             hover:bg-gray-100 active:scale-95 transition-all"
-                >
-                  ←
-                </button>
-                <h2 className="text-xl font-black text-gray-800">Tham gia phòng</h2>
-              </div>
-
-              {/* Available rooms list */}
-              {availableRooms.length > 0 && (
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="text-sm font-bold text-gray-600">Phòng đang chờ</label>
-                    <button
-                      onClick={onRefreshRooms}
-                      className="text-xs text-blue-600 hover:text-blue-800 font-bold"
-                    >
-                      🔄 Làm mới
-                    </button>
-                  </div>
-                  <div className="flex flex-col gap-2 max-h-48 overflow-y-auto mb-4">
-                    {availableRooms.map(room => (
-                      <button
-                        key={room.id}
-                        onClick={() => setSelectedRoom(room)}
-                        className={`p-3 rounded-xl border-2 text-left transition-all
-                          ${selectedRoom?.id === room.id 
-                            ? 'border-blue-500 bg-blue-50' 
-                            : 'border-black bg-white hover:bg-gray-50'}`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="text-sm font-bold text-gray-800">{room.id}</div>
-                            <div className="text-xs text-gray-500">Host: {room.hostName}</div>
-                          </div>
-                          <div className="text-xs font-bold text-gray-600">
-                            {room.playerCount}/11
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {availableRooms.length === 0 && (
-                <div className="bg-[#FFF9C4] rounded-xl p-4 border-2 border-black text-center">
-                  <p className="text-xs text-gray-600">
-                    Chưa có phòng nào đang chờ
-                  </p>
-                </div>
-              )}
-
-              {/* Manual room ID input */}
-              <div>
-                <label className="block text-sm font-bold text-gray-600 mb-2">
-                  Hoặc nhập mã phòng
-                </label>
-                <input
-                  data-testid="input-room-id"
-                  type="text"
-                  value={selectedRoom ? selectedRoom.id : roomId}
-                  onChange={e => { setRoomId(e.target.value); setSelectedRoom(null) }}
-                  placeholder="Nhập mã phòng"
-                  disabled={!!selectedRoom}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-black
-                             focus:outline-none focus:ring-2 focus:ring-blue-300
-                             disabled:bg-gray-100 disabled:cursor-not-allowed"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-gray-600 mb-2">Tên của bạn</label>
-                <input
-                  data-testid="input-username-join"
-                  type="text"
-                  value={userName}
-                  onChange={e => setUserName(e.target.value)}
-                  placeholder="Nhập tên"
-                  className="w-full px-4 py-3 rounded-xl border-2 border-black
-                             focus:outline-none focus:ring-2 focus:ring-blue-300"
-                />
-              </div>
-
-              <button
-                data-testid="btn-confirm-join"
-                onClick={handleJoin}
-                disabled={!userName.trim() || (!selectedRoom && !roomId.trim())}
-                className="w-full py-4 rounded-2xl border-[3px] border-black bg-[#6BCB77]
-                           text-base font-bold hover:bg-[#5BB767] active:scale-[0.98]
-                           disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-              >
-                Vào phòng
-              </button>
-            </motion.div>
-          )}
-
-          {screen === 'create' && (
-            <motion.div
-              key="create"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="h-full flex flex-col justify-center p-8 gap-5"
-              data-testid="lobby-create"
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <button
-                  onClick={() => setScreen('menu')}
-                  className="w-8 h-8 rounded-full border-2 border-black flex items-center justify-center
-                             hover:bg-gray-100 active:scale-95 transition-all"
-                >
-                  ←
-                </button>
-                <h2 className="text-xl font-black text-gray-800">Tạo phòng mới</h2>
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-gray-600 mb-2">Tên của bạn</label>
-                <input
-                  data-testid="input-username-create"
-                  type="text"
-                  value={userName}
-                  onChange={e => setUserName(e.target.value)}
-                  placeholder="Nhập tên"
-                  className="w-full px-4 py-3 rounded-xl border-2 border-black
-                             focus:outline-none focus:ring-2 focus:ring-blue-300"
-                />
-              </div>
-
-              <div className="bg-[#FFF9C4] rounded-xl p-4 border-2 border-black">
-                <p className="text-xs text-gray-600">
-                  💡 Mã phòng sẽ được tạo tự động sau khi bạn tạo phòng
-                </p>
-              </div>
-
-              <button
-                data-testid="btn-confirm-create"
-                onClick={handleCreate}
-                disabled={!userName.trim()}
-                className="w-full py-4 rounded-2xl border-[3px] border-black bg-[#FFD93D]
-                           text-base font-bold hover:bg-[#FFC91D] active:scale-[0.98]
-                           disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-              >
-                Tạo phòng
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </div>
+    <CartoonScreen data-testid="lobby">
+      <AnimatePresence mode="wait">
+        {screen === 'menu' && (
+          <MenuScreen
+            onJoin={() => setScreen('join')}
+            onCreate={() => setScreen('create')}
+          />
+        )}
+        {screen === 'join' && (
+          <JoinScreen
+            availableRooms={availableRooms}
+            onBack={() => setScreen('menu')}
+            onJoin={onJoinRoom}
+            onRefresh={onRefreshRooms}
+          />
+        )}
+        {screen === 'create' && (
+          <CreateScreen
+            onBack={() => setScreen('menu')}
+            onCreate={onCreateRoom}
+          />
+        )}
+      </AnimatePresence>
+    </CartoonScreen>
   )
 }

@@ -4,6 +4,7 @@ import WaitingRoom from './WaitingRoom'
 import GameBoard from './GameBoard'
 import { useSocket } from '../hooks/useSocket'
 import { getUserId } from '../utils/userId'
+import { CartoonScreen, CartoonButton } from '@/components/cartoon'
 
 export default function GameContainer() {
   const [forcelobby, setForceLobby] = useState(false)
@@ -54,36 +55,33 @@ export default function GameContainer() {
 
   if (!isConnected) {
     return (
-      <div data-testid="connecting" className="h-screen bg-[#FAFAF8] flex items-center justify-center overflow-hidden">
-        <div className="w-full max-w-sm h-full bg-white p-8 flex flex-col items-center justify-center text-center">
-          <div className="text-5xl mb-4 animate-bounce">🎴</div>
-          <h2 className="text-xl font-black text-gray-800 mb-2">Đang kết nối...</h2>
-          <p className="text-sm text-gray-600">Vui lòng đợi</p>
+      <CartoonScreen data-testid="connecting">
+        <div className="flex flex-col items-center justify-center flex-1 p-8 text-center gap-4">
+          <div className="text-6xl animate-bounce">🎴</div>
+          <h2 className="font-display text-2xl">Đang kết nối...</h2>
+          <p className="font-body text-sm text-[var(--c-gray)]">Vui lòng đợi</p>
+          <img src="/cartoon/icons/Loading-Spinner.svg" alt="" className="w-12 h-12 spin-cartoon opacity-60" />
         </div>
-      </div>
+      </CartoonScreen>
     )
   }
 
   if (error) {
     return (
-      <div className="h-screen bg-[#FAFAF8] flex items-center justify-center overflow-hidden">
-        <div className="w-full max-w-sm h-full bg-white p-8 flex flex-col items-center justify-center text-center">
-          <div className="text-5xl mb-4">⚠️</div>
-          <h2 className="text-xl font-black text-gray-800 mb-2">Lỗi</h2>
-          <p className="text-sm text-gray-600 mb-4">{error}</p>
-          <button
-            onClick={() => { window.location.reload() }}
-            className="px-6 py-3 rounded-2xl border-2 border-black bg-white
-                       text-sm font-bold hover:bg-gray-100 active:scale-95 transition-all"
-          >
-            Tải lại trang
-          </button>
+      <CartoonScreen>
+        <div className="flex flex-col items-center justify-center flex-1 p-8 text-center gap-4">
+          <div className="text-6xl">⚠️</div>
+          <h2 className="font-display text-2xl text-[var(--c-red)]">Lỗi kết nối</h2>
+          <p className="font-body text-sm text-[var(--c-gray)]">{error}</p>
+          <CartoonButton color="white" onClick={() => window.location.reload()}>
+            🔄 Tải lại trang
+          </CartoonButton>
         </div>
-      </div>
+      </CartoonScreen>
     )
   }
 
-  if (gameState === 'waiting' && roomState && socket) {
+  if (gameState === 'waiting' && roomState && isConnected) {
     return (
       <WaitingRoom
         roomId={roomState.id}
@@ -98,7 +96,7 @@ export default function GameContainer() {
     )
   }
 
-  if (gameState === 'playing' && roomState && socket) {
+  if (gameState === 'playing' && roomState && isConnected) {
     return (
       <GameBoard
         roomId={roomState.id}
