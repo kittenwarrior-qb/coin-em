@@ -107,10 +107,11 @@ interface CartoonCircleButtonProps extends React.ButtonHTMLAttributes<HTMLButton
   size?:    CircleSize
   iconSrc?: string
   iconAlt?: string
+  badge?:   number | string
 }
 
 export const CartoonCircleButton = forwardRef<HTMLButtonElement, CartoonCircleButtonProps>(
-  ({ color = 'blue', size = 'md', iconSrc, iconAlt = '', className, children, ...props }, ref) => {
+  ({ color = 'blue', size = 'md', iconSrc, iconAlt = '', badge, className, children, ...props }, ref) => {
     const src = CIRCLE_SRCS[color] ?? CIRCLE_SRCS.blue
 
     const sizes: Record<CircleSize, string> = {
@@ -143,6 +144,24 @@ export const CartoonCircleButton = forwardRef<HTMLButtonElement, CartoonCircleBu
             children
           )}
         </span>
+        {badge !== undefined && badge !== null && (
+          <span
+            className="absolute bottom-0 right-0 flex items-center justify-center font-display text-white"
+            style={{
+              background: 'linear-gradient(135deg, #7B4FD4, #5B2FB4)',
+              border: '2.5px solid white',
+              borderRadius: '9999px',
+              minWidth: 22,
+              height: 22,
+              fontSize: 11,
+              padding: '0 5px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.25)',
+              lineHeight: 1,
+            }}
+          >
+            {badge}
+          </span>
+        )}
       </button>
     )
   }

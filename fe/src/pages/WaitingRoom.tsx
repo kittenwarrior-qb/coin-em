@@ -38,7 +38,7 @@ export default function WaitingRoom({
   return (
     <CartoonScreen data-testid="waiting-room" panel={false}>
       {/* Actions — fixed to bottom */}
-      <div className="fixed bottom-0 left-0 right-0 px-4 pb-6 pt-3 flex flex-col gap-2 z-10" style={{ background: 'linear-gradient(to bottom, transparent, rgba(255,255,255,0.85) 30%)' }}>
+      <div className="fixed bottom-0 left-0 right-0 px-4 pb-6 pt-3 flex flex-col gap-2 z-10" style={{ background: 'linear-gradient(to bottom, transparent, #2cb9db 40%)' }}>
         {isHost ? (
           <>
             <CartoonButton
@@ -68,7 +68,7 @@ export default function WaitingRoom({
       </div>
 
       {/* Main content — centered vertically in remaining space */}
-      <div className="screen-panel flex flex-col justify-center" style={{ height: '100dvh', paddingBottom: isHost ? 160 : 120 }}>
+      <div className="screen-panel flex flex-col justify-center" style={{ height: '100dvh', paddingBottom: isHost ? 160 : 120, background: 'radial-gradient(circle at center, #4df0f7 0%, #3adbe7 33%, #25b0ca 66%, #2cb9db 100%)' }}>
 
         {/* Header */}
         <div className="flex-shrink-0 px-4 pt-3 pb-2 text-center">
