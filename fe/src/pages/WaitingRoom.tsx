@@ -49,7 +49,7 @@ export default function WaitingRoom({
               onClick={onStartGame}
               data-testid="btn-start-game"
             >
-              {canStart ? '🎮 Bắt đầu chơi' : `Cần 5 người (${players.length}/5)`}
+              {canStart ? '🎮 Bắt đầu chơi' : `Cần ít nhất 5 người (${players.length}/5)`}
             </CartoonButton>
             {onAddFakePlayers && players.length < MAX_PLAYERS && (
               <CartoonButton color="orange" className="w-full" onClick={onAddFakePlayers} data-testid="btn-add-bots">
