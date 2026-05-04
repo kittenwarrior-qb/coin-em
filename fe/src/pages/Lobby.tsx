@@ -31,18 +31,16 @@ function MenuScreen({ onJoin, onCreate }: { onJoin: () => void; onCreate: () => 
       className="flex-1 flex flex-col justify-center p-8 gap-4"
       data-testid="lobby-menu"
     >
-      <div className="text-center mb-4">
-        <div className="text-6xl mb-3">🎴</div>
-        <h1 className="font-display text-3xl text-[var(--c-black)]">EmCoin</h1>
-        <p className="font-body text-sm text-[var(--c-gray)] mt-1">Hành trình cảm xúc</p>
+      <div className="text-center" style={{ marginBottom: 32, marginTop: -40 }}>
+        <img src="/emcoin_logo.png" alt="EmCoin" className="mx-auto" style={{ height: 100, objectFit: 'contain', filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))' }} />
       </div>
 
       <CartoonButton color="blue" size="lg" onClick={onJoin} data-testid="btn-join-room">
-        🚪 Tham gia phòng
+        Tìm phòng
       </CartoonButton>
 
       <CartoonButton color="pink" size="lg" onClick={onCreate} data-testid="btn-create-room">
-        ✨ Tạo phòng mới
+        Tạo phòng
       </CartoonButton>
     </motion.div>
   )
@@ -224,7 +222,7 @@ export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefr
   }, [screen, onRefreshRooms])
 
   return (
-    <CartoonScreen data-testid="lobby">
+    <CartoonScreen data-testid="lobby" purpleBg>
       <AnimatePresence mode="wait">
         {screen === 'menu' && (
           <MenuScreen

@@ -10,6 +10,14 @@
 }
 
 @font-face {
+  font-family: 'Cookii';
+  src: url('/fonts/Cookii-Display.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: 'BPreplay';
   src: url('/fonts/BPreplayExtendedBold.otf') format('opentype');
   font-weight: 700;
@@ -85,9 +93,9 @@
   --ring:           var(--c-blue-mid);
 
   /* === Typography === */
-  --font-display:   'LilitaOne', 'Lilita One', system-ui, sans-serif;
-  --font-body:      'BPreplay', system-ui, sans-serif;
-  --font-sans:      'BPreplay', system-ui, sans-serif;
+  --font-display:   'Cookii', 'LilitaOne', system-ui, sans-serif;
+  --font-body:      'Cookii', 'BPreplay', system-ui, sans-serif;
+  --font-sans:      'Cookii', 'BPreplay', system-ui, sans-serif;
   --font-mono:      'IBM Plex Mono', monospace;
 
   /* === Cartoon border & radius === */
