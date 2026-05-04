@@ -1,118 +1,570 @@
 @import "tailwindcss";
 
+/* ─── Cartoon GUI Pack Fonts ─────────────────────────────────────────────── */
+@font-face {
+  font-family: 'LilitaOne';
+  src: url('/fonts/LilitaOne-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'BPreplay';
+  src: url('/fonts/BPreplayExtendedBold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ─── Cartoon Design Tokens ──────────────────────────────────────────────── */
 :root {
-  --background: oklch(0.9689 0.0090 314.7819);
-  --foreground: oklch(0.3729 0.0306 259.7328);
-  --card: oklch(1.0000 0 0);
-  --card-foreground: oklch(0.3729 0.0306 259.7328);
-  --popover: oklch(1.0000 0 0);
-  --popover-foreground: oklch(0.3729 0.0306 259.7328);
-  --primary: oklch(0.7090 0.1592 293.5412);
-  --primary-foreground: oklch(1.0000 0 0);
-  --secondary: oklch(0.9073 0.0530 306.0902);
-  --secondary-foreground: oklch(0.4461 0.0263 256.8018);
-  --muted: oklch(0.9464 0.0327 307.1745);
-  --muted-foreground: oklch(0.5510 0.0234 264.3637);
-  --accent: oklch(0.9376 0.0260 321.9388);
-  --accent-foreground: oklch(0.3729 0.0306 259.7328);
-  --destructive: oklch(0.8077 0.1035 19.5706);
-  --destructive-foreground: oklch(1.0000 0 0);
-  --border: oklch(0.9073 0.0530 306.0902);
-  --input: oklch(0.9073 0.0530 306.0902);
-  --ring: oklch(0.7090 0.1592 293.5412);
-  --chart-1: oklch(0.7090 0.1592 293.5412);
-  --chart-2: oklch(0.6056 0.2189 292.7172);
-  --chart-3: oklch(0.5413 0.2466 293.0090);
-  --chart-4: oklch(0.4907 0.2412 292.5809);
-  --chart-5: oklch(0.4320 0.2106 292.7591);
-  --sidebar: oklch(0.9073 0.0530 306.0902);
-  --sidebar-foreground: oklch(0.3729 0.0306 259.7328);
-  --sidebar-primary: oklch(0.7090 0.1592 293.5412);
-  --sidebar-primary-foreground: oklch(1.0000 0 0);
-  --sidebar-accent: oklch(0.9376 0.0260 321.9388);
-  --sidebar-accent-foreground: oklch(0.3729 0.0306 259.7328);
-  --sidebar-border: oklch(0.9073 0.0530 306.0902);
-  --sidebar-ring: oklch(0.7090 0.1592 293.5412);
-  --font-sans: Open Sans, sans-serif;
-  --font-serif: Source Serif 4, serif;
-  --font-mono: IBM Plex Mono, monospace;
-  --radius: 1.5rem;
-  --shadow-x: 0px;
-  --shadow-y: 8px;
-  --shadow-blur: 16px;
-  --shadow-spread: -4px;
-  --shadow-opacity: 0.08;
-  --shadow-color: hsl(0 0% 0%);
-  --shadow-2xs: 0px 8px 16px -4px hsl(0 0% 0% / 0.04);
-  --shadow-xs: 0px 8px 16px -4px hsl(0 0% 0% / 0.04);
-  --shadow-sm: 0px 8px 16px -4px hsl(0 0% 0% / 0.08), 0px 1px 2px -5px hsl(0 0% 0% / 0.08);
-  --shadow: 0px 8px 16px -4px hsl(0 0% 0% / 0.08), 0px 1px 2px -5px hsl(0 0% 0% / 0.08);
-  --shadow-md: 0px 8px 16px -4px hsl(0 0% 0% / 0.08), 0px 2px 4px -5px hsl(0 0% 0% / 0.08);
-  --shadow-lg: 0px 8px 16px -4px hsl(0 0% 0% / 0.08), 0px 4px 6px -5px hsl(0 0% 0% / 0.08);
-  --shadow-xl: 0px 8px 16px -4px hsl(0 0% 0% / 0.08), 0px 8px 10px -5px hsl(0 0% 0% / 0.08);
-  --shadow-2xl: 0px 8px 16px -4px hsl(0 0% 0% / 0.20);
-  --tracking-normal: 0em;
-  --spacing: 0.25rem;
+  /* === Palette (from Cartoon GUI Pack .colors, Unity float→hex) === */
+  --c-white:        #FFFFFF;
+  --c-black:        #1A1A1A;
+
+  /* Blue family */
+  --c-blue-dark:    #104A8F;
+  --c-blue:         #2F76AC;
+  --c-blue-mid:     #0E94C5;
+  --c-teal:         #22B8CF;
+  --c-teal-light:   #54F1FC;
+  --c-sky:          #A7F1FC;
+  --c-sky-pale:     #D0F0FF;
+  --c-sky-mist:     #E0F6FF;
+
+  /* Green family */
+  --c-green-dark:   #328F1A;
+  --c-green:        #53B025;
+  --c-green-light:  #94DD26;
+
+  /* Pink / Red family */
+  --c-pink:         #FF6993;
+  --c-pink-dark:    #BF2250;
+  --c-red:          #EB3C54;
+  --c-red-dark:     #A61932;
+
+  /* Yellow / Gold family */
+  --c-yellow:       #F5CC00;
+  --c-gold:         #E8A020;
+  --c-gold-dark:    #B57523;
+  --c-amber:        #FFD93D;
+
+  /* Purple */
+  --c-purple:       #7B4FD4;
+  --c-purple-light: #B89EF0;
+
+  /* Orange */
+  --c-orange:       #FF8C42;
+
+  /* Neutrals */
+  --c-gray-dark:    #3D3D3D;
+  --c-gray:         #68727C;
+  --c-gray-light:   #B3B3B3;
+  --c-gray-pale:    #E8ECF0;
+  --c-cream:        #FFF9F0;
+  --c-bg:           #EEF6FF;
+
+  /* === Semantic tokens === */
+  --background:     var(--c-bg);
+  --foreground:     var(--c-black);
+  --card:           var(--c-white);
+  --card-foreground: var(--c-black);
+  --primary:        var(--c-blue-mid);
+  --primary-foreground: var(--c-white);
+  --secondary:      var(--c-teal-light);
+  --secondary-foreground: var(--c-blue-dark);
+  --muted:          var(--c-sky-mist);
+  --muted-foreground: var(--c-gray);
+  --accent:         var(--c-amber);
+  --accent-foreground: var(--c-black);
+  --destructive:    var(--c-red);
+  --destructive-foreground: var(--c-white);
+  --border:         var(--c-black);
+  --input:          var(--c-white);
+  --ring:           var(--c-blue-mid);
+
+  /* === Typography === */
+  --font-display:   'LilitaOne', 'Lilita One', system-ui, sans-serif;
+  --font-body:      'BPreplay', system-ui, sans-serif;
+  --font-sans:      'BPreplay', system-ui, sans-serif;
+  --font-mono:      'IBM Plex Mono', monospace;
+
+  /* === Cartoon border & radius === */
+  --border-width:   3px;
+  --border-color:   var(--c-black);
+  --radius-sm:      0.75rem;   /* 12px */
+  --radius:         1rem;      /* 16px */
+  --radius-md:      1.25rem;   /* 20px */
+  --radius-lg:      1.5rem;    /* 24px */
+  --radius-xl:      2rem;      /* 32px */
+  --radius-full:    9999px;
+
+  /* === Cartoon shadows — removed (old UI style) === */
+  --shadow-cartoon-sm:  none;
+  --shadow-cartoon:     none;
+  --shadow-cartoon-md:  none;
+  --shadow-cartoon-lg:  none;
+  --shadow-cartoon-xl:  none;
+
+  /* === Pastel player backgrounds === */
+  --pastel-0: #FFF0F5;
+  --pastel-1: #F0F5FF;
+  --pastel-2: #F0FFF4;
+  --pastel-3: #FFFBF0;
+  --pastel-4: #F5F0FF;
+  --pastel-5: #F0FFFF;
+  --pastel-6: #FFF5F0;
+  --pastel-7: #F0FFF8;
+  --pastel-8: #FAFFF0;
 }
 
+/* ─── Tailwind v4 theme mapping ──────────────────────────────────────────── */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
+  /* Colors */
+  --color-background:   var(--background);
+  --color-foreground:   var(--foreground);
+  --color-card:         var(--card);
   --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
+  --color-primary:      var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
+  --color-secondary:    var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
+  --color-muted:        var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
+  --color-accent:       var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
+  --color-destructive:  var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+  --color-border:       var(--border);
+  --color-input:        var(--input);
+  --color-ring:         var(--ring);
 
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono);
-  --font-serif: var(--font-serif);
+  /* Cartoon palette as Tailwind tokens */
+  --color-c-blue-dark:    var(--c-blue-dark);
+  --color-c-blue:         var(--c-blue);
+  --color-c-blue-mid:     var(--c-blue-mid);
+  --color-c-teal:         var(--c-teal);
+  --color-c-teal-light:   var(--c-teal-light);
+  --color-c-sky:          var(--c-sky);
+  --color-c-sky-pale:     var(--c-sky-pale);
+  --color-c-sky-mist:     var(--c-sky-mist);
+  --color-c-green-dark:   var(--c-green-dark);
+  --color-c-green:        var(--c-green);
+  --color-c-green-light:  var(--c-green-light);
+  --color-c-pink:         var(--c-pink);
+  --color-c-pink-dark:    var(--c-pink-dark);
+  --color-c-red:          var(--c-red);
+  --color-c-red-dark:     var(--c-red-dark);
+  --color-c-yellow:       var(--c-yellow);
+  --color-c-gold:         var(--c-gold);
+  --color-c-gold-dark:    var(--c-gold-dark);
+  --color-c-amber:        var(--c-amber);
+  --color-c-purple:       var(--c-purple);
+  --color-c-purple-light: var(--c-purple-light);
+  --color-c-orange:       var(--c-orange);
+  --color-c-gray-dark:    var(--c-gray-dark);
+  --color-c-gray:         var(--c-gray);
+  --color-c-gray-light:   var(--c-gray-light);
+  --color-c-gray-pale:    var(--c-gray-pale);
+  --color-c-cream:        var(--c-cream);
+  --color-c-bg:           var(--c-bg);
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  /* Fonts */
+  --font-display: var(--font-display);
+  --font-sans:    var(--font-sans);
+  --font-body:    var(--font-body);
+  --font-mono:    var(--font-mono);
 
-  --shadow-2xs: var(--shadow-2xs);
-  --shadow-xs: var(--shadow-xs);
-  --shadow-sm: var(--shadow-sm);
-  --shadow: var(--shadow);
-  --shadow-md: var(--shadow-md);
-  --shadow-lg: var(--shadow-lg);
-  --shadow-xl: var(--shadow-xl);
-  --shadow-2xl: var(--shadow-2xl);
+  /* Radius */
+  --radius-sm:  var(--radius-sm);
+  --radius-md:  var(--radius-md);
+  --radius-lg:  var(--radius-lg);
+  --radius-xl:  var(--radius-xl);
+
+  /* Shadows */
+  --shadow-cartoon-sm: var(--shadow-cartoon-sm);
+  --shadow-cartoon:    var(--shadow-cartoon);
+  --shadow-cartoon-md: var(--shadow-cartoon-md);
+  --shadow-cartoon-lg: var(--shadow-cartoon-lg);
+  --shadow-cartoon-xl: var(--shadow-cartoon-xl);
 }
 
+/* ─── Base layer ─────────────────────────────────────────────────────────── */
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+  *, *::before, *::after {
+    box-sizing: border-box;
   }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--c-bg);
+    color: var(--c-black);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    line-height: 1.2;
+  }
+}
+
+/* ─── Cartoon component classes ──────────────────────────────────────────── */
+@layer components {
+
+  /*
+   * ── PILL BUTTON (large, text label) ──────────────────────────────────────
+   *
+   * Replicates the exact Unity prefab structure:
+   *   Layer 0 (::before)  = Shadow  — same PNG, offset y +6px, opacity 0.22
+   *   Layer 1 (element)   = Button  — the colored PNG sprite
+   *   Layer 2 (children)  = Text / Icon
+   *
+   * On press: the inner content shifts up 6px (translateY -6px),
+   * covering the shadow → looks like button sinks into the shadow.
+   * Shadow pseudo-element stays fixed.
+   */
+  /* ── Cards / Panels ── */
+
+  .card-cartoon {
+    background: var(--c-white);
+    border: var(--border-width) solid var(--c-black);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .card-cartoon-sm {
+    border-radius: var(--radius);
+  }
+
+  .card-cartoon-lg {
+    border-radius: var(--radius-xl);
+  }
+
+  /* Pastel tinted card */
+  .card-pastel-blue   { background: #EEF6FF; }
+  .card-pastel-pink   { background: #FFF0F5; }
+  .card-pastel-green  { background: #F0FFF4; }
+  .card-pastel-yellow { background: #FFFBF0; }
+  .card-pastel-purple { background: #F5F0FF; }
+  .card-pastel-teal   { background: #F0FFFF; }
+
+  /* ── Inputs (matches pack: pastel fill, pill shape, no hard border) ── */
+
+  .input-cartoon {
+    width: 100%;
+    padding: 0.85rem 1.25rem;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: var(--c-blue-dark);
+    /* Pastel fill — pack uses light teal/pink fills */
+    background: #E0F7FA;
+    border: none;
+    border-radius: 9999px;
+    outline: none;
+    transition: background 120ms ease, box-shadow 120ms ease;
+    /* Subtle inner shadow for depth */
+    box-shadow: inset 0 3px 6px rgba(0,0,0,0.08);
+  }
+
+  .input-cartoon::placeholder {
+    color: var(--c-blue-mid);
+    opacity: 0.7;
+  }
+
+  .input-cartoon:focus {
+    background: #B2EBF2;
+    box-shadow: inset 0 3px 6px rgba(0,0,0,0.1), 0 0 0 3px rgba(14,148,197,0.2);
+  }
+
+  .input-cartoon:disabled {
+    background: var(--c-gray-pale);
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  /* Pink variant (for password fields etc) */
+  .input-cartoon-pink {
+    background: #FCE4EC;
+    color: var(--c-pink-dark);
+  }
+  .input-cartoon-pink::placeholder { color: var(--c-pink); opacity: 0.8; }
+  .input-cartoon-pink:focus { background: #F8BBD0; }
+
+  /* ── Badges / Pills ── */
+
+  .badge-cartoon {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--radius-full);
+    border: 2px solid var(--c-black);
+    white-space: nowrap;
+    line-height: 1;
+  }
+
+  .badge-yellow  { background: var(--c-amber);        color: var(--c-black); }
+  .badge-blue    { background: var(--c-blue-mid);      color: var(--c-white); }
+  .badge-green   { background: var(--c-green);         color: var(--c-white); }
+  .badge-red     { background: var(--c-red);           color: var(--c-white); }
+  .badge-pink    { background: var(--c-pink);          color: var(--c-white); }
+  .badge-purple  { background: var(--c-purple);        color: var(--c-white); }
+  .badge-teal    { background: var(--c-teal);          color: var(--c-white); }
+  .badge-white   { background: var(--c-white);         color: var(--c-black); }
+  .badge-black   { background: var(--c-black);         color: var(--c-white); }
+
+  /* ── Coin circles ── */
+
+  .coin-cartoon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--radius-full);
+    border: var(--border-width) solid var(--c-black);
+    font-size: 1.25rem;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .coin-red    { background: linear-gradient(135deg, #FF6B6B 0%, #FF4444 100%); }
+  .coin-yellow { background: linear-gradient(135deg, #FFD93D 0%, #F5CC00 100%); }
+  .coin-green  { background: linear-gradient(135deg, #6BCB77 0%, #53B025 100%); }
+  .coin-gold   { background: linear-gradient(135deg, #F8EF5A 0%, #E28F35 100%); }
+
+  /* ── Progress bar ── */
+
+  .progress-cartoon {
+    width: 100%;
+    height: 1.25rem;
+    background: var(--c-gray-pale);
+    border: var(--border-width) solid var(--c-black);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+  }
+
+  .progress-cartoon-fill {
+    height: 100%;
+    border-radius: var(--radius-full);
+    transition: width 400ms ease;
+    position: relative;
+  }
+
+  /* Glossy highlight on progress fill */
+  .progress-cartoon-fill::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 4px;
+    right: 4px;
+    height: 35%;
+    background: rgba(255, 255, 255, 0.45);
+    border-radius: var(--radius-full);
+  }
+
+  .progress-blue   .progress-cartoon-fill { background: linear-gradient(90deg, var(--c-blue-mid), var(--c-teal)); }
+  .progress-green  .progress-cartoon-fill { background: linear-gradient(90deg, var(--c-green), var(--c-green-light)); }
+  .progress-pink   .progress-cartoon-fill { background: linear-gradient(90deg, var(--c-pink-dark), var(--c-pink)); }
+  .progress-yellow .progress-cartoon-fill { background: linear-gradient(90deg, var(--c-gold), var(--c-amber)); }
+
+  /* ── Modal / Overlay panel ── */
+
+  .modal-cartoon {
+    background: var(--c-white);
+    border: var(--border-width) solid var(--c-black);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+  }
+
+  .modal-header-cartoon {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: var(--border-width) solid var(--c-black);
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+  }
+
+  /* ── Player card ── */
+
+  .player-card-cartoon {
+    border: var(--border-width) solid var(--c-black);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    user-select: none;
+    transition: transform 80ms ease;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .player-card-cartoon:active {
+    transform: scale(0.97);
+  }
+
+  .player-card-me {
+    border-color: var(--c-blue-mid);
+    box-shadow: 0 0 0 3px rgba(14, 148, 197, 0.3);
+  }
+
+  /* ── Avatar circle ── */
+
+  .avatar-cartoon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    border: 2px solid var(--c-black);
+    background: var(--c-white);
+    font-family: var(--font-display);
+    font-weight: 400;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  /* ── Screen / Page wrapper ── */
+
+  .screen-cartoon {
+    min-height: 100dvh;
+    background: var(--c-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .screen-panel {
+    width: 100%;
+    max-width: 24rem;
+    min-height: 100dvh;
+    background: var(--c-white);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── Divider ── */
+
+  .divider-cartoon {
+    height: var(--border-width);
+    background: var(--c-black);
+    border: none;
+    margin: 0;
+  }
+
+  /* ── Tooltip / Speech bubble ── */
+
+  .bubble-cartoon {
+    background: var(--c-white);
+    border: var(--border-width) solid var(--c-black);
+    border-radius: var(--radius-lg);
+    padding: 0.5rem 0.875rem;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    position: relative;
+  }
+
+  /* ── Scrollbar styling ── */
+
+  .scroll-cartoon {
+    scrollbar-width: thin;
+    scrollbar-color: var(--c-gray-light) transparent;
+  }
+
+  .scroll-cartoon::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scroll-cartoon::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scroll-cartoon::-webkit-scrollbar-thumb {
+    background: var(--c-gray-light);
+    border-radius: 3px;
+  }
+}
+
+/* ─── Utility layer ──────────────────────────────────────────────────────── */
+@layer utilities {
+  /* Font families */
+  .font-display { font-family: var(--font-display); }
+  .font-body    { font-family: var(--font-body); }
+
+  /* Cartoon shadows — removed */
+  .shadow-cartoon-sm { box-shadow: none; }
+  .shadow-cartoon    { box-shadow: none; }
+  .shadow-cartoon-md { box-shadow: none; }
+  .shadow-cartoon-lg { box-shadow: none; }
+  .shadow-cartoon-xl { box-shadow: none; }
+
+  /* Cartoon border */
+  .border-cartoon    { border: var(--border-width) solid var(--c-black); }
+  .border-cartoon-2  { border: 2px solid var(--c-black); }
+
+  /* Press animation (for non-button elements) */
+  .press-cartoon {
+    transition: transform 80ms ease;
+  }
+  .press-cartoon:active {
+    transform: scale(0.97);
+  }
+
+  /* Glow pulse (for highlighted player) */
+  .glow-gold {
+    animation: glow-gold 1.5s ease-in-out infinite;
+  }
+
+  @keyframes glow-gold {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(245, 204, 0, 0); }
+    50%       { box-shadow: 0 0 16px 4px rgba(245, 204, 0, 0.7); }
+  }
+
+  /* Bounce in */
+  .bounce-in {
+    animation: bounce-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  @keyframes bounce-in {
+    from { transform: scale(0.5); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+
+  /* Spin (loading) */
+  .spin-cartoon {
+    animation: spin-cartoon 1s linear infinite;
+  }
+
+  @keyframes spin-cartoon {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Glossy highlight overlay (top-left white ellipse, like pack SVGs) */
+  .gloss-cartoon {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .gloss-cartoon::before {
+    content: '';
+    position: absolute;
+    top: 8%;
+    left: 12%;
+    width: 40%;
+    height: 28%;
+    background: rgba(255, 255, 255, 0.45);
+    border-radius: 50%;
+    transform: rotate(-20deg);
+    pointer-events: none;
   }
 }

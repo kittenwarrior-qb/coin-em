@@ -1,4 +1,8 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
+import {
+  CartoonButton, CartoonCard, CartoonBadge, CartoonAvatar, CartoonScreen, QuitConfirmModal,
+} from '@/components/cartoon'
 
 interface Player {
   socketId: string
@@ -9,7 +13,7 @@ interface Player {
 interface WaitingRoomProps {
   roomId: string
   players: Player[]
-  hostSocketId: string // Actually hostUserId from backend
+  hostSocketId: string
   mySocketId: string
   myUserId?: string
   onStartGame: () => void
@@ -18,74 +22,65 @@ interface WaitingRoomProps {
 }
 
 export default function WaitingRoom({
-  roomId,
-  players,
-  hostSocketId,
-  myUserId,
-  onStartGame,
-  onLeave,
-  onAddFakePlayers,
+  roomId, players, hostSocketId, myUserId,
+  onStartGame, onLeave, onAddFakePlayers,
 }: WaitingRoomProps) {
-  // hostSocketId is actually hostUserId now (backend sends room.host which is userId)
-  const hostUserId = hostSocketId
-  
-  // Find host player by userId
-  const hostPlayer = players.find(p => p.userId === hostUserId)
-  
-  // Check if I'm the host
-  const isHost = myUserId === hostUserId
-  const canStart = players.length >= 7
-  
-  console.log('[WaitingRoom] hostUserId:', hostUserId, 'myUserId:', myUserId, 'isHost:', isHost, 'hostPlayer:', hostPlayer)
+  const [showQuit, setShowQuit] = useState(false)
+  const hostUserId  = hostSocketId
+  const isHost      = myUserId === hostUserId
+  const canStart    = players.length >= 7
+  const fillPct     = Math.round((players.length / 11) * 100)
 
   return (
-    <div className="h-screen bg-[#FAFAF8] flex items-center justify-center overflow-hidden" data-testid="waiting-room">
-      <div className="w-full max-w-sm h-full bg-white p-6 flex flex-col gap-5">
+    <CartoonScreen data-testid="waiting-room">
+      <div className="flex flex-col gap-4 p-6 flex-1">
+
         {/* Header */}
-        <div className="text-center pt-8">
-          <div className="text-4xl mb-2">🎴</div>
-          <h2 className="text-xl font-black text-gray-800 mb-1">Phòng chờ</h2>
-          <div className="inline-flex items-center gap-2 bg-[#F0F5FF] px-4 py-2 rounded-full border-2 border-black">
-            <span className="text-xs font-bold text-gray-500">Room ID:</span>
-            <span data-testid="room-id" className="text-sm font-black text-gray-800">{roomId}</span>
+        <div className="text-center pt-6">
+          <div className="text-5xl mb-2">🎴</div>
+          <h2 className="font-display text-2xl">Phòng chờ</h2>
+          <div className="inline-flex items-center gap-2 mt-2 px-4 py-2 rounded-full border-cartoon bg-[var(--c-sky-mist)] shadow-cartoon-sm">
+            <span className="font-body text-xs text-[var(--c-gray)]">Room ID:</span>
+            <span data-testid="room-id" className="font-display text-sm">{roomId}</span>
           </div>
         </div>
 
-        {/* Member count */}
-        <div className="bg-[#FFF9C4] rounded-xl p-3 border-2 border-black text-center">
-          <span data-testid="player-count" className="text-sm font-bold text-gray-700">
+        {/* Player count bar */}
+        <CartoonCard pastel="yellow" variant="sm" className="p-3 text-center">
+          <span data-testid="player-count" className="font-display text-sm">
             Thành viên: {players.length} / 11
           </span>
-        </div>
+          <div className="progress-cartoon progress-blue mt-2">
+            <div className="progress-cartoon-fill" style={{ width: `${fillPct}%` }} />
+          </div>
+        </CartoonCard>
 
         {/* Player list */}
-        <div className="flex flex-col gap-2 flex-1 overflow-y-auto" data-testid="player-list">
+        <div className="flex flex-col gap-2 flex-1 overflow-y-auto scroll-cartoon" data-testid="player-list">
           {players.map((player, idx) => {
-            const isMe = player.userId === myUserId
+            const isMe         = player.userId === myUserId
             const isPlayerHost = player.userId === hostUserId
             return (
               <motion.div
                 key={player.socketId}
                 data-testid={`waiting-player-${player.name}`}
-                initial={{ opacity: 0, x: -10 }}
+                initial={{ opacity: 0, x: -12 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.05 }}
-                className="flex items-center gap-3 p-3 rounded-xl border-2 border-black bg-white"
+                className="flex items-center gap-3 p-3 card-cartoon card-cartoon-sm"
               >
-                <div className="w-10 h-10 rounded-full border-2 border-black bg-[#F0FFF4]
-                                flex items-center justify-center text-base font-black">
-                  {player.name[0]}
-                </div>
-                <div className="flex-1">
-                  <div className="text-sm font-bold text-gray-800">
+                <CartoonAvatar name={player.name} colorIndex={idx} size="md" />
+                <div className="flex-1 min-w-0">
+                  <div className="font-display text-sm truncate">
                     {player.name}
-                    {isMe && <span className="text-xs text-gray-500 ml-1">(Bạn)</span>}
+                    {isMe && <span className="font-body text-xs text-[var(--c-gray)] ml-1">(Bạn)</span>}
                   </div>
                 </div>
                 {isPlayerHost && (
-                  <div data-testid="host-badge" className="bg-black text-white text-[10px] font-bold px-2 py-1 rounded-full">
-                    HOST
-                  </div>
+                  <CartoonBadge color="black" data-testid="host-badge">HOST</CartoonBadge>
+                )}
+                {isMe && !isPlayerHost && (
+                  <CartoonBadge color="blue">Tôi</CartoonBadge>
                 )}
               </motion.div>
             )
@@ -93,48 +88,54 @@ export default function WaitingRoom({
         </div>
 
         {/* Actions */}
-        <div className="flex flex-col gap-2 pb-6">
+        <div className="flex flex-col gap-2 pb-4">
           {isHost ? (
             <>
-              <button
-                data-testid="btn-start-game"
-                onClick={onStartGame}
+              <CartoonButton
+                color={canStart ? 'green' : 'gray'}
+                size="lg"
+                className="w-full"
                 disabled={!canStart}
-                className="w-full py-4 rounded-2xl border-[3px] border-black bg-[#6BCB77]
-                           text-base font-bold hover:bg-[#5BB767] active:scale-[0.98]
-                           disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                onClick={onStartGame}
+                data-testid="btn-start-game"
               >
-                {canStart ? 'Bắt đầu chơi' : 'Cần ít nhất 7 người'}
-              </button>
-              
+                {canStart ? '🎮 Bắt đầu chơi' : `Cần ít nhất 7 người (${players.length}/7)`}
+              </CartoonButton>
+
               {onAddFakePlayers && players.length < 11 && (
-                <button
-                  data-testid="btn-add-bots"
+                <CartoonButton
+                  color="orange"
+                  className="w-full"
                   onClick={onAddFakePlayers}
-                  className="w-full py-3 rounded-2xl border-2 border-black bg-[#FFE5B4]
-                             text-sm font-bold hover:bg-[#FFD89B] active:scale-[0.98] transition-all"
+                  data-testid="btn-add-bots"
                 >
                   🤖 Thêm Bot +1 (Debug)
-                </button>
+                </CartoonButton>
               )}
             </>
           ) : (
-            <div data-testid="waiting-for-host" className="w-full py-4 rounded-2xl border-[3px] border-black bg-[#F0F5FF]
-                            text-base font-bold text-center text-gray-600">
-              Đang chờ host bắt đầu...
-            </div>
+            <CartoonCard pastel="blue" variant="sm" className="p-4 text-center" data-testid="waiting-for-host">
+              <p className="font-display text-sm text-[var(--c-blue-dark)]">
+                ⏳ Đang chờ host bắt đầu...
+              </p>
+            </CartoonCard>
           )}
 
-          <button
-            data-testid="btn-leave-room"
-            onClick={onLeave}
-            className="w-full py-3 rounded-2xl border-2 border-black bg-white
-                       text-sm font-bold hover:bg-gray-100 active:scale-[0.98] transition-all"
-          >
+          <CartoonButton color="white" className="w-full" onClick={() => setShowQuit(true)} data-testid="btn-leave-room">
             Rời phòng
-          </button>
+          </CartoonButton>
         </div>
       </div>
-    </div>
+
+      <QuitConfirmModal
+        open={showQuit}
+        onConfirm={() => { setShowQuit(false); onLeave() }}
+        onCancel={() => setShowQuit(false)}
+        message="Bạn có muốn rời phòng không?"
+        subMessage="Bạn sẽ mất chỗ trong phòng!"
+        confirmLabel="Rời"
+        cancelLabel="Ở lại"
+      />
+    </CartoonScreen>
   )
 }

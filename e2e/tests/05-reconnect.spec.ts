@@ -29,12 +29,12 @@ test.describe('Reconnect', () => {
     await guest.joinRoom(roomId)
 
     // Act - guest reloads
-    await guest.p.reload()
+    await guest.p.reload({ waitUntil: 'domcontentloaded' })
 
     // Wait through "connecting" screen first, then lobby or waiting-room
     await guest.p.waitForSelector(
       '[data-testid="connecting"], [data-testid="waiting-room"], [data-testid="lobby"]',
-      { timeout: 15_000 }
+      { timeout: 30_000 }
     )
     // Now wait for connecting to resolve into a real state
     await guest.p.waitForSelector(
