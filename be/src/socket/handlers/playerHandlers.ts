@@ -40,6 +40,7 @@ export function registerPlayerHandlers(io: Server, socket: Socket) {
           host: updatedRoom.host,
         })
       } else {
+        io.to(roomId).emit('room_closed', { roomId })
         console.log(`[room_closed] Phòng ${roomId} đã đóng`)
       }
     }, 10_000)

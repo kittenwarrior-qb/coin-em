@@ -11,7 +11,7 @@ export const CartoonInput = forwardRef<HTMLInputElement, CartoonInputProps>(
     return (
       <div className="flex flex-col gap-1.5">
         {label && (
-          <label htmlFor={inputId} className="font-display text-sm text-[var(--c-gray-dark)]">
+          <label htmlFor={inputId} className="font-display text-sm" style={{ color: '#2f76ac' }}>
             {label}
           </label>
         )}

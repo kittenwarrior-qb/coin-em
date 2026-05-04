@@ -63,6 +63,7 @@ interface UseSocketReturn {
   sendResponse: (roomId: string, message: string) => void
   ntgVote: (roomId: string, targetSocketId: string) => void
   shareReflection: (roomId: string, message: string) => void
+  updateProfile: (roomId: string, name: string, avatarIndex: number, bgIndex: number) => void
 }
 
 // Session helpers
@@ -368,6 +369,12 @@ export function useSocket(): UseSocketReturn {
     socketRef.current.emit('share_reflection', { roomId, message })
   }, [])
 
+  const updateProfile = useCallback((roomId: string, name: string, avatarIndex: number, bgIndex: number) => {
+    if (!socketRef.current) return
+    const userId = getUserId()
+    socketRef.current.emit('update_profile', { roomId, userId, name, avatarIndex, bgIndex })
+  }, [])
+
   return {
     socket: socketRef.current,
     isConnected,
@@ -391,5 +398,6 @@ export function useSocket(): UseSocketReturn {
     sendResponse,
     ntgVote,
     shareReflection,
+    updateProfile,
   }
 }

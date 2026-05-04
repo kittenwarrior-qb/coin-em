@@ -25,11 +25,43 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'Quicksand';
+  src: url('/fonts/Quicksand/Quicksand-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Quicksand';
+  src: url('/fonts/Quicksand/Quicksand-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Quicksand';
+  src: url('/fonts/Quicksand/Quicksand-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Quicksand';
+  src: url('/fonts/Quicksand/Quicksand-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ─── Cartoon Design Tokens ──────────────────────────────────────────────── */
 :root {
   /* === Palette (from Cartoon GUI Pack .colors, Unity float→hex) === */
   --c-white:        #FFFFFF;
-  --c-black:        #1A1A1A;
+  --c-black:        #2f76ac;
 
   /* Blue family */
   --c-blue-dark:    #104A8F;
@@ -94,12 +126,12 @@
 
   /* === Typography === */
   --font-display:   'Cookii', 'LilitaOne', system-ui, sans-serif;
-  --font-body:      'Cookii', 'BPreplay', system-ui, sans-serif;
-  --font-sans:      'Cookii', 'BPreplay', system-ui, sans-serif;
+  --font-body:      'Quicksand', system-ui, sans-serif;
+  --font-sans:      'Quicksand', system-ui, sans-serif;
   --font-mono:      'IBM Plex Mono', monospace;
 
   /* === Cartoon border & radius === */
-  --border-width:   3px;
+  --border-width:   1.5px;
   --border-color:   var(--c-black);
   --radius-sm:      0.75rem;   /* 12px */
   --radius:         1rem;      /* 16px */
@@ -210,16 +242,19 @@
 
   body {
     background-color: var(--c-bg);
-    color: var(--c-black);
+    color: #2f76ac;
     font-family: var(--font-body);
     font-size: 1rem;
     line-height: 1.5;
+    font-weight: 700;
     -webkit-font-smoothing: antialiased;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
     line-height: 1.2;
+    font-weight: 400;
+    color: #2f76ac;
   }
 }
 
@@ -270,7 +305,7 @@
     padding: 0.85rem 1.25rem;
     font-family: var(--font-body);
     font-size: 1rem;
-    color: var(--c-blue-dark);
+    color: #2f76ac;
     /* Pastel fill — pack uses light teal/pink fills */
     background: #E0F7FA;
     border: none;
@@ -287,8 +322,7 @@
   }
 
   .input-cartoon:focus {
-    background: #B2EBF2;
-    box-shadow: inset 0 3px 6px rgba(0,0,0,0.1), 0 0 0 3px rgba(14,148,197,0.2);
+    outline: none;
   }
 
   .input-cartoon:disabled {
