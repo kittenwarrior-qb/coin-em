@@ -10,7 +10,7 @@ interface JoinRoomModalProps {
   onRefresh: () => void
 }
 
-export function JoinRoomModal({ open, onClose, availableRooms, onJoin, onRefresh: _ }: JoinRoomModalProps) {
+export function JoinRoomModal({ open, onClose, availableRooms, onJoin }: Omit<JoinRoomModalProps, 'onRefresh'> & { onRefresh?: () => void }) {
   const [userName, setUserName] = useState('')
   const [selectedRoom, setSelectedRoom] = useState<RoomListItem | null>(null)
 

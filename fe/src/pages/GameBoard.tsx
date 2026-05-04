@@ -35,7 +35,7 @@ interface GameBoardProps {
 }
 
 export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, onUpdateProfile }: GameBoardProps) {
-  const { nextTurn, selectCard: emitSelectCard, sendResponse, ntgVote, shareReflection, giveCoin, submitVote } = useSocket()
+  const { nextTurn, selectCard: emitSelectCard, sendResponse, ntgVote, shareReflection, submitVote } = useSocket()
   const [showQuit, setShowQuit] = useState(false)
 
   // Phase-local state
