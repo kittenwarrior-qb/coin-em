@@ -1,5 +1,10 @@
 import { Room } from '../../game/types'
-import { redisClient, redisAvailable } from '../../../redis'
+import { redisClient, redisAvailable as getRedisAvailable } from '../../../redis'
+import { autoSaveRoom } from '../../../persistence'
+
+// Helper to get live redisAvailable value (avoids stale primitive import)
+import * as redisModule from '../../../redis'
+const isRedisAvailable = () => redisModule.redisAvailable
 
 const ROOM_PREFIX = 'room:'
 const ROOM_INDEX = 'rooms:index'
@@ -12,7 +17,7 @@ export class RoomRepository {
   private cache: Map<string, Room> = new Map()
 
   private async redisSave(room: Room): Promise<void> {
-    if (!redisAvailable) return
+    if (!isRedisAvailable()) return
     try {
       await Promise.all([
         redisClient.set(roomKey(room.id), JSON.stringify(room)),
@@ -24,7 +29,7 @@ export class RoomRepository {
   }
 
   private async redisDelete(roomId: string): Promise<void> {
-    if (!redisAvailable) return
+    if (!isRedisAvailable()) return
     try {
       await Promise.all([
         redisClient.del(roomKey(roomId)),
@@ -87,6 +92,7 @@ export class RoomRepository {
   save(room: Room): void {
     this.cache.set(room.id, room)
     void this.redisSave(room)
+    if (!isRedisAvailable()) autoSaveRoom(room)
   }
 
   update(roomId: string, updates: Partial<Room>): Room | null {
@@ -95,6 +101,7 @@ export class RoomRepository {
     const updated = { ...room, ...updates, lastActivity: Date.now() }
     this.cache.set(roomId, updated)
     void this.redisSave(updated)
+    if (!isRedisAvailable()) autoSaveRoom(updated)
     return updated
   }
 

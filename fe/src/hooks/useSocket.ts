@@ -90,6 +90,7 @@ export function useSocket(): UseSocketReturn {
   const [availableRooms, setAvailableRooms] = useState<RoomListItem[]>([])
   const [error, setError] = useState<string | null>(null)
   const reconnectAttempted = useRef(false)
+  const reconnectPending = useRef(false)
   const [currentSocketId, setCurrentSocketId] = useState<string>('')
 
   useEffect(() => {
@@ -122,6 +123,7 @@ export function useSocket(): UseSocketReturn {
         const session = loadSession()
         if (session) {
           console.log('[Socket] Attempting to reconnect to room:', session.roomId, 'with userId:', session.userId, 'new socket.id:', socket.id)
+          reconnectPending.current = true
           socket.emit('reconnect_room', {
             roomId: session.roomId,
             userId: session.userId,
@@ -142,6 +144,7 @@ export function useSocket(): UseSocketReturn {
     // Room events
     socket.on('room_state', (state: RoomState) => {
       console.log('[Socket] Room state:', state)
+      reconnectPending.current = false
       setRoomState(state)
       setError(null)
       
@@ -241,11 +244,34 @@ export function useSocket(): UseSocketReturn {
 
     socket.on('error', (err: { code: string; message: string }) => {
       console.error('[Socket] Error:', err)
-      setError(err.message)
-      // Clear session if room not found
+      // If error arrives while reconnect is pending
+      if (reconnectPending.current) {
+        reconnectPending.current = false
+        const session = loadSession()
+        // player_not_found: room exists but player was removed (e.g. server restart)
+        // → try to rejoin the room instead of going to lobby
+        if (err.code === 'player_not_found' && session) {
+          console.log('[Socket] player_not_found during reconnect, attempting join_room fallback')
+          socket.emit('join_room', {
+            roomId: session.roomId,
+            name: session.userName,
+            userId: session.userId,
+            createIfMissing: false,
+          })
+          return
+        }
+        // Any other error → clear session and go back to lobby silently
+        clearSessionStorage()
+        reconnectAttempted.current = false
+        return
+      }
+      // room_not_found: clear session, không set error — GameContainer sẽ tự về Lobby
       if (err.code === 'room_not_found') {
         clearSessionStorage()
+        reconnectAttempted.current = false
+        return
       }
+      setError(err.message ?? JSON.stringify(err))
     })
 
     // Cleanup

@@ -34,8 +34,8 @@ Call log:
     - generic [ref=e17]: Player1(Bạn)
     - generic [ref=e18]: HOST
   - generic [ref=e19]:
-    - button "Cần ít nhất 7 người" [disabled] [ref=e20]
-    - button "🤖 Thêm Bot +1 (Debug)" [ref=e21]
+    - button "Cần 5 người" [disabled] [ref=e20]
+    - button "Thêm Bot" [ref=e21]
     - button "Rời phòng" [ref=e22]
 ```
 
