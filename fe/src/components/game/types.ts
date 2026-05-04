@@ -11,6 +11,8 @@ export interface Player {
   isSender?: boolean
   isMuted?: boolean
   isHealed?: boolean
+  avatarIndex?: number
+  bgIndex?: number
   coins: { red: number; yellow: number; green: number }
 }
 
@@ -24,6 +26,8 @@ export interface RoomState {
     role?: string
     isNarrator?: boolean
     isSender?: boolean
+    avatarIndex?: number
+    bgIndex?: number
     coins?: { red: number; yellow: number; green: number }
   }>
   status: string

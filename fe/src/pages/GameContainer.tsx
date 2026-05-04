@@ -111,6 +111,7 @@ export default function GameContainer() {
         mySocketId={mySocketId}
         myUserId={myUserId}
         onLeave={handleLeaveRoom}
+        onUpdateProfile={handleUpdateProfile}
       />
     )
   }

@@ -10,11 +10,13 @@ interface ProfileModalProps {
   currentName: string
   currentAvatarIndex: number
   currentBgIndex: number
+  lockName?: boolean
+  currentRole?: string
   onSave: (name: string, avatarIndex: number, bgIndex: number) => void
 }
 
 export function ProfileModal({
-  open, onClose, currentName, currentAvatarIndex, currentBgIndex, onSave,
+  open, onClose, currentName, currentAvatarIndex, currentBgIndex, lockName, currentRole, onSave,
 }: ProfileModalProps) {
   const [name, setName] = useState(currentName)
   const [avatarIdx, setAvatarIdx] = useState(currentAvatarIndex)
@@ -78,7 +80,12 @@ export function ProfileModal({
             </div>
           </div>
           <div className="flex-1">
-            <CartoonInput label="Tên hiển thị" value={name} onChange={e => setName(e.target.value)} placeholder="Nhập tên" style={{ background: '#fff', boxShadow: 'none' }} />
+            <CartoonInput label="Tên hiển thị" value={name} onChange={e => setName(e.target.value)} placeholder="Nhập tên" disabled={lockName} style={{ background: '#fff', boxShadow: 'none', opacity: lockName ? 0.6 : 1 }} />
+            {lockName && currentRole && (
+              <div className="mt-1 px-3 py-1 rounded-full text-center font-display text-xs" style={{ background: '#fff4e6', color: '#f59e0b' }}>
+                {currentRole}
+              </div>
+            )}
           </div>
         </div>
 

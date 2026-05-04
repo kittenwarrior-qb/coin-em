@@ -9,6 +9,8 @@ interface CartoonAvatarProps extends React.HTMLAttributes<HTMLDivElement> {
   size?: 'sm' | 'md' | 'lg'
   avatarIndex?: number
   bgIndex?: number
+  /** Override the white border color */
+  borderColor?: string
   /** Legacy: single index for both */
   colorIndex?: number
 }
@@ -16,6 +18,7 @@ interface CartoonAvatarProps extends React.HTMLAttributes<HTMLDivElement> {
 export function CartoonAvatar({
   name, size = 'md',
   avatarIndex, bgIndex, colorIndex = 0,
+  borderColor = 'white',
   className, style, ...props
 }: CartoonAvatarProps) {
   const aIdx = (avatarIndex ?? colorIndex) % AVATAR_ICONS.length
@@ -43,7 +46,7 @@ export function CartoonAvatar({
         className="absolute"
         style={{
           inset: s.inset,
-          background: 'white',
+          background: borderColor,
           maskImage: MASK, maskSize: MASK_SIZE,
           WebkitMaskImage: MASK, WebkitMaskSize: MASK_SIZE,
         }}
