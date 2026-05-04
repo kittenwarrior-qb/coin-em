@@ -49,7 +49,7 @@ export function CartoonModal({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
           className="fixed inset-0 z-50 flex items-center justify-center px-4"
-          style={{ background: 'rgba(0,0,0,0.6)' }}
+          style={{ background: 'rgba(0,0,0,0.35)' }}
           onClick={persistent ? undefined : onClose}
         >
           {/* Wrapper — chứa cả headline nhô ra ngoài + close button */}
@@ -65,54 +65,47 @@ export function CartoonModal({
 
             {/* ── Headline Flag — nhô lên trên panel, căn giữa ── */}
             {title && (
-              <div className="absolute -top-7 left-0 right-0 flex justify-center z-10 pointer-events-none">
-                <div
-                  className="relative flex items-center justify-center px-8"
-                  style={{ height: 56 }}
-                >
+              <div className="absolute -top-10 left-0 right-0 flex justify-center z-10 pointer-events-none">
+                <div className="relative flex items-center justify-center" style={{ height: 80 }}>
                   <img
                     src="/cartoon/ui/Headline-Flag.png"
                     alt=""
-                    className="absolute inset-0 w-full h-full object-fill"
+                    className="h-full w-auto"
                     draggable={false}
                   />
-                  <span className="relative font-display text-white text-lg drop-shadow-md whitespace-nowrap">
+                  <span className="absolute font-display text-white text-2xl drop-shadow-md whitespace-nowrap">
                     {title}
                   </span>
                 </div>
               </div>
             )}
 
-            {/* ── Panel chính — Rounded Rectangle 9-slice ── */}
-            <div className="relative rounded-[1.75rem] overflow-hidden border-[3px] border-black bg-white">
-
-              {/* Inner glow overlay (teal tint, top layer) */}
-              <img
-                src="/cartoon/ui/Inner-Glow-Rounded-Rectangle.png"
-                alt=""
-                className="absolute inset-0 w-full h-full object-fill pointer-events-none z-10 opacity-20"
-                draggable={false}
-              />
-
-              {/* Nội dung */}
-              <div className={cn('relative z-20', title ? 'pt-10 pb-5 px-5' : 'p-5')}>
+            {/* ── Panel chính — Panel-Teal.png 9-slice (800×722, slice=120px)
+                border-image giữ nguyên 4 góc, stretch phần giữa theo content ── */}
+            <div
+              style={{
+                borderImage: 'url(/cartoon/ui/Panel-Teal.png) 120 fill / 40px / 0px stretch',
+              }}
+            >
+              <div className={cn(title ? 'pt-16 pb-5 px-5' : 'p-5')}>
                 {children}
               </div>
             </div>
 
-            {/* ── Close Button — ngoài panel, góc trên phải ── */}
+            {/* ── Close Button — blue-teal, ngoài panel góc trên phải ── */}
             {!hideClose && onClose && (
-              <div className="absolute -top-3 -right-3 z-30">
+              <div className="absolute -top-[1px] -right-[1px] z-30">
                 <CartoonCircleButton
-                  color="red"
+                  color="blue-teal"
                   size="sm"
                   onClick={onClose}
                   aria-label="Đóng"
+                  className="!h-8 !w-8"
                 >
                   <img
                     src="/cartoon/icons/X-Icon-Rounded.svg"
                     alt="close"
-                    className="w-[55%] h-[55%] object-contain brightness-0 invert"
+                    className="w-[33%] h-[33%] object-contain brightness-0 invert"
                     draggable={false}
                   />
                 </CartoonCircleButton>
