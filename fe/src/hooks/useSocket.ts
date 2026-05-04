@@ -52,6 +52,7 @@ interface UseSocketReturn {
   getRoomState: (roomId: string) => void
   listRooms: () => void
   clearSession: () => void
+  leaveRoom: (roomId: string) => void
   nightAction: (roomId: string, action: string, targetSocketId?: string, cardData?: object) => void
   nextPhase: (roomId: string) => void
   giveCoin: (roomId: string, receiverSocketId: string, coinType: string) => void
@@ -334,6 +335,11 @@ export function useSocket(): UseSocketReturn {
     reconnectAttempted.current = false
   }, [])
 
+  const leaveRoom = useCallback((roomId: string) => {
+    if (!socketRef.current) return
+    socketRef.current.emit('leave_room', { roomId })
+  }, [])
+
   const addFakePlayers = useCallback((roomId: string) => {
     if (!socketRef.current) return
     socketRef.current.emit('add_fake_players', { roomId })
@@ -387,6 +393,7 @@ export function useSocket(): UseSocketReturn {
     getRoomState,
     listRooms,
     clearSession,
+    leaveRoom,
     nightAction,
     nextPhase,
     giveCoin,

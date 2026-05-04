@@ -6,7 +6,25 @@ const disconnectTimers = new Map<string, ReturnType<typeof setTimeout>>()
 
 export function registerPlayerHandlers(io: Server, socket: Socket) {
   /**
-   * Disconnect handler
+   * Intentional leave — remove player immediately, no grace period
+   */
+  socket.on('leave_room', ({ roomId }: { roomId: string }) => {
+    cancelDisconnectTimer(socket.id)
+    const updatedRoom = roomService.removePlayer(roomId, socket.id)
+    console.log(`[leave_room] ${socket.id} intentionally left room ${roomId}`)
+    if (updatedRoom) {
+      io.to(roomId).emit('player_left', {
+        socketId: socket.id,
+        players: updatedRoom.players,
+        host: updatedRoom.host,
+      })
+    } else {
+      io.to(roomId).emit('room_closed', { roomId })
+    }
+  })
+
+  /**
+   * Disconnect handler — grace period for accidental disconnects
    */
   socket.on('disconnect', () => {
     const room = roomRepository.findBySocketId(socket.id)
