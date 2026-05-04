@@ -6,6 +6,7 @@ export { CartoonCard } from './CartoonCard'
 export { CartoonScreen } from './CartoonScreen'
 export { CartoonModal } from './CartoonModal'
 export { QuitConfirmModal } from './QuitConfirmModal'
+export { CartoonScrollArea } from './CartoonScrollArea'
 
 // Form controls
 export { CartoonInput } from './CartoonInput'
