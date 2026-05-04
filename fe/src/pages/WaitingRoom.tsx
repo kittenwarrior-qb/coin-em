@@ -28,9 +28,12 @@ export default function WaitingRoom({
 }: WaitingRoomProps) {
   const [showQuit, setShowQuit] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
-  const [myAvatarIndex, setMyAvatarIndex] = useState(0)
-  const [myBgIndex, setMyBgIndex] = useState(0)
   const [myDisplayName, setMyDisplayName] = useState('')
+
+  // Init avatar/bg from server data (set by backend on join)
+  const myPlayer = players.find(p => p.userId === myUserId)
+  const [myAvatarIndex, setMyAvatarIndex] = useState(() => myPlayer?.avatarIndex ?? 0)
+  const [myBgIndex, setMyBgIndex] = useState(() => myPlayer?.bgIndex ?? 0)
   const hostUserId = hostSocketId
   const isHost     = myUserId === hostUserId
   const canStart   = players.length >= 5
