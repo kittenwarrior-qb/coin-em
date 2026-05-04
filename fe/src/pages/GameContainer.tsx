@@ -8,7 +8,7 @@ import { CartoonScreen, CartoonButton } from '@/components/cartoon'
 
 export default function GameContainer() {
   const [forcelobby, setForceLobby] = useState(false)
-  const { socket, isConnected, roomState, availableRooms, error, currentSocketId, joinRoom, startGame, listRooms, clearSession, addFakePlayers, updateProfile } = useSocket()
+  const { socket, isConnected, roomState, availableRooms, error, currentSocketId, joinRoom, startGame, listRooms, clearSession, addFakePlayers, updateProfile, leaveRoom } = useSocket()
   
   const mySocketId = currentSocketId || socket?.id || ''
   const myUserId = getUserId()
@@ -28,13 +28,14 @@ export default function GameContainer() {
   }, [roomState, startGame])
 
   const handleLeaveRoom = useCallback(() => {
+    if (roomState) leaveRoom(roomState.id)
     clearSession()
     setForceLobby(true)
     if (socket) {
       socket.disconnect()
       socket.connect()
     }
-  }, [clearSession, socket])
+  }, [clearSession, leaveRoom, roomState, socket])
 
   const handleAddFakePlayers = useCallback(() => {
     if (!roomState) return

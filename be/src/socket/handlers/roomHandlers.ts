@@ -58,6 +58,12 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
         })
       }
 
+      // Cancel any pending disconnect timer for this player's old socket
+      const existingPlayer = room.players.find((p) => p.userId === userId)
+      if (existingPlayer) {
+        cancelDisconnectTimer(existingPlayer.socketId)
+      }
+
       // Add or update player
       const player: Player = {
         socketId: socket.id,
@@ -66,12 +72,6 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
         avatarIndex: existingPlayer?.avatarIndex ?? randomAvatarIndex(),
         bgIndex: existingPlayer?.bgIndex ?? randomBgIndex(),
         coins: { red: 0, yellow: 0, green: 0 },
-      }
-
-      // Cancel any pending disconnect timer for this player's old socket
-      const existingPlayer = room.players.find((p) => p.userId === userId)
-      if (existingPlayer) {
-        cancelDisconnectTimer(existingPlayer.socketId)
       }
 
       room = roomService.addPlayer(roomId, player)
