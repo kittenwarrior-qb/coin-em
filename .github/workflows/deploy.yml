@@ -24,5 +24,6 @@ jobs:
             cd ${{ secrets.APP_PATH }}
             git pull origin main
             docker compose -f docker-compose.prod.yml down
+            docker compose -f docker-compose.prod.yml build --no-cache frontend
             docker compose -f docker-compose.prod.yml up -d --build
             echo "✅ Deploy done — containers started"

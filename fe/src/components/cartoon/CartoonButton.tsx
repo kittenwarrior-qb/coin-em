@@ -61,6 +61,7 @@ export const CartoonButton = forwardRef<HTMLButtonElement, CartoonButtonProps>(
           src={src}
           alt=""
           className={cn('block w-auto object-contain', heights[size])}
+          style={{ filter: 'drop-shadow(0 6px 4px rgba(0,0,0,0.18))' }}
           draggable={false}
         />
         <span className="absolute inset-0 flex items-center justify-center font-display text-[1.1rem] drop-shadow-md whitespace-nowrap px-4 pointer-events-none">
@@ -132,6 +133,7 @@ export const CartoonCircleButton = forwardRef<HTMLButtonElement, CartoonCircleBu
           src={src}
           alt=""
           className={cn('block w-auto object-contain', sizes[size])}
+          style={{ filter: 'drop-shadow(0 6px 4px rgba(0,0,0,0.18))' }}
           draggable={false}
         />
         <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
