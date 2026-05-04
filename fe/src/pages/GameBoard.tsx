@@ -8,12 +8,14 @@ import { useGameFlow } from '../hooks/useGameFlow'
 import type { CardData } from '../stores/types'
 import { PHASE_LABELS, NIGHT_PHASES } from '../stores/types'
 
-import { CartoonButton, CartoonCircleButton } from '@/components/cartoon'
+import { CartoonButton, CartoonCircleButton, QuitConfirmModal } from '@/components/cartoon'
 import { CoinStack }        from '@/components/game/CoinStack'
 import { PlayerCard }       from '@/components/game/PlayerCard'
 import { CenterBoard }      from '@/components/game/CenterBoard'
 import { FlipCard }         from '@/components/game/FlipCard'
 import { CardInventory, CARD_DATA } from '@/components/game/CardInventory'
+import { PlayerLayout }     from '@/components/game/PlayerLayout'
+import { MiniPlayerToken }  from '@/components/game/MiniPlayerToken'
 import {
   GroupResponseOverlay,
   ReflectionSharingOverlay,
@@ -30,10 +32,12 @@ interface GameBoardProps {
   mySocketId: string
   myUserId: string
   onLeave: () => void
+  onUpdateProfile?: (name: string, avatarIndex: number, bgIndex: number) => void
 }
 
-export default function GameBoard({ roomState, mySocketId, myUserId, onLeave }: GameBoardProps) {
+export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, onUpdateProfile }: GameBoardProps) {
   const { nightAction: emitNightAction, nextTurn, selectCard: emitSelectCard, sendResponse, ntgVote, shareReflection, giveCoin, submitVote } = useSocket()
+  const [showQuit, setShowQuit] = useState(false)
 
   // Phase-local state
   const [responseText,       setResponseText]       = useState('')
@@ -65,6 +69,8 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave }: 
       isMe: p.userId ? p.userId === myUserId : p.socketId === mySocketId,
       isNarrator: p.isNarrator,
       isSender: p.isSender,
+      avatarIndex: p.avatarIndex,
+      bgIndex: p.bgIndex,
       coins: p.coins || { red: 0, yellow: 0, green: 0 },
     }))
     setPlayers(converted.sort((a, b) => (a.isMe ? -1 : b.isMe ? 1 : 0)))
@@ -170,7 +176,7 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave }: 
           color="gray"
           size="sm"
           className="absolute top-2 right-2 z-10"
-          onClick={onLeave}
+          onClick={() => setShowQuit(true)}
           aria-label="Rời phòng"
         >
           ←
@@ -188,20 +194,27 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave }: 
         {/* Center board */}
         <CenterBoard selectedCards={selectedCards} />
 
-        {/* Player grid */}
-        <div data-testid="players-grid" className="grid grid-cols-3 gap-3 w-full flex-1 mt-16 mb-20 px-1">
-          {players.map((player, idx) => (
-            <PlayerCard
-              key={player.id}
-              player={player}
-              playerIndex={idx}
-              onExpand={() => setExpandedPlayer(player)}
-              onSendCoin={coin => sendCoin(player.id, coin)}
-              onNightAction={isNightPhase ? handleNightAction : undefined}
-              onVote={gameStep === 'guess-silencer' ? handleVoteSilencer : undefined}
-              isNightPhase={isNightPhase}
-            />
-          ))}
+        {/* Player layout around center board */}
+        <div data-testid="players-grid" className="flex-1 min-h-0 mt-10 mb-2">
+          <PlayerLayout
+            players={players}
+            renderCenter={() => (
+              <div className="h-full flex flex-col">
+                <CenterBoard selectedCards={selectedCards} />
+              </div>
+            )}
+            renderPlayer={({ player, position, index }) => (
+              <MiniPlayerToken
+                key={player.id}
+                player={player}
+                index={index}
+                isTop={position === 'top'}
+                isBottom={position === 'bottom'}
+                onClick={() => setExpandedPlayer(player)}
+                onUpdateProfile={onUpdateProfile}
+              />
+            )}
+          />
         </div>
 
         {/* Bottom action bar */}
@@ -356,6 +369,16 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave }: 
           />
         )}
       </AnimatePresence>
+
+      <QuitConfirmModal
+        open={showQuit}
+        onConfirm={() => { setShowQuit(false); onLeave() }}
+        onCancel={() => setShowQuit(false)}
+        message="Bạn có muốn rời game không?"
+        subMessage="Tiến trình sẽ bị mất!"
+        confirmLabel="Rời"
+        cancelLabel="Ở lại"
+      />
     </div>
   )
 }
