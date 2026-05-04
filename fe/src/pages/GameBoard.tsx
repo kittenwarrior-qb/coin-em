@@ -6,11 +6,10 @@ import { useGameStore, useUIStore } from '../stores'
 import { useGameState, useGameActions, useGameUI } from '../hooks/useGameState'
 import { useGameFlow } from '../hooks/useGameFlow'
 import type { CardData } from '../stores/types'
-import { PHASE_LABELS, NIGHT_PHASES } from '../stores/types'
+import { PHASE_LABELS } from '../stores/types'
 
 import { CartoonButton, CartoonCircleButton, QuitConfirmModal } from '@/components/cartoon'
 import { CoinStack }        from '@/components/game/CoinStack'
-import { PlayerCard }       from '@/components/game/PlayerCard'
 import { CenterBoard }      from '@/components/game/CenterBoard'
 import { FlipCard }         from '@/components/game/FlipCard'
 import { CardInventory, CARD_DATA } from '@/components/game/CardInventory'
@@ -99,20 +98,12 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
 
   // ─── Handlers ──────────────────────────────────────────────────────────────
 
-  const sendCoin = (targetId: string, coin: CoinType) => {
-    if (gameStep === 'give-coins') {
-      giveCoin(roomState.id, targetId, coin)
-    } else {
-      const t = players.find(p => p.id === targetId)
-      if (t) updatePlayer(targetId, { coins: { ...t.coins, [coin]: t.coins[coin] + 1 } })
-    }
-    addFlyingCoin(coin === 'red' ? '❤️' : coin === 'yellow' ? '💛' : '💚')
+  const sendCoin = (_targetId: string, _coin: CoinType) => {
+    // reserved for give-coins phase
   }
 
-  const handleNightAction = (targetId: string) => {
-    if (!NIGHT_PHASES.includes(gamePhase) || !myPlayer) return
-    const action = myPlayer.role === 'Người Chữa Lành' ? 'heal' : myPlayer.role === 'Người Im Lặng' ? 'silence' : null
-    if (action) emitNightAction(roomState.id, action, targetId)
+  const handleNightAction = (_targetId: string) => {
+    // reserved for night phases
   }
 
   const handleDrawSituation = () => {
@@ -161,7 +152,6 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
   const currentRound = roomState.currentRound || 1
   const totalRounds  = roomState.totalRounds || 1
   const myCoinCount  = myPlayer?.coins || { red: 0, yellow: 0, green: 0 }
-  const isNightPhase = NIGHT_PHASES.includes(gamePhase)
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
@@ -192,28 +182,28 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
         </div>
 
         {/* Center board */}
-        <CenterBoard selectedCards={selectedCards} />
 
         {/* Player layout around center board */}
-        <div data-testid="players-grid" className="flex-1 min-h-0 mt-10 mb-2">
+        <div data-testid="players-grid" className="flex-1 min-h-0 mt-10">
           <PlayerLayout
             players={players}
             renderCenter={() => (
-              <div className="h-full flex flex-col">
-                <CenterBoard selectedCards={selectedCards} />
-              </div>
+              <CenterBoard selectedCards={selectedCards} />
             )}
-            renderPlayer={({ player, position, index }) => (
-              <MiniPlayerToken
-                key={player.id}
-                player={player}
-                index={index}
-                isTop={position === 'top'}
-                isBottom={position === 'bottom'}
-                onClick={() => setExpandedPlayer(player)}
-                onUpdateProfile={onUpdateProfile}
-              />
-            )}
+            renderPlayer={({ player, position, index }) => {
+              if (!player) return null
+              return (
+                <MiniPlayerToken
+                  key={player.id}
+                  player={player}
+                  index={index}
+                  isTop={position === 'top'}
+                  isBottom={position === 'bottom'}
+                  onClick={() => setExpandedPlayer(player)}
+                  onUpdateProfile={onUpdateProfile}
+                />
+              )
+            }}
           />
         </div>
 
