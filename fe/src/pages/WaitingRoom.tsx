@@ -26,7 +26,7 @@ export default function WaitingRoom({
   const [showQuit, setShowQuit] = useState(false)
   const hostUserId = hostSocketId
   const isHost     = myUserId === hostUserId
-  const canStart   = players.length >= 7
+  const canStart   = players.length >= 5
   const MAX_PLAYERS = 10
 
   // Pad with empty slots up to MAX_PLAYERS so scroll area always has content

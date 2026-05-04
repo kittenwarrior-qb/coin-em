@@ -1,6 +1,7 @@
 import { Server, Socket } from 'socket.io'
 import { roomRepository, roomService } from '../../modules/room'
 import { Player } from '../../modules/game/types'
+import { cancelDisconnectTimer } from './playerHandlers'
 
 export function registerRoomHandlers(io: Server, socket: Socket) {
   /**
@@ -58,6 +59,12 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
         coins: { red: 0, yellow: 0, green: 0 },
       }
 
+      // Cancel any pending disconnect timer for this player's old socket
+      const existingPlayer = room.players.find((p) => p.userId === userId)
+      if (existingPlayer) {
+        cancelDisconnectTimer(existingPlayer.socketId)
+      }
+
       room = roomService.addPlayer(roomId, player)
       socket.join(roomId)
       console.log(`[join_room] ${name} (userId: ${userId}) vào phòng ${roomId}`)
@@ -98,6 +105,9 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
     const existingPlayer = room.players.find((p) => p.userId === userId)
 
     if (existingPlayer) {
+      // Cancel any pending disconnect timer for old socket
+      cancelDisconnectTimer(existingPlayer.socketId)
+
       // Update socket ID
       const updatedPlayers = room.players.map((p) =>
         p.userId === userId ? { ...p, socketId: socket.id } : p

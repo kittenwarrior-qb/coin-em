@@ -46,25 +46,35 @@ export function CartoonScrollArea({ children, className, style, alwaysShowScroll
     if (!el) return
     const ro = new ResizeObserver(updateThumb)
     ro.observe(el)
-    // also observe children size changes
     const mo = new MutationObserver(updateThumb)
     mo.observe(el, { childList: true, subtree: true })
     return () => { ro.disconnect(); mo.disconnect() }
   }, [updateThumb])
 
-  const onThumbMouseDown = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+  useEffect(() => {
+    const thumb = thumbRef.current
+    if (!thumb) return
+    thumb.addEventListener('mousedown', onThumbMouseDown)
+    thumb.addEventListener('touchstart', onThumbTouchStart, { passive: false })
+    return () => {
+      thumb.removeEventListener('mousedown', onThumbMouseDown)
+      thumb.removeEventListener('touchstart', onThumbTouchStart)
+    }
+  })
+
+  const thumbRef = useRef<HTMLDivElement>(null)
+
+  const onThumbMouseDown = useCallback((e: MouseEvent) => {
     e.preventDefault()
     isDragging.current = true
     setIsThumbActive(true)
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
-    dragStartY.current = clientY
+    dragStartY.current = e.clientY
     dragStartScrollTop.current = viewportRef.current?.scrollTop ?? 0
 
-    const onMove = (ev: MouseEvent | TouchEvent) => {
+    const onMove = (ev: MouseEvent) => {
       const el = viewportRef.current
       if (!el) return
-      const y = 'touches' in ev ? (ev as TouchEvent).touches[0].clientY : (ev as MouseEvent).clientY
-      const delta = y - dragStartY.current
+      const delta = ev.clientY - dragStartY.current
       const { scrollHeight, clientHeight } = el
       const trackH = clientHeight - TRACK_PADDING * 2
       const thumbH = Math.max(60, Math.min(trackH, trackH * (clientHeight / scrollHeight)))
@@ -77,12 +87,37 @@ export function CartoonScrollArea({ children, className, style, alwaysShowScroll
       setIsThumbActive(false)
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseup', onUp)
-      window.removeEventListener('touchmove', onMove)
-      window.removeEventListener('touchend', onUp)
     }
 
     window.addEventListener('mousemove', onMove)
     window.addEventListener('mouseup', onUp)
+  }, [])
+
+  const onThumbTouchStart = useCallback((e: TouchEvent) => {
+    e.preventDefault()
+    isDragging.current = true
+    setIsThumbActive(true)
+    dragStartY.current = e.touches[0].clientY
+    dragStartScrollTop.current = viewportRef.current?.scrollTop ?? 0
+
+    const onMove = (ev: TouchEvent) => {
+      const el = viewportRef.current
+      if (!el) return
+      const delta = ev.touches[0].clientY - dragStartY.current
+      const { scrollHeight, clientHeight } = el
+      const trackH = clientHeight - TRACK_PADDING * 2
+      const thumbH = Math.max(60, Math.min(trackH, trackH * (clientHeight / scrollHeight)))
+      const scrollRatio = (scrollHeight - clientHeight) / (trackH - thumbH)
+      el.scrollTop = dragStartScrollTop.current + delta * scrollRatio
+    }
+
+    const onUp = () => {
+      isDragging.current = false
+      setIsThumbActive(false)
+      window.removeEventListener('touchmove', onMove)
+      window.removeEventListener('touchend', onUp)
+    }
+
     window.addEventListener('touchmove', onMove, { passive: false })
     window.addEventListener('touchend', onUp)
   }, [])
@@ -126,6 +161,7 @@ export function CartoonScrollArea({ children, className, style, alwaysShowScroll
 
           {/* Thumb */}
           <div
+            ref={thumbRef}
             className="absolute left-1/2 pointer-events-auto cursor-grab active:cursor-grabbing overflow-hidden"
             style={{
               top: thumbTop,
@@ -136,8 +172,6 @@ export function CartoonScrollArea({ children, className, style, alwaysShowScroll
               opacity: isThumbActive ? 0.55 : 1,
               transition: 'opacity 100ms ease',
             }}
-            onMouseDown={onThumbMouseDown}
-            onTouchStart={onThumbMouseDown}
           >
             <img
               src="/cartoon/ui/Scrollbar.png"
