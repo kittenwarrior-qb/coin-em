@@ -52,6 +52,25 @@ async function start(): Promise<void> {
     console.log('⚠️  Redis: Unavailable — single-instance mode (JSON fallback)')
   }
 
+  // After restart, all sockets are gone.
+  // Clear players from waiting rooms (no one is connected anymore).
+  // Playing rooms keep their players so reconnect can work.
+  for (const room of roomRepository.findAll()) {
+    if (room.status === 'waiting') {
+      if (room.players.length > 0) {
+        console.log(`[startup] Clearing ${room.players.length} stale player(s) from waiting room ${room.id}`)
+        roomRepository.update(room.id, { players: [] })
+      }
+    }
+  }
+  // Remove now-empty waiting rooms
+  for (const room of roomRepository.findAll()) {
+    if (room.status === 'waiting' && room.players.length === 0) {
+      roomRepository.delete(room.id)
+      console.log(`[startup] Deleted empty waiting room ${room.id}`)
+    }
+  }
+
   registerSocketHandlers(io)
 
   setInterval(() => {

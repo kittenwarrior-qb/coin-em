@@ -35,6 +35,8 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
         socketId: socket.id,
         userId,
         name,
+        avatarIndex: randomAvatarIndex(),
+        bgIndex: randomBgIndex(),
         coins: { red: 0, yellow: 0, green: 0 },
       }
 
@@ -61,6 +63,8 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
         socketId: socket.id,
         userId,
         name,
+        avatarIndex: existingPlayer?.avatarIndex ?? randomAvatarIndex(),
+        bgIndex: existingPlayer?.bgIndex ?? randomBgIndex(),
         coins: { red: 0, yellow: 0, green: 0 },
       }
 

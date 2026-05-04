@@ -20,7 +20,6 @@ export function ProfileModal({
   const [avatarIdx, setAvatarIdx] = useState(currentAvatarIndex)
   const [bgIdx, setBgIdx] = useState(currentBgIndex)
   const [customColor, setCustomColor] = useState('#FFD6E0')
-  const [showAvatarPicker, setShowAvatarPicker] = useState(true)
 
   // Resolve actual bg color: 0-11 palette, 12 = white, 13 = custom
   const bg = bgIdx === 12 ? '#ffffff' : bgIdx === 13 ? customColor : AVATAR_BG_COLORS[bgIdx % AVATAR_BG_COLORS.length]
@@ -84,8 +83,7 @@ export function ProfileModal({
         </div>
 
         {/* Avatar picker — 4 cols, max 3 rows + scroll */}
-        {showAvatarPicker && (
-          <div>
+        <div>
             <p className="font-display text-xs mb-2" style={{ color: '#2f76ac' }}>Chọn avatar</p>
             <div className="overflow-y-auto scroll-cartoon" style={{ maxHeight: 192 }}>
               <div className="grid grid-cols-4 gap-2 p-1 ">
@@ -108,7 +106,6 @@ export function ProfileModal({
               </div>
             </div>
           </div>
-        )}
 
         {/* Bg color picker — 7 cols, 2 rows (12 palette + white + custom) */}
         <div>

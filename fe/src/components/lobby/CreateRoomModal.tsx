@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { CartoonModal, CartoonInput, CartoonButton, CartoonCard } from '@/components/cartoon'
+import { CartoonModal, CartoonInput, CartoonButton } from '@/components/cartoon'
 
 interface CreateRoomModalProps {
   open: boolean
