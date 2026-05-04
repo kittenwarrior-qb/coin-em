@@ -4,6 +4,11 @@ import { Player } from '../../modules/game/types'
 import { cancelDisconnectTimer } from './playerHandlers'
 
 export function registerRoomHandlers(io: Server, socket: Socket) {
+  const AVATAR_COUNT = 22
+  const BG_COUNT = 12
+
+  function randomAvatarIndex() { return Math.floor(Math.random() * AVATAR_COUNT) }
+  function randomBgIndex()     { return Math.floor(Math.random() * BG_COUNT) }
   /**
    * Join or create room
    */
@@ -257,5 +262,27 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
 
     console.log(`[update_room_settings] Room ${roomId} settings updated by ${userId}`)
     io.to(roomId).emit('room_settings_updated', updatedRoom!.settings)
+  })
+
+  /**
+   * Update player profile (name + avatarIndex + bgIndex)
+   */
+  socket.on('update_profile', ({ roomId, userId, name, avatarIndex, bgIndex }) => {
+    if (!roomId || !userId || !name) {
+      return socket.emit('error', { code: 'invalid_params', message: 'roomId, userId và name là bắt buộc.' })
+    }
+
+    const room = roomRepository.findById(roomId)
+    if (!room) return
+
+    const updatedPlayers = room.players.map(p =>
+      p.userId === userId
+        ? { ...p, name: name.trim(), avatarIndex: avatarIndex ?? p.avatarIndex, bgIndex: bgIndex ?? p.bgIndex }
+        : p
+    )
+
+    const updatedRoom = roomRepository.update(roomId, { players: updatedPlayers })
+    console.log(`[update_profile] ${userId} updated profile in room ${roomId}`)
+    io.to(roomId).emit('room_state', roomService.getPublicState(updatedRoom!))
   })
 }

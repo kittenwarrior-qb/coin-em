@@ -1,85 +1,63 @@
 import { cn } from '@/lib/utils'
+import { AVATAR_ICONS, AVATAR_BG_COLORS } from './avatarConfig'
 
-// Avatar icons from cartoon assets — character-like SVGs
-const AVATAR_ICONS = [
-  '/cartoon/icons/Boy-1.svg',
-  '/cartoon/icons/Girl-1.svg',
-  '/cartoon/icons/Boy-2.svg',
-  '/cartoon/icons/Girl-2.svg',
-  '/cartoon/icons/Boy-3.svg',
-  '/cartoon/icons/Girl-3.svg',
-  '/cartoon/icons/Boy-4.svg',
-  '/cartoon/icons/Girl-4.svg',
-  '/cartoon/icons/Boy-2-Dark-Hair.svg',
-  '/cartoon/icons/Girl-4.svg',
-  '/cartoon/icons/Cat.svg',
-  '/cartoon/icons/Bunny.svg',
-]
-
-const AVATAR_BG_COLORS = [
-  '#FFD6E0', // pink
-  '#D6EAFF', // blue
-  '#D6FFE4', // green
-  '#FFF3D6', // yellow
-  '#E8D6FF', // purple
-  '#D6FFFA', // teal
-  '#FFE8D6', // orange
-  '#F0D6FF', // lavender
-  '#D6F5FF', // sky
-  '#FFD6D6', // red-light
-  '#D6FFD6', // mint
-  '#FFECD6', // peach
-]
-
-const AVATAR_BORDER_COLORS = [
-  '#FF8FAB',
-  '#6AABFF',
-  '#4DD97A',
-  '#FFB830',
-  '#A06AFF',
-  '#2DD4BF',
-  '#FF8C42',
-  '#C084FC',
-  '#38BDF8',
-  '#F87171',
-  '#4ADE80',
-  '#FB923C',
-]
+const MASK = 'url(/cartoon/ui/Circle-Cartoon.png)'
+const MASK_SIZE = '100% 100%'
 
 interface CartoonAvatarProps extends React.HTMLAttributes<HTMLDivElement> {
   name: string
   size?: 'sm' | 'md' | 'lg'
-  /** Index used to pick icon, bg, border — 0-based */
+  avatarIndex?: number
+  bgIndex?: number
+  /** Legacy: single index for both */
   colorIndex?: number
 }
 
-export function CartoonAvatar({ name, size = 'md', colorIndex = 0, className, style, ...props }: CartoonAvatarProps) {
-  const idx = colorIndex % AVATAR_ICONS.length
-  const icon = AVATAR_ICONS[idx]
-  const bg = AVATAR_BG_COLORS[idx % AVATAR_BG_COLORS.length]
-  const border = AVATAR_BORDER_COLORS[idx % AVATAR_BORDER_COLORS.length]
+export function CartoonAvatar({
+  name, size = 'md',
+  avatarIndex, bgIndex, colorIndex = 0,
+  className, style, ...props
+}: CartoonAvatarProps) {
+  const aIdx = (avatarIndex ?? colorIndex) % AVATAR_ICONS.length
+  const bIdx = (bgIndex ?? colorIndex) % AVATAR_BG_COLORS.length
 
-  const sizeClass = size === 'sm'
-    ? 'w-9 h-9'
-    : size === 'lg'
-      ? 'w-16 h-16'
-      : 'w-12 h-12'
+  const icon = AVATAR_ICONS[aIdx]
+  const bg   = AVATAR_BG_COLORS[bIdx]
 
-  const imgSize = size === 'sm' ? 'w-6 h-6' : size === 'lg' ? 'w-11 h-11' : 'w-8 h-8'
+  const sizes = {
+    sm: { wrapper: 'w-9 h-9',   img: 'w-6 h-6',   inset: -3 },
+    md: { wrapper: 'w-12 h-12', img: 'w-8 h-8',   inset: -4 },
+    lg: { wrapper: 'w-16 h-16', img: 'w-11 h-11', inset: -5 },
+  }
+  const s = sizes[size]
 
   return (
     <div
-      className={cn('rounded-full flex items-center justify-center flex-shrink-0', sizeClass, className)}
-      style={{
-        background: bg,
-        border: `2.5px solid ${border}`,
-        boxShadow: `0 2px 0 ${border}`,
-        ...style,
-      }}
+      className={cn('relative flex items-center justify-center flex-shrink-0', s.wrapper, className)}
+      style={{ filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.12))', ...style }}
       aria-label={name}
       {...props}
     >
-      <img src={icon} alt="" className={cn(imgSize, 'object-contain')} draggable={false} />
+      {/* White border layer */}
+      <div
+        className="absolute"
+        style={{
+          inset: s.inset,
+          background: 'white',
+          maskImage: MASK, maskSize: MASK_SIZE,
+          WebkitMaskImage: MASK, WebkitMaskSize: MASK_SIZE,
+        }}
+      />
+      {/* Color fill */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: bg,
+          maskImage: MASK, maskSize: MASK_SIZE,
+          WebkitMaskImage: MASK, WebkitMaskSize: MASK_SIZE,
+        }}
+      />
+      <img src={icon} alt="" className={cn('relative z-10 object-contain', s.img)} draggable={false} />
     </div>
   )
 }

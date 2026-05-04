@@ -80,10 +80,18 @@ export class RoomService {
       return null
     }
 
-    // If host left, promote next player
+    // If only bots remain, delete room
+    const hasRealPlayer = updatedPlayers.some((p) => !p.isFake)
+    if (!hasRealPlayer) {
+      roomRepository.delete(roomId)
+      return null
+    }
+
+    // If host left, promote next real player (or first player if none)
     let newHost = room.host
-    if (leavingPlayer && room.host === leavingPlayer.userId && updatedPlayers.length > 0) {
-      newHost = updatedPlayers[0].userId
+    if (leavingPlayer && room.host === leavingPlayer.userId) {
+      const nextReal = updatedPlayers.find((p) => !p.isFake)
+      newHost = (nextReal ?? updatedPlayers[0]).userId
     }
 
     return roomRepository.update(roomId, {

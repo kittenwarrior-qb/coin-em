@@ -89,6 +89,7 @@ const CIRCLE_SRCS: Record<string, string> = {
   red:         '/cartoon/buttons/circle/Red.png',
   yellow:      '/cartoon/buttons/circle/Yellow.png',
   violet:      '/cartoon/buttons/circle/Violet.png',
+  purple:      '/cartoon/buttons/circle/Purple.png',
   gray:        '/cartoon/buttons/circle/Gray.png',
   dark:        '/cartoon/buttons/circle/Dark.png',
   brown:       '/cartoon/buttons/circle/Brown.png',
@@ -100,24 +101,26 @@ const CIRCLE_SRCS: Record<string, string> = {
 }
 
 type CircleColor = keyof typeof CIRCLE_SRCS
-type CircleSize  = 'sm' | 'md' | 'lg'
+type CircleSize  = 'sm' | 'md' | 'lg' | 'xl'
 
 interface CartoonCircleButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   color?:   CircleColor
   size?:    CircleSize
   iconSrc?: string
   iconAlt?: string
+  iconSize?: string  // e.g. '40%', '50%'
   badge?:   number | string
 }
 
 export const CartoonCircleButton = forwardRef<HTMLButtonElement, CartoonCircleButtonProps>(
-  ({ color = 'blue', size = 'md', iconSrc, iconAlt = '', badge, className, children, ...props }, ref) => {
+  ({ color = 'blue', size = 'md', iconSrc, iconAlt = '', iconSize = '55%', badge, className, children, ...props }, ref) => {
     const src = CIRCLE_SRCS[color] ?? CIRCLE_SRCS.blue
 
     const sizes: Record<CircleSize, string> = {
       sm: 'h-10', // 40px
       md: 'h-14', // 56px
       lg: 'h-16', // 64px
+      xl: 'h-20', // 80px
     }
 
     return (
@@ -139,7 +142,7 @@ export const CartoonCircleButton = forwardRef<HTMLButtonElement, CartoonCircleBu
         />
         <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
           {iconSrc ? (
-            <img src={iconSrc} alt={iconAlt} className="w-[55%] h-[55%] object-contain" draggable={false} />
+            <img src={iconSrc} alt={iconAlt} className="object-contain" style={{ width: iconSize, height: iconSize }} draggable={false} />
           ) : (
             children
           )}

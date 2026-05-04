@@ -33,6 +33,9 @@ export interface Player {
   socketId: string
   userId: string
   name: string
+  colorIndex?: number
+  avatarIndex?: number
+  bgIndex?: number
   role?: Role
   originalRole?: Role // Role gốc ban đầu (không thay đổi khi rotate)
   isNarrator?: boolean

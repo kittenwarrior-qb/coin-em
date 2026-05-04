@@ -138,14 +138,14 @@ export function CartoonScrollArea({ children, className, style, alwaysShowScroll
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         <style>{`[data-scroll-hide]::-webkit-scrollbar{display:none}`}</style>
-        <div data-scroll-hide="" style={{ paddingRight: SCROLLBAR_W + 16 + 4 }}>{children}</div>
+        <div data-scroll-hide="" style={{ paddingRight: SCROLLBAR_W + 4 }}>{children}</div>
       </div>
 
       {/* Scrollbar — always visible when overflow or alwaysShowScrollbar */}
       {showScrollbar && (
         <div
           className="absolute top-0 bottom-0 pointer-events-none"
-          style={{ right: 16, width: SCROLLBAR_W, zIndex: 10 }}
+          style={{ right: 0, width: SCROLLBAR_W, zIndex: 10 }}
         >
           {/* Track */}
           <div
