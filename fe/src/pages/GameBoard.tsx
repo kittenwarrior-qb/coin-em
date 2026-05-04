@@ -23,7 +23,7 @@ import {
   RewardOverlay,
   EndedOverlay,
 } from '@/components/game/PhaseOverlays'
-import type { CoinType, RoomState } from '@/components/game/types'
+import type { RoomState } from '@/components/game/types'
 
 interface GameBoardProps {
   roomId: string
@@ -35,7 +35,7 @@ interface GameBoardProps {
 }
 
 export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, onUpdateProfile }: GameBoardProps) {
-  const { nightAction: emitNightAction, nextTurn, selectCard: emitSelectCard, sendResponse, ntgVote, shareReflection, giveCoin, submitVote } = useSocket()
+  const { nextTurn, selectCard: emitSelectCard, sendResponse, ntgVote, shareReflection, giveCoin, submitVote } = useSocket()
   const [showQuit, setShowQuit] = useState(false)
 
   // Phase-local state
@@ -48,11 +48,10 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
 
   // Stores
   const { players, myPlayer, isNarrator, selectedCards } = useGameState()
-  const { setPlayers, updatePlayer, selectCard }         = useGameActions()
+  const { setPlayers, selectCard }         = useGameActions()
   const { expandedPlayer, showInventory, inventoryMode, setExpandedPlayer, setShowInventory, setInventoryMode } = useGameUI()
   const { gameStep, handleSelectCard }                   = useGameFlow()
   const flyCoins      = useUIStore(s => s.flyCoins)
-  const addFlyingCoin = useUIStore(s => s.addFlyingCoin)
   const setMyIds      = useGameStore(s => s.setMyIds)
   const hasShownRoleRef = useRef(false)
 
@@ -98,13 +97,9 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
 
   // ─── Handlers ──────────────────────────────────────────────────────────────
 
-  const sendCoin = (_targetId: string, _coin: CoinType) => {
-    // reserved for give-coins phase
-  }
-
-  const handleNightAction = (_targetId: string) => {
-    // reserved for night phases
-  }
+  // reserved stubs — will be wired up when give-coins / night phases are re-implemented
+  // const sendCoin = ...
+  // const handleNightAction = ...
 
   const handleDrawSituation = () => {
     const card = CARD_DATA.situation[Math.floor(Math.random() * CARD_DATA.situation.length)]
@@ -148,7 +143,6 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
   }
 
   // ─── Derived ───────────────────────────────────────────────────────────────
-  const gamePhase    = roomState.phase || 'role-reveal'
   const currentRound = roomState.currentRound || 1
   const totalRounds  = roomState.totalRounds || 1
   const myCoinCount  = myPlayer?.coins || { red: 0, yellow: 0, green: 0 }
