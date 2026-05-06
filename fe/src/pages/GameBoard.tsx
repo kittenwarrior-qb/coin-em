@@ -10,7 +10,7 @@ import { PHASE_LABELS } from '../stores/types'
 
 import { CartoonButton, CartoonCircleButton, QuitConfirmModal } from '@/components/cartoon'
 import { CoinStack }        from '@/components/game/CoinStack'
-import { CenterBoard }      from '@/components/game/CenterBoard'
+import { TableBoard }      from '@/components/game/TableBoard'
 import { FlipCard }         from '@/components/game/FlipCard'
 import { CardInventory, CARD_DATA } from '@/components/game/CardInventory'
 import { PlayerLayout }     from '@/components/game/PlayerLayout'
@@ -149,11 +149,44 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="h-screen bg-[var(--c-bg)] flex items-center justify-center overflow-hidden">
-      <div className="relative w-full max-w-sm h-full bg-white p-4 flex flex-col gap-4">
+    <div className="h-screen bg-white flex items-center justify-center overflow-hidden">
+      <div className="game-bg relative w-full max-w-sm h-full p-4 flex flex-col gap-4 overflow-hidden">
+
+        {/* Green overlay: role-reveal = full green, fades out on night */}
+        <AnimatePresence>
+          {gameStep === 'role-reveal' && (
+            <motion.div
+              key="role-reveal-bg"
+              initial={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.2, ease: 'easeInOut' }}
+              className="absolute inset-0 z-0 pointer-events-none"
+              style={{ background: '#a5cb7b' }}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Day overlay: situation-card onwards — fades in like sunrise, stays for all day phases */}
+        <AnimatePresence>
+          {!['role-reveal', 'night', 'healer-turn', 'silencer-turn'].includes(gameStep) && (
+            <motion.div
+              key="day-bg"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.8, ease: 'easeInOut' }}
+              className="absolute inset-0 z-0 pointer-events-none"
+              style={{
+                background: 'linear-gradient(180deg, #fffbe6 0%, #fde68a 35%, #a5cb7b 100%)',
+              }}
+            />
+          )}
+        </AnimatePresence>
 
         {/* Coin stack */}
-        <CoinStack coins={myCoinCount} />
+        <div className="relative z-10">
+          <CoinStack coins={myCoinCount} />
+        </div>
 
         {/* Leave button */}
         <CartoonCircleButton
@@ -175,14 +208,53 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
           </div>
         </div>
 
-        {/* Center board */}
-
         {/* Player layout around center board */}
-        <div data-testid="players-grid" className="flex-1 min-h-0 mt-10">
+        <div data-testid="players-grid" className="relative z-10 flex-1 min-h-0 mt-10">
           <PlayerLayout
             players={players}
             renderCenter={() => (
-              <CenterBoard selectedCards={selectedCards} />
+              <TableBoard
+                selectedCards={selectedCards}
+                actions={
+                  <>
+                    {isNarrator && (
+                      <CartoonButton
+                        color="green"
+                        size="md"
+                        className="w-full"
+                        onClick={() => nextTurn(roomState.id)}
+                        data-testid="btn-next-turn"
+                      >
+                        👑 {PHASE_LABELS[gameStep] ?? gameStep}
+                      </CartoonButton>
+                    )}
+                    {myPlayer?.isSender && (
+                      <>
+                        {gameStep === 'situation-card' && (
+                          <CartoonButton color="yellow" size="md" className="w-full" onClick={handleDrawSituation} data-testid="btn-draw-situation">
+                            📋 Bốc thẻ Tình huống
+                          </CartoonButton>
+                        )}
+                        {gameStep === 'emotion-card' && (
+                          <CartoonButton color="pink" size="md" className="w-full" onClick={() => openInventory('emotion')} data-testid="btn-select-emotion">
+                            💭 Chọn thẻ Cảm xúc
+                          </CartoonButton>
+                        )}
+                        {gameStep === 'reflection-card' && selectedCards.reflections.length < 3 && (
+                          <CartoonButton color="blue" size="md" className="w-full" onClick={() => openInventory('reflection')} data-testid="btn-select-reflection">
+                            🤔 Chọn Reflection ({selectedCards.reflections.length}/3)
+                          </CartoonButton>
+                        )}
+                        {gameStep === 'selfcare-card' && !selectedCards.selfcare && (
+                          <CartoonButton color="teal" size="md" className="w-full" onClick={() => openInventory('selfcare')} data-testid="btn-select-selfcare">
+                            🌟 Chọn Bí kíp ôm
+                          </CartoonButton>
+                        )}
+                      </>
+                    )}
+                  </>
+                }
+              />
             )}
             renderPlayer={({ player, position, index }) => {
               if (!player) return null
@@ -201,50 +273,10 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
           />
         </div>
 
-        {/* Bottom action bar */}
-        <div className="flex flex-col gap-2">
-          {isNarrator && (
-            <CartoonButton
-              color="green"
-              size="lg"
-              className="w-full"
-              onClick={() => nextTurn(roomState.id)}
-              data-testid="btn-next-turn"
-            >
-              👑 {PHASE_LABELS[gameStep] ?? gameStep}
-            </CartoonButton>
-          )}
-
-          {myPlayer?.isSender && (
-            <>
-              {gameStep === 'situation-card' && (
-                <CartoonButton color="yellow" size="lg" className="w-full" onClick={handleDrawSituation} data-testid="btn-draw-situation">
-                  📋 Bốc thẻ Tình huống
-                </CartoonButton>
-              )}
-              {gameStep === 'emotion-card' && (
-                <CartoonButton color="pink" size="lg" className="w-full" onClick={() => openInventory('emotion')} data-testid="btn-select-emotion">
-                  💭 Chọn thẻ Cảm xúc
-                </CartoonButton>
-              )}
-              {gameStep === 'reflection-card' && selectedCards.reflections.length < 3 && (
-                <CartoonButton color="blue" size="lg" className="w-full" onClick={() => openInventory('reflection')} data-testid="btn-select-reflection">
-                  🤔 Chọn Reflection ({selectedCards.reflections.length}/3)
-                </CartoonButton>
-              )}
-              {gameStep === 'selfcare-card' && !selectedCards.selfcare && (
-                <CartoonButton color="teal" size="lg" className="w-full" onClick={() => openInventory('selfcare')} data-testid="btn-select-selfcare">
-                  🌟 Chọn Bí kíp ôm
-                </CartoonButton>
-              )}
-            </>
-          )}
-        </div>
-
         {/* Card bag FAB */}
         <button
           onClick={() => openInventory()}
-          className="absolute bottom-2 right-2 coin-cartoon coin-gold w-12 h-12 text-2xl gloss-cartoon"
+          className="absolute bottom-2 right-2 z-10 coin-cartoon coin-gold w-12 h-12 text-2xl gloss-cartoon"
           aria-label="Túi thẻ bài"
         >
           🎴

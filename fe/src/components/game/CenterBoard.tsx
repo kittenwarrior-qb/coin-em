@@ -35,7 +35,7 @@ export function CenterBoard({ selectedCards }: CenterBoardProps) {
   if (!hasAny) return null
 
   return (
-    <div className="absolute top-16 left-1/2 -translate-x-1/2 z-20 w-[88%] max-w-xs flex flex-col items-center gap-2">
+    <div className="relative w-full h-full flex flex-col items-center justify-center gap-2 p-2 overflow-y-auto">
       {selectedCards.situation && (
         <CardSlot label="📋 Tình huống" color="white">
           <CardImg src={selectedCards.situation.frontImage} alt="situation" />

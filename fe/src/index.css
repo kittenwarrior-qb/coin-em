@@ -502,7 +502,32 @@
     }
   }
 
-  /* ── Divider ── */
+  /* ── Game board animated background ── */
+  @keyframes spotlight {
+    0%, 100% { opacity: 0.5; }
+    25%       { opacity: 0.9; }
+    50%       { opacity: 0.6; }
+    75%       { opacity: 0.85; }
+  }
+
+  .game-bg {
+    position: relative;
+    background: #2a2a3e;
+    isolation: isolate;
+  }
+
+  /* Wallpaper layer */
+  .game-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: url('/animal_wallpaper.jpg') center / cover no-repeat;
+    opacity: 0.15;
+    pointer-events: none;
+  }
+
+  .game-bg::before { display: none; }
 
   .divider-cartoon {
     height: var(--border-width);
