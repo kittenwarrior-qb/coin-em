@@ -48,7 +48,7 @@ export function PlayerLayout({ players, renderPlayer, renderCenter }: PlayerLayo
       <div className="flex flex-1 items-stretch gap-1 min-h-0">
 
         {/* Left column */}
-        <div className="flex flex-col justify-around items-center w-14 flex-shrink-0">
+        <div className="flex flex-col justify-around items-center w-20 flex-shrink-0">
           {left.map(p => renderPlayer({ player: p, position: 'left', index: playerIndex(p) }))}
         </div>
 
@@ -58,7 +58,7 @@ export function PlayerLayout({ players, renderPlayer, renderCenter }: PlayerLayo
         </div>
 
         {/* Right column */}
-        <div className="flex flex-col justify-around items-center w-14 flex-shrink-0">
+        <div className="flex flex-col justify-around items-center w-20 flex-shrink-0">
           {right.map(p => renderPlayer({ player: p, position: 'right', index: playerIndex(p) }))}
         </div>
       </div>

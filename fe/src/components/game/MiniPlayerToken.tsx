@@ -19,6 +19,12 @@ const BORDER_DEFAULT = 'white'
 
 export function MiniPlayerToken({ player, index, isTop, isBottom, onClick, onUpdateProfile }: MiniPlayerTokenProps) {
   const [showProfile, setShowProfile] = useState(false)
+  const [localAvatarIdx, setLocalAvatarIdx] = useState<number | null>(null)
+  const [localBgIdx, setLocalBgIdx] = useState<number | null>(null)
+
+  // Use local overrides if set (optimistic update), else fall back to server data
+  const displayAvatarIdx = localAvatarIdx ?? player.avatarIndex ?? index
+  const displayBgIdx     = localBgIdx     ?? player.bgIndex     ?? index
 
   const label = isTop ? 'Quản trò' : isBottom ? 'Người trao gửi' : null
   const borderColor = isTop ? BORDER_NTG : isBottom ? BORDER_SENDER : player.isMe ? BORDER_ME : BORDER_DEFAULT
@@ -43,10 +49,10 @@ export function MiniPlayerToken({ player, index, isTop, isBottom, onClick, onUpd
         <div className="relative">
           <CartoonAvatar
             name={player.name}
-            avatarIndex={player.avatarIndex ?? index}
-            bgIndex={player.bgIndex ?? index}
+            avatarIndex={displayAvatarIdx}
+            bgIndex={displayBgIdx}
             borderColor={borderColor}
-            size="md"
+            size="lg"
           />
           {player.isMe && (
             <div
@@ -68,10 +74,10 @@ export function MiniPlayerToken({ player, index, isTop, isBottom, onClick, onUpd
         <span
           className="font-display text-center leading-tight"
           style={{
-            fontSize: 9,
+            fontSize: 10,
             color: player.isMe ? BORDER_ME : '#2f76ac',
             fontWeight: player.isMe ? 700 : 400,
-            maxWidth: 52,
+            maxWidth: 64,
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
@@ -94,11 +100,13 @@ export function MiniPlayerToken({ player, index, isTop, isBottom, onClick, onUpd
           open={showProfile}
           onClose={() => setShowProfile(false)}
           currentName={player.name}
-          currentAvatarIndex={player.avatarIndex ?? index}
-          currentBgIndex={player.bgIndex ?? index}
+          currentAvatarIndex={displayAvatarIdx}
+          currentBgIndex={displayBgIdx}
           lockName
           currentRole={player.role}
           onSave={(name, avatarIdx, bgIdx) => {
+            setLocalAvatarIdx(avatarIdx)
+            setLocalBgIdx(bgIdx)
             onUpdateProfile?.(name, avatarIdx, bgIdx)
           }}
         />
