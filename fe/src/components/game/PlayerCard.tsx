@@ -11,7 +11,7 @@ interface PlayerCardProps {
   player: Player
   playerIndex: number
   onExpand: () => void
-  onSendCoin: (coin: CoinType) => void
+  onSendCoin?: (coin: CoinType) => void
   onNightAction?: (id: string) => void
   onVote?: (id: string) => void
   isGlowing?: boolean
@@ -19,7 +19,7 @@ interface PlayerCardProps {
 }
 
 export function PlayerCard({
-  player, playerIndex, onExpand, onSendCoin,
+  player, playerIndex, onExpand,
   onNightAction, onVote, isGlowing, isNightPhase,
 }: PlayerCardProps) {
   const bg = PASTEL_LIST[playerIndex % PASTEL_LIST.length]
