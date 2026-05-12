@@ -14,5 +14,19 @@ export default defineConfig(({ mode }) => {
         "@": path.resolve(__dirname, "./src"),
       },
     },
+    build: {
+      // Tăng chunk size warning threshold
+      chunkSizeWarningLimit: 1000,
+      rollupOptions: {
+        output: {
+          // Tách vendor chunks để cache hiệu quả hơn
+          manualChunks: {
+            'react-vendor': ['react', 'react-dom'],
+            'motion': ['framer-motion'],
+            'router': ['react-router'],
+          },
+        },
+      },
+    },
   }
 })
