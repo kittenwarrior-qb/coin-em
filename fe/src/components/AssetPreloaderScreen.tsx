@@ -1,110 +1,155 @@
 import { useEffect, useRef, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import type { PreloadState } from '@/hooks/useAssetPreloader'
+
+interface Rect { left: number; top: number; w: number; h: number }
 
 interface Props {
   state: PreloadState
-  onExited?: () => void  // called when splash fully gone
+  onExited?: (splashLogoRect: Rect) => void
+  onFullyGone?: () => void
 }
 
-export function AssetPreloaderScreen({ state, onExited }: Props) {
+export function AssetPreloaderScreen({ state, onExited, onFullyGone }: Props) {
   const { progress, done } = state
   const [showFinished, setShowFinished] = useState(false)
-  const [logoFlying, setLogoFlying] = useState(false)
-  const [exiting, setExiting] = useState(false)
-  const [targetY, setTargetY] = useState(0)
+  const [rippling, setRippling] = useState(false)
+  const [gone, setGone] = useState(false)
   const splashLogoRef = useRef<HTMLImageElement>(null)
+
+  // Measured positions for flying logo
+  const [splashRect, setSplashRect] = useState<Rect | null>(null)
+  const [targetRect, setTargetRect] = useState<Rect | null>(null)
 
   useEffect(() => {
     if (!done) return
-
-    // t1: show "Finished" text
-    // t2: measure + start logo fly (after 600ms pause)
-    // t3: start fade out (after logo animation ~550ms)
-    // t4: notify parent fully gone
-
     const t1 = setTimeout(() => setShowFinished(true), 100)
-
     const t2 = setTimeout(() => {
-      const splashLogo = splashLogoRef.current
-      const homeLogo = document.getElementById('home-logo')
-      if (splashLogo && homeLogo) {
-        const splashRect = splashLogo.getBoundingClientRect()
-        const homeRect = homeLogo.getBoundingClientRect()
-        setTargetY(
-          (homeRect.top + homeRect.height / 2) - (splashRect.top + splashRect.height / 2)
-        )
+      // Measure both logos before starting animation
+      const splashEl = splashLogoRef.current
+      const homeEl = document.getElementById('home-logo')
+      if (splashEl) {
+        const r = splashEl.getBoundingClientRect()
+        setSplashRect({ left: r.left, top: r.top, w: r.width, h: r.height })
       }
-      setLogoFlying(true)
-    }, 900)  // 800ms pause after "Finished"
+      if (homeEl) {
+        const r = homeEl.getBoundingClientRect()
+        setTargetRect({ left: r.left, top: r.top, w: r.width, h: r.height })
+      }
+      setRippling(true)
+    }, 900)
+    return () => { clearTimeout(t1); clearTimeout(t2) }
+  }, [done])
 
-    const t3 = setTimeout(() => {
-      setExiting(true)
-      onExited?.()   // mount Lobby ngay khi splash bắt đầu fade → PopIn chạy đồng thời
-    }, 900 + 600)
+  if (gone) return null
 
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3) }
-  }, [done, onExited])
+  // Flying logo: fixed at splash position, animates to home-logo position
+  const splashCX = splashRect ? splashRect.left + splashRect.w / 2 : 0
+  const splashCY = splashRect ? splashRect.top + splashRect.h / 2 : 0
+  const targetCX = targetRect ? targetRect.left + targetRect.w / 2 : 0
+  const targetCY = targetRect ? targetRect.top + targetRect.h / 2 : 0
+  const flyScale = (splashRect && targetRect) ? targetRect.h / splashRect.h : 1
 
   return (
-    <AnimatePresence>
-      {!exiting && (
-        <motion.div
-          key="preloader"
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center"
-          style={{ background: 'var(--c-bg)' }}
-        >
-          <div
-            className="relative flex flex-col items-center justify-center gap-6"
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center"
+      style={{ background: 'var(--c-bg)' }}
+    >
+      <div style={{ position: 'relative', width: '100%', maxWidth: 430, height: '100dvh', overflow: 'hidden' }}>
+
+        {/* Layer 1: home background */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: 'url(/cartoon/ui/home-bg.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center top',
+        }} />
+
+        {/* Layer 2: bg */}
+        <div style={{ position: 'absolute', inset: 0, background: '#1695b1' }} />
+
+        {/* Layer 3: expanding home-bg circle */}
+        {rippling && (
+          <motion.div
             style={{
-              width: '100%',
-              maxWidth: 430,
-              minHeight: '100dvh',
+              position: 'absolute', inset: 0,
               backgroundImage: 'url(/cartoon/ui/home-bg.png)',
               backgroundSize: 'cover',
               backgroundPosition: 'center top',
+              clipPath: 'circle(0% at 50% 40%)',
             }}
-          >
-            {/* Logo */}
-            <motion.img
+            animate={{ clipPath: 'circle(150% at 50% 40%)' }}
+            transition={{ duration: 0.7, ease: [0.85, 0, 0.15, 1] }}
+            onAnimationComplete={() => {
+              onExited?.(splashRect ?? { left: 0, top: 0, w: 64, h: 64 })
+              setGone(true)
+              onFullyGone?.()
+            }}
+          />
+        )}
+
+        {/* Static content (progress bar only, logo handled separately) */}
+        <div
+          className="relative flex flex-col items-center justify-center gap-6"
+          style={{ width: '100%', height: '100%', zIndex: 3 }}
+        >
+          {/* Invisible placeholder to keep layout — actual logo rendered below as fixed */}
+          {!rippling && (
+            <img
               ref={splashLogoRef}
               src="/emcoin_logo.png"
               alt="EmCoin"
-              initial={{ scale: 0.85, opacity: 0, y: 0 }}
-              animate={logoFlying
-                ? { scale: 1.56, opacity: 1, y: targetY }
-                : { scale: 1, opacity: 1, y: 0 }
-              }
-              transition={logoFlying
-                ? { duration: 0.55, ease: [0.34, 1.2, 0.64, 1] }
-                : { duration: 0.45, ease: 'easeOut' }
-              }
-              style={{ height: 64, objectFit: 'contain', filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))' }}
+              style={{ height: 64, objectFit: 'contain', opacity: rippling ? 0 : 1 }}
             />
+          )}
+          {rippling && <div style={{ height: 64 }} />}
 
-            {/* Progress bar */}
-            <motion.div
-              className="flex flex-col items-center gap-2 w-48"
-              animate={{ opacity: logoFlying ? 0 : 1, y: logoFlying ? 8 : 0 }}
-              transition={{ duration: 0.25 }}
-            >
-              <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.08)' }}>
-                <motion.div
-                  className="h-full rounded-full"
-                  style={{ background: 'linear-gradient(90deg, var(--c-blue-mid), var(--c-teal))' }}
-                  animate={{ width: `${progress}%` }}
-                  transition={{ ease: 'easeOut', duration: 0.3 }}
-                />
-              </div>
-              <p className="font-display text-xs" style={{ color: 'var(--c-blue-mid)' }}>
-                {showFinished ? '✓ Finished' : `${progress}%`}
-              </p>
-            </motion.div>
-          </div>
-        </motion.div>
+          <motion.div
+            className="flex flex-col items-center gap-2 w-48"
+            animate={{ opacity: rippling ? 0 : 1 }}
+            transition={{ duration: 0.15 }}
+          >
+            <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.08)' }}>
+              <motion.div
+                className="h-full rounded-full"
+                style={{ background: '#41e4ed' }}
+                animate={{ width: `${progress}%` }}
+                transition={{ ease: 'easeOut', duration: 0.3 }}
+              />
+            </div>
+            <p className="font-display text-xs" style={{ color: '#fff' }}>
+              {showFinished ? '✓ Finished' : `${progress}%`}
+            </p>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Flying logo — fixed, animates from splash center to home-logo center simultaneously with circle */}
+      {rippling && splashRect && targetRect && (
+        <motion.img
+          src="/emcoin_logo.png"
+          alt=""
+          style={{
+            position: 'fixed',
+            left: splashRect.left,
+            top: splashRect.top,
+            width: splashRect.w,
+            height: splashRect.h,
+            objectFit: 'contain',
+            filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))',
+            zIndex: 10000,
+            pointerEvents: 'none',
+            transformOrigin: 'center center',
+          }}
+          initial={{ x: 0, y: 0, scale: 1 }}
+          animate={{
+            x: targetCX - splashCX,
+            y: targetCY - splashCY,
+            scale: flyScale,
+          }}
+          transition={{ duration: 0.55, ease: [0.34, 1.2, 0.64, 1] }}
+        />
       )}
-    </AnimatePresence>
+    </div>
   )
 }

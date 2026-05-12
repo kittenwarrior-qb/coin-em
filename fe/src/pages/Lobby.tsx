@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
+import { motion } from 'framer-motion'
 import { CartoonButton, CartoonCircleButton, CartoonScreen } from '@/components/cartoon'
 import { JoinRoomModal } from '@/components/lobby/JoinRoomModal'
 import { CreateRoomModal } from '@/components/lobby/CreateRoomModal'
@@ -6,18 +7,58 @@ import { GameMenuModal } from '@/components/lobby/GameMenuModal'
 import { PopIn } from '@/components/PopIn'
 import type { RoomListItem } from '@/components/lobby/RoomCard'
 
+interface SplashRect { left: number; top: number; w: number; h: number }
+
+/** Renders home-logo invisible until ready, then shows it (flying logo covers the transition) */
+function LogoFly({ splashLogoRect, ready, logoRef }: { splashLogoRect: SplashRect | null; ready: boolean; logoRef: React.RefObject<HTMLImageElement | null> }) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [flyFrom, setFlyFrom] = useState<{ x: number; y: number; scale: number } | null>(null)
+  const measured = useRef(false)
+
+  useLayoutEffect(() => {
+    if (measured.current || !ready || !splashLogoRect || !containerRef.current) return
+    measured.current = true
+    const el = containerRef.current
+    const hr = el.getBoundingClientRect()
+    const homeCX = hr.left + hr.width / 2
+    const homeCY = hr.top + hr.height / 2
+    const splashCX = splashLogoRect.left + splashLogoRect.w / 2
+    const splashCY = splashLogoRect.top + splashLogoRect.h / 2
+    const scaleFrom = splashLogoRect.h / hr.height
+    setFlyFrom({ x: splashCX - homeCX, y: splashCY - homeCY, scale: scaleFrom })
+  }, [ready, splashLogoRect])
+
+  return (
+    <div ref={containerRef} style={{ display: 'inline-block', visibility: flyFrom || !splashLogoRect ? 'visible' : 'hidden' }}>
+      <motion.img
+        ref={logoRef}
+        id="home-logo"
+        src="/emcoin_logo.png"
+        alt="EmCoin"
+        className="mx-auto"
+        initial={flyFrom ? { x: flyFrom.x, y: flyFrom.y, scale: flyFrom.scale } : false}
+        animate={{ x: 0, y: 0, scale: 1 }}
+        transition={{ duration: 0.55, ease: [0.34, 1.2, 0.64, 1] }}
+        style={{ height: 100, objectFit: 'contain', filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))', display: 'block' }}
+      />
+    </div>
+  )
+}
+
 interface LobbyProps {
   availableRooms: RoomListItem[]
   onJoinRoom: (roomId: string, userName: string) => void
   onCreateRoom: (userName: string, cardDecks?: { situation: Record<string, boolean>; emotion: Record<string, boolean> }) => void
   onRefreshRooms: () => void
-  ready?: boolean  // delay animations until splash is gone
+  ready?: boolean
+  splashLogoRect?: SplashRect | null
 }
 
-export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefreshRooms, ready = true }: LobbyProps) {
+export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefreshRooms, ready = true, splashLogoRect }: LobbyProps) {
   const [joinOpen, setJoinOpen] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const homeLogoRef = useRef<HTMLImageElement>(null)
 
   // Refresh room list while join modal is open
   useEffect(() => {
@@ -62,15 +103,9 @@ export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefr
           )}
         </div>
 
-        {/* Logo */}
+        {/* Logo — animates from splash logo position when ready */}
         <div className="text-center" style={{ marginBottom: 32, marginTop: -40 }}>
-          <img
-            id="home-logo"
-            src="/emcoin_logo.png"
-            alt="EmCoin"
-            className="mx-auto"
-            style={{ height: 100, objectFit: 'contain', filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))' }}
-          />
+          <LogoFly splashLogoRect={splashLogoRect ?? null} ready={ready} logoRef={homeLogoRef} />
         </div>
 
         {ready ? (
