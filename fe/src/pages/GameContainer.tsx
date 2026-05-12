@@ -11,6 +11,13 @@ import { AssetPreloaderScreen } from '@/components/AssetPreloaderScreen'
 export default function GameContainer() {
   const [forcelobby, setForceLobby] = useState(false)
   const preloadState = useAssetPreloader()
+  const [splashGone, setSplashGone] = useState(false)
+  const [lobbyKey, setLobbyKey] = useState(0)
+
+  const handleSplashExited = useCallback(() => {
+    setSplashGone(true)
+    setLobbyKey(k => k + 1)
+  }, [])
   const { socket, isConnected, roomState, availableRooms, error, currentSocketId, joinRoom, startGame, listRooms, clearSession, addFakePlayers, updateProfile, leaveRoom, updateRoomSettings } = useSocket()
   
   const mySocketId = currentSocketId || socket?.id || ''
@@ -74,7 +81,7 @@ export default function GameContainer() {
   if (!isConnected) {
     return (
       <>
-        {!preloadState.done && <AssetPreloaderScreen state={preloadState} />}
+        {!splashGone && <AssetPreloaderScreen state={preloadState} onExited={handleSplashExited} />}
         <CartoonScreen data-testid="connecting">
           <div className="flex flex-col items-center justify-center flex-1 p-8 text-center gap-4">
             <div className="text-6xl animate-bounce">🎴</div>
@@ -105,7 +112,7 @@ export default function GameContainer() {
   if (gameState === 'waiting' && roomState && isConnected) {
     return (
       <>
-        {!preloadState.done && <AssetPreloaderScreen state={preloadState} />}
+        {!splashGone && <AssetPreloaderScreen state={preloadState} onExited={handleSplashExited} />}
         <WaitingRoom
           roomId={roomState.id}
           players={roomState.players}
@@ -136,13 +143,17 @@ export default function GameContainer() {
 
   return (
     <>
-      {!preloadState.done && <AssetPreloaderScreen state={preloadState} />}
-      <Lobby
-        availableRooms={availableRooms}
-        onJoinRoom={handleJoinRoom}
-        onCreateRoom={handleCreateRoom}
-        onRefreshRooms={listRooms}
-      />
+      {!splashGone && <AssetPreloaderScreen state={preloadState} onExited={handleSplashExited} />}
+      <div style={splashGone ? undefined : { visibility: 'hidden', pointerEvents: 'none' }}>
+        <Lobby
+          key={lobbyKey}
+          ready={splashGone}
+          availableRooms={availableRooms}
+          onJoinRoom={handleJoinRoom}
+          onCreateRoom={handleCreateRoom}
+          onRefreshRooms={listRooms}
+        />
+      </div>
     </>
   )
 }

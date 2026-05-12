@@ -1,62 +1,110 @@
+import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { PreloadState } from '@/hooks/useAssetPreloader'
 
 interface Props {
   state: PreloadState
+  onExited?: () => void  // called when splash fully gone
 }
 
-export function AssetPreloaderScreen({ state }: Props) {
-  const { progress, loaded, total } = state
+export function AssetPreloaderScreen({ state, onExited }: Props) {
+  const { progress, done } = state
+  const [showFinished, setShowFinished] = useState(false)
+  const [logoFlying, setLogoFlying] = useState(false)
+  const [exiting, setExiting] = useState(false)
+  const [targetY, setTargetY] = useState(0)
+  const splashLogoRef = useRef<HTMLImageElement>(null)
+
+  useEffect(() => {
+    if (!done) return
+
+    // t1: show "Finished" text
+    // t2: measure + start logo fly (after 600ms pause)
+    // t3: start fade out (after logo animation ~550ms)
+    // t4: notify parent fully gone
+
+    const t1 = setTimeout(() => setShowFinished(true), 100)
+
+    const t2 = setTimeout(() => {
+      const splashLogo = splashLogoRef.current
+      const homeLogo = document.getElementById('home-logo')
+      if (splashLogo && homeLogo) {
+        const splashRect = splashLogo.getBoundingClientRect()
+        const homeRect = homeLogo.getBoundingClientRect()
+        setTargetY(
+          (homeRect.top + homeRect.height / 2) - (splashRect.top + splashRect.height / 2)
+        )
+      }
+      setLogoFlying(true)
+    }, 900)  // 800ms pause after "Finished"
+
+    const t3 = setTimeout(() => {
+      setExiting(true)
+      onExited?.()   // mount Lobby ngay khi splash bắt đầu fade → PopIn chạy đồng thời
+    }, 900 + 600)
+
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3) }
+  }, [done, onExited])
 
   return (
     <AnimatePresence>
-      <motion.div
-        key="preloader"
-        initial={{ opacity: 1 }}
-        exit={{ opacity: 0, transition: { duration: 0.6, ease: 'easeOut' } }}
-        className="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-6"
-        style={{
-          background: 'linear-gradient(160deg, #f9e4f7 0%, #dff0ff 60%, #e8f9f0 100%)',
-        }}
-      >
-        {/* Logo */}
-        <motion.img
-          src="/emcoin_logo.png"
-          alt="EmCoin"
-          className="w-32 object-contain"
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-          style={{ filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.15))' }}
-        />
-
-        {/* Card flip animation */}
+      {!exiting && (
         <motion.div
-          animate={{ rotateY: [0, 180, 360] }}
-          transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
-          className="text-5xl select-none"
-          style={{ transformStyle: 'preserve-3d' }}
+          key="preloader"
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center"
+          style={{ background: 'var(--c-bg)' }}
         >
-          🎴
-        </motion.div>
-
-        {/* Progress bar */}
-        <div className="w-56 flex flex-col items-center gap-2">
-          <div className="w-full h-3 rounded-full bg-white/60 overflow-hidden shadow-inner">
-            <motion.div
-              className="h-full rounded-full"
-              style={{
-                background: 'linear-gradient(90deg, #b57bee, #6ec6f5)',
-                width: `${progress}%`,
-              }}
-              transition={{ ease: 'easeOut', duration: 0.3 }}
+          <div
+            className="relative flex flex-col items-center justify-center gap-6"
+            style={{
+              width: '100%',
+              maxWidth: 430,
+              minHeight: '100dvh',
+              backgroundImage: 'url(/cartoon/ui/home-bg.png)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center top',
+            }}
+          >
+            {/* Logo */}
+            <motion.img
+              ref={splashLogoRef}
+              src="/emcoin_logo.png"
+              alt="EmCoin"
+              initial={{ scale: 0.85, opacity: 0, y: 0 }}
+              animate={logoFlying
+                ? { scale: 1.56, opacity: 1, y: targetY }
+                : { scale: 1, opacity: 1, y: 0 }
+              }
+              transition={logoFlying
+                ? { duration: 0.55, ease: [0.34, 1.2, 0.64, 1] }
+                : { duration: 0.45, ease: 'easeOut' }
+              }
+              style={{ height: 64, objectFit: 'contain', filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))' }}
             />
+
+            {/* Progress bar */}
+            <motion.div
+              className="flex flex-col items-center gap-2 w-48"
+              animate={{ opacity: logoFlying ? 0 : 1, y: logoFlying ? 8 : 0 }}
+              transition={{ duration: 0.25 }}
+            >
+              <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.08)' }}>
+                <motion.div
+                  className="h-full rounded-full"
+                  style={{ background: 'linear-gradient(90deg, var(--c-blue-mid), var(--c-teal))' }}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ ease: 'easeOut', duration: 0.3 }}
+                />
+              </div>
+              <p className="font-display text-xs" style={{ color: 'var(--c-blue-mid)' }}>
+                {showFinished ? '✓ Finished' : `${progress}%`}
+              </p>
+            </motion.div>
           </div>
-          <p className="font-body text-xs text-[#8a7aaa]">
-            Đang tải... {loaded}/{total}
-          </p>
-        </div>
-      </motion.div>
+        </motion.div>
+      )}
     </AnimatePresence>
   )
 }

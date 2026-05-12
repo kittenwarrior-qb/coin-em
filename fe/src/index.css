@@ -487,20 +487,13 @@
 
   .screen-panel {
     width: 100%;
-    max-width: 24rem;
+    max-width: 430px;
     min-height: 100dvh;
     background: var(--c-white);
     display: flex;
     flex-direction: column;
     overflow: hidden;
     position: relative;
-  }
-
-  /* On true mobile viewports, stretch panel edge-to-edge */
-  @media (max-width: 430px) {
-    .screen-panel {
-      max-width: 100%;
-    }
   }
 
   /* ── Game board animated background ── */

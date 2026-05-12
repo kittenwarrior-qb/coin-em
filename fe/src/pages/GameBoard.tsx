@@ -178,7 +178,7 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
         />
 
         {/* Coin display — top left */}
-        <div className="absolute top-2 left-2 z-10">
+        <div className="absolute top-2 left-2 z-20">
           <CoinDisplay coins={myCoinCount} onCoinClick={(front, back, alt) => setCoinPreview({ front, back, alt })} />
         </div>
 
