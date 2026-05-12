@@ -12,22 +12,19 @@ interface TableBoardProps {
 
 export function TableBoard({ selectedCards, actions }: TableBoardProps) {
   return (
-    <div className="relative w-full h-full flex items-center justify-center">
+    <div className="relative w-full flex items-center justify-center">
       <div
-        className="relative w-full h-full flex flex-col"
+        className="relative w-full flex flex-col"
         style={{
+          aspectRatio: '701 / 1887',
           borderRadius: '5px',
           overflow: 'hidden',
-          border: '2px solid rgba(255,182,193,0.6)',
+          backgroundImage: 'url(/pink_carpet.jpg)',
+          backgroundSize: '100% 100%',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center',
         }}
       >
-        {/* Carpet texture */}
-        <img
-          src="/pink_carpet.jpg"
-          alt=""
-          draggable={false}
-          className="absolute inset-0 w-full h-full object-cover"
-        />
 
         {/* Glossy highlight */}
         <div
@@ -42,17 +39,17 @@ export function TableBoard({ selectedCards, actions }: TableBoardProps) {
           }}
         />
 
-        {/* Cards — top portion */}
-        <div className="relative z-10 flex-1 flex items-center justify-center min-h-0 overflow-y-auto">
-          <CenterBoard selectedCards={selectedCards} />
-        </div>
-
-        {/* Action buttons — bottom of table */}
-        {actions && (
-          <div className="relative z-10 flex flex-col gap-2 px-3 pb-3">
-            {actions}
+        {/* Cards + Actions — centered */}
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center min-h-0 gap-3 px-3 py-3">
+          <div className="flex items-center justify-center overflow-y-auto">
+            <CenterBoard selectedCards={selectedCards} />
           </div>
-        )}
+          {actions && (
+            <div className="flex flex-col gap-2 w-full">
+              {actions}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

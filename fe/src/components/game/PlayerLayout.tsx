@@ -40,12 +40,12 @@ export function PlayerLayout({ players, renderPlayer, renderCenter }: PlayerLayo
     <div className="flex flex-col w-full h-full">
 
       {/* Top — NTG */}
-      <div className="flex justify-center pb-1">
+      <div className="flex justify-center">
         {ntg ? renderPlayer({ player: ntg, position: 'top', index: playerIndex(ntg) }) : <div className="w-14 h-14" />}
       </div>
 
       {/* Middle row: left | center | right */}
-      <div className="flex flex-1 items-stretch gap-1 min-h-0">
+      <div className="flex items-stretch gap-1">
 
         {/* Left column */}
         <div className="flex flex-col justify-around items-center w-20 flex-shrink-0">
@@ -64,7 +64,7 @@ export function PlayerLayout({ players, renderPlayer, renderCenter }: PlayerLayo
       </div>
 
       {/* Bottom — Sender */}
-      <div className="flex justify-center pt-1">
+      <div className="flex justify-center pt-3">
         {sender ? renderPlayer({ player: sender, position: 'bottom', index: playerIndex(sender) }) : <div className="w-14 h-14" />}
       </div>
     </div>
