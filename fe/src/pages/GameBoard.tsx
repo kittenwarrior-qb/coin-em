@@ -2,19 +2,19 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSocket } from '../hooks/useSocket'
 import { CARD_IMAGES, ROLE_TO_IMAGE } from '../constants/cardImages'
-import { useGameStore, useUIStore } from '../stores'
+import { useGameStore } from '../stores'
 import { useGameState, useGameActions, useGameUI } from '../hooks/useGameState'
 import { useGameFlow } from '../hooks/useGameFlow'
 import type { CardData } from '../stores/types'
 import { PHASE_LABELS } from '../stores/types'
 
 import { CartoonButton, CartoonCircleButton } from '@/components/cartoon'
-import { CoinStack }        from '@/components/game/CoinStack'
 import { TableBoard }      from '@/components/game/TableBoard'
 import { FlipCard }         from '@/components/game/FlipCard'
 import { CardInventory, CARD_DATA } from '@/components/game/CardInventory'
 import { PlayerLayout }     from '@/components/game/PlayerLayout'
 import { MiniPlayerToken }  from '@/components/game/MiniPlayerToken'
+import { CoinDisplay }      from '@/components/game/CoinDisplay'
 import { GameMenuModal }    from '@/components/lobby/GameMenuModal'
 import {
   GroupResponseOverlay,
@@ -38,6 +38,7 @@ interface GameBoardProps {
 export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, onUpdateProfile }: GameBoardProps) {
   const { nextTurn, selectCard: emitSelectCard, sendResponse, ntgVote, shareReflection, submitVote } = useSocket()
   const [showMenu, setShowMenu] = useState(false)
+  const [coinPreview, setCoinPreview] = useState<{ front: string; back: string; alt: string } | null>(null)
 
   // Phase-local state
   const [responseText,       setResponseText]       = useState('')
@@ -52,7 +53,6 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
   const { setPlayers, selectCard }         = useGameActions()
   const { expandedPlayer, showInventory, inventoryMode, setExpandedPlayer, setShowInventory, setInventoryMode } = useGameUI()
   const { gameStep, handleSelectCard }                   = useGameFlow()
-  const flyCoins      = useUIStore(s => s.flyCoins)
   const setMyIds      = useGameStore(s => s.setMyIds)
   const hasShownRoleRef = useRef(false)
 
@@ -152,11 +152,10 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
   const isNight = ['night', 'healer-turn', 'silencer-turn'].includes(gameStep)
 
   return (
-    <div className="h-screen flex items-center justify-center overflow-hidden"
-      style={{ background: '#1a1a2e' }}
-    >
+    <div className="screen-cartoon">
       <div
-        className="relative w-full max-w-sm h-full p-4 flex flex-col gap-4 overflow-hidden"
+        className="screen-panel relative p-4 flex flex-col gap-4 overflow-hidden"
+        id="game-panel"
         style={{
           backgroundImage: 'url(/ingame_background.png)',
           backgroundSize: 'cover',
@@ -178,9 +177,9 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
           initial={{ y: '100%' }}
         />
 
-        {/* Coin stack */}
-        <div className="relative z-10">
-          <CoinStack coins={myCoinCount} />
+        {/* Coin display — top left */}
+        <div className="absolute top-2 left-2 z-10">
+          <CoinDisplay coins={myCoinCount} onCoinClick={(front, back, alt) => setCoinPreview({ front, back, alt })} />
         </div>
 
         {/* Menu button — top right */}
@@ -328,20 +327,25 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
         {gameStep === 'ended' && <EndedOverlay players={players} onLeave={onLeave} />}
       </AnimatePresence>
 
-      {/* Flying coins */}
+      {/* Coin card overlay */}
       <AnimatePresence>
-        {flyCoins.map(c => (
+        {coinPreview && (
           <motion.div
-            key={c.id}
-            initial={{ opacity: 1, y: 0, x: c.x, scale: 1 }}
-            animate={{ opacity: 0, y: -120, scale: 1.5 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="fixed top-1/2 left-1/2 text-3xl pointer-events-none z-50"
+            className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            onClick={() => setCoinPreview(null)}
           >
-            {c.emoji}
+            <FlipCard
+              frontImage={coinPreview.front}
+              backImage={coinPreview.back}
+              altText={coinPreview.alt}
+              size="large"
+              onClose={() => setCoinPreview(null)}
+            />
           </motion.div>
-        ))}
+        )}
       </AnimatePresence>
 
       {/* Role card overlay */}
@@ -352,7 +356,7 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             data-testid="role-card-overlay"
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
             onClick={() => setExpandedPlayer(null)}
           >
             <FlipCard
