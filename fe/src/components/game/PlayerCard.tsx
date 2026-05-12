@@ -1,7 +1,5 @@
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { CartoonBadge, CartoonAvatar } from '@/components/cartoon'
-import { CoinPopup } from './CoinPopup'
 import type { Player, CoinType } from './types'
 
 const PASTEL_LIST = [
@@ -24,7 +22,6 @@ export function PlayerCard({
   player, playerIndex, onExpand, onSendCoin,
   onNightAction, onVote, isGlowing, isNightPhase,
 }: PlayerCardProps) {
-  const [showCoins, setShowCoins] = useState(false)
   const bg = PASTEL_LIST[playerIndex % PASTEL_LIST.length]
 
   const isNarrator   = player.role === 'Người Quản trò'
@@ -35,7 +32,6 @@ export function PlayerCard({
     if (player.isMe)                          { onExpand(); return }
     if (isNightPhase && onNightAction)         { onNightAction(player.id); return }
     if (onVote)                                { onVote(player.id); return }
-    setShowCoins(s => !s)
   }
 
   return (
@@ -81,11 +77,6 @@ export function PlayerCard({
         )}
       </motion.div>
 
-      <AnimatePresence>
-        {showCoins && !player.isMe && (
-          <CoinPopup onSend={onSendCoin} onClose={() => setShowCoins(false)} />
-        )}
-      </AnimatePresence>
     </div>
   )
 }
