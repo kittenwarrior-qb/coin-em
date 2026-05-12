@@ -158,6 +158,9 @@ export default function GameContainer() {
           key={lobbyKey}
           ready={splashGone}
           splashLogoRect={splashLogoRect}
+          bgDone={preloadState.bgDone}
+          bgLoaded={preloadState.bgLoaded}
+          bgTotal={preloadState.bgTotal}
           availableRooms={availableRooms}
           onJoinRoom={handleJoinRoom}
           onCreateRoom={handleCreateRoom}

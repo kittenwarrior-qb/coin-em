@@ -118,8 +118,13 @@ export function AssetPreloaderScreen({ state, onExited, onFullyGone }: Props) {
               />
             </div>
             <p className="font-display text-xs" style={{ color: '#fff' }}>
-              {showFinished ? '✓ Finished' : `${progress}%`}
+              {showFinished ? '✓ Finished' : `${state.loaded}/${state.total}`}
             </p>
+            {!showFinished && state.currentFile ? (
+              <p className="font-body text-[10px] opacity-60 truncate w-48 text-center" style={{ color: '#fff' }}>
+                {state.currentFile}
+              </p>
+            ) : null}
           </motion.div>
         </div>
       </div>

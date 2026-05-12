@@ -11,6 +11,10 @@ function buildCards() {
   const make = (key: string, url: string, cat: CardCategory, back: string) =>
     ({ id: `${cat}-${key}`, frontImage: url, backImage: back, category: cat } as CardData)
 
+  const roles = Object.entries(CARD_IMAGES.roles)
+    .filter(([k]) => k !== 'back')
+    .map(([k, u]) => make(k, u, 'role', CARD_IMAGES.roles.back))
+
   const allSituation = Object.entries(CARD_IMAGES.situation).filter(([k]) => k !== 'back').map(([k, u]) => make(k, u, 'situation', CARD_IMAGES.situation.back))
   // TH1-TH13 = Nhẹ, TH14-TH24 = Vừa, TH25-TH32 = Nhạy cảm
   const situationLight     = allSituation.filter(c => { const n = parseInt(c.id.replace('situation-TH', '')); return n >= 1 && n <= 13 })
@@ -26,6 +30,7 @@ function buildCards() {
   const emotionAdvanced = CARD_IMAGES.emotionAdvanced.map((imgs, i) => ({ id: `emotion-advanced-${i+1}`, frontImage: imgs.front, backImage: imgs.back, category: 'emotion' as CardCategory, subType: 'advanced' as EmotionSubType }))
 
   return {
+    roles,
     situation: allSituation, reflection, selfcare,
     situationByType: { light: situationLight, medium: situationMedium, sensitive: situationSensitive },
     emotion: [...emotionBasic, ...emotionLight, ...emotionStrong, ...emotionAdvanced],
@@ -38,6 +43,7 @@ export const CARD_DATA = buildCards()
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const TABS: { key: CardCategory; label: string }[] = [
+  { key: 'role',       label: 'Vai trò' },
   { key: 'situation',  label: 'Tình huống' },
   { key: 'emotion',    label: 'Cảm xúc' },
   { key: 'reflection', label: 'Phản tư' },
@@ -65,13 +71,14 @@ interface CardInventoryProps {
 }
 
 export function CardInventory({ onClose, onSelectCard, allowedCategory, showConfirmButton = false }: CardInventoryProps) {
-  const [activeTab, setActiveTab]       = useState<CardCategory>(allowedCategory ?? 'situation')
+  const [activeTab, setActiveTab]       = useState<CardCategory>(allowedCategory ?? 'role')
   const [situationSub, setSituationSub] = useState<SituationSubType>('light')
   const [emotionSub, setEmotionSub]     = useState<EmotionSubType>('basic')
   const [preview, setPreview]           = useState<CardData | null>(null)
   const [confirmed, setConfirmed]       = useState<CardData | null>(null)
 
   const cards = 
+    activeTab === 'role' ? CARD_DATA.roles :
     activeTab === 'situation' ? CARD_DATA.situationByType[situationSub] :
     activeTab === 'emotion' ? CARD_DATA.emotionsByType[emotionSub] :
     CARD_DATA[activeTab as 'reflection' | 'selfcare']

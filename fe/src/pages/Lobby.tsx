@@ -52,9 +52,12 @@ interface LobbyProps {
   onRefreshRooms: () => void
   ready?: boolean
   splashLogoRect?: SplashRect | null
+  bgDone?: boolean
+  bgLoaded?: number
+  bgTotal?: number
 }
 
-export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefreshRooms, ready = true, splashLogoRect }: LobbyProps) {
+export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefreshRooms, ready = true, splashLogoRect, bgDone = true, bgLoaded = 0, bgTotal = 0 }: LobbyProps) {
   const [joinOpen, setJoinOpen] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -132,6 +135,16 @@ export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefr
           </CartoonButton>
         )}
       </div>
+
+      {/* Background download indicator */}
+      {!bgDone && (
+        <div className="flex items-center justify-center pb-4 gap-2">
+          <img src="/cartoon/icons/Loading-Spinner.svg" alt="" className="w-4 h-4 spin-cartoon opacity-60" />
+          <span className="font-body text-xs" style={{ color: 'var(--c-gray)' }}>
+            Downloading... {bgLoaded}/{bgTotal}
+          </span>
+        </div>
+      )}
 
       <JoinRoomModal
         open={joinOpen}
