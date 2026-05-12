@@ -8,13 +8,14 @@ import { useGameFlow } from '../hooks/useGameFlow'
 import type { CardData } from '../stores/types'
 import { PHASE_LABELS } from '../stores/types'
 
-import { CartoonButton, CartoonCircleButton, QuitConfirmModal } from '@/components/cartoon'
+import { CartoonButton, CartoonCircleButton } from '@/components/cartoon'
 import { CoinStack }        from '@/components/game/CoinStack'
 import { TableBoard }      from '@/components/game/TableBoard'
 import { FlipCard }         from '@/components/game/FlipCard'
 import { CardInventory, CARD_DATA } from '@/components/game/CardInventory'
 import { PlayerLayout }     from '@/components/game/PlayerLayout'
 import { MiniPlayerToken }  from '@/components/game/MiniPlayerToken'
+import { GameMenuModal }    from '@/components/lobby/GameMenuModal'
 import {
   GroupResponseOverlay,
   ReflectionSharingOverlay,
@@ -36,7 +37,7 @@ interface GameBoardProps {
 
 export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, onUpdateProfile }: GameBoardProps) {
   const { nextTurn, selectCard: emitSelectCard, sendResponse, ntgVote, shareReflection, submitVote } = useSocket()
-  const [showQuit, setShowQuit] = useState(false)
+  const [showMenu, setShowMenu] = useState(false)
 
   // Phase-local state
   const [responseText,       setResponseText]       = useState('')
@@ -148,61 +149,60 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
   const myCoinCount  = myPlayer?.coins || { red: 0, yellow: 0, green: 0 }
 
   // ─── Render ────────────────────────────────────────────────────────────────
+  const isNight = ['night', 'healer-turn', 'silencer-turn'].includes(gameStep)
+
   return (
-    <div className="h-screen bg-white flex items-center justify-center overflow-hidden">
-      <div className="game-bg relative w-full max-w-sm h-full p-4 flex flex-col gap-4 overflow-hidden">
-
-        {/* Green overlay: role-reveal = full green, fades out on night */}
-        <AnimatePresence>
-          {gameStep === 'role-reveal' && (
-            <motion.div
-              key="role-reveal-bg"
-              initial={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1.2, ease: 'easeInOut' }}
-              className="absolute inset-0 z-0 pointer-events-none"
-              style={{ background: '#a5cb7b' }}
-            />
-          )}
-        </AnimatePresence>
-
-        {/* Day overlay: situation-card onwards — fades in like sunrise, stays for all day phases */}
-        <AnimatePresence>
-          {!['role-reveal', 'night', 'healer-turn', 'silencer-turn'].includes(gameStep) && (
-            <motion.div
-              key="day-bg"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1.8, ease: 'easeInOut' }}
-              className="absolute inset-0 z-0 pointer-events-none"
-              style={{
-                background: 'linear-gradient(180deg, #fffbe6 0%, #fde68a 35%, #a5cb7b 100%)',
-              }}
-            />
-          )}
-        </AnimatePresence>
+    <div className="h-screen flex items-center justify-center overflow-hidden"
+      style={{ background: '#1a1a2e' }}
+    >
+      <div
+        className="relative w-full max-w-sm h-full p-4 flex flex-col gap-4 overflow-hidden"
+        style={{
+          backgroundImage: 'url(/ingame_background.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      >
+        {/* Night background — slides up from bottom on night phases, slides back down on day */}
+        <motion.div
+          className="absolute inset-0 z-0 pointer-events-none"
+          style={{
+            backgroundImage: 'url(/ingame_dark_background.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+          }}
+          animate={{ y: isNight ? '0%' : '100%' }}
+          transition={{ duration: 1.6, ease: [0.4, 0, 0.2, 1] }}
+          initial={{ y: '100%' }}
+        />
 
         {/* Coin stack */}
         <div className="relative z-10">
           <CoinStack coins={myCoinCount} />
         </div>
 
-        {/* Leave button */}
+        {/* Menu button — top right */}
         <CartoonCircleButton
-          color="gray"
+          color="purple"
           size="sm"
+          iconSrc="/cartoon/icons/Settings.svg"
+          iconAlt="Menu"
+          iconSize="40%"
           className="absolute top-2 right-2 z-10"
-          onClick={() => setShowQuit(true)}
-          aria-label="Rời phòng"
-        >
-          ←
-        </CartoonCircleButton>
+          style={{ height: 38, width: 38 }}
+          onClick={() => setShowMenu(true)}
+          aria-label="Menu"
+        />
 
         {/* Phase info */}
         <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10">
-          <div className="card-cartoon card-cartoon-sm px-3 py-1 text-center">
-            <div data-testid="game-phase" data-phase={gameStep} className="font-display text-[10px] text-[var(--c-gray)]">
+          <div
+            className="px-3 py-1 text-center rounded-full"
+            style={{ background: 'rgba(0,0,0,0.25)', backdropFilter: 'blur(6px)' }}
+          >
+            <div data-testid="game-phase" data-phase={gameStep} className="font-display text-[10px] text-white/70">
               Round {currentRound}/{totalRounds} · {gameStep}
             </div>
           </div>
@@ -273,14 +273,6 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
           />
         </div>
 
-        {/* Card bag FAB */}
-        <button
-          onClick={() => openInventory()}
-          className="absolute bottom-2 right-2 z-10 coin-cartoon coin-gold w-12 h-12 text-2xl gloss-cartoon"
-          aria-label="Túi thẻ bài"
-        >
-          🎴
-        </button>
       </div>
 
       {/* ── Phase overlays ─────────────────────────────────────────────────── */}
@@ -386,14 +378,11 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
         )}
       </AnimatePresence>
 
-      <QuitConfirmModal
-        open={showQuit}
-        onConfirm={() => { setShowQuit(false); onLeave() }}
-        onCancel={() => setShowQuit(false)}
-        message="Bạn có muốn rời game không?"
-        subMessage="Tiến trình sẽ bị mất!"
-        confirmLabel="Rời"
-        cancelLabel="Ở lại"
+      <GameMenuModal
+        open={showMenu}
+        onClose={() => setShowMenu(false)}
+        onGuide={() => setShowMenu(false)}
+        onQuit={() => { setShowMenu(false); onLeave() }}
       />
     </div>
   )

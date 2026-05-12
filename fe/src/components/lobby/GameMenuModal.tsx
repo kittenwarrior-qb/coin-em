@@ -7,10 +7,11 @@ interface GameMenuModalProps {
   open: boolean
   onClose: () => void
   onGuide: () => void
-  onSettings: () => void
+  onSettings?: () => void
+  onQuit?: () => void
 }
 
-export function GameMenuModal({ open, onClose, onGuide, onSettings }: GameMenuModalProps) {
+export function GameMenuModal({ open, onClose, onGuide, onQuit }: GameMenuModalProps) {
   const [showCardDeck, setShowCardDeck] = useState(false)
 
   return (
@@ -25,9 +26,11 @@ export function GameMenuModal({ open, onClose, onGuide, onSettings }: GameMenuMo
             Hướng dẫn
           </CartoonButton>
 
-          <CartoonButton color="orange" size="lg" className="w-full" onClick={onSettings}>
-            Cài đặt
-          </CartoonButton>
+          {onQuit && (
+            <CartoonButton color="orange" size="lg" className="w-full" onClick={onQuit}>
+              Thoát game
+            </CartoonButton>
+          )}
         </div>
       </CartoonModal>
 
