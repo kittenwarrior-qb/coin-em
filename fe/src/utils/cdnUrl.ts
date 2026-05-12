@@ -13,9 +13,9 @@ export function cdnUrl(transforms: string, url: string): string {
 }
 
 // Presets matching actual render sizes
-export const CDN_FRONT = (url: string) => cdnUrl('f_auto,q_auto:best,w_600', url) // card fronts, max 70vw flip
-export const CDN_BACK  = (url: string) => cdnUrl('f_auto,q_auto:best,w_300', url) // card backs / thumbnails
-export const CDN_COIN  = (url: string) => cdnUrl('f_auto,q_auto:best,w_80',  url) // coins rendered at 25px
+export const CDN_FRONT = (url: string) => cdnUrl('f_auto,q_auto,w_400', url) // card fronts, max 280px display (2x retina)
+export const CDN_BACK  = (url: string) => cdnUrl('f_auto,q_auto,w_200', url) // card backs / thumbnails
+export const CDN_COIN  = (url: string) => cdnUrl('f_auto,q_auto,w_80',  url) // coins rendered at 25px
 
 /**
  * Applies CDN transforms to every URL in a CARD_IMAGES-shaped object.

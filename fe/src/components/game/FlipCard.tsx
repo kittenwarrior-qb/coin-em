@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 
 interface FlipCardProps {
@@ -11,9 +11,12 @@ interface FlipCardProps {
 
 export function FlipCard({ frontImage, backImage, altText, size = 'large', onClose }: FlipCardProps) {
   const [flipped, setFlipped] = useState(false)
+
+  // Reset flip when card changes
+  useEffect(() => { setFlipped(false) }, [frontImage])
   const dims = size === 'large'
-    ? { maxWidth: '70vw', maxHeight: '65vh' }
-    : { maxWidth: '35vw', maxHeight: '32vh' }
+    ? { maxWidth: 'min(70vw, 280px)', maxHeight: '65vh' }
+    : { maxWidth: 'min(35vw, 140px)', maxHeight: '32vh' }
   const radius = size === 'large' ? '24px' : '14px'
 
   return (

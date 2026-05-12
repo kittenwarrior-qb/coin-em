@@ -75,13 +75,24 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, showConf
   const [situationSub, setSituationSub] = useState<SituationSubType>('light')
   const [emotionSub, setEmotionSub]     = useState<EmotionSubType>('basic')
   const [preview, setPreview]           = useState<CardData | null>(null)
+  const [previewDir, setPreviewDir]     = useState<1 | -1>(1) // 1 = next (right→left), -1 = prev (left→right)
   const [confirmed, setConfirmed]       = useState<CardData | null>(null)
 
-  const cards = 
+  const cards =
     activeTab === 'role' ? CARD_DATA.roles :
     activeTab === 'situation' ? CARD_DATA.situationByType[situationSub] :
     activeTab === 'emotion' ? CARD_DATA.emotionsByType[emotionSub] :
     CARD_DATA[activeTab as 'reflection' | 'selfcare']
+
+  const previewIndex = preview ? cards.findIndex(c => c.id === preview.id) : -1
+
+  const navigatePreview = (dir: 1 | -1) => {
+    if (previewIndex < 0) return
+    const next = previewIndex + dir
+    if (next < 0 || next >= cards.length) return
+    setPreviewDir(dir)
+    setPreview(cards[next])
+  }
 
   const handleCardClick = (card: CardData) => {
     if (showConfirmButton) setConfirmed(card)
@@ -97,15 +108,17 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, showConf
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
       onClick={onClose}
     >
+      {/* Constrain to mobile panel width */}
+      <div className="relative w-full h-full flex items-center justify-center" style={{ maxWidth: 430 }}>
       <motion.div
         initial={{ scale: 0.9, y: 40 }}
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.9, y: 40 }}
         onClick={e => e.stopPropagation()}
-        className="relative w-[90vw] max-w-md flex flex-col"
+        className="relative w-[90%] flex flex-col"
       >
         {/* Panel-Teal background */}
         <div
@@ -235,8 +248,9 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, showConf
           </CartoonCircleButton>
         </div>
       </motion.div>
+      </div>
 
-      {/* Preview overlay */}
+      {/* Preview overlay — constrained to 430px panel */}
       <AnimatePresence>
         {preview && !showConfirmButton && (
           <motion.div
@@ -244,15 +258,66 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, showConf
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="absolute inset-0 z-[60] flex items-center justify-center bg-black/30 backdrop-blur-sm"
+            style={{ maxWidth: 430, margin: '0 auto' }}
             onClick={e => { e.stopPropagation(); setPreview(null) }}
           >
-            <FlipCard
-              frontImage={preview.frontImage}
-              backImage={preview.backImage}
-              altText={preview.id}
-              size="large"
-              onClose={() => setPreview(null)}
-            />
+            {/* Prev button */}
+            <button
+              className="absolute left-2 z-10 p-2 disabled:opacity-20 transition-opacity"
+              onClick={e => { e.stopPropagation(); navigatePreview(-1) }}
+              disabled={previewIndex <= 0}
+              aria-label="Thẻ trước"
+            >
+              <img src="/cartoon/icons/Arrow---Right.svg" alt="prev" className="w-8 h-8" style={{ transform: 'scaleX(-1)', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.4))' }} draggable={false} />
+            </button>
+
+            {/* Card with slide transition */}
+            <AnimatePresence mode="popLayout" custom={previewDir}>
+              <motion.div
+                key={preview.id}
+                custom={previewDir}
+                variants={{
+                  enter: (dir: number) => ({ x: dir * 120, opacity: 0, scale: 0.92 }),
+                  center: { x: 0, opacity: 1, scale: 1 },
+                  exit: (dir: number) => ({ x: dir * -120, opacity: 0, scale: 0.92 }),
+                }}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.16, ease: [0.25, 0.46, 0.45, 0.94] }}
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.25}
+                onDragEnd={(_, info) => {
+                  if (info.offset.x < -60) navigatePreview(1)
+                  else if (info.offset.x > 60) navigatePreview(-1)
+                }}
+                onClick={e => e.stopPropagation()}
+              >
+                <FlipCard
+                  frontImage={preview.frontImage}
+                  backImage={preview.backImage}
+                  altText={preview.id}
+                  size="large"
+                  onClose={() => setPreview(null)}
+                />
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Next button */}
+            <button
+              className="absolute right-2 z-10 p-2 disabled:opacity-20 transition-opacity"
+              onClick={e => { e.stopPropagation(); navigatePreview(1) }}
+              disabled={previewIndex >= cards.length - 1}
+              aria-label="Thẻ tiếp"
+            >
+              <img src="/cartoon/icons/Arrow---Right.svg" alt="next" className="w-8 h-8" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.4))' }} draggable={false} />
+            </button>
+
+            {/* Counter */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 font-display text-xs text-white/70">
+              {previewIndex + 1} / {cards.length}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
