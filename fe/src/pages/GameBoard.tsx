@@ -14,6 +14,7 @@ import { FlipCard }         from '@/components/game/FlipCard'
 import { CardInventory, CARD_DATA } from '@/components/game/CardInventory'
 import { PlayerLayout }     from '@/components/game/PlayerLayout'
 import { MiniPlayerToken }  from '@/components/game/MiniPlayerToken'
+import { CoinDisplay }      from '@/components/game/CoinDisplay'
 import { GameMenuModal }    from '@/components/lobby/GameMenuModal'
 import {
   GroupResponseOverlay,
@@ -37,6 +38,7 @@ interface GameBoardProps {
 export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, onUpdateProfile }: GameBoardProps) {
   const { nextTurn, selectCard: emitSelectCard, sendResponse, ntgVote, shareReflection, submitVote } = useSocket()
   const [showMenu, setShowMenu] = useState(false)
+  const [coinPreview, setCoinPreview] = useState<{ front: string; back: string; alt: string } | null>(null)
 
   // Phase-local state
   const [responseText,       setResponseText]       = useState('')
@@ -144,6 +146,7 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
   // ─── Derived ───────────────────────────────────────────────────────────────
   const currentRound = roomState.currentRound || 1
   const totalRounds  = roomState.totalRounds || 1
+  const myCoinCount  = myPlayer?.coins || { red: 0, yellow: 0, green: 0 }
 
   // ─── Render ────────────────────────────────────────────────────────────────
   const isNight = ['night', 'healer-turn', 'silencer-turn'].includes(gameStep)
@@ -173,6 +176,11 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
           transition={{ duration: 1.6, ease: [0.4, 0, 0.2, 1] }}
           initial={{ y: '100%' }}
         />
+
+        {/* Coin display — top left */}
+        <div className="absolute top-2 left-2 z-10">
+          <CoinDisplay coins={myCoinCount} onCoinClick={(front, back, alt) => setCoinPreview({ front, back, alt })} />
+        </div>
 
         {/* Menu button — top right */}
         <CartoonCircleButton
@@ -317,6 +325,27 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
 
       <AnimatePresence>
         {gameStep === 'ended' && <EndedOverlay players={players} onLeave={onLeave} />}
+      </AnimatePresence>
+
+      {/* Coin card overlay */}
+      <AnimatePresence>
+        {coinPreview && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            onClick={() => setCoinPreview(null)}
+          >
+            <FlipCard
+              frontImage={coinPreview.front}
+              backImage={coinPreview.back}
+              altText={coinPreview.alt}
+              size="large"
+              onClose={() => setCoinPreview(null)}
+            />
+          </motion.div>
+        )}
       </AnimatePresence>
 
       {/* Role card overlay */}
