@@ -37,17 +37,17 @@ export function CenterBoard({ selectedCards }: CenterBoardProps) {
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center gap-2 p-2 overflow-y-auto">
       {selectedCards.situation && (
-        <CardSlot label="📋 Tình huống" color="white">
+        <CardSlot label="Tình huống" color="white">
           <CardImg src={selectedCards.situation.frontImage} alt="situation" />
         </CardSlot>
       )}
       {selectedCards.emotion && (
-        <CardSlot label="💭 Cảm xúc NTG" color="pink">
+        <CardSlot label="Cảm xúc NTG" color="pink">
           <CardImg src={selectedCards.emotion.frontImage} alt="emotion" />
         </CardSlot>
       )}
       {selectedCards.reflections.length > 0 && (
-        <CardSlot label="🤔 Phản tư" color="blue">
+        <CardSlot label="Phản tư" color="blue">
           <div className="flex gap-1">
             {selectedCards.reflections.map((card, i) => (
               <motion.div key={card.id} initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: i * 0.1 }}>
@@ -58,7 +58,7 @@ export function CenterBoard({ selectedCards }: CenterBoardProps) {
         </CardSlot>
       )}
       {selectedCards.selfcare && (
-        <CardSlot label="🌟 Bí kíp ôm" color="green">
+        <CardSlot label="Bí kíp ôm" color="green">
           <CardImg src={selectedCards.selfcare.frontImage} alt="selfcare" />
         </CardSlot>
       )}

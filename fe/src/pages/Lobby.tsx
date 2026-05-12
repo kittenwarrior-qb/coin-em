@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { CartoonButton, CartoonCircleButton, CartoonScreen } from '@/components/cartoon'
 import { JoinRoomModal } from '@/components/lobby/JoinRoomModal'
 import { CreateRoomModal } from '@/components/lobby/CreateRoomModal'
+import { GameMenuModal } from '@/components/lobby/GameMenuModal'
 import type { RoomListItem } from '@/components/lobby/RoomCard'
 
 interface LobbyProps {
@@ -15,6 +16,7 @@ interface LobbyProps {
 export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefreshRooms }: LobbyProps) {
   const [joinOpen, setJoinOpen] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   // Refresh room list while join modal is open
   useEffect(() => {
@@ -42,6 +44,7 @@ export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefr
             iconSize="40%"
             aria-label="Cài đặt"
             style={{ height: 45, width: 45 }}
+            onClick={() => setMenuOpen(true)}
           />
         </div>
 
@@ -76,6 +79,13 @@ export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefr
         open={createOpen}
         onClose={() => setCreateOpen(false)}
         onCreate={onCreateRoom}
+      />
+
+      <GameMenuModal
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        onGuide={() => { setMenuOpen(false) }}
+        onSettings={() => { setMenuOpen(false) }}
       />
     </CartoonScreen>
   )

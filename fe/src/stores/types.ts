@@ -25,6 +25,7 @@ export type GameStatus = 'waiting' | 'playing' | 'ended'
 
 export type CardCategory = 'situation' | 'emotion' | 'reflection' | 'selfcare'
 export type EmotionSubType = 'basic' | 'light' | 'strong' | 'advanced'
+export type SituationSubType = 'light' | 'medium' | 'sensitive'
 export type CoinType = 'red' | 'yellow' | 'green'
 
 export interface Player {

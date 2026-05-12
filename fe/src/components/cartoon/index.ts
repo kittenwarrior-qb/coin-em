@@ -1,5 +1,6 @@
 // Buttons
 export { CartoonButton, CartoonCircleButton } from './CartoonButton'
+export { CartoonCheckbox } from './CartoonCheckbox'
 
 // Layout / containers
 export { CartoonCard } from './CartoonCard'

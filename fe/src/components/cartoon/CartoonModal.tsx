@@ -48,7 +48,7 @@ export function CartoonModal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-50 flex items-center justify-center px-4"
+          className="absolute inset-0 z-50 flex items-center justify-center px-4"
           style={{ background: 'rgba(0,0,0,0.35)' }}
           onClick={persistent ? undefined : onClose}
         >
@@ -80,14 +80,13 @@ export function CartoonModal({
               </div>
             )}
 
-            {/* ── Panel chính — Panel-Teal.png 9-slice (800×722, slice=120px)
-                border-image giữ nguyên 4 góc, stretch phần giữa theo content ── */}
+            {/* ── Panel-Teal.png 9-slice ── */}
             <div
               style={{
                 borderImage: 'url(/cartoon/ui/Panel-Teal.png) 120 fill / 40px / 0px stretch',
               }}
             >
-              <div className={cn(title ? 'pt-16 pb-5 px-5' : 'p-5')}>
+              <div className={cn(title ? 'pt-13 pb-5 px-5' : 'p-5')}>
                 {children}
               </div>
             </div>
