@@ -5,9 +5,12 @@ import GameBoard from './GameBoard'
 import { useSocket } from '../hooks/useSocket'
 import { getUserId } from '../utils/userId'
 import { CartoonScreen, CartoonButton } from '@/components/cartoon'
+import { useAssetPreloader } from '@/hooks/useAssetPreloader'
+import { AssetPreloaderScreen } from '@/components/AssetPreloaderScreen'
 
 export default function GameContainer() {
   const [forcelobby, setForceLobby] = useState(false)
+  const preloadState = useAssetPreloader()
   const { socket, isConnected, roomState, availableRooms, error, currentSocketId, joinRoom, startGame, listRooms, clearSession, addFakePlayers, updateProfile, leaveRoom, updateRoomSettings } = useSocket()
   
   const mySocketId = currentSocketId || socket?.id || ''
@@ -70,14 +73,17 @@ export default function GameContainer() {
 
   if (!isConnected) {
     return (
-      <CartoonScreen data-testid="connecting">
-        <div className="flex flex-col items-center justify-center flex-1 p-8 text-center gap-4">
-          <div className="text-6xl animate-bounce">🎴</div>
-          <h2 className="font-display text-2xl">Đang kết nối...</h2>
-          <p className="font-body text-sm text-[var(--c-gray)]">Vui lòng đợi</p>
-          <img src="/cartoon/icons/Loading-Spinner.svg" alt="" className="w-12 h-12 spin-cartoon opacity-60" />
-        </div>
-      </CartoonScreen>
+      <>
+        {!preloadState.done && <AssetPreloaderScreen state={preloadState} />}
+        <CartoonScreen data-testid="connecting">
+          <div className="flex flex-col items-center justify-center flex-1 p-8 text-center gap-4">
+            <div className="text-6xl animate-bounce">🎴</div>
+            <h2 className="font-display text-2xl">Đang kết nối...</h2>
+            <p className="font-body text-sm text-[var(--c-gray)]">Vui lòng đợi</p>
+            <img src="/cartoon/icons/Loading-Spinner.svg" alt="" className="w-12 h-12 spin-cartoon opacity-60" />
+          </div>
+        </CartoonScreen>
+      </>
     )
   }
 
@@ -98,17 +104,20 @@ export default function GameContainer() {
 
   if (gameState === 'waiting' && roomState && isConnected) {
     return (
-      <WaitingRoom
-        roomId={roomState.id}
-        players={roomState.players}
-        hostSocketId={roomState.host}
-        mySocketId={mySocketId}
-        myUserId={myUserId}
-        onStartGame={handleStartGame}
-        onLeave={handleLeaveRoom}
-        onAddFakePlayers={handleAddFakePlayers}
-        onUpdateProfile={handleUpdateProfile}
-      />
+      <>
+        {!preloadState.done && <AssetPreloaderScreen state={preloadState} />}
+        <WaitingRoom
+          roomId={roomState.id}
+          players={roomState.players}
+          hostSocketId={roomState.host}
+          mySocketId={mySocketId}
+          myUserId={myUserId}
+          onStartGame={handleStartGame}
+          onLeave={handleLeaveRoom}
+          onAddFakePlayers={handleAddFakePlayers}
+          onUpdateProfile={handleUpdateProfile}
+        />
+      </>
     )
   }
 
@@ -126,11 +135,14 @@ export default function GameContainer() {
   }
 
   return (
-    <Lobby
-      availableRooms={availableRooms}
-      onJoinRoom={handleJoinRoom}
-      onCreateRoom={handleCreateRoom}
-      onRefreshRooms={listRooms}
-    />
+    <>
+      {!preloadState.done && <AssetPreloaderScreen state={preloadState} />}
+      <Lobby
+        availableRooms={availableRooms}
+        onJoinRoom={handleJoinRoom}
+        onCreateRoom={handleCreateRoom}
+        onRefreshRooms={listRooms}
+      />
+    </>
   )
 }

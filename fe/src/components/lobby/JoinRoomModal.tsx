@@ -13,12 +13,14 @@ interface JoinRoomModalProps {
 export function JoinRoomModal({ open, onClose, availableRooms, onJoin }: Omit<JoinRoomModalProps, 'onRefresh'> & { onRefresh?: () => void }) {
   const [userName, setUserName] = useState('')
   const [selectedRoom, setSelectedRoom] = useState<RoomListItem | null>(null)
+  const [manualRoomId, setManualRoomId] = useState('')
 
-  const canJoin = !!userName.trim() && !!selectedRoom
+  const effectiveRoomId = selectedRoom?.id || manualRoomId.trim().toUpperCase()
+  const canJoin = !!userName.trim() && !!effectiveRoomId
 
   const handleJoin = () => {
     if (!canJoin) return
-    onJoin(selectedRoom!.id, userName.trim())
+    onJoin(effectiveRoomId, userName.trim())
     onClose()
   }
 
@@ -36,7 +38,7 @@ export function JoinRoomModal({ open, onClose, availableRooms, onJoin }: Omit<Jo
                   key={room.id}
                   room={room}
                   selected={selectedRoom?.id === room.id}
-                  onSelect={() => setSelectedRoom(room)}
+                  onSelect={() => { setSelectedRoom(room); setManualRoomId('') }}
                 />
               ))}
             </div>
@@ -46,6 +48,17 @@ export function JoinRoomModal({ open, onClose, availableRooms, onJoin }: Omit<Jo
             <p className="font-body text-sm">Chưa có phòng nào đang chờ</p>
           </CartoonCard>
         )}
+
+        <CartoonInput
+          label="Mã phòng"
+          data-testid="input-room-id"
+          value={selectedRoom ? selectedRoom.id : manualRoomId}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setManualRoomId(e.target.value.toUpperCase())
+            setSelectedRoom(null)
+          }}
+          placeholder="Nhập mã phòng"
+        />
 
         <CartoonInput
           label="Tên của bạn"
