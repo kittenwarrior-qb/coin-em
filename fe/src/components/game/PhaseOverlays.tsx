@@ -151,7 +151,7 @@ export function RevealSilencerOverlay({ players }: { players: Player[] }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-40 flex items-end justify-center bg-black/40"
+      className="absolute inset-0 z-40 flex items-end justify-center bg-black/40"
     >
       <motion.div
         initial={{ y: 100 }}
@@ -187,7 +187,7 @@ export function RewardOverlay({ players, currentRound, totalRounds, isNarrator, 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-40 flex items-end justify-center bg-black/40"
+      className="absolute inset-0 z-40 flex items-end justify-center bg-black/40"
     >
       <motion.div
         initial={{ y: 100 }}
@@ -240,7 +240,7 @@ export function EndedOverlay({ players, onLeave }: EndedProps) {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[var(--c-cream)] px-6 gap-5 overflow-y-auto scroll-cartoon"
+      className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[var(--c-cream)] px-6 gap-5 overflow-y-auto scroll-cartoon"
     >
       <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} transition={{ delay: 0.2 }} className="text-center">
         <div className="text-5xl mb-2">🫂</div>

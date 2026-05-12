@@ -13,6 +13,8 @@
  * Backdrop:  rgba(0,0,0,0.6)  (Popup.cs backgroundColor)
  */
 
+import { useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CartoonCircleButton } from './CartoonButton'
 import { cn } from '@/lib/utils'
@@ -39,10 +41,19 @@ export function CartoonModal({
   persistent,
   hideClose,
 }: CartoonModalProps) {
-  return (
+  const portalRef = useRef<Element | null>(null)
+
+  useEffect(() => {
+    // Prefer game-panel (in-game), fallback to screen-panel, then body
+    portalRef.current =
+      document.getElementById('game-panel') ??
+      document.querySelector('.screen-panel') ??
+      document.body
+  }, [open])
+
+  const content = (
     <AnimatePresence>
       {open && (
-        /* Backdrop — rgba(0,0,0,0.6) theo Popup.cs */
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -116,4 +127,7 @@ export function CartoonModal({
       )}
     </AnimatePresence>
   )
+
+  if (!portalRef.current) return content
+  return createPortal(content, portalRef.current)
 }

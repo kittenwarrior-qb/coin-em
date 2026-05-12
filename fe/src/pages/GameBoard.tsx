@@ -2,14 +2,13 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSocket } from '../hooks/useSocket'
 import { CARD_IMAGES, ROLE_TO_IMAGE } from '../constants/cardImages'
-import { useGameStore, useUIStore } from '../stores'
+import { useGameStore } from '../stores'
 import { useGameState, useGameActions, useGameUI } from '../hooks/useGameState'
 import { useGameFlow } from '../hooks/useGameFlow'
 import type { CardData } from '../stores/types'
 import { PHASE_LABELS } from '../stores/types'
 
 import { CartoonButton, CartoonCircleButton } from '@/components/cartoon'
-import { CoinStack }        from '@/components/game/CoinStack'
 import { TableBoard }      from '@/components/game/TableBoard'
 import { FlipCard }         from '@/components/game/FlipCard'
 import { CardInventory, CARD_DATA } from '@/components/game/CardInventory'
@@ -52,7 +51,6 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
   const { setPlayers, selectCard }         = useGameActions()
   const { expandedPlayer, showInventory, inventoryMode, setExpandedPlayer, setShowInventory, setInventoryMode } = useGameUI()
   const { gameStep, handleSelectCard }                   = useGameFlow()
-  const flyCoins      = useUIStore(s => s.flyCoins)
   const setMyIds      = useGameStore(s => s.setMyIds)
   const hasShownRoleRef = useRef(false)
 
@@ -146,17 +144,15 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
   // ─── Derived ───────────────────────────────────────────────────────────────
   const currentRound = roomState.currentRound || 1
   const totalRounds  = roomState.totalRounds || 1
-  const myCoinCount  = myPlayer?.coins || { red: 0, yellow: 0, green: 0 }
 
   // ─── Render ────────────────────────────────────────────────────────────────
   const isNight = ['night', 'healer-turn', 'silencer-turn'].includes(gameStep)
 
   return (
-    <div className="h-screen flex items-center justify-center overflow-hidden"
-      style={{ background: '#1a1a2e' }}
-    >
+    <div className="screen-cartoon">
       <div
-        className="relative w-full max-w-sm h-full p-4 flex flex-col gap-4 overflow-hidden"
+        className="screen-panel relative p-4 flex flex-col gap-4 overflow-hidden"
+        id="game-panel"
         style={{
           backgroundImage: 'url(/ingame_background.png)',
           backgroundSize: 'cover',
@@ -177,11 +173,6 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
           transition={{ duration: 1.6, ease: [0.4, 0, 0.2, 1] }}
           initial={{ y: '100%' }}
         />
-
-        {/* Coin stack */}
-        <div className="relative z-10">
-          <CoinStack coins={myCoinCount} />
-        </div>
 
         {/* Menu button — top right */}
         <CartoonCircleButton
@@ -328,22 +319,6 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
         {gameStep === 'ended' && <EndedOverlay players={players} onLeave={onLeave} />}
       </AnimatePresence>
 
-      {/* Flying coins */}
-      <AnimatePresence>
-        {flyCoins.map(c => (
-          <motion.div
-            key={c.id}
-            initial={{ opacity: 1, y: 0, x: c.x, scale: 1 }}
-            animate={{ opacity: 0, y: -120, scale: 1.5 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="fixed top-1/2 left-1/2 text-3xl pointer-events-none z-50"
-          >
-            {c.emoji}
-          </motion.div>
-        ))}
-      </AnimatePresence>
-
       {/* Role card overlay */}
       <AnimatePresence>
         {expandedPlayer && (
@@ -352,7 +327,7 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             data-testid="role-card-overlay"
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
             onClick={() => setExpandedPlayer(null)}
           >
             <FlipCard
