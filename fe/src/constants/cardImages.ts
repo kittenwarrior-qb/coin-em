@@ -1,5 +1,8 @@
 // Card images from Cloudinary
-export const CARD_IMAGES = {
+// URLs are transformed at module load time via applyCardTransforms (f_auto, q_auto:best, sized per use)
+import { applyCardTransforms } from '@/utils/cdnUrl'
+
+const RAW_CARD_IMAGES = {
   // Vai trò (Role cards)
   roles: {
     back: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469092/emcoin/vai-tro/m%E1%BA%B7t%20sau.png',
@@ -244,7 +247,10 @@ export const CARD_IMAGES = {
       front: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471398/emcoin/cam-xuc/advance/NC%208.png',
     },
   ],
-};
+}
+
+// Apply Cloudinary transforms (f_auto, q_auto:best, sized per use-case)
+export const CARD_IMAGES = applyCardTransforms(RAW_CARD_IMAGES)
 
 // Role mapping
 export const ROLE_TO_IMAGE: Record<string, string> = {
@@ -255,4 +261,4 @@ export const ROLE_TO_IMAGE: Record<string, string> = {
   'Người Gợi Mở': CARD_IMAGES.roles.VT5,
   'Người Im Lặng': CARD_IMAGES.roles.VT6,
   'Người Kết Nối': CARD_IMAGES.roles.VT7,
-};
+}
