@@ -50,9 +50,9 @@ export function CreateRoomModal({ open, onClose, onCreate }: CreateRoomModalProp
           <div>
             <p className="font-display text-sm mb-2" style={{ color: '#2f76ac' }}>Thẻ Tình huống</p>
             <div className="flex gap-1">
-              <CartoonCheckbox label="Nhẹ"       checked={decks.situation.light}     onChange={() => toggleSituation('light')} />
-              <CartoonCheckbox label="Vừa"       checked={decks.situation.medium}    onChange={() => toggleSituation('medium')} />
-              <CartoonCheckbox label="Nhạy cảm"  checked={decks.situation.sensitive} onChange={() => toggleSituation('sensitive')} />
+              <CartoonCheckbox label="Nhẹ"       data-testid="checkbox-situation-light"     checked={decks.situation.light}     onChange={() => toggleSituation('light')} />
+              <CartoonCheckbox label="Vừa"       data-testid="checkbox-situation-medium"    checked={decks.situation.medium}    onChange={() => toggleSituation('medium')} />
+              <CartoonCheckbox label="Nhạy cảm"  data-testid="checkbox-situation-sensitive" checked={decks.situation.sensitive} onChange={() => toggleSituation('sensitive')} />
             </div>
           </div>
 
@@ -60,10 +60,10 @@ export function CreateRoomModal({ open, onClose, onCreate }: CreateRoomModalProp
           <div>
             <p className="font-display text-sm mb-2" style={{ color: '#2f76ac' }}>Thẻ Cảm xúc</p>
             <div className="flex gap-1">
-              <CartoonCheckbox label="Cơ bản"   checked={decks.emotion.basic}    onChange={() => toggleEmotion('basic')} />
-              <CartoonCheckbox label="Nhẹ"      checked={decks.emotion.light}    onChange={() => toggleEmotion('light')} />
-              <CartoonCheckbox label="Mạnh"     checked={decks.emotion.strong}   onChange={() => toggleEmotion('strong')} />
-              <CartoonCheckbox label="Nâng cao" checked={decks.emotion.advanced} onChange={() => toggleEmotion('advanced')} />
+              <CartoonCheckbox label="Cơ bản"   data-testid="checkbox-emotion-basic"    checked={decks.emotion.basic}    onChange={() => toggleEmotion('basic')} />
+              <CartoonCheckbox label="Nhẹ"      data-testid="checkbox-emotion-light"    checked={decks.emotion.light}    onChange={() => toggleEmotion('light')} />
+              <CartoonCheckbox label="Mạnh"     data-testid="checkbox-emotion-strong"   checked={decks.emotion.strong}   onChange={() => toggleEmotion('strong')} />
+              <CartoonCheckbox label="Nâng cao" data-testid="checkbox-emotion-advanced" checked={decks.emotion.advanced} onChange={() => toggleEmotion('advanced')} />
             </div>
           </div>
         </div>
