@@ -28,7 +28,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3001
-      - CLIENT_ORIGIN=https://quocbui.site,https://coin-em.vercel.app
+      - CLIENT_ORIGIN=https://emcoin.cloud
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     networks:
@@ -49,7 +49,7 @@ services:
       context: ./fe
       dockerfile: Dockerfile.prod
       args:
-        - VITE_API_URL=https://quocbui.site
+        - VITE_API_URL=https://emcoin.cloud
     container_name: emcoin-frontend-prod
     volumes:
       - fe-dist:/var/www/html

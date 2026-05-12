@@ -7,13 +7,16 @@ interface CartoonCheckboxProps {
   label: string
   checked: boolean
   onChange: (checked: boolean) => void
+  'data-testid'?: string
 }
 
-export function CartoonCheckbox({ label, checked, onChange }: CartoonCheckboxProps) {
+export function CartoonCheckbox({ label, checked, onChange, 'data-testid': testId }: CartoonCheckboxProps) {
   return (
     <button
       type="button"
       onClick={() => onChange(!checked)}
+      aria-checked={checked}
+      data-testid={testId}
       className="flex flex-col items-center gap-1 flex-1 transition-transform active:scale-95 mt-2"
     >
       {/* Circle */}

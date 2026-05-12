@@ -41,10 +41,31 @@ export class PlayerContext {
 
   // ── Lobby ───────────────────────────────────────────────────────────────────
 
-  /** Create a new room and return the generated roomId */
-  async createRoom(): Promise<string> {
+  /** Create a new room with optional card deck selection, return the generated roomId */
+  async createRoom(options?: { situationDecks?: string[]; emotionDecks?: string[] }): Promise<string> {
     await this.p.click('[data-testid="btn-create-room"]')
     await this.p.fill('[data-testid="input-username-create"]', this.name)
+
+    // Toggle card deck checkboxes if specified
+    if (options?.situationDecks) {
+      const allSituation = ['light', 'medium', 'sensitive']
+      for (const key of allSituation) {
+        const checkbox = this.p.locator(`[data-testid="checkbox-situation-${key}"]`)
+        const isChecked = await checkbox.getAttribute('aria-checked')
+        const shouldBeChecked = options.situationDecks.includes(key)
+        if ((isChecked === 'true') !== shouldBeChecked) await checkbox.click()
+      }
+    }
+    if (options?.emotionDecks) {
+      const allEmotion = ['basic', 'light', 'strong', 'advanced']
+      for (const key of allEmotion) {
+        const checkbox = this.p.locator(`[data-testid="checkbox-emotion-${key}"]`)
+        const isChecked = await checkbox.getAttribute('aria-checked')
+        const shouldBeChecked = options.emotionDecks.includes(key)
+        if ((isChecked === 'true') !== shouldBeChecked) await checkbox.click()
+      }
+    }
+
     await this.p.click('[data-testid="btn-confirm-create"]')
     await this.p.waitForSelector('[data-testid="waiting-room"]', { timeout: 10_000 })
 

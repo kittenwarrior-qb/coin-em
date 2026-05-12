@@ -9,7 +9,7 @@ import type { RoomListItem } from '@/components/lobby/RoomCard'
 interface LobbyProps {
   availableRooms: RoomListItem[]
   onJoinRoom: (roomId: string, userName: string) => void
-  onCreateRoom: (userName: string) => void
+  onCreateRoom: (userName: string, cardDecks?: { situation: Record<string, boolean>; emotion: Record<string, boolean> }) => void
   onRefreshRooms: () => void
 }
 

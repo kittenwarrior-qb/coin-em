@@ -1,9 +1,9 @@
 {
-    email admin@quocbui.site
+    email admin@emcoin.cloud
     admin off
 }
 
-quocbui.site {
+emcoin.cloud {
     encode gzip zstd
 
     handle /api/* {

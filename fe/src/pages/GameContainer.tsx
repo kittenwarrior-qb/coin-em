@@ -8,7 +8,7 @@ import { CartoonScreen, CartoonButton } from '@/components/cartoon'
 
 export default function GameContainer() {
   const [forcelobby, setForceLobby] = useState(false)
-  const { socket, isConnected, roomState, availableRooms, error, currentSocketId, joinRoom, startGame, listRooms, clearSession, addFakePlayers, updateProfile, leaveRoom } = useSocket()
+  const { socket, isConnected, roomState, availableRooms, error, currentSocketId, joinRoom, startGame, listRooms, clearSession, addFakePlayers, updateProfile, leaveRoom, updateRoomSettings } = useSocket()
   
   const mySocketId = currentSocketId || socket?.id || ''
   const myUserId = getUserId()
@@ -17,10 +17,19 @@ export default function GameContainer() {
     joinRoom(roomId, userName, false)
   }, [joinRoom])
 
-  const handleCreateRoom = useCallback((userName: string) => {
+  const handleCreateRoom = useCallback((userName: string, cardDecks?: { situation: Record<string, boolean>; emotion: Record<string, boolean> }) => {
     const roomId = Math.random().toString(36).substring(2, 8).toUpperCase()
     joinRoom(roomId, userName, true)
-  }, [joinRoom])
+    // Send card deck settings after a short delay to ensure room is created
+    if (cardDecks) {
+      const situationGroups = Object.entries(cardDecks.situation).filter(([, v]) => v).map(([k]) => k)
+      const emotionGroups   = Object.entries(cardDecks.emotion).filter(([, v]) => v).map(([k]) => k)
+      // Fallback to defaults if nothing selected
+      const finalSituation = situationGroups.length > 0 ? situationGroups : ['light', 'medium']
+      const finalEmotion   = emotionGroups.length > 0 ? emotionGroups : ['basic']
+      setTimeout(() => updateRoomSettings(roomId, finalSituation, finalEmotion), 500)
+    }
+  }, [joinRoom, updateRoomSettings])
 
   const handleStartGame = useCallback(() => {
     if (!roomState) return
