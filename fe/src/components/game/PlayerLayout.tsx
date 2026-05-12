@@ -45,7 +45,7 @@ export function PlayerLayout({ players, renderPlayer, renderCenter }: PlayerLayo
       </div>
 
       {/* Middle row: left | center | right */}
-      <div className="flex items-stretch gap-1">
+      <div className="flex items-stretch gap-1 flex-1 min-h-0">
 
         {/* Left column */}
         <div className="flex flex-col justify-around items-center w-20 flex-shrink-0">

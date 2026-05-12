@@ -152,11 +152,14 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
   const isNight = ['night', 'healer-turn', 'silencer-turn'].includes(gameStep)
 
   return (
-    <div className="screen-cartoon">
+    <div className="screen-cartoon" style={{ overflow: 'hidden' }}>
       <div
-        className="screen-panel relative p-4 flex flex-col gap-4 overflow-hidden"
+        className="screen-panel relative p-4 flex flex-col gap-4"
         id="game-panel"
         style={{
+          width: 430,
+          height: '100dvh',
+          overflow: 'hidden',
           backgroundImage: 'url(/ingame_background.png)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
@@ -208,7 +211,7 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
         </div>
 
         {/* Player layout around center board */}
-        <div data-testid="players-grid" className="relative z-10 flex-1 min-h-0 mt-10">
+        <div data-testid="players-grid" className="relative z-10 flex-1 min-h-0 mt-10 h-full">
           <PlayerLayout
             players={players}
             renderCenter={() => (

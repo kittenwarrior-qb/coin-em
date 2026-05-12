@@ -12,11 +12,10 @@ interface TableBoardProps {
 
 export function TableBoard({ selectedCards, actions }: TableBoardProps) {
   return (
-    <div className="relative w-full flex items-center justify-center">
+    <div className="relative w-full h-full flex items-center justify-center">
       <div
-        className="relative w-full flex flex-col"
+        className="relative w-full h-full flex flex-col"
         style={{
-          aspectRatio: '701 / 1887',
           borderRadius: '5px',
           overflow: 'hidden',
           backgroundImage: 'url(/pink_carpet.jpg)',
