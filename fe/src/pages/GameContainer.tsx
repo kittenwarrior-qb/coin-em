@@ -13,11 +13,20 @@ export default function GameContainer() {
   const preloadState = useAssetPreloader()
   const [splashGone, setSplashGone] = useState(false)
   const [lobbyKey, setLobbyKey] = useState(0)
+  const [splashLogoRect, setSplashLogoRect] = useState<{ left: number; top: number; w: number; h: number } | null>(null)
 
-  const handleSplashExited = useCallback(() => {
+  const [preloaderMounted, setPreloaderMounted] = useState(true)
+
+  const handleSplashReady = useCallback((rect: { left: number; top: number; w: number; h: number }) => {
+    setSplashLogoRect(rect)
     setSplashGone(true)
     setLobbyKey(k => k + 1)
   }, [])
+
+  const handleSplashFullyGone = useCallback(() => {
+    setPreloaderMounted(false)
+  }, [])
+
   const { socket, isConnected, roomState, availableRooms, error, currentSocketId, joinRoom, startGame, listRooms, clearSession, addFakePlayers, updateProfile, leaveRoom, updateRoomSettings } = useSocket()
   
   const mySocketId = currentSocketId || socket?.id || ''
@@ -81,7 +90,7 @@ export default function GameContainer() {
   if (!isConnected) {
     return (
       <>
-        {!splashGone && <AssetPreloaderScreen state={preloadState} onExited={handleSplashExited} />}
+        {!splashGone && <AssetPreloaderScreen state={preloadState} onExited={handleSplashReady} onFullyGone={handleSplashFullyGone} />}
         <CartoonScreen data-testid="connecting">
           <div className="flex flex-col items-center justify-center flex-1 p-8 text-center gap-4">
             <div className="text-6xl animate-bounce">🎴</div>
@@ -112,7 +121,7 @@ export default function GameContainer() {
   if (gameState === 'waiting' && roomState && isConnected) {
     return (
       <>
-        {!splashGone && <AssetPreloaderScreen state={preloadState} onExited={handleSplashExited} />}
+        {!splashGone && <AssetPreloaderScreen state={preloadState} onExited={handleSplashReady} onFullyGone={handleSplashFullyGone} />}
         <WaitingRoom
           roomId={roomState.id}
           players={roomState.players}
@@ -143,11 +152,12 @@ export default function GameContainer() {
 
   return (
     <>
-      {!splashGone && <AssetPreloaderScreen state={preloadState} onExited={handleSplashExited} />}
+      {preloaderMounted && <AssetPreloaderScreen state={preloadState} onExited={handleSplashReady} onFullyGone={handleSplashFullyGone} />}
       <div style={splashGone ? undefined : { visibility: 'hidden', pointerEvents: 'none' }}>
         <Lobby
           key={lobbyKey}
           ready={splashGone}
+          splashLogoRect={splashLogoRect}
           availableRooms={availableRooms}
           onJoinRoom={handleJoinRoom}
           onCreateRoom={handleCreateRoom}
