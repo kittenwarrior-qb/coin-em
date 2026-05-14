@@ -71,6 +71,9 @@ export const useGameStore = create<GameState>()(
       selectCard: (card, category) =>
         set((state) => {
           if (category === 'reflection') {
+            if (state.selectedCards.reflections.some((c) => c.id === card.id)) {
+              return { selectedCards: state.selectedCards }
+            }
             return {
               selectedCards: {
                 ...state.selectedCards,

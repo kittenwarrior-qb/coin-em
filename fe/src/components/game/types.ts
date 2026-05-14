@@ -1,4 +1,4 @@
-import type { GamePhase } from '@/stores/types'
+import type { CardData, GamePhase } from '@/stores/types'
 
 export type CoinType = 'red' | 'yellow' | 'green'
 
@@ -40,11 +40,21 @@ export interface RoomState {
   currentNTG?: string | null
   currentNarrator?: string | null
   mutedPlayer?: string | null
+  selectedCard?: CardData | null
+  gameLog?: GameLogEntry[]
   nightActions?: {
     silenced: boolean
     healed: boolean
     cardSelected: boolean
   }
+}
+
+export interface GameLogEntry {
+  type: string
+  actorId: string
+  targetId?: string
+  data?: any
+  timestamp: number
 }
 
 export const COIN_META: Record<CoinType, { label: string; emoji: string; gradient: string }> = {
