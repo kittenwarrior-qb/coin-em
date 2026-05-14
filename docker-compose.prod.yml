@@ -29,7 +29,7 @@ services:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: ${PORT:-3001}
       CLIENT_ORIGIN: ${CLIENT_ORIGIN:-https://emcoin.cloud}
-      DEBUG_ROLE_PICKER: ${DEBUG_ROLE_PICKER:-false}
+      DEBUG_ROLE_PICKER: "true"
       REDIS_HOST: ${REDIS_HOST:-redis}
       REDIS_PORT: ${REDIS_PORT:-6379}
     networks:
