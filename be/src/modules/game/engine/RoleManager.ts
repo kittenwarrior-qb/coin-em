@@ -71,7 +71,7 @@ export class RoleManager {
   /**
    * Assign roles to players at game start
    */
-  assignRoles(players: Player[]): Player[] {
+  assignRoles(players: Player[], preferredRoles: Record<string, Role> = {}): Player[] {
     const playerCount = players.length
     const roles = this.getRolesForPlayerCount(playerCount)
 
@@ -79,8 +79,25 @@ export class RoleManager {
       throw new Error(`Cannot assign roles for ${playerCount} players`)
     }
 
+    const remainingRoles = [...roles]
+    const assignedRoles = new Map<string, Role>()
+
+    for (const player of players) {
+      const preferredRole = preferredRoles[player.userId]
+      if (!preferredRole) continue
+
+      const roleIndex = remainingRoles.indexOf(preferredRole)
+      if (roleIndex === -1) {
+        throw new Error(`Preferred role ${preferredRole} is not available for ${playerCount} players`)
+      }
+
+      assignedRoles.set(player.userId, preferredRole)
+      remainingRoles.splice(roleIndex, 1)
+    }
+
     // Shuffle roles
-    const shuffledRoles = this.shuffleArray([...roles])
+    const shuffledRoles = this.shuffleArray(remainingRoles)
+    let shuffledIndex = 0
 
     // Assign roles to players with initial coins
     // UPDATED LOGIC:
@@ -88,7 +105,7 @@ export class RoleManager {
     // - Yellow = 5-10 random (ONLY given in round 1, kept in other rounds)
     // - Green = 0 (received when others give coins)
     return players.map((player, index) => {
-      const role = shuffledRoles[index]
+      const role = assignedRoles.get(player.userId) ?? shuffledRoles[shuffledIndex++]
       const initialYellow = Math.floor(Math.random() * 6) + 5 // Random 5-10
       
       return {

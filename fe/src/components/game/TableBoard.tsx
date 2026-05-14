@@ -7,10 +7,11 @@ import { CenterBoard } from './CenterBoard'
 
 interface TableBoardProps {
   selectedCards: SelectedCards
+  status?: React.ReactNode
   actions?: React.ReactNode
 }
 
-export function TableBoard({ selectedCards, actions }: TableBoardProps) {
+export function TableBoard({ selectedCards, status, actions }: TableBoardProps) {
   return (
     <div className="relative w-full h-full flex items-center justify-center">
       <div
@@ -40,6 +41,11 @@ export function TableBoard({ selectedCards, actions }: TableBoardProps) {
 
         {/* Cards + Actions — centered */}
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center min-h-0 gap-3 px-3 py-3">
+          {status && (
+            <div className="w-full">
+              {status}
+            </div>
+          )}
           <div className="flex items-center justify-center overflow-y-auto">
             <CenterBoard selectedCards={selectedCards} />
           </div>

@@ -6,18 +6,57 @@ interface FlipCardProps {
   backImage: string
   altText: string
   size?: 'small' | 'large'
+  aspect?: 'card' | 'coin'
+  initialFlipped?: boolean
+  autoFlipDelayMs?: number
   onClose?: () => void
 }
 
-export function FlipCard({ frontImage, backImage, altText, size = 'large', onClose }: FlipCardProps) {
-  const [flipped, setFlipped] = useState(false)
+export function FlipCard({
+  frontImage,
+  backImage,
+  altText,
+  size = 'large',
+  aspect = 'card',
+  initialFlipped = false,
+  autoFlipDelayMs,
+  onClose,
+}: FlipCardProps) {
+  const [flipped, setFlipped] = useState(initialFlipped)
 
   // Reset flip when card changes
-  useEffect(() => { setFlipped(false) }, [frontImage])
-  const dims = size === 'large'
-    ? { maxWidth: 'min(70vw, 280px)', maxHeight: '65vh' }
-    : { maxWidth: 'min(35vw, 140px)', maxHeight: '32vh' }
+  useEffect(() => {
+    setFlipped(initialFlipped)
+    if (autoFlipDelayMs === undefined) return
+
+    const t = setTimeout(() => setFlipped(true), autoFlipDelayMs)
+    return () => clearTimeout(t)
+  }, [frontImage, backImage, initialFlipped, autoFlipDelayMs])
+  const width = aspect === 'coin'
+    ? size === 'large'
+      ? 'min(70vw, 65vh, 280px)'
+      : 'min(35vw, 32vh, 140px)'
+    : size === 'large'
+      ? 'min(70vw, calc(65vh * 2 / 3), 280px)'
+      : 'min(35vw, calc(32vh * 2 / 3), 140px)'
   const radius = size === 'large' ? '24px' : '14px'
+  const cardAspectRatio = aspect === 'coin' ? '1 / 1' : '2 / 3'
+  const imageFit = aspect === 'coin' ? 'contain' : 'cover'
+  const faceStyle: React.CSSProperties = {
+    position: 'absolute',
+    inset: 0,
+    backfaceVisibility: 'hidden',
+    WebkitBackfaceVisibility: 'hidden',
+    borderRadius: radius,
+    overflow: 'hidden',
+    boxShadow: '6px 6px 0 #1A1A1A',
+  }
+  const imageStyle: React.CSSProperties = {
+    display: 'block',
+    width: '100%',
+    height: '100%',
+    objectFit: imageFit,
+  }
 
   return (
     <motion.div
@@ -29,22 +68,22 @@ export function FlipCard({ frontImage, backImage, altText, size = 'large', onClo
       dragElastic={0.2}
       onDragEnd={onClose ? (_, info) => { if (info.offset.y > 100) onClose() } : undefined}
       className="relative"
-      style={{ perspective: '1000px', ...dims }}
+      style={{ perspective: '1000px', width, aspectRatio: cardAspectRatio }}
       onClick={e => e.stopPropagation()}
     >
       <motion.div
         animate={{ rotateY: flipped ? 180 : 0 }}
         transition={{ duration: 0.7, ease: 'easeInOut' }}
-        style={{ transformStyle: 'preserve-3d', position: 'relative', cursor: 'pointer' }}
+        style={{ transformStyle: 'preserve-3d', position: 'relative', cursor: 'pointer', width: '100%', height: '100%' }}
         onClick={() => setFlipped(f => !f)}
       >
         {/* Front */}
-        <div style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', borderRadius: radius, overflow: 'hidden', boxShadow: '6px 6px 0 #1A1A1A' }}>
-          <img src={frontImage} alt={`${altText} - front`} style={{ display: 'block', ...dims, width: 'auto', height: 'auto' }} draggable={false} />
+        <div style={faceStyle}>
+          <img src={frontImage} alt={`${altText} - front`} style={imageStyle} draggable={false} />
         </div>
         {/* Back */}
-        <div style={{ position: 'absolute', top: 0, left: 0, backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(180deg)', borderRadius: radius, overflow: 'hidden', boxShadow: '6px 6px 0 #1A1A1A' }}>
-          <img src={backImage} alt={`${altText} - back`} style={{ display: 'block', ...dims, width: 'auto', height: 'auto' }} draggable={false} />
+        <div style={{ ...faceStyle, transform: 'rotateY(180deg)' }}>
+          <img src={backImage} alt={`${altText} - back`} style={imageStyle} draggable={false} />
         </div>
       </motion.div>
 

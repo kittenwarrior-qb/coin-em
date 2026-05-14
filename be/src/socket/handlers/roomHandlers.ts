@@ -1,6 +1,6 @@
 import { Server, Socket } from 'socket.io'
 import { roomRepository, roomService } from '../../modules/room'
-import { Player } from '../../modules/game/types'
+import { Player, Role } from '../../modules/game/types'
 import { cancelDisconnectTimer } from './playerHandlers'
 
 export function registerRoomHandlers(io: Server, socket: Socket) {
@@ -9,6 +9,53 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
 
   function randomAvatarIndex() { return Math.floor(Math.random() * AVATAR_COUNT) }
   function randomBgIndex()     { return Math.floor(Math.random() * BG_COUNT) }
+
+  function getDebugRoleDeck(count: number): Role[] {
+    switch (count) {
+      case 5:
+        return [Role.NARRATOR, Role.SENDER, Role.SILENCER, Role.CONNECTOR, Role.OPENER]
+      case 6:
+        return [Role.NARRATOR, Role.SENDER, Role.SILENCER, Role.CONNECTOR, Role.OPENER, Role.GUIDE]
+      case 7:
+        return [Role.NARRATOR, Role.SENDER, Role.SILENCER, Role.CONNECTOR, Role.OPENER, Role.GUIDE, Role.HEALER]
+      case 8:
+        return [Role.NARRATOR, Role.SENDER, Role.SILENCER, Role.SILENCER, Role.CONNECTOR, Role.OPENER, Role.GUIDE, Role.HEALER]
+      case 9:
+        return [Role.NARRATOR, Role.SENDER, Role.SILENCER, Role.SILENCER, Role.CONNECTOR, Role.CONNECTOR, Role.OPENER, Role.GUIDE, Role.HEALER]
+      case 10:
+        return [Role.NARRATOR, Role.SENDER, Role.SILENCER, Role.SILENCER, Role.CONNECTOR, Role.CONNECTOR, Role.OPENER, Role.OPENER, Role.GUIDE, Role.HEALER]
+      default:
+        return []
+    }
+  }
+
+  function countRoles(roles: Role[]): Partial<Record<Role, number>> {
+    return roles.reduce<Partial<Record<Role, number>>>((acc, role) => {
+      acc[role] = (acc[role] ?? 0) + 1
+      return acc
+    }, {})
+  }
+
+  function fillLastDebugRole(players: Player[], hostUserId: string, roleDeck: Role[]): Player[] {
+    const selected = players
+      .map(p => p.userId === hostUserId ? Role.NARRATOR : p.debugPreferredRole)
+      .filter(Boolean) as Role[]
+    const remaining = [...roleDeck]
+
+    for (const role of selected) {
+      const index = remaining.indexOf(role)
+      if (index !== -1) remaining.splice(index, 1)
+    }
+
+    const unassigned = players.filter(p => p.userId !== hostUserId && !p.debugPreferredRole)
+    if (unassigned.length !== 1 || remaining.length !== 1) return players
+
+    return players.map(p =>
+      p.userId === unassigned[0].userId
+        ? { ...p, debugPreferredRole: remaining[0] }
+        : p
+    )
+  }
   /**
    * Join or create room
    */
@@ -185,6 +232,111 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
 
     console.log(`[add_fake_players] Added ${result.added} fake player(s) to room ${roomId}`)
     io.to(roomId).emit('room_state', roomService.getPublicState(result.room))
+  })
+
+  /**
+   * Debug role picker: host assigns first-round roles in the waiting room.
+   */
+  socket.on('set_debug_role_preference', ({ roomId, userId, targetUserId, role }) => {
+    if (process.env.DEBUG_ROLE_PICKER !== 'true') {
+      return socket.emit('error', {
+        code: 'debug_role_picker_disabled',
+        message: 'Debug role picker is disabled.',
+      })
+    }
+
+    if (!roomId || !userId || !targetUserId || !role) {
+      return socket.emit('error', {
+        code: 'invalid_params',
+        message: 'roomId, userId, targetUserId and role are required.',
+      })
+    }
+
+    const room = roomRepository.findById(roomId)
+    if (!room) {
+      return socket.emit('error', {
+        code: 'room_not_found',
+        message: 'Room not found.',
+      })
+    }
+
+    if (room.status !== 'waiting') {
+      return socket.emit('error', {
+        code: 'game_in_progress',
+        message: 'Cannot change debug role after the game starts.',
+      })
+    }
+
+    if (room.host !== userId) {
+      return socket.emit('error', {
+        code: 'not_host',
+        message: 'Only host can assign debug roles.',
+      })
+    }
+
+    const hostPlayer = room.players.find((p) => p.userId === userId)
+    if (!hostPlayer || hostPlayer.socketId !== socket.id) {
+      return socket.emit('error', {
+        code: 'player_not_found',
+        message: 'Host player not found.',
+      })
+    }
+
+    const targetPlayer = room.players.find((p) => p.userId === targetUserId)
+    if (!targetPlayer) {
+      return socket.emit('error', {
+        code: 'target_not_found',
+        message: 'Target player not found.',
+      })
+    }
+
+    const selectedRole = role as Role
+    const roleDeck = getDebugRoleDeck(room.players.length)
+    if (!roleDeck.length || !roleDeck.includes(selectedRole)) {
+      return socket.emit('error', {
+        code: 'invalid_debug_role',
+        message: 'Invalid debug role.',
+      })
+    }
+
+    if (targetUserId === room.host && selectedRole !== Role.NARRATOR) {
+      return socket.emit('error', {
+        code: 'host_role_locked',
+        message: 'Host is locked as Narrator.',
+      })
+    }
+
+    if (targetUserId !== room.host && selectedRole === Role.NARRATOR) {
+      return socket.emit('error', {
+        code: 'narrator_locked',
+        message: 'Narrator is reserved for host.',
+      })
+    }
+
+    const roleCapacity = countRoles(roleDeck)
+    const selectedRoles = [
+      Role.NARRATOR,
+      ...room.players
+        .filter((p) => p.userId !== room.host && p.userId !== targetUserId)
+        .map((p) => p.debugPreferredRole)
+        .filter(Boolean) as Role[],
+      selectedRole,
+    ]
+    const selectedCounts = countRoles(selectedRoles)
+    if ((selectedCounts[selectedRole] ?? 0) > (roleCapacity[selectedRole] ?? 0)) {
+      return socket.emit('error', {
+        code: 'role_quota_full',
+        message: 'This role has already been assigned enough times.',
+      })
+    }
+
+    const updatedPlayers = room.players.map((p) =>
+      p.userId === targetUserId ? { ...p, debugPreferredRole: selectedRole } : p
+    )
+    const updatedRoom = roomRepository.update(roomId, {
+      players: fillLastDebugRole(updatedPlayers, room.host, roleDeck),
+    })
+    io.to(roomId).emit('room_state', roomService.getPublicState(updatedRoom!))
   })
 
   /**

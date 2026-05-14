@@ -26,11 +26,12 @@ services:
     volumes:
       - backend-data:/app/data
     environment:
-      - NODE_ENV=production
-      - PORT=3001
-      - CLIENT_ORIGIN=https://emcoin.cloud
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-3001}
+      CLIENT_ORIGIN: ${CLIENT_ORIGIN:-https://emcoin.cloud}
+      DEBUG_ROLE_PICKER: ${DEBUG_ROLE_PICKER:-false}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
     networks:
       - emcoin-network
     depends_on:
@@ -49,7 +50,8 @@ services:
       context: ./fe
       dockerfile: Dockerfile.prod
       args:
-        - VITE_API_URL=https://emcoin.cloud
+        VITE_API_URL: ${VITE_API_URL:-https://emcoin.cloud}
+        VITE_DEBUG_ROLE_PICKER: ${VITE_DEBUG_ROLE_PICKER:-false}
     container_name: emcoin-frontend-prod
     volumes:
       - fe-dist:/var/www/html

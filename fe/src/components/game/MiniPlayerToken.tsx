@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { CartoonAvatar, CartoonCircleButton, ProfileModal } from '@/components/cartoon'
 import type { Player } from '@/components/game/types'
 
@@ -7,7 +8,12 @@ interface MiniPlayerTokenProps {
   index: number
   isTop?: boolean
   isBottom?: boolean
+  showActionIcon?: boolean
+  actionIconSrc?: string
+  actionIconSide?: 'left' | 'right'
+  isActionTarget?: boolean
   onClick?: () => void
+  onActionClick?: () => void
   onUpdateProfile?: (name: string, avatarIndex: number, bgIndex: number) => void
 }
 
@@ -17,7 +23,19 @@ const BORDER_SENDER = '#FF6B9D'  // pink — Người trao gửi
 const BORDER_ME     = '#29B6F6'  // sky blue — bản thân
 const BORDER_DEFAULT = 'white'
 
-export function MiniPlayerToken({ player, index, isTop, isBottom, onClick, onUpdateProfile }: MiniPlayerTokenProps) {
+export function MiniPlayerToken({
+  player,
+  index,
+  isTop,
+  isBottom,
+  showActionIcon,
+  actionIconSrc = '/cartoon/icons/Potion-Green-Border.svg',
+  actionIconSide = 'right',
+  isActionTarget,
+  onClick,
+  onActionClick,
+  onUpdateProfile,
+}: MiniPlayerTokenProps) {
   const [showProfile, setShowProfile] = useState(false)
   const [localAvatarIdx, setLocalAvatarIdx] = useState<number | null>(null)
   const [localBgIdx, setLocalBgIdx] = useState<number | null>(null)
@@ -30,6 +48,10 @@ export function MiniPlayerToken({ player, index, isTop, isBottom, onClick, onUpd
   const borderColor = isTop ? BORDER_NTG : isBottom ? BORDER_SENDER : player.isMe ? BORDER_ME : BORDER_DEFAULT
 
   const handleClick = () => {
+    if (onActionClick) {
+      onActionClick()
+      return
+    }
     // Only allow viewing own role card
     if (player.isMe) onClick?.()
   }
@@ -42,6 +64,7 @@ export function MiniPlayerToken({ player, index, isTop, isBottom, onClick, onUpd
   return (
     <>
       <div
+        data-player-token-id={player.id}
         className="flex flex-col items-center gap-0.5 cursor-pointer select-none"
         onClick={handleClick}
       >
@@ -53,7 +76,23 @@ export function MiniPlayerToken({ player, index, isTop, isBottom, onClick, onUpd
             bgIndex={displayBgIdx}
             borderColor={borderColor}
             size="lg"
+            className={isActionTarget ? 'glow-gold' : undefined}
           />
+          {showActionIcon && (
+            <motion.img
+              src={actionIconSrc}
+              alt=""
+              initial={{ scale: 0, opacity: 0, y: 8 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              transition={{ type: 'spring', stiffness: 420, damping: 18 }}
+              className="absolute z-20 h-8 w-8 object-contain pointer-events-none"
+              style={{
+                top: 8,
+                [actionIconSide]: -24,
+                filter: 'drop-shadow(0 3px 4px rgba(0,0,0,0.25))',
+              }}
+            />
+          )}
           {player.isMe && (
             <div
               className="absolute"

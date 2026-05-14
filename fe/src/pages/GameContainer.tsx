@@ -27,7 +27,7 @@ export default function GameContainer() {
     setPreloaderMounted(false)
   }, [])
 
-  const { socket, isConnected, roomState, availableRooms, error, currentSocketId, joinRoom, startGame, listRooms, clearSession, addFakePlayers, updateProfile, leaveRoom, updateRoomSettings } = useSocket()
+  const { socket, isConnected, roomState, availableRooms, error, currentSocketId, joinRoom, startGame, listRooms, clearSession, addFakePlayers, updateProfile, leaveRoom, updateRoomSettings, setDebugRolePreference } = useSocket()
   
   const mySocketId = currentSocketId || socket?.id || ''
   const myUserId = getUserId()
@@ -132,6 +132,8 @@ export default function GameContainer() {
           onLeave={handleLeaveRoom}
           onAddFakePlayers={handleAddFakePlayers}
           onUpdateProfile={handleUpdateProfile}
+          onSetDebugRolePreference={(targetUserId, role) => setDebugRolePreference(roomState.id, targetUserId, role)}
+          debugRolePickerEnabled={roomState.debugRolePickerEnabled}
         />
       </>
     )
