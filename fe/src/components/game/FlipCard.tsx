@@ -9,6 +9,7 @@ interface FlipCardProps {
   aspect?: 'card' | 'coin'
   initialFlipped?: boolean
   autoFlipDelayMs?: number
+  allowFlip?: boolean
   onClose?: () => void
 }
 
@@ -20,6 +21,7 @@ export function FlipCard({
   aspect = 'card',
   initialFlipped = false,
   autoFlipDelayMs,
+  allowFlip = true,
   onClose,
 }: FlipCardProps) {
   const [flipped, setFlipped] = useState(initialFlipped)
@@ -72,10 +74,13 @@ export function FlipCard({
       onClick={e => e.stopPropagation()}
     >
       <motion.div
+        initial={{ rotateY: initialFlipped ? 180 : 0 }}
         animate={{ rotateY: flipped ? 180 : 0 }}
         transition={{ duration: 0.7, ease: 'easeInOut' }}
-        style={{ transformStyle: 'preserve-3d', position: 'relative', cursor: 'pointer', width: '100%', height: '100%' }}
-        onClick={() => setFlipped(f => !f)}
+        style={{ transformStyle: 'preserve-3d', position: 'relative', cursor: allowFlip ? 'pointer' : 'default', width: '100%', height: '100%' }}
+        onClick={() => {
+          if (allowFlip) setFlipped(f => !f)
+        }}
       >
         {/* Front */}
         <div style={faceStyle}>

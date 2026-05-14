@@ -6,6 +6,11 @@ import { Role } from '../../src/modules/game/types'
 describe('ActionValidator', () => {
   let validator: ActionValidator
 
+  const findNightActionTarget = (room: ReturnType<typeof createPlayingRoom>, actorId: string) =>
+    room.players.find(p => p.userId !== actorId && !p.isNarrator && !p.isSender)!
+  const findEligibleGuessVoter = (room: ReturnType<typeof createPlayingRoom>) =>
+    room.players.find(p => !p.isNarrator && p.originalRole !== Role.SILENCER && p.role !== Role.SILENCER)!
+
   beforeEach(() => {
     validator = new ActionValidator()
   })
@@ -14,7 +19,7 @@ describe('ActionValidator', () => {
     it('should validate correct silence action', () => {
       const room = setRoomPhase(createPlayingRoom(7), 'silencer-turn')
       const silencer = room.players.find(p => p.role === Role.SILENCER)!
-      const target = room.players.find(p => p.userId !== silencer.userId)!
+      const target = findNightActionTarget(room, silencer.userId)
 
       const result = validator.validate(room, {
         type: 'SILENCE',
@@ -85,6 +90,22 @@ describe('ActionValidator', () => {
       expect(result.error).toBe('Cannot silence self')
     })
 
+    it('should reject silencing narrator or sender', () => {
+      const room = setRoomPhase(createPlayingRoom(7), 'silencer-turn')
+      const silencer = room.players.find(p => p.role === Role.SILENCER)!
+
+      for (const target of room.players.filter(p => p.isNarrator || p.isSender)) {
+        const result = validator.validate(room, {
+          type: 'SILENCE',
+          actorId: silencer.userId,
+          targetId: target.userId,
+        })
+
+        expect(result.valid).toBe(false)
+        expect(result.error).toBe('CANNOT_TARGET_PUBLIC_ROLE')
+      }
+    })
+
     it('should reject missing target', () => {
       const room = setRoomPhase(createPlayingRoom(7), 'silencer-turn')
       const silencer = room.players.find(p => p.role === Role.SILENCER)!
@@ -103,7 +124,7 @@ describe('ActionValidator', () => {
     it('should validate correct heal action', () => {
       const room = setRoomPhase(createPlayingRoom(7), 'healer-turn')
       const healer = room.players.find(p => p.role === Role.HEALER)!
-      const target = room.players.find(p => p.userId !== healer.userId)!
+      const target = findNightActionTarget(room, healer.userId)
 
       const result = validator.validate(room, {
         type: 'HEAL',
@@ -141,6 +162,22 @@ describe('ActionValidator', () => {
       })
 
       expect(result.valid).toBe(true)
+    })
+
+    it('should reject healing narrator or sender', () => {
+      const room = setRoomPhase(createPlayingRoom(7), 'healer-turn')
+      const healer = room.players.find(p => p.role === Role.HEALER)!
+
+      for (const target of room.players.filter(p => p.isNarrator || p.isSender)) {
+        const result = validator.validate(room, {
+          type: 'HEAL',
+          actorId: healer.userId,
+          targetId: target.userId,
+        })
+
+        expect(result.valid).toBe(false)
+        expect(result.error).toBe('CANNOT_TARGET_PUBLIC_ROLE')
+      }
     })
   })
 
@@ -263,7 +300,7 @@ describe('ActionValidator', () => {
   describe('validate VOTE', () => {
     it('should validate correct vote', () => {
       const room = setRoomPhase(createPlayingRoom(7), 'guess-silencer')
-      const voter = room.players[0]
+      const voter = findEligibleGuessVoter(room)
       const suspect = room.players[1]
 
       const result = validator.validate(room, {
@@ -277,7 +314,7 @@ describe('ActionValidator', () => {
 
     it('should reject vote in wrong phase', () => {
       const room = setRoomPhase(createPlayingRoom(7), 'night')
-      const voter = room.players[0]
+      const voter = findEligibleGuessVoter(room)
       const suspect = room.players[1]
 
       const result = validator.validate(room, {
@@ -292,7 +329,7 @@ describe('ActionValidator', () => {
 
     it('should reject duplicate vote', () => {
       const room = setRoomPhase(createPlayingRoom(7), 'guess-silencer')
-      const voter = room.players[0]
+      const voter = findEligibleGuessVoter(room)
       const suspect = room.players[1]
       room.votes = { [voter.userId]: suspect.userId }
 
@@ -304,6 +341,23 @@ describe('ActionValidator', () => {
 
       expect(result.valid).toBe(false)
       expect(result.error).toBe('ALREADY_VOTED')
+    })
+
+    it('should reject votes from narrator or silencer', () => {
+      const room = setRoomPhase(createPlayingRoom(7), 'guess-silencer')
+      const restrictedVoters = room.players.filter(p => p.isNarrator || p.originalRole === Role.SILENCER)
+      const suspect = room.players.find(p => !restrictedVoters.includes(p))!
+
+      for (const voter of restrictedVoters) {
+        const result = validator.validate(room, {
+          type: 'VOTE',
+          actorId: voter.userId,
+          targetId: suspect.userId,
+        })
+
+        expect(result.valid).toBe(false)
+        expect(result.error).toBe('CANNOT_VOTE_AS_PUBLIC_ROLE')
+      }
     })
   })
 

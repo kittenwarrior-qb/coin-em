@@ -1,9 +1,11 @@
 import { motion } from 'framer-motion'
 import { CartoonBadge } from '@/components/cartoon'
-import type { SelectedCards } from '@/stores/types'
+import type { CardData, SelectedCards } from '@/stores/types'
 
 interface CenterBoardProps {
   selectedCards: SelectedCards
+  revealSituation?: boolean
+  onCardClick?: (card: CardData, revealed: boolean) => void
 }
 
 function CardSlot({ label, color, children }: { label: string; color: string; children: React.ReactNode }) {
@@ -19,16 +21,57 @@ function CardSlot({ label, color, children }: { label: string; color: string; ch
   )
 }
 
-function CardImg({ src, alt, size = 'md' }: { src: string; alt: string; size?: 'sm' | 'md' }) {
-  const cls = size === 'sm' ? 'w-14 h-20' : 'w-20 h-28'
+function CardImg({
+  card,
+  alt,
+  size = 'md',
+  faceDown = false,
+  revealed = true,
+  onClick,
+}: {
+  card: CardData
+  alt: string
+  size?: 'sm' | 'md'
+  faceDown?: boolean
+  revealed?: boolean
+  onClick?: () => void
+}) {
+  const cls = size === 'sm' ? 'w-14' : 'w-20'
+  const isFaceDown = faceDown && !revealed
+
   return (
-    <div className={`${cls} card-cartoon card-cartoon-sm overflow-hidden`}>
-      <img src={src} alt={alt} className="w-full h-full object-cover" draggable={false} />
-    </div>
+    <motion.button
+      type="button"
+      className={`${cls} relative aspect-[2/3]`}
+      style={{ perspective: 700 }}
+      onClick={onClick}
+      whileTap={onClick ? { scale: 0.985 } : undefined}
+    >
+      <motion.div
+        className="card-cartoon card-cartoon-sm relative h-full w-full overflow-hidden"
+        style={{ transformStyle: 'preserve-3d', borderWidth: 1, borderRadius: 14 }}
+        initial={{ rotateY: isFaceDown ? 180 : 0 }}
+        animate={{ rotateY: isFaceDown ? 180 : 0 }}
+        transition={{ duration: 0.75, ease: 'easeInOut' }}
+      >
+        <div
+          className="absolute inset-0 overflow-hidden rounded-[inherit]"
+          style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
+        >
+          <img src={card.frontImage} alt={alt} className="h-full w-full object-cover" draggable={false} />
+        </div>
+        <div
+          className="absolute inset-0 overflow-hidden rounded-[inherit]"
+          style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+        >
+          <img src={card.backImage} alt={alt} className="h-full w-full object-cover" draggable={false} />
+        </div>
+      </motion.div>
+    </motion.button>
   )
 }
 
-export function CenterBoard({ selectedCards }: CenterBoardProps) {
+export function CenterBoard({ selectedCards, revealSituation = true, onCardClick }: CenterBoardProps) {
   const hasAny = selectedCards.situation || selectedCards.emotion ||
     selectedCards.reflections.length > 0 || selectedCards.selfcare
 
@@ -37,29 +80,35 @@ export function CenterBoard({ selectedCards }: CenterBoardProps) {
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center gap-2 p-2 overflow-y-auto">
       {selectedCards.situation && (
-        <CardSlot label="Tình huống" color="white">
-          <CardImg src={selectedCards.situation.frontImage} alt="situation" />
+        <CardSlot label="Tinh huong" color="white">
+          <CardImg
+            card={selectedCards.situation}
+            alt="situation"
+            faceDown
+            revealed={revealSituation}
+            onClick={() => onCardClick?.(selectedCards.situation!, revealSituation)}
+          />
         </CardSlot>
       )}
       {selectedCards.emotion && (
-        <CardSlot label="Cảm xúc NTG" color="pink">
-          <CardImg src={selectedCards.emotion.frontImage} alt="emotion" />
+        <CardSlot label="Cam xuc NTG" color="pink">
+          <CardImg card={selectedCards.emotion} alt="emotion" onClick={() => onCardClick?.(selectedCards.emotion!, true)} />
         </CardSlot>
       )}
       {selectedCards.reflections.length > 0 && (
-        <CardSlot label="Phản tư" color="blue">
+        <CardSlot label="Phan tu" color="blue">
           <div className="flex gap-1">
             {selectedCards.reflections.map((card, i) => (
               <motion.div key={card.id} initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: i * 0.1 }}>
-                <CardImg src={card.frontImage} alt="reflection" size="sm" />
+                <CardImg card={card} alt="reflection" size="sm" onClick={() => onCardClick?.(card, true)} />
               </motion.div>
             ))}
           </div>
         </CardSlot>
       )}
       {selectedCards.selfcare && (
-        <CardSlot label="Bí kíp ôm" color="green">
-          <CardImg src={selectedCards.selfcare.frontImage} alt="selfcare" />
+        <CardSlot label="Bi kip om" color="green">
+          <CardImg card={selectedCards.selfcare} alt="selfcare" onClick={() => onCardClick?.(selectedCards.selfcare!, true)} />
         </CardSlot>
       )}
     </div>

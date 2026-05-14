@@ -180,6 +180,7 @@ export class RoomService {
       currentNarrator: room.currentNarrator,
       mutedPlayer: room.mutedPlayer,
       selectedCard: room.selectedCard,
+      gameLog: room.gameLog,
       nightActions: room.nightActions,
       debugRolePickerEnabled: room.debugRolePickerEnabled,
     }

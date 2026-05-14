@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { io, Socket } from 'socket.io-client'
 import { getUserId } from '../utils/userId'
 import { useGameStore } from '../stores/gameStore'
-import type { GamePhase } from '../stores/types'
+import type { CardData, GamePhase } from '../stores/types'
 
 const SOCKET_URL = import.meta.env.VITE_API_URL ?? window.location.origin
 const SESSION_KEY = 'emcoin_session'
@@ -27,13 +27,22 @@ interface RoomState {
   currentNTG: string | null
   currentNarrator?: string | null
   mutedPlayer?: string | null
-  selectedCard?: object | null
+  selectedCard?: CardData | null
+  gameLog?: GameLogEntry[]
   nightActions?: {
     silenced: boolean
     healed: boolean
     cardSelected: boolean
   }
   debugRolePickerEnabled?: boolean
+}
+
+interface GameLogEntry {
+  type: string
+  actorId: string
+  targetId?: string
+  data?: any
+  timestamp: number
 }
 
 interface Session {

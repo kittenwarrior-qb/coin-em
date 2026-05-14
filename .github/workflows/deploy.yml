@@ -23,6 +23,8 @@ jobs:
             set -e
             cd ${{ secrets.APP_PATH }}
             git pull origin main
+            export DEBUG_ROLE_PICKER=true
+            export VITE_DEBUG_ROLE_PICKER=true
             docker compose -f docker-compose.prod.yml down
             docker volume rm coin-em_fe-dist || true
             docker compose -f docker-compose.prod.yml build --no-cache frontend

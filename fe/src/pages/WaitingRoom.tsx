@@ -104,6 +104,11 @@ export default function WaitingRoom({
       .filter(role => role === player.debugPreferredRole || (selectedRoleCounts[role] ?? 0) < (roleCapacity[role] ?? 0))
       .map(role => ({ value: role, label: role }))
 
+  const assignDebugRole = (player: Player, role: string) => {
+    if (!player.userId || !roleDeck.includes(role)) return
+    onSetDebugRolePreference?.(player.userId, role)
+  }
+
   const slots = [
     ...players,
     ...Array(Math.max(0, MAX_PLAYERS - players.length)).fill(null),
@@ -150,7 +155,11 @@ export default function WaitingRoom({
           {canHostPickRoles && (
             <div className="rounded-2xl bg-white/70 px-3 py-2" data-testid="debug-role-picker">
               <div className="font-display text-xs text-[var(--c-gray)]">Debug role round 1</div>
-              <div className="font-body text-[11px] text-black/55">Host chọn role cho từng người. Người cuối sẽ tự nhận role còn lại.</div>
+              <div className="font-body text-[11px] text-black/55">
+                {roleDeck.length
+                  ? 'Host chọn role cho từng người. Người cuối sẽ tự nhận role còn lại.'
+                  : 'Cần ít nhất 5 người chơi hoặc bot để chọn role.'}
+              </div>
             </div>
           )}
 
@@ -242,7 +251,8 @@ export default function WaitingRoom({
                             options={getRoleOptionsForPlayer(player)}
                             value={player.debugPreferredRole}
                             placeholder="Chọn role"
-                            onChange={(role) => player.userId && onSetDebugRolePreference?.(player.userId, role)}
+                            disabled={roleDeck.length === 0}
+                            onChange={(role) => assignDebugRole(player, role)}
                           />
                         )}
                       </div>

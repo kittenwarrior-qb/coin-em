@@ -2,16 +2,18 @@
  * TableBoard — cái bàn trải thảm ở giữa game
  * Cards hiển thị ở phần trên, action buttons ở phần dưới bàn
  */
-import type { SelectedCards } from '@/stores/types'
+import type { CardData, SelectedCards } from '@/stores/types'
 import { CenterBoard } from './CenterBoard'
 
 interface TableBoardProps {
   selectedCards: SelectedCards
+  revealSituation?: boolean
+  onCardClick?: (card: CardData, revealed: boolean) => void
   status?: React.ReactNode
   actions?: React.ReactNode
 }
 
-export function TableBoard({ selectedCards, status, actions }: TableBoardProps) {
+export function TableBoard({ selectedCards, revealSituation, onCardClick, status, actions }: TableBoardProps) {
   return (
     <div className="relative w-full h-full flex items-center justify-center">
       <div
@@ -47,7 +49,7 @@ export function TableBoard({ selectedCards, status, actions }: TableBoardProps) 
             </div>
           )}
           <div className="flex items-center justify-center overflow-y-auto">
-            <CenterBoard selectedCards={selectedCards} />
+            <CenterBoard selectedCards={selectedCards} revealSituation={revealSituation} onCardClick={onCardClick} />
           </div>
           {actions && (
             <div className="flex flex-col gap-2 w-full">

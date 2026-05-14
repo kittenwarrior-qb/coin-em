@@ -206,7 +206,7 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, showConf
                       whileTap={{ scale: 0.95 }}
                       onClick={() => handleCardClick(card)}
                       className={[
-                        'aspect-[2/3] w-full rounded-[8px] border overflow-hidden',
+                        'aspect-[2/3] w-full rounded-[14px] border overflow-hidden',
                         confirmed?.id === card.id
                           ? 'border-[var(--c-blue-mid)] shadow-cartoon'
                           : 'border-[var(--c-black)] shadow-cartoon-sm',

@@ -36,6 +36,28 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
     }, {})
   }
 
+  function normalizeDebugRole(role: unknown): Role | null {
+    if (typeof role !== 'string') return null
+    if ((Object.values(Role) as string[]).includes(role)) return role as Role
+
+    const compact = role
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/đ/g, 'd')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim()
+
+    if (compact.includes('quan tro')) return Role.NARRATOR
+    if (compact.includes('trao gui')) return Role.SENDER
+    if (compact.includes('im lang')) return Role.SILENCER
+    if (compact.includes('ket noi')) return Role.CONNECTOR
+    if (compact.includes('goi mo')) return Role.OPENER
+    if (compact.includes('dan loi')) return Role.GUIDE
+    if (compact.includes('chua lanh')) return Role.HEALER
+    return null
+  }
+
   function fillLastDebugRole(players: Player[], hostUserId: string, roleDeck: Role[]): Player[] {
     const selected = players
       .map(p => p.userId === hostUserId ? Role.NARRATOR : p.debugPreferredRole)
@@ -290,9 +312,23 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
       })
     }
 
-    const selectedRole = role as Role
+    const selectedRole = normalizeDebugRole(role)
+    if (!selectedRole) {
+      return socket.emit('error', {
+        code: 'invalid_debug_role',
+        message: 'Invalid debug role.',
+      })
+    }
+
     const roleDeck = getDebugRoleDeck(room.players.length)
-    if (!roleDeck.length || !roleDeck.includes(selectedRole)) {
+    if (!roleDeck.length) {
+      return socket.emit('error', {
+        code: 'not_enough_players_for_debug_roles',
+        message: 'Need at least 5 players before assigning debug roles.',
+      })
+    }
+
+    if (!roleDeck.includes(selectedRole)) {
       return socket.emit('error', {
         code: 'invalid_debug_role',
         message: 'Invalid debug role.',

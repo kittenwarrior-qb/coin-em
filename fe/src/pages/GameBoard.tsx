@@ -37,48 +37,130 @@ interface GameBoardProps {
 
 function RandomSituationFan({
   cards,
-  onSelect,
+  selectedCard,
+  onPick,
+  onConfirm,
 }: {
   cards: CardData[]
-  onSelect: (card: CardData) => void
+  selectedCard: CardData | null
+  onPick: (card: CardData) => void
+  onConfirm: () => void
 }) {
-  const rotations = [-22, -11, 0, 11, 22]
-  const yOffsets = [30, 10, 0, 10, 30]
+  const [activePosition, setActivePosition] = useState(0)
+  const [dragOffset, setDragOffset] = useState(0)
+  const cardSpacing = 58
+
+  const wrapPosition = (position: number) => {
+    if (!cards.length) return 0
+    return ((position % cards.length) + cards.length) % cards.length
+  }
+
+  const shortestDiff = (index: number, center: number) => {
+    if (!cards.length) return 0
+    const raw = index - center
+    return ((raw + cards.length / 2) % cards.length + cards.length) % cards.length - cards.length / 2
+  }
+
+  const pickCard = (card: CardData, index: number) => {
+    setActivePosition(index)
+    setDragOffset(0)
+    onPick(card)
+  }
+
+  const visualCenter = wrapPosition(activePosition - dragOffset / cardSpacing)
+  const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value))
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 80 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 80 }}
-      className="absolute left-1/2 bottom-14 z-30 w-[360px] max-w-[96vw] -translate-x-1/2"
+      className="absolute inset-x-0 bottom-4 z-30 mx-auto w-full max-w-[430px] overflow-hidden px-3"
       data-testid="random-situation-fan"
     >
-      <div className="rounded-2xl bg-white/70 px-3 py-2 text-center mb-2">
+      <div className="rounded-2xl bg-white/75 px-3 py-2 text-center mb-2">
         <div className="font-display text-xs text-[var(--c-gray)]">Chọn một thẻ tình huống</div>
         <div className="font-body text-[11px] text-black/55">Kéo qua lại để xem bộ thẻ úp</div>
       </div>
+      <div className="flex h-52 items-center justify-center">
+        <AnimatePresence mode="wait">
+          {selectedCard && (
+            <motion.div
+              key={selectedCard.id}
+              initial={{ opacity: 0, y: 28, scale: 0.86 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 18, scale: 0.9 }}
+              className="flex flex-col items-center gap-2"
+            >
+              <div className="h-44 w-[7.35rem] overflow-hidden rounded-[14px] border border-[var(--c-black)] bg-white shadow-[0_7px_0_rgba(0,0,0,0.2)]" style={{ borderWidth: 1 }}>
+                <img src={selectedCard.backImage} alt="" className="h-full w-full object-cover" draggable={false} />
+              </div>
+              <CartoonButton color="green" size="sm" onClick={onConfirm} data-testid="btn-confirm-situation-card">
+                Xac nhan gui
+              </CartoonButton>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
       <motion.div
-        className="relative h-44"
+        className="relative h-64 overflow-hidden pb-2"
         drag="x"
-        dragConstraints={{ left: -58, right: 58 }}
-        dragElastic={0.18}
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.05}
+        dragMomentum={false}
+        onDrag={(_, info) => setDragOffset(info.offset.x)}
+        onDragEnd={(_, info) => {
+          const momentum = clamp(info.velocity.x * 0.08, -cardSpacing * 1.15, cardSpacing * 1.15)
+          setActivePosition((current) => wrapPosition(current - (info.offset.x + momentum) / cardSpacing))
+          setDragOffset(0)
+        }}
+        onWheel={(event) => {
+          const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY
+          if (Math.abs(delta) < 2) return
+          setActivePosition((current) => wrapPosition(current + delta / 180))
+        }}
       >
-        {cards.map((card, index) => (
-          <motion.button
-            key={card.id}
-            type="button"
-            initial={{ scale: 0.8, opacity: 0, y: 40 }}
-            animate={{ scale: 1, opacity: 1, y: yOffsets[index], rotate: rotations[index] }}
-            transition={{ delay: index * 0.06, type: 'spring', stiffness: 240, damping: 18 }}
-            whileTap={{ scale: 0.92, y: yOffsets[index] + 8 }}
-            onClick={() => onSelect(card)}
-            className="absolute left-1/2 top-2 h-36 w-24 origin-bottom overflow-hidden rounded-xl border border-[var(--c-black)] bg-white shadow-[0_6px_0_rgba(0,0,0,0.18)]"
-            style={{ marginLeft: -48 + (index - 2) * 54, zIndex: 10 + index }}
-            data-testid={`random-situation-card-${index + 1}`}
-          >
-            <img src={CARD_IMAGES.situation.back} alt="" className="h-full w-full object-cover" draggable={false} />
-          </motion.button>
-        ))}
+        <div className="absolute left-1/2 top-5 h-56 w-0">
+          {cards.map((card, index) => {
+            const diff = shortestDiff(index, visualCenter)
+            const absDiff = Math.abs(diff)
+            const selected = selectedCard?.id === card.id
+            if (absDiff > 4.25 && !selected) return null
+            const x = diff * cardSpacing
+            const y = Math.pow(absDiff, 1.45) * 10
+            const rotate = Math.max(-10, Math.min(10, diff * 4.1))
+            const scale = Math.max(0.9, 1.06 - absDiff * 0.04)
+            const opacity = absDiff > 3.55 ? 0.35 : absDiff > 3.15 ? 0.65 : 1
+            return (
+              <motion.button
+                key={card.id}
+                type="button"
+                initial={false}
+                animate={{
+                  opacity,
+                  x,
+                  y: selected ? y - 2 : y,
+                  rotate,
+                  scale: selected ? scale + 0.025 : scale,
+                }}
+                transition={{ type: 'spring', stiffness: 380, damping: 38, mass: 0.6 }}
+                whileTap={{ scale: selected ? scale + 0.015 : scale * 0.985 }}
+                onClick={() => pickCard(card, index)}
+                className={[
+                  'absolute top-0 h-44 w-[7.25rem] origin-bottom overflow-hidden rounded-[14px] border bg-white shadow-[0_6px_0_rgba(0,0,0,0.2)]',
+                  selected ? 'border-[var(--c-yellow)]' : 'border-[var(--c-black)]',
+                ].join(' ')}
+                style={{ zIndex: selected ? 100 : Math.round(30 - absDiff * 5), marginLeft: -58, borderWidth: 1 }}
+                data-testid={`random-situation-card-${index + 1}`}
+              >
+                <img src={card.backImage} alt="" className="h-full w-full object-cover" draggable={false} />
+              </motion.button>
+            )
+          })}
+        </div>
+        <div className="pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 rounded-full bg-white/70 px-2 py-0.5 font-body text-[10px] text-black/50">
+          {cards.length ? `${(Math.round(wrapPosition(activePosition)) % cards.length) + 1}/${cards.length}` : '0/0'}
+        </div>
       </motion.div>
     </motion.div>
   )
@@ -144,9 +226,12 @@ function FlyingActionIconEffect({
 export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, onUpdateProfile }: GameBoardProps) {
   const { nextTurn, nightAction, selectCard: emitSelectCard, sendResponse, ntgVote, shareReflection, submitVote } = useSocket()
   const [showMenu, setShowMenu] = useState(false)
+  const [showHistory, setShowHistory] = useState(false)
   const [coinPreview, setCoinPreview] = useState<{ front: string; back: string; alt: string } | null>(null)
+  const [cardPreview, setCardPreview] = useState<{ card: CardData; revealed: boolean } | null>(null)
   const [flyingActionEffect, setFlyingActionEffect] = useState<{ fromId: string; toId: string; iconSrc: string; nonce: number } | null>(null)
   const [situationChoices, setSituationChoices] = useState<CardData[]>([])
+  const [selectedSituationChoice, setSelectedSituationChoice] = useState<CardData | null>(null)
 
   // Phase-local state
   const [responseText,       setResponseText]       = useState('')
@@ -160,7 +245,7 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
 
   // Stores
   const { players, myPlayer, isNarrator, selectedCards } = useGameState()
-  const { setPlayers, selectCard }         = useGameActions()
+  const { setPlayers, selectCard, clearSelectedCards } = useGameActions()
   const { expandedPlayer, showInventory, inventoryMode, setExpandedPlayer, setShowInventory, setInventoryMode } = useGameUI()
   const { gameStep, handleSelectCard }                   = useGameFlow()
   const setMyIds      = useGameStore(s => s.setMyIds)
@@ -203,8 +288,17 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
   useEffect(() => {
     if (gameStep !== 'situation-card') {
       setSituationChoices([])
+      setSelectedSituationChoice(null)
     }
   }, [gameStep])
+
+  useEffect(() => {
+    if (!roomState.selectedCard?.category) {
+      if (gameStep === 'role-reveal' || gameStep === 'night') clearSelectedCards()
+      return
+    }
+    selectCard(roomState.selectedCard, roomState.selectedCard.category)
+  }, [roomState.selectedCard, gameStep, selectCard, clearSelectedCards])
 
   // ─── Handlers ──────────────────────────────────────────────────────────────
 
@@ -212,15 +306,9 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
   // const sendCoin = ...
   // const handleNightAction = ...
 
-  const handleDrawSituation = (card?: CardData) => {
-    const selected = card ?? CARD_DATA.situation[Math.floor(Math.random() * CARD_DATA.situation.length)]
-    selectCard(selected, 'situation')
-    emitSelectCard(roomState.id, selected)
-  }
-
   const getSituationChoices = () => {
     const shuffled = [...CARD_DATA.situation].sort(() => Math.random() - 0.5)
-    return shuffled.slice(0, 5)
+    return shuffled
   }
 
   useEffect(() => {
@@ -228,9 +316,12 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
     setSituationChoices(getSituationChoices())
   }, [gameStep, myPlayer?.isSender, selectedCards.situation, situationChoices.length])
 
-  const handleSelectSituationChoice = (card: CardData) => {
-    handleDrawSituation(card)
+  const handleConfirmSituationChoice = () => {
+    if (!selectedSituationChoice) return
+    selectCard(selectedSituationChoice, 'situation')
+    emitSelectCard(roomState.id, selectedSituationChoice)
     setSituationChoices([])
+    setSelectedSituationChoice(null)
   }
 
   const handleSendResponse = () => {
@@ -252,13 +343,14 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
   }
 
   const handleVoteSilencer = (id: string) => {
-    if (hasVoted) return
+    if (hasVoted || isNarrator || isMySilencerRole) return
     submitVote(roomState.id, id)
     setHasVoted(true)
   }
 
   const handleHealTarget = (targetId: string) => {
-    if (!myPlayer || hasHealed) return
+    const target = players.find((p) => p.id === targetId)
+    if (!myPlayer || hasHealed || !target || target.isNarrator || target.isSender) return
     setHasHealed(true)
     setFlyingActionEffect({
       fromId: myPlayer.id,
@@ -270,7 +362,8 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
   }
 
   const handleSilenceTarget = (targetId: string) => {
-    if (!myPlayer || hasSilenced || targetId === myPlayer.id) return
+    const target = players.find((p) => p.id === targetId)
+    if (!myPlayer || hasSilenced || !target || targetId === myPlayer.id || target.isNarrator || target.isSender) return
     setHasSilenced(true)
     setFlyingActionEffect({
       fromId: myPlayer.id,
@@ -282,9 +375,16 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
   }
 
   const handleInventorySelect = (card: CardData) => {
-    if (gameStep === 'emotion-card')    handleSelectCard(card, 'emotion')
-    else if (gameStep === 'reflection-card') handleSelectCard(card, 'reflection')
-    else if (gameStep === 'selfcare-card')   handleSelectCard(card, 'selfcare')
+    if (gameStep === 'emotion-card') {
+      handleSelectCard(card, 'emotion')
+      emitSelectCard(roomState.id, card)
+    } else if (gameStep === 'reflection-card') {
+      handleSelectCard(card, 'reflection')
+      emitSelectCard(roomState.id, card)
+    } else if (gameStep === 'selfcare-card') {
+      handleSelectCard(card, 'selfcare')
+      emitSelectCard(roomState.id, card, 'SELECT_SELFCARE_CARD')
+    }
   }
 
   const openInventory = (category?: CardData['category']) => {
@@ -298,6 +398,10 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
   const myCoinCount  = myPlayer?.coins || { red: 0, yellow: 0, green: 0 }
   const healerActionDone = roomState.nightActions?.healed || hasHealed
   const silencerActionDone = roomState.nightActions?.silenced || hasSilenced
+  const healerRole = Object.keys(ROLE_TO_IMAGE)[2]
+  const silencerRole = Object.keys(ROLE_TO_IMAGE)[5]
+  const isMyHealerRole = myPlayer?.role === healerRole
+  const isMySilencerRole = myPlayer?.role === silencerRole
   const canShowMyRole =
     !!myPlayer?.role &&
     myPlayer.role !== 'Chưa chia vai trò' &&
@@ -306,7 +410,10 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
     gameStep === 'role-reveal' &&
     dismissedRoleRevealRound !== currentRound &&
     canShowMyRole
-  const showTurnStatus = gameStep !== 'role-reveal' || dismissedRoleRevealRound === currentRound
+  const isSenderChoosingSituation = gameStep === 'situation-card' && !!myPlayer?.isSender && !selectedCards.situation
+  const showTurnStatus =
+    (gameStep !== 'role-reveal' || dismissedRoleRevealRound === currentRound) &&
+    !isSenderChoosingSituation
 
   const getTurnStatus = () => {
     switch (gameStep) {
@@ -327,6 +434,12 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
             description: 'Đang đợi quản trò tiếp tục',
           }
         }
+        if (isMyHealerRole) {
+          return {
+            title: 'Lượt của bạn',
+            description: 'Chọn người cần bảo vệ, trừ Quản trò và Người Trao Gửi',
+          }
+        }
         return {
           title: 'Lượt của Người Chữa Lành',
           description: 'Đang đợi Người Chữa Lành chọn người bảo vệ',
@@ -336,6 +449,12 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
           return {
             title: 'Lượt của quản trò',
             description: 'Đang đợi quản trò tiếp tục',
+          }
+        }
+        if (isMySilencerRole) {
+          return {
+            title: 'Lượt của bạn',
+            description: 'Chọn người cần làm im lặng, trừ Quản trò và Người Trao Gửi',
           }
         }
         return {
@@ -411,11 +530,88 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
   }
 
   const turnStatus = getTurnStatus()
+  const playerNameByUserId = (userId?: string) =>
+    roomState.players.find((p) => p.userId === userId)?.name || (userId === 'system' ? 'He thong' : 'Nguoi choi')
+  const phaseName = (phase?: string) => phase && (PHASE_LABELS[phase as keyof typeof PHASE_LABELS] ?? phase)
+  const roundLogStart = (roomState.gameLog ?? []).reduce(
+    (latest, entry, index) => entry.type === 'ROUND_STARTED' && entry.data?.round === currentRound ? index : latest,
+    -1
+  )
+  const roundLogs = (roomState.gameLog ?? []).slice(roundLogStart >= 0 ? roundLogStart : 0)
+
+  const renderHistoryEntry = (entry: NonNullable<RoomState['gameLog']>[number]) => {
+    const actorName = playerNameByUserId(entry.actorId)
+    const targetName = playerNameByUserId(entry.targetId)
+    const card = entry.data?.card as CardData | undefined
+
+    switch (entry.type) {
+      case 'PHASE_CHANGED':
+        return {
+          title: `${actorName} da cho game tiep tuc`,
+          detail: `Phase ${phaseName(entry.data?.phase)}`,
+        }
+      case 'SILENCE':
+        return {
+          title: 'Nguoi Im Lang da chon muc tieu',
+          detail: `Nguoi choi bi im lang la ${targetName}`,
+        }
+      case 'HEAL':
+        return {
+          title: 'Nguoi Chua Lanh da chon bao ve',
+          detail: `Nguoi duoc bao ve la ${targetName}`,
+        }
+      case 'SELECT_CARD':
+        return {
+          title: `${actorName} da boc the`,
+          detail: card ? `The la ${card.id}` : 'Da chon the',
+          card,
+        }
+      case 'SELECT_SELFCARE_CARD':
+        return {
+          title: `${actorName} da chon the bi kip om`,
+          detail: card ? `The la ${card.id}` : 'Da chon the',
+          card,
+        }
+      case 'SEND_RESPONSE':
+        return {
+          title: `${actorName} da gui phan hoi`,
+          detail: entry.data?.message || 'Da gui phan hoi',
+        }
+      case 'NTG_VOTE':
+        return {
+          title: 'Nguoi Trao Gui da vote phan hoi hay',
+          detail: `${targetName} nhan +${entry.data?.bonus ?? 5} coin vang`,
+        }
+      case 'SHARE_REFLECTION':
+        return {
+          title: 'Nguoi Trao Gui da chia se phan tu',
+          detail: `${actorName} nhan +${entry.data?.bonus ?? 5} coin vang`,
+        }
+      case 'GIVE_COIN':
+        return {
+          title: `${actorName} da tang coin cho ${targetName}`,
+          detail: `${entry.data?.amount ?? 1} ${entry.data?.coinType ?? 'coin'} -> nguoi nhan nhan green coin`,
+        }
+      case 'REWARDS_CALCULATED':
+        return {
+          title: 'Da tinh thuong cuoi round',
+          detail: entry.data?.silencerFound ? 'Nhom da tim ra Nguoi Im Lang' : 'Nhom chua tim ra Nguoi Im Lang',
+        }
+      case 'ROUND_STARTED':
+        return {
+          title: `Bat dau round ${entry.data?.round ?? currentRound}`,
+          detail: 'Vai tro va trang thai round moi da duoc reset',
+        }
+      default:
+        return {
+          title: entry.type,
+          detail: targetName !== 'Nguoi choi' ? `${actorName} -> ${targetName}` : actorName,
+        }
+    }
+  }
 
   // ─── Render ────────────────────────────────────────────────────────────────
   const isNight = ['night', 'healer-turn', 'silencer-turn'].includes(gameStep)
-  const healerRole = Object.keys(ROLE_TO_IMAGE)[2]
-  const silencerRole = Object.keys(ROLE_TO_IMAGE)[5]
   const isMyHealerTurn = gameStep === 'healer-turn' && myPlayer?.role === healerRole && !healerActionDone
   const isMySilencerTurn = gameStep === 'silencer-turn' && myPlayer?.role === silencerRole && !silencerActionDone
 
@@ -449,6 +645,15 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
         />
 
         {/* Coin display — top left */}
+        {isSenderChoosingSituation && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.28 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-[9] pointer-events-none bg-black"
+          />
+        )}
+
         <div className="absolute top-2 left-2 z-20">
           <CoinDisplay coins={myCoinCount} onCoinClick={(front, back, alt) => setCoinPreview({ front, back, alt })} />
         </div>
@@ -460,11 +665,26 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
           iconSrc="/cartoon/icons/Settings.svg"
           iconAlt="Menu"
           iconSize="40%"
-          className="absolute top-2 right-2 z-10"
+          className="absolute top-2 right-2 z-30"
           style={{ height: 38, width: 38 }}
           onClick={() => setShowMenu(true)}
           aria-label="Menu"
         />
+
+        {/* History log button */}
+        <div className="absolute bottom-3 left-3 z-30 flex flex-col items-center gap-0.5">
+          <CartoonCircleButton
+            color="light"
+            size="sm"
+            iconSrc="/cartoon/icons/Book.svg"
+            iconAlt="History log"
+            iconSize="52%"
+            onClick={() => setShowHistory(true)}
+            aria-label="History log"
+            data-testid="btn-history-log"
+          />
+          <div className="font-display text-[9px] text-[var(--c-pink)] leading-none drop-shadow-sm">History log</div>
+        </div>
 
         {/* Phase info */}
         <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10">
@@ -485,6 +705,8 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
             renderCenter={() => (
               <TableBoard
                 selectedCards={selectedCards}
+                revealSituation={gameStep !== 'situation-card'}
+                onCardClick={(card) => setCardPreview({ card, revealed: true })}
                 status={
                   showTurnStatus ? (
                     <div className="rounded-2xl bg-white/70 px-3 py-2 text-center" data-testid="turn-status-panel">
@@ -533,8 +755,9 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
               if (!player) return null
               const isHealerToken = isMyHealerTurn && player.id === myPlayer?.id
               const isSilencerToken = isMySilencerTurn && player.id === myPlayer?.id
-              const canHealTarget = isMyHealerTurn
-              const canSilenceTarget = isMySilencerTurn && player.id !== myPlayer?.id
+              const isProtectedNightTarget = player.isNarrator || player.isSender
+              const canHealTarget = isMyHealerTurn && !isProtectedNightTarget
+              const canSilenceTarget = isMySilencerTurn && !isProtectedNightTarget && player.id !== myPlayer?.id
               const canNightActionTarget = canHealTarget || canSilenceTarget
               return (
                 <MiniPlayerToken
@@ -566,7 +789,12 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
 
       <AnimatePresence>
         {gameStep === 'situation-card' && myPlayer?.isSender && !selectedCards.situation && situationChoices.length > 0 && (
-          <RandomSituationFan cards={situationChoices} onSelect={handleSelectSituationChoice} />
+          <RandomSituationFan
+            cards={situationChoices}
+            selectedCard={selectedSituationChoice}
+            onPick={setSelectedSituationChoice}
+            onConfirm={handleConfirmSituationChoice}
+          />
         )}
       </AnimatePresence>
 
@@ -598,7 +826,7 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
       </AnimatePresence>
 
       <AnimatePresence>
-        {gameStep === 'guess-silencer' && (
+        {gameStep === 'guess-silencer' && !isNarrator && !isMySilencerRole && (
           <GuessSilencerOverlay players={players} hasVoted={hasVoted} onVote={handleVoteSilencer} />
         )}
       </AnimatePresence>
@@ -632,6 +860,85 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
             nonce={flyingActionEffect.nonce}
             onDone={() => setFlyingActionEffect(null)}
           />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showHistory && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-[65] flex items-end justify-center bg-black/55 backdrop-blur-sm px-3 pb-4"
+            onClick={() => setShowHistory(false)}
+          >
+            <motion.div
+              initial={{ y: 80, scale: 0.96 }}
+              animate={{ y: 0, scale: 1 }}
+              exit={{ y: 80, scale: 0.96 }}
+              className="w-full max-w-[404px] max-h-[78dvh] overflow-hidden rounded-[28px] border-[3px] border-[var(--c-black)] bg-white shadow-[0_8px_0_rgba(0,0,0,0.22)]"
+              onClick={(e) => e.stopPropagation()}
+              data-testid="history-log-panel"
+            >
+              <div className="flex items-center justify-between gap-3 border-b-[3px] border-[var(--c-black)] bg-[var(--c-pink)] px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <img src="/cartoon/icons/Book.svg" alt="" className="h-7 w-7 object-contain" draggable={false} />
+                  <div>
+                    <div className="font-display text-sm text-white">History log</div>
+                    <div className="font-body text-[11px] text-white/80">Round {currentRound}</div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="font-display text-xl leading-none text-white"
+                  onClick={() => setShowHistory(false)}
+                  aria-label="Close history log"
+                >
+                  x
+                </button>
+              </div>
+
+              <div className="max-h-[62dvh] overflow-y-auto scroll-cartoon px-3 py-3">
+                {roundLogs.length === 0 ? (
+                  <div className="rounded-2xl bg-[var(--c-gray-pale)] px-3 py-4 text-center font-body text-xs text-[var(--c-gray)]">
+                    Chua co su kien nao trong round nay.
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    {roundLogs.map((entry, index) => {
+                      const item = renderHistoryEntry(entry)
+                      return (
+                        <div key={`${entry.timestamp}-${entry.type}-${index}`} className="rounded-2xl bg-[var(--c-sky-mist)] px-3 py-2">
+                          <div className="flex items-start gap-2">
+                            <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white font-display text-[10px] text-[var(--c-pink)]">
+                              {index + 1}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="font-display text-[11px] leading-snug text-[var(--c-black)]">{item.title}</div>
+                              <div className="font-body text-[11px] leading-snug text-black/60">{item.detail}</div>
+                              {item.card && (
+                                <button
+                                  type="button"
+                                  className="mt-2 h-24 w-16 overflow-hidden rounded-[14px] border-2 border-[var(--c-black)] bg-white shadow-[0_3px_0_rgba(0,0,0,0.18)]"
+                                  onClick={() => {
+                                    setShowHistory(false)
+                                    setCardPreview({ card: item.card!, revealed: true })
+                                  }}
+                                  data-testid={`history-card-${item.card.id}`}
+                                >
+                                  <img src={item.card.frontImage} alt={item.card.id} className="h-full w-full object-cover" draggable={false} />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -706,6 +1013,29 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
               size="large"
               aspect="coin"
               onClose={() => setCoinPreview(null)}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Selected card preview */}
+      <AnimatePresence>
+        {cardPreview && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            onClick={() => setCardPreview(null)}
+          >
+            <FlipCard
+              frontImage={cardPreview.card.frontImage}
+              backImage={cardPreview.card.backImage}
+              altText={cardPreview.card.id}
+              size="large"
+              initialFlipped={!cardPreview.revealed}
+              allowFlip={cardPreview.revealed}
+              onClose={() => setCardPreview(null)}
             />
           </motion.div>
         )}

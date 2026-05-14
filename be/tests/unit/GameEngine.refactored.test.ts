@@ -212,6 +212,14 @@ describe('GameEngine (Refactored)', () => {
         .withUserId('silencer-1')
         .asSilencer()
         .build()
+      const narrator = new PlayerBuilder()
+        .withUserId('narrator-1')
+        .asNarrator()
+        .build()
+      const sender = new PlayerBuilder()
+        .withUserId('sender-1')
+        .asSender()
+        .build()
 
       const target = new PlayerBuilder()
         .withUserId('target-1')
@@ -219,7 +227,7 @@ describe('GameEngine (Refactored)', () => {
         .build()
 
       const room = new RoomBuilder()
-        .withCustomPlayers([silencer, target])
+        .withCustomPlayers([narrator, sender, silencer, target])
         .asPlaying()
         .inPhase(phase as any)
         .build()
@@ -303,13 +311,22 @@ describe('GameEngine (Refactored)', () => {
         .withUserId('healer-1')
         .asHealer()
         .build()
+      const narrator = new PlayerBuilder()
+        .withUserId('narrator-1')
+        .asNarrator()
+        .build()
+      const sender = new PlayerBuilder()
+        .withUserId('sender-1')
+        .asSender()
+        .build()
 
       const target = new PlayerBuilder()
         .withUserId('target-1')
+        .asConnector()
         .build()
 
       const room = new RoomBuilder()
-        .withCustomPlayers([healer, target])
+        .withCustomPlayers([narrator, sender, healer, target])
         .asPlaying()
         .inPhase('healer-turn')
         .build()
@@ -331,13 +348,22 @@ describe('GameEngine (Refactored)', () => {
         .withUserId('healer-1')
         .asHealer()
         .build()
+      const narrator = new PlayerBuilder()
+        .withUserId('narrator-1')
+        .asNarrator()
+        .build()
+      const sender = new PlayerBuilder()
+        .withUserId('sender-1')
+        .asSender()
+        .build()
 
       const target = new PlayerBuilder()
         .withUserId('target-1')
+        .asConnector()
         .build()
 
       const room = new RoomBuilder()
-        .withCustomPlayers([healer, target])
+        .withCustomPlayers([narrator, sender, healer, target])
         .asPlaying()
         .inPhase('healer-turn')
         .withMutedPlayer(target.userId)
@@ -510,16 +536,28 @@ describe('GameEngine (Refactored)', () => {
 
   describe('executeAction - VOTE', () => {
     it('should record vote', () => {
+      const narrator = new PlayerBuilder()
+        .withUserId('narrator-1')
+        .asNarrator()
+        .build()
+
+      const sender = new PlayerBuilder()
+        .withUserId('sender-1')
+        .asSender()
+        .build()
+
       const voter = new PlayerBuilder()
         .withUserId('voter-1')
+        .asConnector()
         .build()
 
       const suspect = new PlayerBuilder()
         .withUserId('suspect-1')
+        .asHealer()
         .build()
 
       const room = new RoomBuilder()
-        .withCustomPlayers([voter, suspect])
+        .withCustomPlayers([narrator, sender, voter, suspect])
         .asPlaying()
         .inPhase('guess-silencer')
         .build()
@@ -536,17 +574,20 @@ describe('GameEngine (Refactored)', () => {
     })
 
     it('should auto-advance when all players voted', () => {
-      const players = Array.from({ length: 3 }, (_, i) =>
-        new PlayerBuilder()
-          .withUserId(`player-${i}`)
-          .build()
-      )
+      const players = [
+        new PlayerBuilder().withUserId('narrator-1').asNarrator().build(),
+        new PlayerBuilder().withUserId('sender-1').asSender().build(),
+        new PlayerBuilder().withUserId('player-0').asConnector().build(),
+        new PlayerBuilder().withUserId('player-1').asHealer().build(),
+        new PlayerBuilder().withUserId('player-2').asGuide().build(),
+      ]
 
       const room = new RoomBuilder()
         .withCustomPlayers(players)
         .asPlaying()
         .inPhase('guess-silencer')
         .withVotes({
+          'sender-1': 'player-0',
           'player-0': 'player-1',
           'player-1': 'player-2',
         })
@@ -562,20 +603,32 @@ describe('GameEngine (Refactored)', () => {
       assertThat(result)
         .isSuccessful()
         .shouldAutoAdvance()
-        .hasVoteCount(3)
+        .hasVoteCount(4)
     })
 
     it('should reject duplicate vote', () => {
+      const narrator = new PlayerBuilder()
+        .withUserId('narrator-1')
+        .asNarrator()
+        .build()
+
+      const sender = new PlayerBuilder()
+        .withUserId('sender-1')
+        .asSender()
+        .build()
+
       const voter = new PlayerBuilder()
         .withUserId('voter-1')
+        .asConnector()
         .build()
 
       const suspect = new PlayerBuilder()
         .withUserId('suspect-1')
+        .asHealer()
         .build()
 
       const room = new RoomBuilder()
-        .withCustomPlayers([voter, suspect])
+        .withCustomPlayers([narrator, sender, voter, suspect])
         .asPlaying()
         .inPhase('guess-silencer')
         .withVotes({ 'voter-1': 'suspect-1' })
