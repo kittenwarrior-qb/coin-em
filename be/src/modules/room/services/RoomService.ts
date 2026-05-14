@@ -35,6 +35,7 @@ export class RoomService {
         situationGroups: ['light', 'medium', 'sensitive'],
         emotionGroups: ['basic', 'light', 'strong', 'advanced'],
       },
+      debugRolePickerEnabled: process.env.DEBUG_ROLE_PICKER === 'true',
     }
 
     roomRepository.save(room)
@@ -179,6 +180,8 @@ export class RoomService {
       currentNarrator: room.currentNarrator,
       mutedPlayer: room.mutedPlayer,
       selectedCard: room.selectedCard,
+      nightActions: room.nightActions,
+      debugRolePickerEnabled: room.debugRolePickerEnabled,
     }
   }
 }

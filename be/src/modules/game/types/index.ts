@@ -43,6 +43,7 @@ export interface Player {
   isMuted?: boolean
   isHealed?: boolean
   isFake?: boolean
+  debugPreferredRole?: Role
   coins: {
     red: number
     yellow: number
@@ -74,6 +75,7 @@ export interface Room {
   lastActivity: number
   // Room settings (card groups)
   settings: RoomSettings
+  debugRolePickerEnabled?: boolean
   // Phase 1 additions
   votes: Record<string, string> // voterId → targetId (silencer guess)
   ntgVotes: Record<string, string[]> // NTG votes: ntgId → [targetId, ...] (best responders, multiple allowed)

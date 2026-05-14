@@ -69,8 +69,10 @@ export class GameService {
       currentNarrator: room.currentNarrator,
       mutedPlayer: room.mutedPlayer,
       selectedCard: room.selectedCard,
+      nightActions: room.nightActions,
       votes: room.votes,
       selfcareActor, // userId of who draws selfcare card (Guide or NTG fallback)
+      debugRolePickerEnabled: room.debugRolePickerEnabled,
     }
   }
 }

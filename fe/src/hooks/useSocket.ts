@@ -9,7 +9,10 @@ const SESSION_KEY = 'emcoin_session'
 
 interface Player {
   socketId: string
+  userId?: string
   name: string
+  isFake?: boolean
+  debugPreferredRole?: string
 }
 
 interface RoomState {
@@ -25,6 +28,12 @@ interface RoomState {
   currentNarrator?: string | null
   mutedPlayer?: string | null
   selectedCard?: object | null
+  nightActions?: {
+    silenced: boolean
+    healed: boolean
+    cardSelected: boolean
+  }
+  debugRolePickerEnabled?: boolean
 }
 
 interface Session {
@@ -66,6 +75,7 @@ interface UseSocketReturn {
   shareReflection: (roomId: string, message: string) => void
   updateProfile: (roomId: string, name: string, avatarIndex: number, bgIndex: number) => void
   updateRoomSettings: (roomId: string, situationGroups: string[], emotionGroups: string[]) => void
+  setDebugRolePreference: (roomId: string, targetUserId: string, role: string) => void
 }
 
 // Session helpers
@@ -388,6 +398,12 @@ export function useSocket(): UseSocketReturn {
     socketRef.current.emit('update_room_settings', { roomId, userId, settings: { situationGroups, emotionGroups } })
   }, [])
 
+  const setDebugRolePreference = useCallback((roomId: string, targetUserId: string, role: string) => {
+    if (!socketRef.current) return
+    const userId = getUserId()
+    socketRef.current.emit('set_debug_role_preference', { roomId, userId, targetUserId, role })
+  }, [])
+
   return {
     socket: socketRef.current,
     isConnected,
@@ -414,5 +430,6 @@ export function useSocket(): UseSocketReturn {
     shareReflection,
     updateProfile,
     updateRoomSettings,
+    setDebugRolePreference,
   }
 }

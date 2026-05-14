@@ -26,6 +26,8 @@ export interface RoomState {
     role?: string
     isNarrator?: boolean
     isSender?: boolean
+    isMuted?: boolean
+    isHealed?: boolean
     avatarIndex?: number
     bgIndex?: number
     coins?: { red: number; yellow: number; green: number }
@@ -38,6 +40,11 @@ export interface RoomState {
   currentNTG?: string | null
   currentNarrator?: string | null
   mutedPlayer?: string | null
+  nightActions?: {
+    silenced: boolean
+    healed: boolean
+    cardSelected: boolean
+  }
 }
 
 export const COIN_META: Record<CoinType, { label: string; emoji: string; gradient: string }> = {

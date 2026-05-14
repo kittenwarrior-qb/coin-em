@@ -202,7 +202,18 @@ export class GameEngine {
     // Assign roles
     let playersWithRoles
     try {
-      playersWithRoles = this.roleManager.assignRoles(room.players)
+      const preferredRoles = room.debugRolePickerEnabled
+        ? room.players.reduce<Record<string, Role>>((acc, player) => {
+            if (player.userId === room.host) {
+              acc[player.userId] = Role.NARRATOR
+              return acc
+            }
+            if (player.debugPreferredRole) acc[player.userId] = player.debugPreferredRole
+            return acc
+          }, {})
+        : {}
+
+      playersWithRoles = this.roleManager.assignRoles(room.players, preferredRoles)
     } catch (error: any) {
       return { success: false, error: 'ROLE_ASSIGNMENT_FAILED', message: error.message }
     }
