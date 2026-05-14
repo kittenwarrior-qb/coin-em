@@ -70,6 +70,10 @@ export class ActionValidator {
       return { valid: false, error: 'Cannot silence self' }
     }
 
+    if (target.isNarrator || target.isSender) {
+      return { valid: false, error: 'CANNOT_TARGET_PUBLIC_ROLE' }
+    }
+
     return { valid: true }
   }
 
@@ -100,6 +104,10 @@ export class ActionValidator {
     const target = room.players.find((p) => p.userId === action.targetId)
     if (!target) {
       return { valid: false, error: 'Target not found' }
+    }
+
+    if (target.isNarrator || target.isSender) {
+      return { valid: false, error: 'CANNOT_TARGET_PUBLIC_ROLE' }
     }
 
     return { valid: true }
@@ -220,6 +228,10 @@ export class ActionValidator {
     // Must be guess-silencer phase
     if (room.phase !== 'guess-silencer') {
       return { valid: false, error: 'NOT_VOTE_PHASE' }
+    }
+
+    if (actor.isNarrator || actor.originalRole === Role.SILENCER || actor.role === Role.SILENCER) {
+      return { valid: false, error: 'CANNOT_VOTE_AS_PUBLIC_ROLE' }
     }
 
     // Check if already voted

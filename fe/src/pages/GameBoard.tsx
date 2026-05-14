@@ -252,13 +252,14 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
   }
 
   const handleVoteSilencer = (id: string) => {
-    if (hasVoted) return
+    if (hasVoted || isNarrator || isMySilencerRole) return
     submitVote(roomState.id, id)
     setHasVoted(true)
   }
 
   const handleHealTarget = (targetId: string) => {
-    if (!myPlayer || hasHealed) return
+    const target = players.find((p) => p.id === targetId)
+    if (!myPlayer || hasHealed || !target || target.isNarrator || target.isSender) return
     setHasHealed(true)
     setFlyingActionEffect({
       fromId: myPlayer.id,
@@ -270,7 +271,8 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
   }
 
   const handleSilenceTarget = (targetId: string) => {
-    if (!myPlayer || hasSilenced || targetId === myPlayer.id) return
+    const target = players.find((p) => p.id === targetId)
+    if (!myPlayer || hasSilenced || !target || targetId === myPlayer.id || target.isNarrator || target.isSender) return
     setHasSilenced(true)
     setFlyingActionEffect({
       fromId: myPlayer.id,
@@ -298,6 +300,10 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
   const myCoinCount  = myPlayer?.coins || { red: 0, yellow: 0, green: 0 }
   const healerActionDone = roomState.nightActions?.healed || hasHealed
   const silencerActionDone = roomState.nightActions?.silenced || hasSilenced
+  const healerRole = Object.keys(ROLE_TO_IMAGE)[2]
+  const silencerRole = Object.keys(ROLE_TO_IMAGE)[5]
+  const isMyHealerRole = myPlayer?.role === healerRole
+  const isMySilencerRole = myPlayer?.role === silencerRole
   const canShowMyRole =
     !!myPlayer?.role &&
     myPlayer.role !== 'Chưa chia vai trò' &&
@@ -327,6 +333,12 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
             description: 'Đang đợi quản trò tiếp tục',
           }
         }
+        if (isMyHealerRole) {
+          return {
+            title: 'Lượt của bạn',
+            description: 'Chọn người cần bảo vệ, trừ Quản trò và Người Trao Gửi',
+          }
+        }
         return {
           title: 'Lượt của Người Chữa Lành',
           description: 'Đang đợi Người Chữa Lành chọn người bảo vệ',
@@ -336,6 +348,12 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
           return {
             title: 'Lượt của quản trò',
             description: 'Đang đợi quản trò tiếp tục',
+          }
+        }
+        if (isMySilencerRole) {
+          return {
+            title: 'Lượt của bạn',
+            description: 'Chọn người cần làm im lặng, trừ Quản trò và Người Trao Gửi',
           }
         }
         return {
@@ -414,8 +432,6 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
 
   // ─── Render ────────────────────────────────────────────────────────────────
   const isNight = ['night', 'healer-turn', 'silencer-turn'].includes(gameStep)
-  const healerRole = Object.keys(ROLE_TO_IMAGE)[2]
-  const silencerRole = Object.keys(ROLE_TO_IMAGE)[5]
   const isMyHealerTurn = gameStep === 'healer-turn' && myPlayer?.role === healerRole && !healerActionDone
   const isMySilencerTurn = gameStep === 'silencer-turn' && myPlayer?.role === silencerRole && !silencerActionDone
 
@@ -533,8 +549,9 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
               if (!player) return null
               const isHealerToken = isMyHealerTurn && player.id === myPlayer?.id
               const isSilencerToken = isMySilencerTurn && player.id === myPlayer?.id
-              const canHealTarget = isMyHealerTurn
-              const canSilenceTarget = isMySilencerTurn && player.id !== myPlayer?.id
+              const isProtectedNightTarget = player.isNarrator || player.isSender
+              const canHealTarget = isMyHealerTurn && !isProtectedNightTarget
+              const canSilenceTarget = isMySilencerTurn && !isProtectedNightTarget && player.id !== myPlayer?.id
               const canNightActionTarget = canHealTarget || canSilenceTarget
               return (
                 <MiniPlayerToken
@@ -598,7 +615,7 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
       </AnimatePresence>
 
       <AnimatePresence>
-        {gameStep === 'guess-silencer' && (
+        {gameStep === 'guess-silencer' && !isNarrator && !isMySilencerRole && (
           <GuessSilencerOverlay players={players} hasVoted={hasVoted} onVote={handleVoteSilencer} />
         )}
       </AnimatePresence>

@@ -212,6 +212,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
           NOT_NIGHT_PHASE: 'Không phải giai đoạn ban đêm.',
           'Not a silencer': 'Bạn không phải Người Im Lặng.',
           'Not a healer': 'Bạn không phải Người Chữa Lành.',
+          CANNOT_TARGET_PUBLIC_ROLE: 'Không thể chọn Quản trò hoặc Người Trao Gửi.',
         }
         const error = {
           success: false,
@@ -359,6 +360,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         const messages = {
           NOT_VOTE_PHASE: 'Không phải giai đoạn bình chọn.',
           ALREADY_VOTED: 'Bạn đã bình chọn rồi.',
+          CANNOT_VOTE_AS_PUBLIC_ROLE: 'Quản trò và Người Im Lặng không tham gia bình chọn.',
         }
         const error = {
           success: false,

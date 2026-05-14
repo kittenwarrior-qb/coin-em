@@ -150,10 +150,13 @@ describe('GameEngine', () => {
   })
 
   describe('executeAction - SILENCE', () => {
+    const canReceiveNightAction = (player: any, actorId: string) =>
+      player.userId !== actorId && !player.isNarrator && !player.isSender
+
     it('should silence a player during silencer-turn phase', () => {
       const room = setRoomPhase(createPlayingRoom(7), 'silencer-turn')
       const silencer = room.players.find(p => p.role === Role.SILENCER)!
-      const target = room.players.find(p => p.userId !== silencer.userId)!
+      const target = room.players.find(p => canReceiveNightAction(p, silencer.userId))!
 
       const result = engine.executeAction(room, {
         type: 'SILENCE',
@@ -228,10 +231,13 @@ describe('GameEngine', () => {
   })
 
   describe('executeAction - HEAL', () => {
+    const canReceiveNightAction = (player: any, actorId: string) =>
+      player.userId !== actorId && !player.isNarrator && !player.isSender
+
     it('should heal a player during healer-turn phase', () => {
       const room = setRoomPhase(createPlayingRoom(7), 'healer-turn')
       const healer = room.players.find(p => p.role === Role.HEALER)!
-      const target = room.players.find(p => p.userId !== healer.userId)!
+      const target = room.players.find(p => canReceiveNightAction(p, healer.userId))!
 
       const result = engine.executeAction(room, {
         type: 'HEAL',
@@ -247,7 +253,7 @@ describe('GameEngine', () => {
     it('should remove mute if healing muted player', () => {
       const room = setRoomPhase(createPlayingRoom(7), 'healer-turn')
       const healer = room.players.find(p => p.role === Role.HEALER)!
-      const target = room.players.find(p => p.userId !== healer.userId)!
+      const target = room.players.find(p => canReceiveNightAction(p, healer.userId))!
       room.mutedPlayer = target.userId
 
       const result = engine.executeAction(room, {
@@ -438,9 +444,12 @@ describe('GameEngine', () => {
   })
 
   describe('executeAction - VOTE', () => {
+    const canVoteForSilencer = (player: any) =>
+      !player.isNarrator && player.originalRole !== Role.SILENCER && player.role !== Role.SILENCER
+
     it('should record vote', () => {
       const room = setRoomPhase(createPlayingRoom(7), 'guess-silencer')
-      const voter = room.players[0]
+      const voter = room.players.find(canVoteForSilencer)!
       const suspect = room.players[1]
 
       const result = engine.executeAction(room, {
@@ -455,13 +464,14 @@ describe('GameEngine', () => {
 
     it('should auto-advance when all players voted', () => {
       const room = setRoomPhase(createPlayingRoom(7), 'guess-silencer')
+      const eligibleVoters = room.players.filter(canVoteForSilencer)
       // Pre-fill votes for all but one
       room.votes = {}
-      room.players.slice(0, -1).forEach((p, i) => {
+      eligibleVoters.slice(0, -1).forEach((p, i) => {
         room.votes[p.userId] = room.players[(i + 1) % room.players.length].userId
       })
 
-      const lastVoter = room.players[room.players.length - 1]
+      const lastVoter = eligibleVoters[eligibleVoters.length - 1]
       const suspect = room.players[0]
 
       const result = engine.executeAction(room, {
@@ -476,7 +486,7 @@ describe('GameEngine', () => {
 
     it('should fail if already voted', () => {
       const room = setRoomPhase(createPlayingRoom(7), 'guess-silencer')
-      const voter = room.players[0]
+      const voter = room.players.find(canVoteForSilencer)!
       const suspect = room.players[1]
       room.votes = { [voter.userId]: suspect.userId }
 
@@ -492,7 +502,7 @@ describe('GameEngine', () => {
 
     it('should fail if not vote phase', () => {
       const room = setRoomPhase(createPlayingRoom(7), 'night')
-      const voter = room.players[0]
+      const voter = room.players.find(canVoteForSilencer)!
       const suspect = room.players[1]
 
       const result = engine.executeAction(room, {
