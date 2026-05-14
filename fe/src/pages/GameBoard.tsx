@@ -307,8 +307,16 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
   // const handleNightAction = ...
 
   const getSituationChoices = () => {
-    const shuffled = [...CARD_DATA.situation].sort(() => Math.random() - 0.5)
-    return shuffled
+    const settings = roomState.settings
+    const allowedGroups = settings?.situationGroups ?? ['light', 'medium', 'sensitive']
+    const filtered = CARD_DATA.situation.filter(card => {
+      const n = parseInt(card.id.replace('situation-TH', ''))
+      if (allowedGroups.includes('light') && n >= 1 && n <= 13) return true
+      if (allowedGroups.includes('medium') && n >= 14 && n <= 24) return true
+      if (allowedGroups.includes('sensitive') && n >= 25) return true
+      return false
+    })
+    return [...filtered].sort(() => Math.random() - 0.5)
   }
 
   useEffect(() => {
@@ -391,6 +399,9 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
     setInventoryMode({ category, showConfirm: !!category })
     setShowInventory(true)
   }
+
+  const roomEmotionGroups = roomState.settings?.emotionGroups ?? ['basic', 'light', 'strong', 'advanced']
+  const roomSituationGroups = roomState.settings?.situationGroups ?? ['light', 'medium', 'sensitive']
 
   // ─── Derived ───────────────────────────────────────────────────────────────
   const currentRound = roomState.currentRound || 1
@@ -1070,6 +1081,8 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
             onClose={() => setShowInventory(false)}
             onSelectCard={handleInventorySelect}
             allowedCategory={inventoryMode.category}
+            allowedEmotionGroups={roomEmotionGroups}
+            allowedSituationGroups={roomSituationGroups}
             showConfirmButton={inventoryMode.showConfirm}
           />
         )}

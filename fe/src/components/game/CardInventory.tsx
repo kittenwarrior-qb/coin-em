@@ -67,21 +67,35 @@ interface CardInventoryProps {
   onClose: () => void
   onSelectCard?: (card: CardData) => void
   allowedCategory?: CardCategory
+  allowedEmotionGroups?: ('basic' | 'light' | 'strong' | 'advanced')[]
+  allowedSituationGroups?: ('light' | 'medium' | 'sensitive')[]
   showConfirmButton?: boolean
 }
 
-export function CardInventory({ onClose, onSelectCard, allowedCategory, showConfirmButton = false }: CardInventoryProps) {
+export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedEmotionGroups, allowedSituationGroups, showConfirmButton = false }: CardInventoryProps) {
   const [activeTab, setActiveTab]       = useState<CardCategory>(allowedCategory ?? 'role')
   const [situationSub, setSituationSub] = useState<SituationSubType>('light')
   const [emotionSub, setEmotionSub]     = useState<EmotionSubType>('basic')
   const [preview, setPreview]           = useState<CardData | null>(null)
-  const [previewDir, setPreviewDir]     = useState<1 | -1>(1) // 1 = next (right→left), -1 = prev (left→right)
+  const [previewDir, setPreviewDir]     = useState<1 | -1>(1)
   const [confirmed, setConfirmed]       = useState<CardData | null>(null)
+
+  // Filter tabs based on allowed groups
+  const allowedEmotionTabs = EMOTION_TABS.filter(t =>
+    !allowedEmotionGroups || allowedEmotionGroups.includes(t.key)
+  )
+  const allowedSituationTabs = SITUATION_TABS.filter(t =>
+    !allowedSituationGroups || allowedSituationGroups.includes(t.key)
+  )
+
+  // Auto-select first allowed sub-tab if current is not allowed
+  const effectiveSituationSub = allowedSituationTabs.find(t => t.key === situationSub)?.key ?? allowedSituationTabs[0]?.key ?? 'light'
+  const effectiveEmotionSub   = allowedEmotionTabs.find(t => t.key === emotionSub)?.key   ?? allowedEmotionTabs[0]?.key   ?? 'basic'
 
   const cards =
     activeTab === 'role' ? CARD_DATA.roles :
-    activeTab === 'situation' ? CARD_DATA.situationByType[situationSub] :
-    activeTab === 'emotion' ? CARD_DATA.emotionsByType[emotionSub] :
+    activeTab === 'situation' ? CARD_DATA.situationByType[effectiveSituationSub] :
+    activeTab === 'emotion' ? CARD_DATA.emotionsByType[effectiveEmotionSub] :
     CARD_DATA[activeTab as 'reflection' | 'selfcare']
 
   const previewIndex = preview ? cards.findIndex(c => c.id === preview.id) : -1
@@ -153,16 +167,16 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, showConf
               </div>
             )}
 
-            {/* Situation sub-tabs */}
-            {activeTab === 'situation' && (
+            {/* Situation sub-tabs — ẩn nếu chỉ có 1 nhóm được phép */}
+            {activeTab === 'situation' && allowedSituationTabs.length > 1 && (
               <div className="flex bg-[var(--c-sky-mist)] px-2">
-                {SITUATION_TABS.map(t => (
+                {allowedSituationTabs.map(t => (
                   <button
                     key={t.key}
                     onClick={() => setSituationSub(t.key)}
                     className={[
                       'flex-1 py-1.5 font-display text-[10px] transition-colors',
-                      situationSub === t.key
+                      effectiveSituationSub === t.key
                         ? 'text-[var(--c-pink)]'
                         : 'text-[var(--c-gray)] hover:text-[var(--c-black)]',
                     ].join(' ')}
@@ -173,16 +187,16 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, showConf
               </div>
             )}
 
-            {/* Emotion sub-tabs */}
-            {activeTab === 'emotion' && (
+            {/* Emotion sub-tabs — ẩn nếu chỉ có 1 nhóm được phép */}
+            {activeTab === 'emotion' && allowedEmotionTabs.length > 1 && (
               <div className="flex bg-[var(--c-sky-mist)] px-2">
-                {EMOTION_TABS.map(t => (
+                {allowedEmotionTabs.map(t => (
                   <button
                     key={t.key}
                     onClick={() => setEmotionSub(t.key)}
                     className={[
                       'flex-1 py-1.5 font-display text-[10px] transition-colors',
-                      emotionSub === t.key
+                      effectiveEmotionSub === t.key
                         ? 'text-[var(--c-pink)]'
                         : 'text-[var(--c-gray)] hover:text-[var(--c-black)]',
                     ].join(' ')}
