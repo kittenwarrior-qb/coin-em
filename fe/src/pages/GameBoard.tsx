@@ -35,6 +35,55 @@ interface GameBoardProps {
   onUpdateProfile?: (name: string, avatarIndex: number, bgIndex: number) => void
 }
 
+function RandomSituationFan({
+  cards,
+  onSelect,
+}: {
+  cards: CardData[]
+  onSelect: (card: CardData) => void
+}) {
+  const rotations = [-22, -11, 0, 11, 22]
+  const yOffsets = [30, 10, 0, 10, 30]
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 80 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 80 }}
+      className="absolute left-1/2 bottom-14 z-30 w-[360px] max-w-[96vw] -translate-x-1/2"
+      data-testid="random-situation-fan"
+    >
+      <div className="rounded-2xl bg-white/70 px-3 py-2 text-center mb-2">
+        <div className="font-display text-xs text-[var(--c-gray)]">Chọn một thẻ tình huống</div>
+        <div className="font-body text-[11px] text-black/55">Kéo qua lại để xem bộ thẻ úp</div>
+      </div>
+      <motion.div
+        className="relative h-44"
+        drag="x"
+        dragConstraints={{ left: -58, right: 58 }}
+        dragElastic={0.18}
+      >
+        {cards.map((card, index) => (
+          <motion.button
+            key={card.id}
+            type="button"
+            initial={{ scale: 0.8, opacity: 0, y: 40 }}
+            animate={{ scale: 1, opacity: 1, y: yOffsets[index], rotate: rotations[index] }}
+            transition={{ delay: index * 0.06, type: 'spring', stiffness: 240, damping: 18 }}
+            whileTap={{ scale: 0.92, y: yOffsets[index] + 8 }}
+            onClick={() => onSelect(card)}
+            className="absolute left-1/2 top-2 h-36 w-24 origin-bottom overflow-hidden rounded-xl border border-[var(--c-black)] bg-white shadow-[0_6px_0_rgba(0,0,0,0.18)]"
+            style={{ marginLeft: -48 + (index - 2) * 54, zIndex: 10 + index }}
+            data-testid={`random-situation-card-${index + 1}`}
+          >
+            <img src={CARD_IMAGES.situation.back} alt="" className="h-full w-full object-cover" draggable={false} />
+          </motion.button>
+        ))}
+      </motion.div>
+    </motion.div>
+  )
+}
+
 function FlyingActionIconEffect({
   fromId,
   toId,
@@ -97,6 +146,7 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
   const [showMenu, setShowMenu] = useState(false)
   const [coinPreview, setCoinPreview] = useState<{ front: string; back: string; alt: string } | null>(null)
   const [flyingActionEffect, setFlyingActionEffect] = useState<{ fromId: string; toId: string; iconSrc: string; nonce: number } | null>(null)
+  const [situationChoices, setSituationChoices] = useState<CardData[]>([])
 
   // Phase-local state
   const [responseText,       setResponseText]       = useState('')
@@ -150,16 +200,37 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
     if (gameStep !== 'role-reveal') setDismissedRoleRevealRound(null)
   }, [gameStep])
 
+  useEffect(() => {
+    if (gameStep !== 'situation-card') {
+      setSituationChoices([])
+    }
+  }, [gameStep])
+
   // ─── Handlers ──────────────────────────────────────────────────────────────
 
   // reserved stubs — will be wired up when give-coins / night phases are re-implemented
   // const sendCoin = ...
   // const handleNightAction = ...
 
-  const handleDrawSituation = () => {
-    const card = CARD_DATA.situation[Math.floor(Math.random() * CARD_DATA.situation.length)]
-    selectCard(card, 'situation')
-    emitSelectCard(roomState.id, card)
+  const handleDrawSituation = (card?: CardData) => {
+    const selected = card ?? CARD_DATA.situation[Math.floor(Math.random() * CARD_DATA.situation.length)]
+    selectCard(selected, 'situation')
+    emitSelectCard(roomState.id, selected)
+  }
+
+  const getSituationChoices = () => {
+    const shuffled = [...CARD_DATA.situation].sort(() => Math.random() - 0.5)
+    return shuffled.slice(0, 5)
+  }
+
+  useEffect(() => {
+    if (gameStep !== 'situation-card' || !myPlayer?.isSender || selectedCards.situation || situationChoices.length > 0) return
+    setSituationChoices(getSituationChoices())
+  }, [gameStep, myPlayer?.isSender, selectedCards.situation, situationChoices.length])
+
+  const handleSelectSituationChoice = (card: CardData) => {
+    handleDrawSituation(card)
+    setSituationChoices([])
   }
 
   const handleSendResponse = () => {
@@ -437,11 +508,6 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
                     )}
                     {myPlayer?.isSender && (
                       <>
-                        {gameStep === 'situation-card' && (
-                          <CartoonButton color="yellow" size="md" className="w-full" onClick={handleDrawSituation} data-testid="btn-draw-situation">
-                            📋 Bốc thẻ Tình huống
-                          </CartoonButton>
-                        )}
                         {gameStep === 'emotion-card' && (
                           <CartoonButton color="pink" size="md" className="w-full" onClick={() => openInventory('emotion')} data-testid="btn-select-emotion">
                             💭 Chọn thẻ Cảm xúc
@@ -497,6 +563,12 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
         </div>
 
       </div>
+
+      <AnimatePresence>
+        {gameStep === 'situation-card' && myPlayer?.isSender && !selectedCards.situation && situationChoices.length > 0 && (
+          <RandomSituationFan cards={situationChoices} onSelect={handleSelectSituationChoice} />
+        )}
+      </AnimatePresence>
 
       {/* ── Phase overlays ─────────────────────────────────────────────────── */}
       <AnimatePresence>
