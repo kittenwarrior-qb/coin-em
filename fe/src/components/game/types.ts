@@ -47,6 +47,11 @@ export interface RoomState {
     healed: boolean
     cardSelected: boolean
   }
+  settings?: {
+    situationGroups: ('light' | 'medium' | 'sensitive')[]
+    emotionGroups: ('basic' | 'light' | 'strong' | 'advanced')[]
+  }
+  debugRolePickerEnabled?: boolean
 }
 
 export interface GameLogEntry {

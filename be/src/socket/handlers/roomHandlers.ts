@@ -454,6 +454,7 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
 
     console.log(`[update_room_settings] Room ${roomId} settings updated by ${userId}`)
     io.to(roomId).emit('room_settings_updated', updatedRoom!.settings)
+    io.to(roomId).emit('room_state', roomService.getPublicState(updatedRoom!))
   })
 
   /**
