@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useSocket } from '../hooks/useSocket'
+import { Eye, EyeOff } from 'lucide-react'
 import { CARD_IMAGES, ROLE_TO_IMAGE } from '../constants/cardImages'
 import { useGameStore } from '../stores'
 import { useGameState, useGameActions, useGameUI } from '../hooks/useGameState'
 import { useGameFlow } from '../hooks/useGameFlow'
 import type { CardData } from '../stores/types'
-import { PHASE_LABELS } from '../stores/types'
+import { PHASE_LABELS, type GamePhase } from '../stores/types'
 
 import { CartoonButton, CartoonCircleButton } from '@/components/cartoon'
 import { TableBoard }      from '@/components/game/TableBoard'
@@ -33,7 +33,34 @@ interface GameBoardProps {
   myUserId: string
   onLeave: () => void
   onUpdateProfile?: (name: string, avatarIndex: number, bgIndex: number) => void
+  nextTurn: (roomId: string) => void
+  prevTurn: (roomId: string) => void
+  nightAction: (roomId: string, action: string, targetSocketId?: string, cardData?: object) => void
+  emitSelectCard: (roomId: string, card: object, type?: 'SELECT_CARD' | 'SELECT_SELFCARE_CARD') => void
+  sendResponse: (roomId: string, message: string) => void
+  ntgVote: (roomId: string, targetSocketId: string) => void
+  shareReflection: (roomId: string, message: string) => void
+  submitVote: (roomId: string, suspectSocketId: string) => void
 }
+
+const PHASE_ORDER: GamePhase[] = [
+  'role-reveal',
+  'night',
+  'healer-turn',
+  'silencer-turn',
+  'situation-card',
+  'emotion-card',
+  'story-telling',
+  'group-response',
+  'reflection-card',
+  'reflection-sharing',
+  'selfcare-card',
+  'hug-action',
+  'guess-silencer',
+  'reveal-silencer',
+  'give-coins',
+  'reward',
+]
 
 function RandomSituationFan({
   cards,
@@ -183,6 +210,8 @@ function FlyingActionIconEffect({
 
   useEffect(() => {
     const findToken = (id: string) =>
+      Array.from(document.querySelectorAll<HTMLElement>('[data-player-avatar-id]'))
+        .find(el => el.dataset.playerAvatarId === id) ??
       Array.from(document.querySelectorAll<HTMLElement>('[data-player-token-id]'))
         .find(el => el.dataset.playerTokenId === id)
 
@@ -208,14 +237,18 @@ function FlyingActionIconEffect({
       key={nonce}
       src={iconSrc}
       alt=""
-      initial={{ x: coords.from.x - 18, y: coords.from.y - 18, scale: 1, opacity: 0 }}
+      initial={{ x: coords.from.x - 18, y: coords.from.y - 18, scale: 0.9, opacity: 0 }}
       animate={{
         x: coords.to.x - 18,
         y: coords.to.y - 18,
-        scale: [1, 0.8, 0.2],
+        scale: [0.9, 1.08, 1.08, 1.85],
         opacity: [0, 1, 1, 0],
       }}
-      transition={{ duration: 0.85, ease: [0.25, 0.8, 0.25, 1] }}
+      transition={{
+        duration: 1.45,
+        times: [0, 0.56, 0.76, 1],
+        ease: [0.25, 0.8, 0.25, 1],
+      }}
       onAnimationComplete={onDone}
       className="fixed left-0 top-0 z-[70] h-9 w-9 pointer-events-none object-contain"
       style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.35))' }}
@@ -223,15 +256,37 @@ function FlyingActionIconEffect({
   )
 }
 
-export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, onUpdateProfile }: GameBoardProps) {
-  const { nextTurn, nightAction, selectCard: emitSelectCard, sendResponse, ntgVote, shareReflection, submitVote } = useSocket()
+export default function GameBoard({
+  roomState,
+  mySocketId,
+  myUserId,
+  onLeave,
+  onUpdateProfile,
+  nextTurn,
+  prevTurn,
+  nightAction,
+  emitSelectCard,
+  sendResponse,
+  ntgVote,
+  shareReflection,
+  submitVote,
+}: GameBoardProps) {
   const [showMenu, setShowMenu] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
   const [coinPreview, setCoinPreview] = useState<{ front: string; back: string; alt: string } | null>(null)
   const [cardPreview, setCardPreview] = useState<{ card: CardData; revealed: boolean } | null>(null)
   const [flyingActionEffect, setFlyingActionEffect] = useState<{ fromId: string; toId: string; iconSrc: string; nonce: number } | null>(null)
+  const [selectedNightAction, setSelectedNightAction] = useState<{
+    type: 'heal' | 'silence'
+    targetId: string
+    targetName: string
+    iconSrc: string
+    confirmed: boolean
+  } | null>(null)
   const [situationChoices, setSituationChoices] = useState<CardData[]>([])
   const [selectedSituationChoice, setSelectedSituationChoice] = useState<CardData | null>(null)
+  const [hideOtherPlayerBadges, setHideOtherPlayerBadges] = useState(false)
+  const [phaseNavigation, setPhaseNavigation] = useState<{ direction: 'next' | 'prev'; targetPhase: GamePhase } | null>(null)
 
   // Phase-local state
   const [responseText,       setResponseText]       = useState('')
@@ -250,6 +305,7 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
   const { gameStep, handleSelectCard }                   = useGameFlow()
   const setMyIds      = useGameStore(s => s.setMyIds)
   const [dismissedRoleRevealRound, setDismissedRoleRevealRound] = useState<number | null>(null)
+  const lastNightActionEffectRef = useRef<number | null>(null)
 
   // Init
   useEffect(() => { setMyIds(mySocketId, myUserId) }, [mySocketId, myUserId, setMyIds])
@@ -263,7 +319,7 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
       isMe: p.userId ? p.userId === myUserId : p.socketId === mySocketId,
       isNarrator: p.isNarrator,
       isSender: p.isSender,
-      isMuted: p.isMuted,
+      isMuted: p.isMuted || Boolean(p.userId && p.userId === roomState.mutedPlayer),
       isHealed: p.isHealed,
       isDisconnected: p.isDisconnected,
       disconnectedAt: p.disconnectedAt,
@@ -272,7 +328,31 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
       coins: p.coins || { red: 0, yellow: 0, green: 0 },
     }))
     setPlayers(converted.sort((a, b) => (a.isMe ? -1 : b.isMe ? 1 : 0)))
-  }, [roomState.players, mySocketId, myUserId, setPlayers])
+  }, [roomState.mutedPlayer, roomState.players, mySocketId, myUserId, setPlayers])
+
+  useEffect(() => {
+    const latestNightAction = [...(roomState.gameLog ?? [])]
+      .reverse()
+      .find((entry) => entry.type === 'HEAL' || entry.type === 'SILENCE')
+    if (!latestNightAction || latestNightAction.timestamp === lastNightActionEffectRef.current) return
+
+    const actor = roomState.players.find((p) => p.userId === latestNightAction.actorId)
+    const target = roomState.players.find((p) => p.userId === latestNightAction.targetId)
+    if (!actor || !target) return
+
+    const shouldShowRealtime = isNarrator
+    if (!shouldShowRealtime) return
+
+    lastNightActionEffectRef.current = latestNightAction.timestamp
+    setFlyingActionEffect({
+      fromId: actor.socketId,
+      toId: target.socketId,
+      iconSrc: latestNightAction.type === 'HEAL'
+        ? '/cartoon/icons/Potion-Green-Border.svg'
+        : '/cartoon/icons/Lock-Sliver.svg',
+      nonce: latestNightAction.timestamp,
+    })
+  }, [isNarrator, myUserId, roomState.gameLog, roomState.players])
 
   // Reset phase state on step change
   useEffect(() => {
@@ -281,6 +361,7 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
     setHasSharedReflection(false); setHasVoted(false)
     setHasHealed(false)
     setHasSilenced(false)
+    setSelectedNightAction(null)
   }, [gameStep])
 
   useEffect(() => {
@@ -308,7 +389,7 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
   // const sendCoin = ...
   // const handleNightAction = ...
 
-  const getSituationChoices = () => {
+  const getSituationChoices = useCallback(() => {
     const settings = roomState.settings
     const allowedGroups = settings?.situationGroups ?? ['light', 'medium', 'sensitive']
     const filtered = CARD_DATA.situation.filter(card => {
@@ -319,12 +400,12 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
       return false
     })
     return [...filtered].sort(() => Math.random() - 0.5)
-  }
+  }, [roomState.settings])
 
   useEffect(() => {
     if (gameStep !== 'situation-card' || !myPlayer?.isSender || selectedCards.situation || situationChoices.length > 0) return
     setSituationChoices(getSituationChoices())
-  }, [gameStep, myPlayer?.isSender, selectedCards.situation, situationChoices.length])
+  }, [gameStep, getSituationChoices, myPlayer?.isSender, selectedCards.situation, situationChoices.length])
 
   const handleConfirmSituationChoice = () => {
     if (!selectedSituationChoice) return
@@ -360,8 +441,20 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
 
   const handleHealTarget = (targetId: string) => {
     const target = players.find((p) => p.id === targetId)
-    if (!myPlayer || hasHealed || !target || target.isNarrator || target.isSender) return
+    if (!myPlayer || hasHealed || !target || target.id === myPlayer.id || target.isNarrator || target.isSender) return
+    setSelectedNightAction({
+      type: 'heal',
+      targetId,
+      targetName: target.name,
+      iconSrc: '/cartoon/icons/Potion-Green-Border.svg',
+      confirmed: false,
+    })
+  }
+
+  const confirmHealTarget = (targetId: string) => {
+    if (!myPlayer || hasHealed) return
     setHasHealed(true)
+    setSelectedNightAction((action) => action?.targetId === targetId ? { ...action, confirmed: true } : action)
     setFlyingActionEffect({
       fromId: myPlayer.id,
       toId: targetId,
@@ -374,7 +467,19 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
   const handleSilenceTarget = (targetId: string) => {
     const target = players.find((p) => p.id === targetId)
     if (!myPlayer || hasSilenced || !target || targetId === myPlayer.id || target.isNarrator || target.isSender) return
+    setSelectedNightAction({
+      type: 'silence',
+      targetId,
+      targetName: target.name,
+      iconSrc: '/cartoon/icons/Lock-Sliver.svg',
+      confirmed: false,
+    })
+  }
+
+  const confirmSilenceTarget = (targetId: string) => {
+    if (!myPlayer || hasSilenced) return
     setHasSilenced(true)
+    setSelectedNightAction((action) => action?.targetId === targetId ? { ...action, confirmed: true } : action)
     setFlyingActionEffect({
       fromId: myPlayer.id,
       toId: targetId,
@@ -585,12 +690,12 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
       case 'SILENCE':
         return {
           title: 'Người Im Lặng đã chọn mục tiêu',
-          detail: `${targetName} sẽ bị im lặng trong lượt này.`,
+          detail: 'Một người chơi sẽ bị im lặng trong lượt này.',
         }
       case 'HEAL':
         return {
-          title: 'Người Chữa Lành đã bảo vệ một người chơi',
-          detail: `${targetName} được bảo vệ khỏi hiệu ứng im lặng.`,
+          title: 'Người Chữa Lành đã chọn mục tiêu',
+          detail: 'Một người chơi được bảo vệ khỏi hiệu ứng im lặng.',
         }
       case 'SELECT_CARD':
         return {
@@ -650,6 +755,11 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
   const isNight = ['night', 'healer-turn', 'silencer-turn'].includes(gameStep)
   const isMyHealerTurn = gameStep === 'healer-turn' && myPlayer?.role === healerRole && !healerActionDone
   const isMySilencerTurn = gameStep === 'silencer-turn' && myPlayer?.role === silencerRole && !silencerActionDone
+  const currentPhaseIndex = PHASE_ORDER.indexOf(gameStep as GamePhase)
+  const previousPhase = currentPhaseIndex > 0 ? PHASE_ORDER[currentPhaseIndex - 1] : null
+  const nextPhase = currentPhaseIndex >= 0 && currentPhaseIndex < PHASE_ORDER.length - 1
+    ? PHASE_ORDER[currentPhaseIndex + 1]
+    : 'role-reveal'
 
   return (
     <div className="screen-cartoon" style={{ overflow: 'hidden' }}>
@@ -722,6 +832,23 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
           <div className="font-display text-[9px] text-[var(--c-pink)] leading-none drop-shadow-sm">Nhật ký</div>
         </div>
 
+        <div className="absolute bottom-3 right-3 z-30">
+          <CartoonCircleButton
+            color={hideOtherPlayerBadges ? 'gray' : 'light'}
+            size="sm"
+            onClick={() => setHideOtherPlayerBadges((hidden) => !hidden)}
+            aria-label={hideOtherPlayerBadges ? 'Hien badge nguoi choi' : 'An badge nguoi choi'}
+            aria-pressed={hideOtherPlayerBadges}
+            data-testid="btn-toggle-player-badges"
+          >
+            {hideOtherPlayerBadges ? (
+              <Eye className="h-[45%] w-[45%] text-white drop-shadow-sm" strokeWidth={3} />
+            ) : (
+              <EyeOff className="h-[45%] w-[45%] text-[#2f76ac] drop-shadow-sm" strokeWidth={3} />
+            )}
+          </CartoonCircleButton>
+        </div>
+
         {/* Phase info */}
         <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10">
           <div
@@ -765,15 +892,48 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
                 actions={
                   <>
                     {isNarrator && (
-                      <CartoonButton
-                        color="green"
-                        size="md"
-                        className="w-full"
-                        onClick={() => nextTurn(roomState.id)}
-                        data-testid="btn-next-turn"
-                      >
-                        👑 {PHASE_LABELS[gameStep] ?? gameStep}
-                      </CartoonButton>
+                      <div className="flex items-center gap-2 w-full" data-testid="narrator-phase-nav">
+                        {/* Prev phase arrow */}
+                        <button
+                          type="button"
+                          disabled={!previousPhase}
+                          className="shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-white/80 border-2 border-[var(--c-black)] shadow-[0_3px_0_rgba(0,0,0,0.18)] transition-all active:translate-y-[1px] active:shadow-[0_2px_0_rgba(0,0,0,0.18)] disabled:opacity-30 disabled:pointer-events-none"
+                          onClick={() => previousPhase && setPhaseNavigation({ direction: 'prev', targetPhase: previousPhase })}
+                          data-testid="btn-prev-phase"
+                          aria-label="Quay lại phase trước"
+                        >
+                          <img
+                            src="/cartoon/icons/Arrow---Right.svg"
+                            alt=""
+                            className="h-5 w-5 object-contain rotate-180"
+                            draggable={false}
+                          />
+                        </button>
+
+                        {/* Current phase label */}
+                        <div className="flex-1 min-w-0 text-center">
+                          <div className="font-display text-[11px] text-[var(--c-gray)] leading-none">👑 Quản trò</div>
+                          <div className="font-body text-[10px] text-black/55 truncate mt-0.5">
+                            {PHASE_LABELS[gameStep] ?? gameStep}
+                          </div>
+                        </div>
+
+                        {/* Next phase arrow */}
+                        <button
+                          type="button"
+                          className="shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-[var(--c-green)] border-2 border-[var(--c-black)] shadow-[0_3px_0_rgba(0,0,0,0.18)] transition-all active:translate-y-[1px] active:shadow-[0_2px_0_rgba(0,0,0,0.18)]"
+                          onClick={() => setPhaseNavigation({ direction: 'next', targetPhase: nextPhase })}
+                          data-testid="btn-next-phase"
+                          aria-label="Chuyển sang phase tiếp theo"
+                        >
+                          <img
+                            src="/cartoon/icons/Arrow---Right.svg"
+                            alt=""
+                            className="h-5 w-5 object-contain"
+                            draggable={false}
+                          />
+                        </button>
+                      </div>
                     )}
                     {myPlayer?.isSender && (
                       <>
@@ -803,9 +963,22 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
               const isHealerToken = isMyHealerTurn && player.id === myPlayer?.id
               const isSilencerToken = isMySilencerTurn && player.id === myPlayer?.id
               const isProtectedNightTarget = player.isNarrator || player.isSender
-              const canHealTarget = isMyHealerTurn && !isProtectedNightTarget
+              const canHealTarget = isMyHealerTurn && !isProtectedNightTarget && player.id !== myPlayer?.id
               const canSilenceTarget = isMySilencerTurn && !isProtectedNightTarget && player.id !== myPlayer?.id
               const canNightActionTarget = canHealTarget || canSilenceTarget
+              const selectedNightActionTarget = selectedNightAction?.targetId === player.id
+              const nightActionTone = selectedNightActionTarget
+                ? selectedNightAction?.type
+                : canSilenceTarget
+                  ? 'silence'
+                  : 'heal'
+              const isActiveNightRole =
+                (gameStep === 'healer-turn' && player.role === healerRole && !healerActionDone) ||
+                (gameStep === 'silencer-turn' && player.role === silencerRole && !silencerActionDone)
+              const canSeeActiveNightRole = isActiveNightRole && (isNarrator || player.isMe)
+              const activeNightActionIcon = gameStep === 'silencer-turn'
+                ? '/cartoon/icons/Lock-Sliver.svg'
+                : '/cartoon/icons/Potion-Green-Border.svg'
               return (
                 <MiniPlayerToken
                   key={player.id}
@@ -813,11 +986,17 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
                   index={index}
                   isTop={position === 'top'}
                   isBottom={position === 'bottom'}
-                  showActionIcon={isHealerToken || isSilencerToken}
+                  showActionIcon={isHealerToken || isSilencerToken || (isNarrator && isActiveNightRole)}
                   showRoleLabel={isNarrator || player.isMe}
-                  actionIconSrc={isSilencerToken ? '/cartoon/icons/Lock-Sliver.svg' : '/cartoon/icons/Potion-Green-Border.svg'}
+                  hideRoleBadge={hideOtherPlayerBadges}
+                  isNightDimmed={isNight && !canSeeActiveNightRole}
+                  showSleepEffect={isNight && !canSeeActiveNightRole && !canNightActionTarget && !selectedNightActionTarget}
+                  isRoleActive={canSeeActiveNightRole}
+                  actionIconSrc={isSilencerToken || (isNarrator && isActiveNightRole) ? activeNightActionIcon : '/cartoon/icons/Potion-Green-Border.svg'}
                   actionIconSide={position === 'right' ? 'left' : 'right'}
                   isActionTarget={canNightActionTarget}
+                  actionTargetTone={nightActionTone}
+                  isSelectedActionTarget={selectedNightActionTarget}
                   onClick={() => setExpandedPlayer(player)}
                   onActionClick={
                     canHealTarget
@@ -906,8 +1085,57 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
             toId={flyingActionEffect.toId}
             iconSrc={flyingActionEffect.iconSrc}
             nonce={flyingActionEffect.nonce}
-            onDone={() => setFlyingActionEffect(null)}
+            onDone={() => {
+              setFlyingActionEffect(null)
+              setSelectedNightAction(null)
+            }}
           />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {selectedNightAction && !selectedNightAction.confirmed && (
+          <motion.div
+            className="absolute inset-0 z-[72] flex items-center justify-center bg-black/45 px-6 backdrop-blur-[2px]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedNightAction(null)}
+          >
+            <motion.div
+              className="w-full max-w-[320px] rounded-[28px] border-[3px] border-[var(--c-black)] bg-white px-4 py-5 text-center shadow-[0_8px_0_rgba(0,0,0,0.24)]"
+              initial={{ scale: 0.86, y: 26 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.86, y: 26 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img src={selectedNightAction.iconSrc} alt="" className="mx-auto mb-2 h-12 w-12 object-contain" draggable={false} />
+              <div className="font-display text-base text-[var(--c-black)]">
+                {selectedNightAction.type === 'heal' ? 'Xác nhận bảo vệ' : 'Xác nhận làm im lặng'}
+              </div>
+              <div className="mt-1 font-body text-sm leading-snug text-black/65">
+                {selectedNightAction.type === 'heal'
+                  ? `Người Chữa Lành sẽ bảo vệ ${selectedNightAction.targetName}.`
+                  : `Người Im Lặng sẽ chọn ${selectedNightAction.targetName}.`}
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <CartoonButton color="orange" size="sm" onClick={() => setSelectedNightAction(null)}>
+                  Hủy
+                </CartoonButton>
+                <CartoonButton
+                  color={selectedNightAction.type === 'heal' ? 'green' : 'purple'}
+                  size="sm"
+                  onClick={() => {
+                    const action = selectedNightAction
+                    if (action.type === 'heal') confirmHealTarget(action.targetId)
+                    else confirmSilenceTarget(action.targetId)
+                  }}
+                >
+                  Xác nhận
+                </CartoonButton>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -1121,6 +1349,67 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
             allowedSituationGroups={roomSituationGroups}
             showConfirmButton={inventoryMode.showConfirm}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Phase navigation confirmation popup */}
+      <AnimatePresence>
+        {phaseNavigation && (
+          <motion.div
+            className="absolute inset-0 z-[72] flex items-center justify-center bg-black/45 px-6 backdrop-blur-[2px]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setPhaseNavigation(null)}
+          >
+            <motion.div
+              className="w-full max-w-[320px] rounded-[28px] border-[3px] border-[var(--c-black)] bg-white px-4 py-5 text-center shadow-[0_8px_0_rgba(0,0,0,0.24)]"
+              initial={{ scale: 0.86, y: 26 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.86, y: 26 }}
+              onClick={(e) => e.stopPropagation()}
+              data-testid="phase-nav-confirm-popup"
+            >
+              <img
+                src={phaseNavigation.direction === 'next' ? '/cartoon/icons/Arrow---Right.svg' : '/cartoon/icons/Arrow---Left.svg'}
+                alt=""
+                className="mx-auto mb-2 h-10 w-10 object-contain"
+                draggable={false}
+              />
+              <div className="font-display text-base text-[var(--c-black)]">
+                {phaseNavigation.direction === 'next' ? 'Chuyển sang phase tiếp theo?' : 'Quay lại phase trước?'}
+              </div>
+              <div className="mt-1 font-body text-sm leading-snug text-black/65">
+                {phaseNavigation.direction === 'next'
+                  ? <>Sẽ chuyển từ <strong>{PHASE_LABELS[gameStep] ?? gameStep}</strong> sang <strong>{PHASE_LABELS[phaseNavigation.targetPhase] ?? phaseNavigation.targetPhase}</strong></>
+                  : <>Sẽ quay lại <strong>{PHASE_LABELS[phaseNavigation.targetPhase] ?? phaseNavigation.targetPhase}</strong> để người chơi chọn lại</>}
+              </div>
+              {phaseNavigation.direction === 'prev' && (
+                <div className="mt-2 rounded-xl bg-amber-50 px-3 py-1.5 font-body text-[11px] text-amber-700 leading-snug">
+                  ⚠️ Các hành động ở phase hiện tại có thể bị reset
+                </div>
+              )}
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <CartoonButton color="orange" size="sm" onClick={() => setPhaseNavigation(null)}>
+                  Hủy
+                </CartoonButton>
+                <CartoonButton
+                  color={phaseNavigation.direction === 'next' ? 'green' : 'blue'}
+                  size="sm"
+                  onClick={() => {
+                    if (phaseNavigation.direction === 'next') {
+                      nextTurn(roomState.id)
+                    } else {
+                      prevTurn(roomState.id)
+                    }
+                    setPhaseNavigation(null)
+                  }}
+                >
+                  {phaseNavigation.direction === 'next' ? 'Tiếp tục' : 'Quay lại'}
+                </CartoonButton>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 

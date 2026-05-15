@@ -64,7 +64,16 @@ export interface GameLogEntry {
   type: string
   actorId: string
   targetId?: string
-  data?: any
+  data?: {
+    phase?: GamePhase
+    round?: number
+    card?: CardData
+    message?: string
+    bonus?: number
+    amount?: number
+    coinType?: CoinType | string
+    silencerFound?: boolean
+  }
   timestamp: number
 }
 

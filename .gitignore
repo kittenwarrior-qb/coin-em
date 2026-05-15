@@ -40,3 +40,7 @@ be/test-data/
 /gui-pack
 
 /background
+
+/.codex-home
+
+start-codex.bat

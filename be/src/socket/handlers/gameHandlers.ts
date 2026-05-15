@@ -193,6 +193,85 @@ export function registerGameHandlers(io: Server, socket: Socket) {
   })
 
   /**
+   * Move back one phase
+   */
+  socket.on('prev_turn', async ({ roomId, userId, deviceId }, callback) => {
+    try {
+      const room = roomRepository.findById(roomId)
+      if (!room) {
+        const error = { success: false, error: 'ROOM_NOT_FOUND', message: 'PhÃ²ng khÃ´ng tá»“n táº¡i.' }
+        if (callback) callback(error)
+        else socket.emit('error', error)
+        return
+      }
+
+      let narratorPlayer = room.players.find((p) => p.socketId === socket.id)
+      if (!narratorPlayer) {
+        narratorPlayer = room.players.find((p) =>
+          (!!userId && p.userId === userId) || (!!deviceId && p.deviceId === deviceId)
+        )
+      }
+      if (!narratorPlayer) {
+        const error = { success: false, error: 'PLAYER_NOT_FOUND', message: 'NgÆ°á»i chÆ¡i khÃ´ng tá»“n táº¡i.' }
+        if (callback) callback(error)
+        else socket.emit('error', error)
+        return
+      }
+
+      if (narratorPlayer.socketId !== socket.id || narratorPlayer.isDisconnected) {
+        const updatedRoom = roomRepository.update(roomId, {
+          players: room.players.map((p) =>
+            p.userId === narratorPlayer!.userId
+              ? {
+                  ...p,
+                  socketId: socket.id,
+                  deviceId: deviceId ?? p.deviceId,
+                  isDisconnected: false,
+                  disconnectedAt: null,
+                  lastSeenAt: Date.now(),
+                }
+              : p
+          ),
+        })
+        if (updatedRoom) {
+          socket.join(roomId)
+          Object.assign(room, updatedRoom)
+          narratorPlayer = updatedRoom.players.find((p) => p.userId === narratorPlayer!.userId) ?? narratorPlayer
+        }
+      }
+
+      const result = await gameService.previousTurn(room, narratorPlayer.userId)
+
+      if (!result.success) {
+        const messages = {
+          NOT_NARRATOR: 'Chỉ Quản trò mới có thể chuyển lượt.',
+          NO_PREVIOUS_PHASE: 'Không thể quay lại phase trước.',
+        }
+        const error = {
+          success: false,
+          error: result.error,
+          message: messages[result.error as keyof typeof messages] || 'Không thể quay lại phase trước',
+        }
+        if (callback) callback(error)
+        else socket.emit('error', error)
+        return
+      }
+
+      roomRepository.save(result.room!)
+      phaseTimer.clearTimer(roomId)
+      console.log(`[prev_turn] Room ${roomId} -> Turn ${result.room!.turn}, Phase ${result.room!.phase}`)
+      io.to(roomId).emit('turn_changed', gameService.getPublicState(result.room!))
+
+      if (callback) callback({ success: true, data: gameService.getPublicState(result.room!) })
+    } catch (error: any) {
+      console.error('[prev_turn] Error:', error)
+      const err = { success: false, error: 'INTERNAL_ERROR', message: error.message }
+      if (callback) callback(err)
+      else socket.emit('error', err)
+    }
+  })
+
+  /**
    * Night action
    */
   socket.on('night_action', async ({ roomId, action, targetSocketId }, callback) => {
@@ -258,6 +337,10 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       console.log(`[night_action] ${action} by ${socket.id} in room ${roomId}`)
       io.to(roomId).emit('night_action_completed', {
         action,
+        actorId: actor.userId,
+        targetId: target.userId,
+        actorSocketId: actor.socketId,
+        targetSocketId: target.socketId,
         room: gameService.getPublicState(result.room!),
       })
 

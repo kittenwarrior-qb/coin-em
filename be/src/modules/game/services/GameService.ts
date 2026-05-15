@@ -23,6 +23,13 @@ export class GameService {
   }
 
   /**
+   * Move back one phase
+   */
+  async previousTurn(room: Room, narratorId: string): Promise<GameResult> {
+    return this.gameEngine.previousTurn(room, narratorId)
+  }
+
+  /**
    * Execute action
    */
   async executeAction(room: Room, action: GameAction): Promise<GameResult> {

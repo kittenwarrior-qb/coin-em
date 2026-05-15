@@ -27,7 +27,33 @@ export default function GameContainer() {
     setPreloaderMounted(false)
   }, [])
 
-  const { socket, isConnected, roomState, availableRooms, error, currentSocketId, joinRoom, startGame, listRooms, clearSession, addFakePlayers, updateProfile, leaveRoom, updateRoomSettings, setDebugRolePreference, resumeCandidates, resumeRoom } = useSocket()
+  const {
+    socket,
+    isConnected,
+    roomState,
+    availableRooms,
+    error,
+    currentSocketId,
+    joinRoom,
+    startGame,
+    listRooms,
+    clearSession,
+    addFakePlayers,
+    updateProfile,
+    leaveRoom,
+    updateRoomSettings,
+    setDebugRolePreference,
+    resumeCandidates,
+    resumeRoom,
+    nextTurn,
+    prevTurn,
+    nightAction,
+    selectCard,
+    sendResponse,
+    ntgVote,
+    shareReflection,
+    submitVote,
+  } = useSocket()
   
   const mySocketId = currentSocketId || socket?.id || ''
   const myUserId = getUserId()
@@ -149,6 +175,14 @@ export default function GameContainer() {
         myUserId={myUserId}
         onLeave={handleLeaveRoom}
         onUpdateProfile={handleUpdateProfile}
+        nextTurn={nextTurn}
+        prevTurn={prevTurn}
+        nightAction={nightAction}
+        emitSelectCard={selectCard}
+        sendResponse={sendResponse}
+        ntgVote={ntgVote}
+        shareReflection={shareReflection}
+        submitVote={submitVote}
       />
     )
   }
