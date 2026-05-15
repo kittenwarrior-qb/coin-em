@@ -257,7 +257,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         return
       }
 
-      roomRepository.saveAndWait(result.room!)
+      await roomRepository.saveAndWait(result.room!)
       phaseTimer.clearTimer(roomId)
       console.log(`[prev_turn] Room ${roomId} -> Turn ${result.room!.turn}, Phase ${result.room!.phase}`)
       io.to(roomId).emit('turn_changed', gameService.getPublicState(result.room!))

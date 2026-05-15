@@ -13,6 +13,7 @@ interface GameMenuModalProps {
 
 export function GameMenuModal({ open, onClose, onGuide, onQuit }: GameMenuModalProps) {
   const [showCardDeck, setShowCardDeck] = useState(false)
+  const [showQuitConfirm, setShowQuitConfirm] = useState(false)
 
   return (
     <>
@@ -27,7 +28,7 @@ export function GameMenuModal({ open, onClose, onGuide, onQuit }: GameMenuModalP
           </CartoonButton>
 
           {onQuit && (
-            <CartoonButton color="orange" size="lg" className="w-full" onClick={onQuit}>
+            <CartoonButton color="orange" size="lg" className="w-full" onClick={() => setShowQuitConfirm(true)}>
               Thoát game
             </CartoonButton>
           )}
@@ -39,6 +40,40 @@ export function GameMenuModal({ open, onClose, onGuide, onQuit }: GameMenuModalP
           <CardInventory onClose={() => setShowCardDeck(false)} />
         )}
       </AnimatePresence>
+
+      <CartoonModal 
+        open={showQuitConfirm} 
+        onClose={() => setShowQuitConfirm(false)} 
+        title="Xác nhận thoát"
+      >
+        <div className="py-2">
+          <p className="font-body text-sm text-center mb-4">
+            Bạn có chắc muốn thoát game không?
+          </p>
+          <div className="flex gap-3">
+            <CartoonButton 
+              color="blue" 
+              size="md" 
+              className="flex-1"
+              onClick={() => setShowQuitConfirm(false)}
+            >
+              Ở lại
+            </CartoonButton>
+            <CartoonButton 
+              color="orange" 
+              size="md" 
+              className="flex-1"
+              onClick={() => {
+                setShowQuitConfirm(false)
+                onClose()
+                onQuit?.()
+              }}
+            >
+              Thoát
+            </CartoonButton>
+          </div>
+        </div>
+      </CartoonModal>
     </>
   )
 }
