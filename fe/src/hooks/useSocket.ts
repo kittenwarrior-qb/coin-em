@@ -53,7 +53,16 @@ interface GameLogEntry {
   type: string
   actorId: string
   targetId?: string
-  data?: any
+  data?: {
+    phase?: GamePhase
+    round?: number
+    card?: CardData
+    message?: string
+    bonus?: number
+    amount?: number
+    coinType?: string
+    silencerFound?: boolean
+  }
   timestamp: number
 }
 
@@ -105,6 +114,7 @@ interface UseSocketReturn {
   endGame: (roomId: string) => void
   addFakePlayers: (roomId: string) => void
   nextTurn: (roomId: string) => void
+  prevTurn: (roomId: string) => void
   selectCard: (roomId: string, card: object, type?: 'SELECT_CARD' | 'SELECT_SELFCARE_CARD') => void
   sendResponse: (roomId: string, message: string) => void
   ntgVote: (roomId: string, targetSocketId: string) => void
@@ -533,6 +543,19 @@ export function useSocket(): UseSocketReturn {
     })
   }, [])
 
+  const prevTurn = useCallback((roomId: string) => {
+    if (!socketRef.current) return
+    const now = Date.now()
+    if (now - lastNextTurnRef.current < 800) return
+    lastNextTurnRef.current = now
+    const session = loadSession()
+    socketRef.current.emit('prev_turn', {
+      roomId,
+      userId: session?.userId ?? getUserId(),
+      deviceId: session?.deviceId ?? getDeviceId(),
+    })
+  }, [])
+
   const selectCard = useCallback((roomId: string, card: object, type: 'SELECT_CARD' | 'SELECT_SELFCARE_CARD' = 'SELECT_CARD') => {
     if (!socketRef.current) return
     socketRef.current.emit('select_card', { roomId, card, type })
@@ -591,6 +614,7 @@ export function useSocket(): UseSocketReturn {
     endGame,
     addFakePlayers,
     nextTurn,
+    prevTurn,
     selectCard,
     sendResponse,
     ntgVote,

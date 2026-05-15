@@ -133,6 +133,75 @@ export class GameEngine {
   }
 
   /**
+   * Move back to the previous phase in the same round so the narrator can let players choose again.
+   */
+  previousTurn(room: Room, narratorId: string): GameResult {
+    if (!this.actionValidator.canAdvanceTurn(room, narratorId)) {
+      return { success: false, error: 'NOT_NARRATOR' }
+    }
+
+    const previousPhase = this.turnManager.getPreviousPhase(room.phase)
+    if (previousPhase === room.phase) {
+      return { success: false, error: 'NO_PREVIOUS_PHASE' }
+    }
+
+    let updatedRoom: Room = {
+      ...room,
+      phase: previousPhase,
+      lastActivity: Date.now(),
+    }
+
+    switch (previousPhase) {
+      case 'night':
+        updatedRoom.nightActions = { silenced: false, healed: false, cardSelected: false }
+        updatedRoom.mutedPlayer = null
+        updatedRoom.healedPlayer = null
+        updatedRoom.selectedCard = null
+        break
+      case 'healer-turn':
+        updatedRoom.nightActions = { ...updatedRoom.nightActions, healed: false }
+        updatedRoom.healedPlayer = null
+        break
+      case 'silencer-turn':
+        updatedRoom.nightActions = { ...updatedRoom.nightActions, silenced: false }
+        updatedRoom.mutedPlayer = null
+        break
+      case 'situation-card':
+      case 'emotion-card':
+      case 'reflection-card':
+      case 'selfcare-card':
+        updatedRoom.selectedCard = null
+        updatedRoom.nightActions = { ...updatedRoom.nightActions, cardSelected: false }
+        break
+      case 'group-response':
+        updatedRoom.responses = {}
+        break
+      case 'guess-silencer':
+        updatedRoom.votes = {}
+        break
+      case 'give-coins':
+        updatedRoom.redCoinsGiven = {}
+        updatedRoom.yellowCoinsGiven = {}
+        break
+    }
+
+    updatedRoom.gameLog = [
+      ...updatedRoom.gameLog,
+      {
+        type: 'PHASE_CHANGED',
+        actorId: narratorId,
+        timestamp: Date.now(),
+        data: {
+          phase: previousPhase,
+          direction: 'previous',
+        },
+      },
+    ]
+
+    return { success: true, room: updatedRoom }
+  }
+
+  /**
    * Execute game action using Command Pattern
    */
   executeAction(room: Room, action: GameAction): GameResult {

@@ -1,38 +1,47 @@
 import { Room, GamePhase } from '../types'
 
 export class TurnManager {
+  private readonly phaseOrder: GamePhase[] = [
+    'role-reveal',
+    'night',
+    'healer-turn',
+    'silencer-turn',
+    'situation-card',
+    'emotion-card',
+    'story-telling',
+    'group-response',
+    'reflection-card',
+    'reflection-sharing',
+    'selfcare-card',
+    'hug-action',
+    'guess-silencer',
+    'reveal-silencer',
+    'give-coins',
+    'reward',
+  ]
+
   /**
    * Get next phase based on current phase
    */
   getNextPhase(currentPhase: GamePhase): GamePhase {
-    const phaseOrder: GamePhase[] = [
-      'role-reveal',
-      'night',
-      'healer-turn',
-      'silencer-turn',
-      'situation-card',
-      'emotion-card',
-      'story-telling',
-      'group-response',
-      'reflection-card',
-      'reflection-sharing',
-      'selfcare-card',
-      'hug-action',
-      'guess-silencer',
-      'reveal-silencer',
-      'give-coins',
-      'reward',
-    ]
-
-    const currentIndex = phaseOrder.indexOf(currentPhase)
+    const currentIndex = this.phaseOrder.indexOf(currentPhase)
     if (currentIndex === -1) return 'role-reveal'
 
     // If at reward, go back to role-reveal for new round
-    if (currentIndex === phaseOrder.length - 1) {
+    if (currentIndex === this.phaseOrder.length - 1) {
       return 'role-reveal'
     }
 
-    return phaseOrder[currentIndex + 1]
+    return this.phaseOrder[currentIndex + 1]
+  }
+
+  /**
+   * Get previous phase inside the current round.
+   */
+  getPreviousPhase(currentPhase: GamePhase): GamePhase {
+    const currentIndex = this.phaseOrder.indexOf(currentPhase)
+    if (currentIndex <= 0) return currentPhase
+    return this.phaseOrder[currentIndex - 1]
   }
 
   /**

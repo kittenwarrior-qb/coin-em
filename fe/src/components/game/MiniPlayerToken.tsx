@@ -12,7 +12,13 @@ interface MiniPlayerTokenProps {
   actionIconSrc?: string
   actionIconSide?: 'left' | 'right'
   isActionTarget?: boolean
+  actionTargetTone?: 'heal' | 'silence'
+  isSelectedActionTarget?: boolean
   showRoleLabel?: boolean
+  hideRoleBadge?: boolean
+  isNightDimmed?: boolean
+  showSleepEffect?: boolean
+  isRoleActive?: boolean
   onClick?: () => void
   onActionClick?: () => void
   onUpdateProfile?: (name: string, avatarIndex: number, bgIndex: number) => void
@@ -111,7 +117,13 @@ export function MiniPlayerToken({
   actionIconSrc = '/cartoon/icons/Potion-Green-Border.svg',
   actionIconSide = 'right',
   isActionTarget,
+  actionTargetTone,
+  isSelectedActionTarget,
   showRoleLabel,
+  hideRoleBadge,
+  isNightDimmed,
+  showSleepEffect,
+  isRoleActive,
   onClick,
   onActionClick,
   onUpdateProfile,
@@ -127,8 +139,15 @@ export function MiniPlayerToken({
   const roleLabel = getRoleLabel(player, isTop, isBottom)
   const roleColor = getRoleColor(player, isTop, isBottom)
   const roleIcon = getRoleIcon(player, isTop, isBottom)
-  const shouldShowRoleLabel = Boolean(roleLabel && (showRoleLabel || isTop || isBottom || player.isNarrator || player.isSender))
-  const borderColor = shouldShowRoleLabel ? roleColor : player.isMe ? BORDER_ME : BORDER_DEFAULT
+  const shouldShowRoleLabel = Boolean(
+    !hideRoleBadge && roleLabel && (showRoleLabel || isTop || isBottom || player.isNarrator || player.isSender)
+  )
+  const actionTargetColor = actionTargetTone === 'silence' ? BORDER_SILENCER : BORDER_HEALER
+  const borderColor = shouldShowRoleLabel
+      ? roleColor
+      : player.isMe
+        ? BORDER_ME
+        : BORDER_DEFAULT
   const labelPathId = `role-arc-${player.id.replace(/[^a-zA-Z0-9_-]/g, '-')}`
 
   const handleClick = () => {
@@ -163,29 +182,84 @@ export function MiniPlayerToken({
         </div>
 
         {/* Avatar with role-based border + photo badge for self */}
-        <div className="relative">
+        <div className="relative" data-player-avatar-id={player.id}>
           {shouldShowRoleLabel && roleIcon && (
-            <img
+            <motion.img
               src={roleIcon}
               alt=""
               className="pointer-events-none absolute z-20 h-8 w-8 object-contain"
+              animate={{
+                scale: isRoleActive ? [1, 1.18, 1] : 1,
+                opacity: isRoleActive ? 1 : 0.92,
+              }}
+              transition={isRoleActive ? { duration: 1.1, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.2 }}
               style={{
                 top: isTop || player.isNarrator ? -20 : -18,
                 left: isTop || player.isNarrator ? 4 : -1,
                 transform: isTop || player.isNarrator ? 'rotate(-14deg)' : 'rotate(-8deg)',
-                filter: 'drop-shadow(0 3px 4px rgba(0,0,0,0.22))',
+                filter: isRoleActive
+                  ? `drop-shadow(0 0 8px ${roleColor}) drop-shadow(0 3px 4px rgba(0,0,0,0.22))`
+                  : 'drop-shadow(0 3px 4px rgba(0,0,0,0.22))',
               }}
               draggable={false}
             />
           )}
-          <CartoonAvatar
-            name={player.name}
-            avatarIndex={displayAvatarIdx}
-            bgIndex={displayBgIdx}
-            borderColor={borderColor}
-            size="lg"
-            className={isActionTarget ? 'glow-gold' : undefined}
-          />
+          {(isActionTarget || isSelectedActionTarget) && (
+            <motion.div
+              className="pointer-events-none absolute z-10 rounded-[18px] border-[3px]"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{
+                opacity: 1,
+                scale: isSelectedActionTarget ? 1.08 : 1,
+                boxShadow: isSelectedActionTarget
+                  ? `0 0 22px 6px ${actionTargetColor}`
+                  : `0 0 10px 1px ${actionTargetColor}`,
+              }}
+              transition={{ duration: 0.22 }}
+              style={{
+                inset: -9,
+                borderColor: actionTargetColor,
+                background: 'transparent',
+              }}
+            />
+          )}
+          <motion.div
+            animate={{
+              opacity: isSelectedActionTarget ? 1 : isNightDimmed ? 0.48 : 1,
+              scale: isSelectedActionTarget ? 1.08 : 1,
+              filter: isSelectedActionTarget
+                ? `saturate(1.12) brightness(1.16) drop-shadow(0 0 14px ${actionTargetColor})`
+                : isNightDimmed
+                  ? 'saturate(0.75) brightness(0.78)'
+                  : 'saturate(1) brightness(1)',
+            }}
+            transition={{ duration: 0.25 }}
+          >
+            <CartoonAvatar
+              name={player.name}
+              avatarIndex={displayAvatarIdx}
+              bgIndex={displayBgIdx}
+              borderColor={borderColor}
+              size="lg"
+            />
+          </motion.div>
+          {showSleepEffect && (
+            <motion.img
+              src="/cartoon/icons/Zzz.svg"
+              alt=""
+              className="pointer-events-none absolute z-30 h-7 w-7 object-contain"
+              initial={{ opacity: 0, scale: 0.6, x: 30, y: -2 }}
+              animate={{
+                opacity: [0, 0.95, 0],
+                scale: [0.65, 1, 0.85],
+                x: [28, 34, 40],
+                y: [-2, -14, -28],
+              }}
+              transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 1.2, ease: 'easeOut' }}
+              style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.25))' }}
+              draggable={false}
+            />
+          )}
           {showActionIcon && (
             <motion.img
               src={actionIconSrc}
@@ -199,6 +273,22 @@ export function MiniPlayerToken({
                 [actionIconSide]: -24,
                 filter: 'drop-shadow(0 3px 4px rgba(0,0,0,0.25))',
               }}
+            />
+          )}
+          {player.isMuted && (
+            <motion.img
+              src="/cartoon/icons/Lock-Sliver.svg"
+              alt=""
+              initial={{ scale: 0, opacity: 0, y: 6 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              transition={{ type: 'spring', stiffness: 420, damping: 18 }}
+              className="absolute z-30 h-7 w-7 object-contain pointer-events-none"
+              style={{
+                bottom: -8,
+                left: -8,
+                filter: 'drop-shadow(0 3px 4px rgba(0,0,0,0.28))',
+              }}
+              draggable={false}
             />
           )}
           {player.isMe && (
