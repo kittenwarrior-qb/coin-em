@@ -1,15 +1,15 @@
 import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { CartoonButton, CartoonCircleButton, CartoonScreen } from '@/components/cartoon'
+import { CartoonButton, CartoonCircleButton, CartoonModal, CartoonScreen } from '@/components/cartoon'
 import { JoinRoomModal } from '@/components/lobby/JoinRoomModal'
 import { CreateRoomModal } from '@/components/lobby/CreateRoomModal'
 import { GameMenuModal } from '@/components/lobby/GameMenuModal'
 import { PopIn } from '@/components/PopIn'
 import type { RoomListItem } from '@/components/lobby/RoomCard'
+import type { ResumeCandidate } from '@/hooks/useSocket'
 
 interface SplashRect { left: number; top: number; w: number; h: number }
 
-/** Renders home-logo invisible until ready, then shows it (flying logo covers the transition) */
 function LogoFly({ splashLogoRect, ready, logoRef }: { splashLogoRect: SplashRect | null; ready: boolean; logoRef: React.RefObject<HTMLImageElement | null> }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [flyFrom, setFlyFrom] = useState<{ x: number; y: number; scale: number } | null>(null)
@@ -55,15 +55,31 @@ interface LobbyProps {
   bgDone?: boolean
   bgLoaded?: number
   bgTotal?: number
+  resumeCandidates?: ResumeCandidate[]
+  onResumeRoom?: (candidate: ResumeCandidate) => void
 }
 
-export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefreshRooms, ready = true, splashLogoRect, bgDone = true, bgLoaded = 0, bgTotal = 0 }: LobbyProps) {
+export default function Lobby({
+  availableRooms,
+  onJoinRoom,
+  onCreateRoom,
+  onRefreshRooms,
+  ready = true,
+  splashLogoRect,
+  bgDone = true,
+  bgLoaded = 0,
+  bgTotal = 0,
+  resumeCandidates = [],
+  onResumeRoom,
+}: LobbyProps) {
   const [joinOpen, setJoinOpen] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [resumeOpen, setResumeOpen] = useState(false)
   const homeLogoRef = useRef<HTMLImageElement>(null)
+  const autoOpenedResumeRef = useRef(false)
+  const latestResume = resumeCandidates[0]
 
-  // Refresh room list while join modal is open
   useEffect(() => {
     if (!joinOpen) return
     onRefreshRooms()
@@ -71,13 +87,18 @@ export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefr
     return () => clearInterval(id)
   }, [joinOpen, onRefreshRooms])
 
+  useEffect(() => {
+    if (autoOpenedResumeRef.current || resumeCandidates.length === 0) return
+    autoOpenedResumeRef.current = true
+    setResumeOpen(true)
+  }, [resumeCandidates.length])
+
   return (
     <CartoonScreen data-testid="lobby" purpleBg>
       <div
         className="flex-1 flex flex-col justify-center p-8 gap-4 relative"
         data-testid="lobby-menu"
       >
-        {/* Settings — top right, pop-in last */}
         <div className="absolute top-4 right-4">
           {ready ? (
             <PopIn delay={0.16}>
@@ -106,7 +127,22 @@ export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefr
           )}
         </div>
 
-        {/* Logo — animates from splash logo position when ready */}
+        <div className="absolute top-[66px] right-4">
+          <PopIn delay={0.22}>
+            <CartoonCircleButton
+              color="violet"
+              size="sm"
+              iconSrc="/cartoon/icons/Arrow-Simple-Right.svg"
+              iconAlt="Tiếp tục phòng"
+              iconSize="35%"
+              aria-label="Tiếp tục phòng"
+              style={{ height: 45, width: 45 }}
+              onClick={() => setResumeOpen(true)}
+              badge={latestResume ? resumeCandidates.length : undefined}
+            />
+          </PopIn>
+        </div>
+
         <div className="text-center" style={{ marginBottom: 32, marginTop: -40 }}>
           <LogoFly splashLogoRect={splashLogoRect ?? null} ready={ready} logoRef={homeLogoRef} />
         </div>
@@ -136,7 +172,6 @@ export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefr
         )}
       </div>
 
-      {/* Background download indicator */}
       {!bgDone && (
         <div className="flex items-center justify-center pb-4 gap-2">
           <img src="/cartoon/icons/Loading-Spinner.svg" alt="" className="w-4 h-4 spin-cartoon opacity-60" />
@@ -166,6 +201,57 @@ export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefr
         onGuide={() => { setMenuOpen(false) }}
         onSettings={() => { setMenuOpen(false) }}
       />
+
+      <CartoonModal open={resumeOpen} onClose={() => setResumeOpen(false)} title="Tiếp tục">
+        <div className="flex flex-col gap-3 py-2">
+          <div className="text-center font-body text-xs text-black/55">
+            Phòng còn dữ liệu khôi phục trong 2 giờ nếu bị ngắt.
+          </div>
+
+          {resumeCandidates.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 py-2">
+              <div className="rounded-2xl bg-[var(--c-sky-mist)] px-4 py-5 text-center font-display text-sm text-[var(--c-gray)]">
+                Không có phòng nào để chơi tiếp
+              </div>
+              <CartoonButton
+                color="purple"
+                size="sm"
+                className="mx-auto"
+                onClick={() => setResumeOpen(false)}
+              >
+                Bỏ qua
+              </CartoonButton>
+            </div>
+          ) : (
+            <div className="flex max-h-[52dvh] flex-col gap-2 overflow-y-auto pr-1">
+              {resumeCandidates.map((candidate) => (
+                <div key={candidate.roomId} className="grid grid-cols-[1fr_auto] items-center gap-2 rounded-2xl bg-[var(--c-sky-mist)] px-3 py-2">
+                  <div className="min-w-0">
+                    <div className="font-display text-sm text-[var(--c-black)]">{candidate.userName}</div>
+                    <div className="font-body text-[11px] leading-snug text-black/60">
+                      Phòng {candidate.roomId} · {candidate.role || 'Chưa rõ vai'}
+                    </div>
+                    <div className="font-body text-[11px] leading-snug text-black/60">
+                      Round {candidate.round ?? 0}/{candidate.totalRounds ?? '?'} · {candidate.phase || candidate.status || 'waiting'}
+                    </div>
+                  </div>
+                  <CartoonButton
+                    color="green"
+                    size="sm"
+                    className="shrink-0"
+                    onClick={() => {
+                      setResumeOpen(false)
+                      onResumeRoom?.(candidate)
+                    }}
+                  >
+                    Tham gia lại
+                  </CartoonButton>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </CartoonModal>
     </CartoonScreen>
   )
 }

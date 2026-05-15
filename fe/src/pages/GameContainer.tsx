@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Lobby from './Lobby'
 import WaitingRoom from './WaitingRoom'
 import GameBoard from './GameBoard'
@@ -27,16 +27,18 @@ export default function GameContainer() {
     setPreloaderMounted(false)
   }, [])
 
-  const { socket, isConnected, roomState, availableRooms, error, currentSocketId, joinRoom, startGame, listRooms, clearSession, addFakePlayers, updateProfile, leaveRoom, updateRoomSettings, setDebugRolePreference } = useSocket()
+  const { socket, isConnected, roomState, availableRooms, error, currentSocketId, joinRoom, startGame, listRooms, clearSession, addFakePlayers, updateProfile, leaveRoom, updateRoomSettings, setDebugRolePreference, resumeCandidates, resumeRoom } = useSocket()
   
   const mySocketId = currentSocketId || socket?.id || ''
   const myUserId = getUserId()
 
   const handleJoinRoom = useCallback((roomId: string, userName: string) => {
+    setForceLobby(false)
     joinRoom(roomId, userName, false)
   }, [joinRoom])
 
   const handleCreateRoom = useCallback((userName: string, cardDecks?: { situation: Record<string, boolean>; emotion: Record<string, boolean> }) => {
+    setForceLobby(false)
     const roomId = Math.random().toString(36).substring(2, 8).toUpperCase()
     joinRoom(roomId, userName, true)
     // Send card deck settings after a short delay to ensure room is created
@@ -82,10 +84,9 @@ export default function GameContainer() {
     : 'lobby'
     : 'lobby'
 
-  // Reset forceLobby when roomState is cleared
-  if (forcelobby && !roomState) {
-    setForceLobby(false)
-  }
+  useEffect(() => {
+    if (forcelobby && !roomState) setForceLobby(false)
+  }, [forcelobby, roomState])
 
   if (!isConnected) {
     return (
@@ -167,6 +168,8 @@ export default function GameContainer() {
           onJoinRoom={handleJoinRoom}
           onCreateRoom={handleCreateRoom}
           onRefreshRooms={listRooms}
+          resumeCandidates={resumeCandidates}
+          onResumeRoom={resumeRoom}
         />
       </div>
     </>

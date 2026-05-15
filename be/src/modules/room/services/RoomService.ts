@@ -1,6 +1,8 @@
 import { Room, Player } from '../../game/types'
 import { roomRepository } from '../repository/RoomRepository'
 
+const ROOM_DISCONNECT_TTL_MS = 2 * 60 * 60 * 1000
+
 export class RoomService {
   /**
    * Create new room
@@ -55,7 +57,17 @@ export class RoomService {
     if (existingPlayer) {
       // Update socket ID
       const updatedPlayers = room.players.map((p) =>
-        p.userId === player.userId ? { ...p, socketId: player.socketId } : p
+        p.userId === player.userId
+          ? {
+              ...p,
+              socketId: player.socketId,
+              deviceId: player.deviceId ?? p.deviceId,
+              name: player.name || p.name,
+              isDisconnected: false,
+              disconnectedAt: null,
+              lastSeenAt: Date.now(),
+            }
+          : p
       )
       return roomRepository.update(roomId, { players: updatedPlayers })
     }
@@ -181,10 +193,87 @@ export class RoomService {
       mutedPlayer: room.mutedPlayer,
       selectedCard: room.selectedCard,
       settings: room.settings,
+      resumeExpiresAt: this.getResumeExpiresAt(room),
       gameLog: room.gameLog,
       nightActions: room.nightActions,
       debugRolePickerEnabled: room.debugRolePickerEnabled,
     }
+  }
+
+  markPlayerDisconnected(roomId: string, socketId: string): Room | null {
+    const room = roomRepository.findById(roomId)
+    if (!room) return null
+
+    const disconnectedAt = Date.now()
+    const updatedPlayers = room.players.map(p =>
+      p.socketId === socketId
+        ? { ...p, isDisconnected: true, disconnectedAt, lastSeenAt: disconnectedAt }
+        : p
+    )
+
+    return roomRepository.update(roomId, { players: updatedPlayers })
+  }
+
+  reconnectPlayer(roomId: string, socketId: string, userId?: string, deviceId?: string, name?: string): Room | null {
+    const room = roomRepository.findById(roomId)
+    if (!room) return null
+
+    let matched = false
+    const updatedPlayers = room.players.map(p => {
+      const sameUser = !!userId && p.userId === userId
+      const sameDevice = !!deviceId && p.deviceId === deviceId
+      if (!sameUser && !sameDevice) return p
+
+      matched = true
+      return {
+        ...p,
+        socketId,
+        deviceId: deviceId ?? p.deviceId,
+        name: name || p.name,
+        isDisconnected: false,
+        disconnectedAt: null,
+        lastSeenAt: Date.now(),
+      }
+    })
+
+    if (!matched) return null
+    return roomRepository.update(roomId, { players: updatedPlayers })
+  }
+
+  cleanupDisconnectedRooms(now = Date.now()): string[] {
+    const deleted: string[] = []
+
+    for (const room of roomRepository.findAll()) {
+      if (room.status === 'ended') continue
+
+      const realPlayers = room.players.filter(p => !p.isFake)
+      if (realPlayers.length === 0) {
+        roomRepository.delete(room.id)
+        deleted.push(room.id)
+        continue
+      }
+
+      const allDisconnected = realPlayers.every(p => p.isDisconnected && p.disconnectedAt)
+      if (!allDisconnected) continue
+
+      const latestDisconnect = Math.max(...realPlayers.map(p => p.disconnectedAt ?? 0))
+      if (latestDisconnect > 0 && now - latestDisconnect >= ROOM_DISCONNECT_TTL_MS) {
+        roomRepository.delete(room.id)
+        deleted.push(room.id)
+      }
+    }
+
+    return deleted
+  }
+
+  private getResumeExpiresAt(room: Room): number | null {
+    const realPlayers = room.players.filter(p => !p.isFake)
+    if (realPlayers.length === 0) return Date.now() + ROOM_DISCONNECT_TTL_MS
+
+    const allDisconnected = realPlayers.every(p => p.isDisconnected && p.disconnectedAt)
+    if (!allDisconnected) return null
+
+    return Math.max(...realPlayers.map(p => p.disconnectedAt ?? 0)) + ROOM_DISCONNECT_TTL_MS
   }
 }
 

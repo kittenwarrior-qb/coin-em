@@ -18,7 +18,6 @@ export function FlipCard({
   backImage,
   altText,
   size = 'large',
-  aspect = 'card',
   initialFlipped = false,
   autoFlipDelayMs,
   allowFlip = true,
@@ -34,16 +33,12 @@ export function FlipCard({
     const t = setTimeout(() => setFlipped(true), autoFlipDelayMs)
     return () => clearTimeout(t)
   }, [frontImage, backImage, initialFlipped, autoFlipDelayMs])
-  const width = aspect === 'coin'
-    ? size === 'large'
-      ? 'min(70vw, 65vh, 280px)'
-      : 'min(35vw, 32vh, 140px)'
-    : size === 'large'
+  const width = size === 'large'
       ? 'min(70vw, calc(65vh * 2 / 3), 280px)'
       : 'min(35vw, calc(32vh * 2 / 3), 140px)'
   const radius = size === 'large' ? '24px' : '14px'
-  const cardAspectRatio = aspect === 'coin' ? '1 / 1' : '2 / 3'
-  const imageFit = aspect === 'coin' ? 'contain' : 'cover'
+  const cardAspectRatio = '2 / 3'
+  const imageFit = 'cover'
   const faceStyle: React.CSSProperties = {
     position: 'absolute',
     inset: 0,

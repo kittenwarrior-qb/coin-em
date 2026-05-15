@@ -1,17 +1,24 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { io, Socket } from 'socket.io-client'
-import { getUserId } from '../utils/userId'
+import { getDeviceId, getUserId } from '../utils/userId'
 import { useGameStore } from '../stores/gameStore'
 import type { CardData, GamePhase } from '../stores/types'
 
 const SOCKET_URL = import.meta.env.VITE_API_URL ?? window.location.origin
 const SESSION_KEY = 'emcoin_session'
+const RESUME_KEY = 'emcoin_resume_rooms'
 
 interface Player {
   socketId: string
   userId?: string
+  deviceId?: string
   name: string
   isFake?: boolean
+  role?: string
+  isNarrator?: boolean
+  isSender?: boolean
+  isDisconnected?: boolean
+  disconnectedAt?: number | null
   debugPreferredRole?: string
 }
 
@@ -39,6 +46,7 @@ interface RoomState {
     emotionGroups: ('basic' | 'light' | 'strong' | 'advanced')[]
   }
   debugRolePickerEnabled?: boolean
+  resumeExpiresAt?: number | null
 }
 
 interface GameLogEntry {
@@ -53,7 +61,22 @@ interface Session {
   roomId: string
   userName: string
   userId: string
+  deviceId: string
   oldSocketId?: string
+}
+
+export interface ResumeCandidate {
+  roomId: string
+  userName: string
+  userId: string
+  deviceId: string
+  role?: string
+  round?: number
+  totalRounds?: number
+  phase?: GamePhase
+  status?: RoomState['status']
+  updatedAt: number
+  expiresAt?: number | null
 }
 
 interface RoomListItem {
@@ -89,6 +112,9 @@ interface UseSocketReturn {
   updateProfile: (roomId: string, name: string, avatarIndex: number, bgIndex: number) => void
   updateRoomSettings: (roomId: string, situationGroups: string[], emotionGroups: string[]) => void
   setDebugRolePreference: (roomId: string, targetUserId: string, role: string) => void
+  resumeCandidates: ResumeCandidate[]
+  resumeRoom: (candidate: ResumeCandidate) => void
+  dismissResumeCandidate: (roomId: string) => void
 }
 
 // Session helpers
@@ -109,15 +135,77 @@ function clearSessionStorage() {
   localStorage.removeItem(SESSION_KEY)
 }
 
+function loadResumeCandidates(): ResumeCandidate[] {
+  try {
+    const data = localStorage.getItem(RESUME_KEY)
+    const parsed = data ? JSON.parse(data) : []
+    if (!Array.isArray(parsed)) return []
+    const now = Date.now()
+    return parsed.filter((item) =>
+      item.status === 'playing' &&
+      (!item.expiresAt || item.expiresAt > now)
+    )
+  } catch {
+    return []
+  }
+}
+
+function saveResumeCandidates(candidates: ResumeCandidate[]) {
+  localStorage.setItem(RESUME_KEY, JSON.stringify(candidates))
+}
+
+function upsertResumeCandidate(candidate: ResumeCandidate): ResumeCandidate[] {
+  const candidates = loadResumeCandidates()
+  const next = [candidate, ...candidates.filter(c => c.roomId !== candidate.roomId)]
+  saveResumeCandidates(next)
+  return next
+}
+
+function removeResumeCandidate(roomId: string): ResumeCandidate[] {
+  const next = loadResumeCandidates().filter(c => c.roomId !== roomId)
+  saveResumeCandidates(next)
+  return next
+}
+
 export function useSocket(): UseSocketReturn {
   const socketRef = useRef<Socket | null>(null)
   const [isConnected, setIsConnected] = useState(false)
   const [roomState, setRoomState] = useState<RoomState | null>(null)
   const [availableRooms, setAvailableRooms] = useState<RoomListItem[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [resumeCandidates, setResumeCandidates] = useState<ResumeCandidate[]>(() => loadResumeCandidates())
   const reconnectAttempted = useRef(false)
   const reconnectPending = useRef(false)
+  const roomStateRef = useRef<RoomState | null>(null)
   const [currentSocketId, setCurrentSocketId] = useState<string>('')
+
+  const persistResumeFromState = useCallback((state: RoomState) => {
+    const userId = getUserId()
+    const deviceId = getDeviceId()
+    if (state.status !== 'playing') {
+      setResumeCandidates(removeResumeCandidate(state.id))
+      return
+    }
+
+    const player = state.players.find(p => p.userId === userId || p.deviceId === deviceId)
+    if (!player) return
+
+    const candidate: ResumeCandidate = {
+      roomId: state.id,
+      userName: player.name,
+      userId: player.userId ?? userId,
+      deviceId,
+      role: player.role,
+      round: state.currentRound,
+      totalRounds: state.totalRounds,
+      phase: state.phase,
+      status: state.status,
+      updatedAt: Date.now(),
+      expiresAt: state.resumeExpiresAt ?? null,
+    }
+
+    setResumeCandidates(upsertResumeCandidate(candidate))
+  }, [])
 
   useEffect(() => {
     // Initialize socket
@@ -143,22 +231,19 @@ export function useSocket(): UseSocketReturn {
       setCurrentSocketId(socket.id || '')
       setError(null)
 
-      // Try to reconnect to previous room
-      if (!reconnectAttempted.current) {
-        reconnectAttempted.current = true
-        const session = loadSession()
-        if (session) {
-          console.log('[Socket] Attempting to reconnect to room:', session.roomId, 'with userId:', session.userId, 'new socket.id:', socket.id)
-          reconnectPending.current = true
-          socket.emit('reconnect_room', {
-            roomId: session.roomId,
-            userId: session.userId,
-            oldSocketId: session.oldSocketId,
-            name: session.userName,
-          })
-          // Update session with new socket ID
-          saveSession({ ...session, oldSocketId: socket.id })
-        }
+      // Preserve active gameplay across transient network reconnects.
+      const activeRoom = roomStateRef.current
+      const session = loadSession()
+      if (activeRoom && session && !reconnectPending.current) {
+        reconnectPending.current = true
+        socket.emit('reconnect_room', {
+          roomId: session.roomId,
+          userId: session.userId,
+          deviceId: session.deviceId,
+          oldSocketId: session.oldSocketId,
+          name: session.userName,
+        })
+        saveSession({ ...session, oldSocketId: socket.id })
       }
     })
 
@@ -171,8 +256,10 @@ export function useSocket(): UseSocketReturn {
     socket.on('room_state', (state: RoomState) => {
       console.log('[Socket] Room state:', state)
       reconnectPending.current = false
+      roomStateRef.current = state
       setRoomState(state)
       setError(null)
+      persistResumeFromState(state)
       
       // Sync gameStep with server phase
       if (state.phase) {
@@ -185,6 +272,20 @@ export function useSocket(): UseSocketReturn {
       setRoomState(prev => prev ? { ...prev, players } : null)
     })
 
+    socket.on('player_reconnected', ({ room }: { socketId: string; name: string; players: Player[]; room: RoomState }) => {
+      console.log('[Socket] Player reconnected')
+      roomStateRef.current = room
+      setRoomState(room)
+      persistResumeFromState(room)
+    })
+
+    socket.on('players_disconnected', ({ room }: { players: Array<{ userId: string; name: string; disconnectedAt?: number | null }>; room: RoomState }) => {
+      console.log('[Socket] Players disconnected')
+      roomStateRef.current = room
+      setRoomState(room)
+      persistResumeFromState(room)
+    })
+
     socket.on('player_left', ({ players, host }: { socketId: string; players: Player[]; host: string }) => {
       console.log('[Socket] Player left')
       setRoomState(prev => prev ? { ...prev, players, host } : null)
@@ -192,7 +293,9 @@ export function useSocket(): UseSocketReturn {
 
     socket.on('game_started', (state: RoomState) => {
       console.log('[Socket] Game started:', state)
+      roomStateRef.current = state
       setRoomState(state)
+      persistResumeFromState(state)
       
       // Sync gameStep with server phase
       if (state.phase) {
@@ -202,12 +305,16 @@ export function useSocket(): UseSocketReturn {
 
     socket.on('night_action_completed', ({ action, room }: { action: string; room: RoomState }) => {
       console.log('[Socket] Night action completed:', action)
+      roomStateRef.current = room
       setRoomState(room)
+      persistResumeFromState(room)
     })
 
     socket.on('phase_changed', (state: RoomState) => {
       console.log('[Socket] Phase changed:', state.phase)
+      roomStateRef.current = state
       setRoomState(state)
+      persistResumeFromState(state)
       
       // Sync gameStep with server phase
       if (state.phase) {
@@ -217,7 +324,9 @@ export function useSocket(): UseSocketReturn {
 
     socket.on('turn_changed', (state: RoomState) => {
       console.log('[Socket] Turn changed:', state.turn, state.phase)
+      roomStateRef.current = state
       setRoomState(state)
+      persistResumeFromState(state)
       
       // Sync gameStep with server phase
       if (state.phase) {
@@ -227,27 +336,37 @@ export function useSocket(): UseSocketReturn {
 
     socket.on('coin_given', ({ giver, receiver, coinType, room }: { giver: string; receiver: string; coinType: string; room: RoomState }) => {
       console.log('[Socket] Coin given:', coinType, 'from', giver, 'to', receiver)
+      roomStateRef.current = room
       setRoomState(room)
+      persistResumeFromState(room)
     })
 
     socket.on('card_selected', ({ type, room }: { actorId: string; card: object; type: string; room: RoomState }) => {
       console.log('[Socket] Card selected:', type)
+      roomStateRef.current = room
       setRoomState(room)
+      persistResumeFromState(room)
     })
 
     socket.on('response_received', ({ actorName, message, room }: { actorId: string; actorName: string; message: string; room: RoomState }) => {
       console.log('[Socket] Response received from:', actorName, message)
+      roomStateRef.current = room
       setRoomState(room)
+      persistResumeFromState(room)
     })
 
     socket.on('ntg_vote_cast', ({ votedName, bonus, room }: { ntgId: string; votedId: string; votedName: string; bonus: number; room: RoomState }) => {
       console.log('[Socket] NTG voted for:', votedName, '+', bonus, 'yellow')
+      roomStateRef.current = room
       setRoomState(room)
+      persistResumeFromState(room)
     })
 
     socket.on('reflection_shared', ({ ntgName, message, room }: { ntgId: string; ntgName: string; message: string; bonus: number; room: RoomState }) => {
       console.log('[Socket] Reflection shared by:', ntgName, message)
+      roomStateRef.current = room
       setRoomState(room)
+      persistResumeFromState(room)
     })
 
     socket.on('vote_submitted', () => {
@@ -266,6 +385,14 @@ export function useSocket(): UseSocketReturn {
     socket.on('rooms_list', (rooms: RoomListItem[]) => {
       console.log('[Socket] Rooms list:', rooms)
       setAvailableRooms(rooms)
+    })
+
+    socket.on('room_closed', ({ roomId }: { roomId: string; reason?: string }) => {
+      console.log('[Socket] Room closed:', roomId)
+      clearSessionStorage()
+      roomStateRef.current = null
+      setRoomState(null)
+      setResumeCandidates(removeResumeCandidate(roomId))
     })
 
     socket.on('error', (err: { code: string; message: string }) => {
@@ -293,6 +420,8 @@ export function useSocket(): UseSocketReturn {
       }
       // room_not_found: clear session, không set error — GameContainer sẽ tự về Lobby
       if (err.code === 'room_not_found') {
+        const session = loadSession()
+        if (session) setResumeCandidates(removeResumeCandidate(session.roomId))
         clearSessionStorage()
         reconnectAttempted.current = false
         return
@@ -304,14 +433,15 @@ export function useSocket(): UseSocketReturn {
     return () => {
       socket.disconnect()
     }
-  }, [])
+  }, [persistResumeFromState])
 
   const joinRoom = useCallback((roomId: string, name: string, createIfMissing = false) => {
     if (!socketRef.current) return
     const userId = getUserId()
-    console.log('[Socket] Emit join_room:', { roomId, name, userId, createIfMissing })
-    socketRef.current.emit('join_room', { roomId, name, userId, createIfMissing })
-    saveSession({ roomId, userName: name, userId, oldSocketId: socketRef.current.id })
+    const deviceId = getDeviceId()
+    console.log('[Socket] Emit join_room:', { roomId, name, userId, deviceId, createIfMissing })
+    socketRef.current.emit('join_room', { roomId, name, userId, deviceId, createIfMissing })
+    saveSession({ roomId, userName: name, userId, deviceId, oldSocketId: socketRef.current.id })
   }, [])
 
   const startGame = useCallback((roomId: string) => {
@@ -357,11 +487,30 @@ export function useSocket(): UseSocketReturn {
   const clearSession = useCallback(() => {
     clearSessionStorage()
     reconnectAttempted.current = false
+    roomStateRef.current = null
+    setRoomState(null)
+    setError(null)
   }, [])
 
   const leaveRoom = useCallback((roomId: string) => {
     if (!socketRef.current) return
     socketRef.current.emit('leave_room', { roomId })
+  }, [])
+
+  const resumeRoom = useCallback((candidate: ResumeCandidate) => {
+    if (!socketRef.current) return
+    reconnectPending.current = true
+    saveSession({ ...candidate, oldSocketId: socketRef.current.id })
+    socketRef.current.emit('reconnect_room', {
+      roomId: candidate.roomId,
+      userId: candidate.userId,
+      deviceId: candidate.deviceId,
+      name: candidate.userName,
+    })
+  }, [])
+
+  const dismissResumeCandidate = useCallback((roomId: string) => {
+    setResumeCandidates(removeResumeCandidate(roomId))
   }, [])
 
   const addFakePlayers = useCallback((roomId: string) => {
@@ -376,7 +525,12 @@ export function useSocket(): UseSocketReturn {
     const now = Date.now()
     if (now - lastNextTurnRef.current < 800) return
     lastNextTurnRef.current = now
-    socketRef.current.emit('next_turn', { roomId })
+    const session = loadSession()
+    socketRef.current.emit('next_turn', {
+      roomId,
+      userId: session?.userId ?? getUserId(),
+      deviceId: session?.deviceId ?? getDeviceId(),
+    })
   }, [])
 
   const selectCard = useCallback((roomId: string, card: object, type: 'SELECT_CARD' | 'SELECT_SELFCARE_CARD' = 'SELECT_CARD') => {
@@ -444,5 +598,8 @@ export function useSocket(): UseSocketReturn {
     updateProfile,
     updateRoomSettings,
     setDebugRolePreference,
+    resumeCandidates,
+    resumeRoom,
+    dismissResumeCandidate,
   }
 }

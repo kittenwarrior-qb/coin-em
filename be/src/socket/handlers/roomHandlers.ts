@@ -81,7 +81,7 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
   /**
    * Join or create room
    */
-  socket.on('join_room', ({ name, roomId, userId, createIfMissing = false }) => {
+  socket.on('join_room', ({ name, roomId, userId, deviceId, createIfMissing = false }) => {
     if (!name || !roomId || !userId) {
       return socket.emit('error', {
         code: 'invalid_params',
@@ -103,7 +103,11 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
       const host: Player = {
         socketId: socket.id,
         userId,
+        deviceId,
         name,
+        isDisconnected: false,
+        disconnectedAt: null,
+        lastSeenAt: Date.now(),
         avatarIndex: randomAvatarIndex(),
         bgIndex: randomBgIndex(),
         coins: { red: 0, yellow: 0, green: 0 },
@@ -137,7 +141,11 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
       const player: Player = {
         socketId: socket.id,
         userId,
+        deviceId,
         name,
+        isDisconnected: false,
+        disconnectedAt: null,
+        lastSeenAt: Date.now(),
         avatarIndex: existingPlayer?.avatarIndex ?? randomAvatarIndex(),
         bgIndex: existingPlayer?.bgIndex ?? randomBgIndex(),
         coins: { red: 0, yellow: 0, green: 0 },
@@ -163,8 +171,8 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
   /**
    * Reconnect to room
    */
-  socket.on('reconnect_room', ({ roomId, userId, name }) => {
-    if (!roomId || !userId) {
+  socket.on('reconnect_room', ({ roomId, userId, deviceId, name }) => {
+    if (!roomId || (!userId && !deviceId)) {
       return socket.emit('error', {
         code: 'invalid_params',
         message: 'roomId và userId là bắt buộc.',
@@ -179,30 +187,27 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
       })
     }
 
-    // Find player by userId
-    const existingPlayer = room.players.find((p) => p.userId === userId)
+    // Find player by stable browser userId, then deviceId fallback.
+    const existingPlayer = room.players.find((p) =>
+      (!!userId && p.userId === userId) || (!!deviceId && p.deviceId === deviceId)
+    )
 
     if (existingPlayer) {
       // Cancel any pending disconnect timer for old socket
       cancelDisconnectTimer(existingPlayer.socketId)
 
-      // Update socket ID
-      const updatedPlayers = room.players.map((p) =>
-        p.userId === userId ? { ...p, socketId: socket.id } : p
-      )
-
-      roomRepository.update(roomId, { players: updatedPlayers })
+      const updatedRoom = roomService.reconnectPlayer(roomId, socket.id, userId, deviceId, name)
       socket.join(roomId)
 
       console.log(`[reconnect_room] ${name} (userId: ${userId}) reconnected`)
 
-      const updatedRoom = roomRepository.findById(roomId)
       socket.emit('room_state', roomService.getPublicState(updatedRoom!))
-      socket.to(roomId).emit('player_joined', {
+      socket.to(roomId).emit('player_reconnected', {
         socketId: socket.id,
-        userId,
-        name,
+        userId: existingPlayer.userId,
+        name: name || existingPlayer.name,
         players: updatedRoom!.players,
+        room: roomService.getPublicState(updatedRoom!),
       })
     } else {
       return socket.emit('error', {

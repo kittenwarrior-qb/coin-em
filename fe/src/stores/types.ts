@@ -37,6 +37,8 @@ export interface Player {
   isSender?: boolean
   isMuted?: boolean
   isHealed?: boolean
+  isDisconnected?: boolean
+  disconnectedAt?: number | null
   avatarIndex?: number
   bgIndex?: number
   coins: {
