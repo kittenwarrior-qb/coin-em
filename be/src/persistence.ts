@@ -115,13 +115,12 @@ export function cleanupRooms(rooms: Map<string, Room>): void {
   const MAX_AGE = 24 * 60 * 60 * 1000
   const MAX_AGE_FAKE = 2 * 60 * 60 * 1000
 
+  const toDelete: string[] = []
+
   for (const [roomId, room] of rooms.entries()) {
     if (room.players.length === 0) {
-      rooms.delete(roomId)
-      deleteRoomFile(roomId)
-      void redisClient.del(`${ROOM_PREFIX}${roomId}`)
-      void redisClient.srem(ROOM_INDEX, roomId)
-      console.log(`[Cleanup] Removed empty room: ${roomId}`)
+      toDelete.push(roomId)
+      console.log(`[Cleanup] Marking empty room for deletion: ${roomId}`)
       continue
     }
 
@@ -129,13 +128,18 @@ export function cleanupRooms(rooms: Map<string, Room>): void {
     const maxAge = hasOnlyFakePlayers ? MAX_AGE_FAKE : MAX_AGE
 
     if (room.lastActivity && now - room.lastActivity > maxAge) {
-      rooms.delete(roomId)
-      deleteRoomFile(roomId)
-      void redisClient.del(`${ROOM_PREFIX}${roomId}`)
-      void redisClient.srem(ROOM_INDEX, roomId)
-      console.log(`[Cleanup] Removed inactive room: ${roomId}`)
+      toDelete.push(roomId)
+      console.log(`[Cleanup] Marking inactive room for deletion: ${roomId} (last activity: ${new Date(room.lastActivity).toISOString()})`)
     }
   }
 
-  console.log(`[Cleanup] Completed. Active rooms: ${rooms.size}`)
+  // Delete through repository to ensure Redis sync
+  for (const roomId of toDelete) {
+    rooms.delete(roomId)
+    deleteRoomFile(roomId)
+    void redisClient.del(`${ROOM_PREFIX}${roomId}`)
+    void redisClient.srem(ROOM_INDEX, roomId)
+  }
+
+  console.log(`[Cleanup] Completed. Deleted ${toDelete.length} room(s). Active rooms: ${rooms.size}`)
 }
