@@ -108,7 +108,9 @@ async function start(): Promise<void> {
   registerSocketHandlers(io)
 
   setInterval(() => {
-    cleanupRooms(roomRepository.getRawMap())
+    cleanupRooms(roomRepository.getRawMap()).catch(err =>
+      console.error('[Cleanup] Error:', err)
+    )
   }, 60 * 60 * 1000)
 
   httpServer.listen(PORT, () => {

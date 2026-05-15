@@ -110,7 +110,7 @@ export function autoSaveRoom(room: Room): void {
 /**
  * Clean up old/empty rooms (run periodically)
  */
-export function cleanupRooms(rooms: Map<string, Room>): void {
+export async function cleanupRooms(rooms: Map<string, Room>): Promise<void> {
   const now = Date.now()
   const MAX_AGE = 24 * 60 * 60 * 1000
   const MAX_AGE_FAKE = 2 * 60 * 60 * 1000
@@ -134,12 +134,21 @@ export function cleanupRooms(rooms: Map<string, Room>): void {
   }
 
   // Delete through repository to ensure Redis sync
+  const deletePromises: Promise<any>[] = []
+  
   for (const roomId of toDelete) {
     rooms.delete(roomId)
     deleteRoomFile(roomId)
-    void redisClient.del(`${ROOM_PREFIX}${roomId}`)
-    void redisClient.srem(ROOM_INDEX, roomId)
+    deletePromises.push(
+      redisClient.del(`${ROOM_PREFIX}${roomId}`),
+      redisClient.srem(ROOM_INDEX, roomId)
+    )
   }
+
+  // Wait for all Redis deletes to complete
+  await Promise.allSettled(deletePromises).catch(err =>
+    console.error('[Cleanup] Redis delete errors:', err)
+  )
 
   console.log(`[Cleanup] Completed. Deleted ${toDelete.length} room(s). Active rooms: ${rooms.size}`)
 }

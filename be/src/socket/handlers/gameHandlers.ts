@@ -147,8 +147,8 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         return
       }
 
-      // Save room
-      roomRepository.save(result.room!)
+      // Save room and wait for Redis
+      await roomRepository.saveAndWait(result.room!)
 
       // Broadcast
       if (result.message === 'GAME_ENDED') {
@@ -257,7 +257,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         return
       }
 
-      roomRepository.save(result.room!)
+      roomRepository.saveAndWait(result.room!)
       phaseTimer.clearTimer(roomId)
       console.log(`[prev_turn] Room ${roomId} -> Turn ${result.room!.turn}, Phase ${result.room!.phase}`)
       io.to(roomId).emit('turn_changed', gameService.getPublicState(result.room!))
@@ -818,7 +818,11 @@ export function registerGameHandlers(io: Server, socket: Socket) {
           },
         }))
 
-      roomRepository.update(roomId, { status: 'ended', phase: 'ended' })
+      const updatedRoom = roomRepository.update(roomId, { status: 'ended', phase: 'ended' })
+      if (updatedRoom) {
+        // Ensure Redis save completes for ended game
+        await roomRepository.saveAndWait(updatedRoom)
+      }
       phaseTimer.clearTimer(roomId)
 
       console.log(`[end_game] Room ${roomId} ended`)
