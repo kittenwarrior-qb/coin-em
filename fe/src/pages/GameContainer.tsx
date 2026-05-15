@@ -45,6 +45,7 @@ export default function GameContainer() {
     setDebugRolePreference,
     resumeCandidates,
     resumeRoom,
+    dismissResumeCandidate,
     nextTurn,
     prevTurn,
     nightAction,
@@ -204,6 +205,7 @@ export default function GameContainer() {
           onRefreshRooms={listRooms}
           resumeCandidates={resumeCandidates}
           onResumeRoom={resumeRoom}
+          onDismissResume={dismissResumeCandidate}
         />
       </div>
     </>

@@ -23,6 +23,7 @@ export class RoomRepository {
         redisClient.set(roomKey(room.id), JSON.stringify(room)),
         redisClient.sadd(ROOM_INDEX, room.id),
       ])
+      console.log(`[RoomRepository] Saved room ${room.id} to Redis (status: ${room.status}, players: ${room.players.length})`)
     } catch (err) {
       console.error(`[RoomRepository] Redis save error for ${room.id}:`, err)
     }
@@ -35,6 +36,7 @@ export class RoomRepository {
         redisClient.del(roomKey(roomId)),
         redisClient.srem(ROOM_INDEX, roomId),
       ])
+      console.log(`[RoomRepository] Deleted room ${roomId} from Redis`)
     } catch (err) {
       console.error(`[RoomRepository] Redis delete error for ${roomId}:`, err)
     }
@@ -43,25 +45,48 @@ export class RoomRepository {
   async loadFromRedis(): Promise<void> {
     try {
       const ids = await redisClient.smembers(ROOM_INDEX)
+      console.log(`[RoomRepository] Found ${ids.length} room ID(s) in Redis index`)
       if (ids.length === 0) return
 
       const pipeline = redisClient.pipeline()
       ids.forEach((id) => pipeline.get(roomKey(id)))
       const results = await pipeline.exec()
 
-      results?.forEach((result) => {
+      let loaded = 0
+      let corrupted = 0
+      let missing = 0
+      const orphanedIds: string[] = []
+      
+      results?.forEach((result, index) => {
         const [err, value] = result
+        const roomId = ids[index]
+        
         if (!err && typeof value === 'string') {
           try {
             const room = JSON.parse(value) as Room
             this.cache.set(room.id, room)
+            loaded++
           } catch {
-            // skip corrupted entry
+            corrupted++
+            console.warn(`[RoomRepository] Corrupted room data for ${roomId}`)
+            orphanedIds.push(roomId)
           }
+        } else if (err) {
+          console.error(`[RoomRepository] Redis error loading ${roomId}:`, err)
+        } else {
+          missing++
+          console.warn(`[RoomRepository] Room ${roomId} in index but data missing`)
+          orphanedIds.push(roomId)
         }
       })
 
-      console.log(`[RoomRepository] Loaded ${this.cache.size} room(s) from Redis`)
+      // Clean up orphaned index entries
+      if (orphanedIds.length > 0) {
+        console.log(`[RoomRepository] Cleaning up ${orphanedIds.length} orphaned index entries`)
+        await redisClient.srem(ROOM_INDEX, ...orphanedIds)
+      }
+
+      console.log(`[RoomRepository] Loaded ${loaded} room(s) from Redis (${corrupted} corrupted, ${missing} missing)`)
     } catch (err) {
       console.error('[RoomRepository] Failed to load from Redis:', err)
     }
@@ -92,7 +117,8 @@ export class RoomRepository {
   save(room: Room): void {
     this.cache.set(room.id, room)
     void this.redisSave(room)
-    if (!isRedisAvailable()) autoSaveRoom(room)
+    // Always save to JSON as backup, even when Redis is available
+    autoSaveRoom(room)
   }
 
   update(roomId: string, updates: Partial<Room>): Room | null {
@@ -101,7 +127,8 @@ export class RoomRepository {
     const updated = { ...room, ...updates, lastActivity: Date.now() }
     this.cache.set(roomId, updated)
     void this.redisSave(updated)
-    if (!isRedisAvailable()) autoSaveRoom(updated)
+    // Always save to JSON as backup, even when Redis is available
+    autoSaveRoom(updated)
     return updated
   }
 

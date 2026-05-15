@@ -57,6 +57,7 @@ interface LobbyProps {
   bgTotal?: number
   resumeCandidates?: ResumeCandidate[]
   onResumeRoom?: (candidate: ResumeCandidate) => void
+  onDismissResume?: (roomId: string) => void
 }
 
 export default function Lobby({
@@ -71,6 +72,7 @@ export default function Lobby({
   bgTotal = 0,
   resumeCandidates = [],
   onResumeRoom,
+  onDismissResume,
 }: LobbyProps) {
   const [joinOpen, setJoinOpen] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
@@ -235,17 +237,33 @@ export default function Lobby({
                       Round {candidate.round ?? 0}/{candidate.totalRounds ?? '?'} · {candidate.phase || candidate.status || 'waiting'}
                     </div>
                   </div>
-                  <CartoonButton
-                    color="green"
-                    size="sm"
-                    className="shrink-0"
-                    onClick={() => {
-                      setResumeOpen(false)
-                      onResumeRoom?.(candidate)
-                    }}
-                  >
-                    Tham gia lại
-                  </CartoonButton>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      className="shrink-0 flex items-center justify-center h-9 w-9 rounded-full bg-[var(--c-red)]/15 border-2 border-[var(--c-red)]/40 transition-all active:scale-95"
+                      onClick={() => onDismissResume?.(candidate.roomId)}
+                      aria-label={`Xóa phòng ${candidate.roomId}`}
+                      data-testid={`btn-dismiss-resume-${candidate.roomId}`}
+                    >
+                      <img
+                        src="/cartoon/icons/X-Icon.svg"
+                        alt=""
+                        className="h-4 w-4 object-contain opacity-70"
+                        draggable={false}
+                      />
+                    </button>
+                    <CartoonButton
+                      color="green"
+                      size="sm"
+                      className="shrink-0"
+                      onClick={() => {
+                        setResumeOpen(false)
+                        onResumeRoom?.(candidate)
+                      }}
+                    >
+                      Tham gia lại
+                    </CartoonButton>
+                  </div>
                 </div>
               ))}
             </div>
