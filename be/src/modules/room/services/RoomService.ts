@@ -93,11 +93,18 @@ export class RoomService {
       return null
     }
 
-    // If only bots remain, delete room
+    // If only bots remain AND game is not playing, delete room
+    // Keep room if game is playing to allow reconnection
     const hasRealPlayer = updatedPlayers.some((p) => !p.isFake)
-    if (!hasRealPlayer) {
+    if (!hasRealPlayer && room.status !== 'playing') {
+      console.log(`[removePlayer] Deleting room ${roomId} - only bots remain in ${room.status} room`)
       roomRepository.delete(roomId)
       return null
+    }
+
+    // If only bots remain but game is playing, keep room for potential reconnection
+    if (!hasRealPlayer && room.status === 'playing') {
+      console.log(`[removePlayer] Keeping room ${roomId} - only bots remain but game is playing`)
     }
 
     // If host left, promote next real player (or first player if none)
