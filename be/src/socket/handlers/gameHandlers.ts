@@ -47,8 +47,8 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         return
       }
 
-      // Save room
-      roomRepository.save(result.room!)
+      // Save room and wait for Redis to complete
+      await roomRepository.saveAndWait(result.room!)
 
       // Broadcast
       console.log(`[start_game] Phòng ${roomId} bắt đầu - Roles assigned`)

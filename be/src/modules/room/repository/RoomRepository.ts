@@ -44,8 +44,20 @@ export class RoomRepository {
 
   async loadFromRedis(): Promise<void> {
     try {
-      const ids = await redisClient.smembers(ROOM_INDEX)
-      console.log(`[RoomRepository] Found ${ids.length} room ID(s) in Redis index`)
+      let ids: string[] = []
+      
+      // Try to get room IDs from index
+      try {
+        ids = await redisClient.smembers(ROOM_INDEX)
+        console.log(`[RoomRepository] Found ${ids.length} room ID(s) in Redis index`)
+      } catch (indexErr: any) {
+        console.warn(`[RoomRepository] Failed to read index (${indexErr.message}), falling back to KEYS scan`)
+        // Fallback: scan for room keys directly
+        const keys = await redisClient.keys(`${ROOM_PREFIX}*`)
+        ids = keys.map(key => key.replace(ROOM_PREFIX, ''))
+        console.log(`[RoomRepository] Found ${ids.length} room(s) via KEYS scan`)
+      }
+      
       if (ids.length === 0) return
 
       const pipeline = redisClient.pipeline()
@@ -116,8 +128,19 @@ export class RoomRepository {
 
   save(room: Room): void {
     this.cache.set(room.id, room)
-    void this.redisSave(room)
+    // Fire and forget Redis save, but log if it fails
+    this.redisSave(room).catch(err => 
+      console.error(`[RoomRepository] Failed to save room ${room.id} to Redis:`, err)
+    )
     // Always save to JSON as backup, even when Redis is available
+    autoSaveRoom(room)
+  }
+
+  async saveAndWait(room: Room): Promise<void> {
+    this.cache.set(room.id, room)
+    // Wait for Redis save to complete
+    await this.redisSave(room)
+    // Always save to JSON as backup
     autoSaveRoom(room)
   }
 
@@ -126,7 +149,10 @@ export class RoomRepository {
     if (!room) return null
     const updated = { ...room, ...updates, lastActivity: Date.now() }
     this.cache.set(roomId, updated)
-    void this.redisSave(updated)
+    // Fire and forget Redis save, but log if it fails
+    this.redisSave(updated).catch(err =>
+      console.error(`[RoomRepository] Failed to update room ${roomId} in Redis:`, err)
+    )
     // Always save to JSON as backup, even when Redis is available
     autoSaveRoom(updated)
     return updated
@@ -134,7 +160,12 @@ export class RoomRepository {
 
   delete(roomId: string): boolean {
     const existed = this.cache.delete(roomId)
-    if (existed) void this.redisDelete(roomId)
+    if (existed) {
+      // Ensure Redis delete completes
+      this.redisDelete(roomId).catch(err =>
+        console.error(`[RoomRepository] Failed to delete room ${roomId} from Redis:`, err)
+      )
+    }
     return existed
   }
 

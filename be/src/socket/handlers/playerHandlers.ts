@@ -40,16 +40,23 @@ export function registerPlayerHandlers(io: Server, socket: Socket) {
     cancelDisconnectTimer(socket.id)
 
     const room = roomRepository.findById(roomId)
-    if (room?.status === 'playing') {
+    if (!room) {
+      console.log(`[leave_room] Room ${roomId} not found for socket ${socket.id}`)
+      return
+    }
+
+    // If game is playing or has started, don't remove player - just mark disconnected
+    if (room.status === 'playing' || room.status === 'ended') {
       const updatedRoom = roomService.markPlayerDisconnected(roomId, socket.id)
       socket.leave(roomId)
-      console.log(`[leave_room] ${socket.id} left playing room ${roomId} - marked disconnected`)
+      console.log(`[leave_room] ${socket.id} left ${room.status} room ${roomId} - marked disconnected`)
       if (updatedRoom) emitDisconnectedSummary(io, roomId)
       return
     }
 
+    // Only remove player if game is still in waiting phase
     const updatedRoom = roomService.removePlayer(roomId, socket.id)
-    console.log(`[leave_room] ${socket.id} intentionally left room ${roomId}`)
+    console.log(`[leave_room] ${socket.id} intentionally left waiting room ${roomId}`)
     if (updatedRoom) {
       io.to(roomId).emit('player_left', {
         socketId: socket.id,
@@ -58,6 +65,7 @@ export function registerPlayerHandlers(io: Server, socket: Socket) {
       })
     } else {
       io.to(roomId).emit('room_closed', { roomId })
+      console.log(`[room_closed] Room ${roomId} closed after last player left`)
     }
   })
 
