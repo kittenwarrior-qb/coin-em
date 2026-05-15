@@ -1,9 +1,11 @@
 import { Server } from 'socket.io'
 import { registerRoomHandlers } from './roomHandlers'
 import { registerGameHandlers } from './gameHandlers'
-import { registerPlayerHandlers } from './playerHandlers'
+import { registerPlayerHandlers, startDisconnectedRoomCleanup } from './playerHandlers'
 
 export function registerSocketHandlers(io: Server) {
+  startDisconnectedRoomCleanup(io)
+
   io.on('connection', (socket) => {
     console.log(`[connect] ${socket.id}`)
 

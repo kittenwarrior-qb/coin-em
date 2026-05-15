@@ -11,6 +11,8 @@ export interface Player {
   isSender?: boolean
   isMuted?: boolean
   isHealed?: boolean
+  isDisconnected?: boolean
+  disconnectedAt?: number | null
   avatarIndex?: number
   bgIndex?: number
   coins: { red: number; yellow: number; green: number }
@@ -24,10 +26,13 @@ export interface RoomState {
     userId?: string
     name: string
     role?: string
+    isFake?: boolean
     isNarrator?: boolean
     isSender?: boolean
     isMuted?: boolean
     isHealed?: boolean
+    isDisconnected?: boolean
+    disconnectedAt?: number | null
     avatarIndex?: number
     bgIndex?: number
     coins?: { red: number; yellow: number; green: number }
@@ -51,6 +56,7 @@ export interface RoomState {
     situationGroups: ('light' | 'medium' | 'sensitive')[]
     emotionGroups: ('basic' | 'light' | 'strong' | 'advanced')[]
   }
+  resumeExpiresAt?: number | null
   debugRolePickerEnabled?: boolean
 }
 

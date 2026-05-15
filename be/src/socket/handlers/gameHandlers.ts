@@ -84,7 +84,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
   /**
    * Advance turn
    */
-  socket.on('next_turn', async ({ roomId }, callback) => {
+  socket.on('next_turn', async ({ roomId, userId, deviceId }, callback) => {
     try {
       const room = roomRepository.findById(roomId)
       if (!room) {
@@ -94,13 +94,40 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         return
       }
 
-      // Find narrator by socket ID
-      const narratorPlayer = room.players.find((p) => p.socketId === socket.id)
+      // Find narrator by current socket first, then stable browser identity after reload/reconnect.
+      let narratorPlayer = room.players.find((p) => p.socketId === socket.id)
+      if (!narratorPlayer) {
+        narratorPlayer = room.players.find((p) =>
+          (!!userId && p.userId === userId) || (!!deviceId && p.deviceId === deviceId)
+        )
+      }
       if (!narratorPlayer) {
         const error = { success: false, error: 'PLAYER_NOT_FOUND', message: 'Người chơi không tồn tại.' }
         if (callback) callback(error)
         else socket.emit('error', error)
         return
+      }
+
+      if (narratorPlayer.socketId !== socket.id || narratorPlayer.isDisconnected) {
+        const updatedRoom = roomRepository.update(roomId, {
+          players: room.players.map((p) =>
+            p.userId === narratorPlayer!.userId
+              ? {
+                  ...p,
+                  socketId: socket.id,
+                  deviceId: deviceId ?? p.deviceId,
+                  isDisconnected: false,
+                  disconnectedAt: null,
+                  lastSeenAt: Date.now(),
+                }
+              : p
+          ),
+        })
+        if (updatedRoom) {
+          socket.join(roomId)
+          Object.assign(room, updatedRoom)
+          narratorPlayer = updatedRoom.players.find((p) => p.userId === narratorPlayer!.userId) ?? narratorPlayer
+        }
       }
 
       // Advance turn via engine

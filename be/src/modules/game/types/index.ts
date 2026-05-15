@@ -32,6 +32,7 @@ export enum Role {
 export interface Player {
   socketId: string
   userId: string
+  deviceId?: string
   name: string
   colorIndex?: number
   avatarIndex?: number
@@ -43,6 +44,9 @@ export interface Player {
   isMuted?: boolean
   isHealed?: boolean
   isFake?: boolean
+  isDisconnected?: boolean
+  disconnectedAt?: number | null
+  lastSeenAt?: number
   debugPreferredRole?: Role
   coins: {
     red: number

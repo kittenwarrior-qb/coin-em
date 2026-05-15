@@ -70,6 +70,7 @@ export class GameService {
       mutedPlayer: room.mutedPlayer,
       selectedCard: room.selectedCard,
       settings: room.settings,
+      resumeExpiresAt: null,
       gameLog: room.gameLog,
       nightActions: room.nightActions,
       votes: room.votes,

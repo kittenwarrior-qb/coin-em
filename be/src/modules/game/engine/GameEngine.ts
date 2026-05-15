@@ -295,20 +295,16 @@ export class GameEngine {
     const player = room.players.find((p) => p.userId === playerId)
     const isNarrator = player?.isNarrator
     
-    // Night phases where narrator can see all roles
-    const nightPhases = ['night', 'healer-turn', 'silencer-turn']
-    const isNightPhase = nightPhases.includes(room.phase)
-
     return {
       ...room,
       players: room.players.map((p) => ({
         ...p,
-        // Hide role unless it's the player themselves, public role, or narrator viewing during night
+        // Hide role unless it's the player themselves, public role, or narrator viewing the round
         role:
           p.userId === playerId ||
           p.isNarrator ||
           p.isSender ||
-          (isNarrator && isNightPhase)
+          isNarrator
             ? p.role
             : undefined,
       })),

@@ -16,3 +16,14 @@ export const getUserId = (): string => {
 export const clearUserId = (): void => {
   localStorage.removeItem('userId');
 };
+
+export const getDeviceId = (): string => {
+  let deviceId = localStorage.getItem('deviceId');
+
+  if (!deviceId) {
+    deviceId = `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    localStorage.setItem('deviceId', deviceId);
+  }
+
+  return deviceId;
+};

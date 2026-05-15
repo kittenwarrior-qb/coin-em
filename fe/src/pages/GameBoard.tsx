@@ -265,6 +265,8 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
       isSender: p.isSender,
       isMuted: p.isMuted,
       isHealed: p.isHealed,
+      isDisconnected: p.isDisconnected,
+      disconnectedAt: p.disconnectedAt,
       avatarIndex: p.avatarIndex,
       bgIndex: p.bgIndex,
       coins: p.coins || { red: 0, yellow: 0, green: 0 },
@@ -541,87 +543,110 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
   }
 
   const turnStatus = getTurnStatus()
+  const disconnectedPlayers = roomState.players.filter(p => !p.isFake && p.isDisconnected)
   const playerNameByUserId = (userId?: string) =>
-    roomState.players.find((p) => p.userId === userId)?.name || (userId === 'system' ? 'He thong' : 'Nguoi choi')
+    roomState.players.find((p) => p.userId === userId)?.name || (userId === 'system' ? 'Hệ thống' : 'Người chơi')
   const phaseName = (phase?: string) => phase && (PHASE_LABELS[phase as keyof typeof PHASE_LABELS] ?? phase)
+  const cardName = (card?: CardData) => {
+    if (!card) return 'một thẻ'
+    const match = card.id.match(/([A-Z]{1,3}\d+|\d+)$/i)
+    if (card.category === 'situation') return `thẻ Tình huống ${match?.[1]?.toUpperCase() ?? ''}`.trim()
+    if (card.category === 'emotion') return `thẻ Cảm xúc ${card.subType ? `nhóm ${card.subType}` : ''}`.trim()
+    if (card.category === 'reflection') return `thẻ Phản tư ${match?.[1]?.toUpperCase() ?? ''}`.trim()
+    if (card.category === 'selfcare') return `thẻ Bí kíp ôm ${match?.[1]?.toUpperCase() ?? ''}`.trim()
+    return 'một thẻ'
+  }
+  const coinName = (coinType?: string) => {
+    if (coinType === 'red') return 'coin đỏ'
+    if (coinType === 'yellow') return 'coin vàng'
+    if (coinType === 'green') return 'coin xanh'
+    return 'coin'
+  }
   const roundLogStart = (roomState.gameLog ?? []).reduce(
     (latest, entry, index) => entry.type === 'ROUND_STARTED' && entry.data?.round === currentRound ? index : latest,
     -1
   )
   const roundLogs = (roomState.gameLog ?? []).slice(roundLogStart >= 0 ? roundLogStart : 0)
-
   const renderHistoryEntry = (entry: NonNullable<RoomState['gameLog']>[number]) => {
     const actorName = playerNameByUserId(entry.actorId)
     const targetName = playerNameByUserId(entry.targetId)
     const card = entry.data?.card as CardData | undefined
+    const narratorTitle = `Quản trò đã cho lượt chơi tiếp tục (${actorName})`
+    const senderTitle = `Người Trao Gửi (${actorName})`
 
     switch (entry.type) {
+      case 'GAME_STARTED':
+        return null
       case 'PHASE_CHANGED':
         return {
-          title: `${actorName} da cho game tiep tuc`,
-          detail: `Phase ${phaseName(entry.data?.phase)}`,
+          title: narratorTitle,
+          detail: `Cả bàn chuyển sang: ${phaseName(entry.data?.phase) ?? 'giai đoạn tiếp theo'}.`,
         }
       case 'SILENCE':
         return {
-          title: 'Nguoi Im Lang da chon muc tieu',
-          detail: `Nguoi choi bi im lang la ${targetName}`,
+          title: 'Người Im Lặng đã chọn mục tiêu',
+          detail: `${targetName} sẽ bị im lặng trong lượt này.`,
         }
       case 'HEAL':
         return {
-          title: 'Nguoi Chua Lanh da chon bao ve',
-          detail: `Nguoi duoc bao ve la ${targetName}`,
+          title: 'Người Chữa Lành đã bảo vệ một người chơi',
+          detail: `${targetName} được bảo vệ khỏi hiệu ứng im lặng.`,
         }
       case 'SELECT_CARD':
         return {
-          title: `${actorName} da boc the`,
-          detail: card ? `The la ${card.id}` : 'Da chon the',
+          title: `${senderTitle} đã chọn thẻ tình huống`,
+          detail: `Thẻ được chọn là ${cardName(card)}. Nhấn vào thẻ bên dưới để xem lại.`,
           card,
         }
       case 'SELECT_SELFCARE_CARD':
         return {
-          title: `${actorName} da chon the bi kip om`,
-          detail: card ? `The la ${card.id}` : 'Da chon the',
+          title: `${senderTitle} đã chọn thẻ Bí kíp ôm`,
+          detail: `Thẻ được chọn là ${cardName(card)}. Nhấn vào thẻ bên dưới để xem lại.`,
           card,
         }
       case 'SEND_RESPONSE':
         return {
-          title: `${actorName} da gui phan hoi`,
-          detail: entry.data?.message || 'Da gui phan hoi',
+          title: 'Một người chơi đã gửi phản hồi',
+          detail: entry.data?.message ? `"${entry.data.message}"` : 'Người chơi đã gửi phản hồi cho câu chuyện.',
         }
       case 'NTG_VOTE':
         return {
-          title: 'Nguoi Trao Gui da vote phan hoi hay',
-          detail: `${targetName} nhan +${entry.data?.bonus ?? 5} coin vang`,
+          title: `${senderTitle} đã chọn phản hồi nổi bật`,
+          detail: `${targetName} nhận thêm ${entry.data?.bonus ?? 5} coin vàng.`,
         }
       case 'SHARE_REFLECTION':
         return {
-          title: 'Nguoi Trao Gui da chia se phan tu',
-          detail: `${actorName} nhan +${entry.data?.bonus ?? 5} coin vang`,
+          title: `${senderTitle} đã chia sẻ phần phản tư`,
+          detail: `Người Trao Gửi nhận thêm ${entry.data?.bonus ?? 5} coin vàng.`,
         }
       case 'GIVE_COIN':
         return {
-          title: `${actorName} da tang coin cho ${targetName}`,
-          detail: `${entry.data?.amount ?? 1} ${entry.data?.coinType ?? 'coin'} -> nguoi nhan nhan green coin`,
+          title: `Một người chơi đã tặng ${coinName(entry.data?.coinType)} cho ${targetName}`,
+          detail: `${targetName} nhận ${entry.data?.amount ?? 1} coin xanh từ lượt tặng này.`,
         }
       case 'REWARDS_CALCULATED':
         return {
-          title: 'Da tinh thuong cuoi round',
-          detail: entry.data?.silencerFound ? 'Nhom da tim ra Nguoi Im Lang' : 'Nhom chua tim ra Nguoi Im Lang',
+          title: 'Đã tổng kết phần thưởng cuối lượt',
+          detail: entry.data?.silencerFound ? 'Cả nhóm đã tìm ra Người Im Lặng.' : 'Cả nhóm chưa tìm ra Người Im Lặng.',
         }
       case 'ROUND_STARTED':
         return {
-          title: `Bat dau round ${entry.data?.round ?? currentRound}`,
-          detail: 'Vai tro va trang thai round moi da duoc reset',
+          title: `Bắt đầu round ${entry.data?.round ?? currentRound}`,
+          detail: 'Vai trò lượt mới và trạng thái người chơi đã được làm mới.',
         }
       default:
         return {
           title: entry.type,
-          detail: targetName !== 'Nguoi choi' ? `${actorName} -> ${targetName}` : actorName,
+          detail: targetName !== 'Người chơi' ? `${actorName} tương tác với ${targetName}.` : `${actorName} vừa thực hiện một hành động.`,
         }
     }
   }
 
   // ─── Render ────────────────────────────────────────────────────────────────
+  const visibleRoundLogs = roundLogs
+    .map((entry) => ({ entry, item: renderHistoryEntry(entry) }))
+    .filter((log): log is { entry: NonNullable<RoomState['gameLog']>[number]; item: NonNullable<ReturnType<typeof renderHistoryEntry>> } => Boolean(log.item))
+
   const isNight = ['night', 'healer-turn', 'silencer-turn'].includes(gameStep)
   const isMyHealerTurn = gameStep === 'healer-turn' && myPlayer?.role === healerRole && !healerActionDone
   const isMySilencerTurn = gameStep === 'silencer-turn' && myPlayer?.role === silencerRole && !silencerActionDone
@@ -688,13 +713,13 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
             color="light"
             size="sm"
             iconSrc="/cartoon/icons/Book.svg"
-            iconAlt="History log"
+            iconAlt="Nhật ký"
             iconSize="52%"
             onClick={() => setShowHistory(true)}
-            aria-label="History log"
+            aria-label="Nhật ký lượt chơi"
             data-testid="btn-history-log"
           />
-          <div className="font-display text-[9px] text-[var(--c-pink)] leading-none drop-shadow-sm">History log</div>
+          <div className="font-display text-[9px] text-[var(--c-pink)] leading-none drop-shadow-sm">Nhật ký</div>
         </div>
 
         {/* Phase info */}
@@ -708,6 +733,17 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
             </div>
           </div>
         </div>
+
+        {disconnectedPlayers.length > 0 && (
+          <div className="absolute top-12 left-1/2 z-20 w-[min(92%,360px)] -translate-x-1/2 rounded-2xl bg-white/90 px-3 py-2 text-center shadow-[0_4px_0_rgba(0,0,0,0.16)]">
+            <div className="font-display text-[11px] text-[var(--c-pink)]">
+              {disconnectedPlayers.length} nguoi choi da roi phong
+            </div>
+            <div className="font-body text-[11px] leading-snug text-black/60">
+              {disconnectedPlayers.map(p => p.name).join(', ')}
+            </div>
+          </div>
+        )}
 
         {/* Player layout around center board */}
         <div data-testid="players-grid" className="relative z-10 flex-1 min-h-0 mt-10 h-full">
@@ -778,6 +814,7 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
                   isTop={position === 'top'}
                   isBottom={position === 'bottom'}
                   showActionIcon={isHealerToken || isSilencerToken}
+                  showRoleLabel={isNarrator || player.isMe}
                   actionIconSrc={isSilencerToken ? '/cartoon/icons/Lock-Sliver.svg' : '/cartoon/icons/Potion-Green-Border.svg'}
                   actionIconSide={position === 'right' ? 'left' : 'right'}
                   isActionTarget={canNightActionTarget}
@@ -895,7 +932,7 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
                 <div className="flex items-center gap-2">
                   <img src="/cartoon/icons/Book.svg" alt="" className="h-7 w-7 object-contain" draggable={false} />
                   <div>
-                    <div className="font-display text-sm text-white">History log</div>
+                    <div className="font-display text-sm text-white">Nhật ký lượt chơi</div>
                     <div className="font-body text-[11px] text-white/80">Round {currentRound}</div>
                   </div>
                 </div>
@@ -903,21 +940,20 @@ export default function GameBoard({ roomState, mySocketId, myUserId, onLeave, on
                   type="button"
                   className="font-display text-xl leading-none text-white"
                   onClick={() => setShowHistory(false)}
-                  aria-label="Close history log"
+                  aria-label="Đóng nhật ký"
                 >
                   x
                 </button>
               </div>
 
               <div className="max-h-[62dvh] overflow-y-auto scroll-cartoon px-3 py-3">
-                {roundLogs.length === 0 ? (
+                {visibleRoundLogs.length === 0 ? (
                   <div className="rounded-2xl bg-[var(--c-gray-pale)] px-3 py-4 text-center font-body text-xs text-[var(--c-gray)]">
-                    Chua co su kien nao trong round nay.
+                    Chưa có sự kiện nào trong round này.
                   </div>
                 ) : (
                   <div className="flex flex-col gap-2">
-                    {roundLogs.map((entry, index) => {
-                      const item = renderHistoryEntry(entry)
+                    {visibleRoundLogs.map(({ entry, item }, index) => {
                       return (
                         <div key={`${entry.timestamp}-${entry.type}-${index}`} className="rounded-2xl bg-[var(--c-sky-mist)] px-3 py-2">
                           <div className="flex items-start gap-2">

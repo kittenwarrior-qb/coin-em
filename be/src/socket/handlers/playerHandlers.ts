@@ -3,6 +3,34 @@ import { roomRepository, roomService } from '../../modules/room'
 
 // Track pending disconnect timers: socketId → timer
 const disconnectTimers = new Map<string, ReturnType<typeof setTimeout>>()
+let cleanupStarted = false
+
+function emitDisconnectedSummary(io: Server, roomId: string) {
+  const room = roomRepository.findById(roomId)
+  if (!room) return
+
+  const players = room.players
+    .filter(p => !p.isFake && p.isDisconnected)
+    .map(p => ({ userId: p.userId, name: p.name, disconnectedAt: p.disconnectedAt }))
+
+  io.to(roomId).emit('players_disconnected', {
+    players,
+    room: roomService.getPublicState(room),
+  })
+}
+
+export function startDisconnectedRoomCleanup(io: Server) {
+  if (cleanupStarted) return
+  cleanupStarted = true
+
+  setInterval(() => {
+    const deletedRoomIds = roomService.cleanupDisconnectedRooms()
+    for (const roomId of deletedRoomIds) {
+      io.to(roomId).emit('room_closed', { roomId, reason: 'inactive_timeout' })
+      console.log(`[room_closed] Room ${roomId} deleted after 2h disconnected timeout`)
+    }
+  }, 60_000)
+}
 
 export function registerPlayerHandlers(io: Server, socket: Socket) {
   /**
@@ -10,6 +38,16 @@ export function registerPlayerHandlers(io: Server, socket: Socket) {
    */
   socket.on('leave_room', ({ roomId }: { roomId: string }) => {
     cancelDisconnectTimer(socket.id)
+
+    const room = roomRepository.findById(roomId)
+    if (room?.status === 'playing') {
+      const updatedRoom = roomService.markPlayerDisconnected(roomId, socket.id)
+      socket.leave(roomId)
+      console.log(`[leave_room] ${socket.id} left playing room ${roomId} - marked disconnected`)
+      if (updatedRoom) emitDisconnectedSummary(io, roomId)
+      return
+    }
+
     const updatedRoom = roomService.removePlayer(roomId, socket.id)
     console.log(`[leave_room] ${socket.id} intentionally left room ${roomId}`)
     if (updatedRoom) {
@@ -34,7 +72,9 @@ export function registerPlayerHandlers(io: Server, socket: Socket) {
 
     // If game is playing, don't remove player - just mark as disconnected
     if (room.status === 'playing') {
+      const updatedRoom = roomService.markPlayerDisconnected(roomId, socket.id)
       console.log(`[disconnect] ${socket.id} disconnected from playing game ${roomId} - keeping player in room`)
+      if (updatedRoom) emitDisconnectedSummary(io, roomId)
       return
     }
 
