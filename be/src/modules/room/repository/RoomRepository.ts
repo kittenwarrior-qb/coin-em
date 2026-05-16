@@ -1,6 +1,6 @@
 import { Room } from '../../game/types'
 import { redisClient, redisAvailable as getRedisAvailable } from '../../../redis'
-import { autoSaveRoom } from '../../../persistence'
+import { autoSaveRoom, saveRoom } from '../../../persistence'
 
 // Helper to get live redisAvailable value (avoids stale primitive import)
 import * as redisModule from '../../../redis'
@@ -108,6 +108,23 @@ export class RoomRepository {
     return this.cache.get(roomId) ?? null
   }
 
+  async findByIdFresh(roomId: string): Promise<Room | null> {
+    if (isRedisAvailable()) {
+      try {
+        const value = await redisClient.get(roomKey(roomId))
+        if (typeof value === 'string') {
+          const room = JSON.parse(value) as Room
+          this.cache.set(room.id, room)
+          return room
+        }
+      } catch (err) {
+        console.error(`[RoomRepository] Redis fresh load error for ${roomId}:`, err)
+      }
+    }
+
+    return this.findById(roomId)
+  }
+
   findBySocketId(socketId: string): Room | null {
     for (const room of this.cache.values()) {
       if (room.players.find((p) => p.socketId === socketId)) return room
@@ -140,8 +157,8 @@ export class RoomRepository {
     this.cache.set(room.id, room)
     // Wait for Redis save to complete
     await this.redisSave(room)
-    // Always save to JSON as backup
-    autoSaveRoom(room)
+    // Critical writes should be durable immediately; debounce is too weak for VPS restarts.
+    saveRoom(room)
   }
 
   update(roomId: string, updates: Partial<Room>): Room | null {

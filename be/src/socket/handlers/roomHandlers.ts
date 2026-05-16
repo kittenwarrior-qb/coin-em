@@ -171,7 +171,7 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
   /**
    * Reconnect to room
    */
-  socket.on('reconnect_room', ({ roomId, userId, deviceId, name }) => {
+  socket.on('reconnect_room', async ({ roomId, userId, deviceId, name }) => {
     console.log(`[reconnect_room] Attempt: roomId=${roomId}, userId=${userId}, deviceId=${deviceId}`)
     
     if (!roomId || (!userId && !deviceId)) {
@@ -181,7 +181,7 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
       })
     }
 
-    const room = roomRepository.findById(roomId)
+    const room = await roomRepository.findByIdFresh(roomId)
     if (!room) {
       console.warn(`[reconnect_room] Room ${roomId} not found. Available rooms: ${roomRepository.count()}`)
       return socket.emit('error', {
@@ -231,8 +231,8 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
   /**
    * Get room state
    */
-  socket.on('get_room_state', ({ roomId }) => {
-    const room = roomRepository.findById(roomId)
+  socket.on('get_room_state', async ({ roomId }) => {
+    const room = await roomRepository.findByIdFresh(roomId)
     if (!room) {
       return socket.emit('error', {
         code: 'room_not_found',
