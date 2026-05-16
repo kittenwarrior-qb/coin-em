@@ -71,7 +71,11 @@ interface RoomActionAck {
   data?: RoomState
   message?: string
   error?: string
+  phase?: GamePhase
+  previousPhase?: GamePhase
 }
+
+type SocketAckError = Error | null
 
 interface Session {
   roomId: string
@@ -112,7 +116,7 @@ interface UseSocketReturn {
   startGame: (roomId: string) => void
   getRoomState: (roomId: string) => void
   listRooms: () => void
-  clearSession: () => void
+  clearSession: (options?: { keepStorage?: boolean }) => void
   leaveRoom: (roomId: string) => void
   nightAction: (roomId: string, action: string, targetSocketId?: string, cardData?: object) => void
   nextPhase: (roomId: string) => void
@@ -426,6 +430,7 @@ export function useSocket(): UseSocketReturn {
             roomId: session.roomId,
             name: session.userName,
             userId: session.userId,
+            deviceId: session.deviceId,
             createIfMissing: false,
           })
           return
@@ -501,8 +506,8 @@ export function useSocket(): UseSocketReturn {
     socketRef.current.emit('end_game', { roomId })
   }, [])
 
-  const clearSession = useCallback(() => {
-    clearSessionStorage()
+  const clearSession = useCallback((options?: { keepStorage?: boolean }) => {
+    if (!options?.keepStorage) clearSessionStorage()
     reconnectAttempted.current = false
     roomStateRef.current = null
     setRoomState(null)
@@ -536,6 +541,7 @@ export function useSocket(): UseSocketReturn {
   }, [])
 
   const lastNextTurnRef = useRef<number>(0)
+  const lastPrevTurnRef = useRef<number>(0)
 
   const nextTurn = useCallback((roomId: string) => {
     if (!socketRef.current) return
@@ -543,19 +549,31 @@ export function useSocket(): UseSocketReturn {
     if (now - lastNextTurnRef.current < 800) return
     lastNextTurnRef.current = now
     const session = loadSession()
-    socketRef.current.emit(
+    const payload = {
+      roomId,
+      userId: session?.userId ?? getUserId(),
+      deviceId: session?.deviceId ?? getDeviceId(),
+    }
+    console.log('[Socket] Emit next_turn:', {
+      ...payload,
+      currentPhase: roomStateRef.current?.phase,
+    })
+    socketRef.current.timeout(5000).emit(
       'next_turn',
-      {
-        roomId,
-        userId: session?.userId ?? getUserId(),
-        deviceId: session?.deviceId ?? getDeviceId(),
-      },
-      (ack: RoomActionAck) => {
+      payload,
+      (err: SocketAckError, ack?: RoomActionAck) => {
+        if (err) {
+          console.error('[Socket] next_turn timeout/no ack:', err)
+          setError('Không nhận được phản hồi chuyển lượt từ server.')
+          return
+        }
         if (!ack?.success) {
+          console.error('[Socket] next_turn failed:', ack)
           setError(ack?.message ?? ack?.error ?? 'Không thể chuyển lượt.')
           return
         }
         if (ack.data) {
+          console.log('[Socket] next_turn ack:', ack.data.phase)
           roomStateRef.current = ack.data
           setRoomState(ack.data)
           persistResumeFromState(ack.data)
@@ -568,22 +586,40 @@ export function useSocket(): UseSocketReturn {
   const prevTurn = useCallback((roomId: string) => {
     if (!socketRef.current) return
     const now = Date.now()
-    if (now - lastNextTurnRef.current < 800) return
-    lastNextTurnRef.current = now
+    if (now - lastPrevTurnRef.current < 800) {
+      console.warn('[Socket] prev_turn skipped by local throttle')
+      return
+    }
+    lastPrevTurnRef.current = now
     const session = loadSession()
-    socketRef.current.emit(
+    const payload = {
+      roomId,
+      userId: session?.userId ?? getUserId(),
+      deviceId: session?.deviceId ?? getDeviceId(),
+    }
+    console.log('[Socket] Emit prev_turn:', {
+      ...payload,
+      currentPhase: roomStateRef.current?.phase,
+    })
+    socketRef.current.timeout(5000).emit(
       'prev_turn',
-      {
-        roomId,
-        userId: session?.userId ?? getUserId(),
-        deviceId: session?.deviceId ?? getDeviceId(),
-      },
-      (ack: RoomActionAck) => {
+      payload,
+      (err: SocketAckError, ack?: RoomActionAck) => {
+        if (err) {
+          console.error('[Socket] prev_turn timeout/no ack:', err)
+          setError('Không nhận được phản hồi quay lại phase từ server.')
+          return
+        }
         if (!ack?.success) {
+          console.error('[Socket] prev_turn failed:', ack)
           setError(ack?.message ?? ack?.error ?? 'Không thể quay lại phase trước.')
           return
         }
         if (ack.data) {
+          console.log('[Socket] prev_turn ack:', {
+            from: ack.previousPhase,
+            to: ack.data.phase,
+          })
           roomStateRef.current = ack.data
           setRoomState(ack.data)
           persistResumeFromState(ack.data)
