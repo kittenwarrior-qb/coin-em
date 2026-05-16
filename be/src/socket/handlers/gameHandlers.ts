@@ -61,7 +61,9 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         if (room && room.currentNarrator) {
           gameService.advanceTurn(room, room.currentNarrator).then((advanceResult) => {
             if (advanceResult.success && advanceResult.room) {
-              roomRepository.save(advanceResult.room)
+              roomRepository.saveAndWait(advanceResult.room).catch(err =>
+                console.error(`[phase_timer] Failed to save room ${roomId}:`, err)
+              )
               io.to(roomId).emit('turn_changed', gameService.getPublicState(advanceResult.room))
               // Start timer for next phase
               phaseTimer.startTimer(roomId, advanceResult.room.phase, () => {
@@ -166,7 +168,9 @@ export function registerGameHandlers(io: Server, socket: Socket) {
           if (room && room.currentNarrator) {
             gameService.advanceTurn(room, room.currentNarrator).then((advanceResult) => {
               if (advanceResult.success && advanceResult.room) {
-                roomRepository.save(advanceResult.room)
+                roomRepository.saveAndWait(advanceResult.room).catch(err =>
+                  console.error(`[phase_timer] Failed to save room ${roomId}:`, err)
+                )
                 if (advanceResult.message === 'GAME_ENDED') {
                   phaseTimer.clearTimer(roomId)
                   io.to(roomId).emit('game_ended', gameService.getPublicState(advanceResult.room))
