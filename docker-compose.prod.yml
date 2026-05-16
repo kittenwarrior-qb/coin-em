@@ -51,6 +51,11 @@ services:
         VITE_API_URL: ${VITE_API_URL:-https://emcoin.cloud}
         VITE_DEBUG_ROLE_PICKER: ${VITE_DEBUG_ROLE_PICKER:-false}
     container_name: emcoin-frontend-prod
+    command: >
+      sh -c "rm -rf /var/www/html/* &&
+             cp -a /app/dist-source/. /var/www/html/ &&
+             echo 'Frontend dist copied to shared volume' &&
+             tail -f /dev/null"
     volumes:
       - fe-dist:/var/www/html
     networks:

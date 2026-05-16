@@ -16,6 +16,6 @@ RUN npm run build
 
 FROM alpine:latest
 
-WORKDIR /var/www/html
+WORKDIR /app/dist-source
 
 COPY --from=builder /app/dist .
