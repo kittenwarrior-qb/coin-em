@@ -38,7 +38,7 @@ export class GameEngine {
     }
 
     // Get next phase
-    const nextPhase = this.turnManager.getNextPhase(room.phase)
+    const nextPhase = this.turnManager.getNextPhase(room.phase, room)
 
     let updatedRoom: Room = {
       ...room,
@@ -140,7 +140,7 @@ export class GameEngine {
       return { success: false, error: 'NOT_NARRATOR' }
     }
 
-    const previousPhase = this.turnManager.getPreviousPhase(room.phase)
+    const previousPhase = this.turnManager.getPreviousPhase(room.phase, room)
     if (previousPhase === room.phase) {
       return { success: false, error: 'NO_PREVIOUS_PHASE' }
     }

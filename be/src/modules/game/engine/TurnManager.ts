@@ -1,4 +1,4 @@
-import { Room, GamePhase } from '../types'
+import { Room, GamePhase, Role } from '../types'
 
 export class TurnManager {
   private readonly phaseOrder: GamePhase[] = [
@@ -23,7 +23,15 @@ export class TurnManager {
   /**
    * Get next phase based on current phase
    */
-  getNextPhase(currentPhase: GamePhase): GamePhase {
+  private phaseExistsInRoom(phase: GamePhase, room?: Room): boolean {
+    if (!room) return true
+    if (phase === 'healer-turn') {
+      return room.players.some((p) => p.originalRole === Role.HEALER || p.role === Role.HEALER)
+    }
+    return true
+  }
+
+  getNextPhase(currentPhase: GamePhase, room?: Room): GamePhase {
     const currentIndex = this.phaseOrder.indexOf(currentPhase)
     if (currentIndex === -1) return 'role-reveal'
 
@@ -32,16 +40,27 @@ export class TurnManager {
       return 'role-reveal'
     }
 
-    return this.phaseOrder[currentIndex + 1]
+    for (let i = currentIndex + 1; i < this.phaseOrder.length; i += 1) {
+      const candidate = this.phaseOrder[i]
+      if (this.phaseExistsInRoom(candidate, room)) return candidate
+    }
+
+    return 'role-reveal'
   }
 
   /**
    * Get previous phase inside the current round.
    */
-  getPreviousPhase(currentPhase: GamePhase): GamePhase {
+  getPreviousPhase(currentPhase: GamePhase, room?: Room): GamePhase {
     const currentIndex = this.phaseOrder.indexOf(currentPhase)
     if (currentIndex <= 0) return currentPhase
-    return this.phaseOrder[currentIndex - 1]
+
+    for (let i = currentIndex - 1; i >= 0; i -= 1) {
+      const candidate = this.phaseOrder[i]
+      if (this.phaseExistsInRoom(candidate, room)) return candidate
+    }
+
+    return currentPhase
   }
 
   /**
