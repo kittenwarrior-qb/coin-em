@@ -10,7 +10,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
    */
   socket.on('start_game', async ({ roomId }, callback) => {
     try {
-      const room = roomRepository.findById(roomId)
+      const room = await roomRepository.findByIdFresh(roomId)
       if (!room) {
         const error = { success: false, error: 'ROOM_NOT_FOUND', message: 'Phòng không tồn tại.' }
         if (callback) callback(error)
@@ -86,7 +86,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
    */
   socket.on('next_turn', async ({ roomId, userId, deviceId }, callback) => {
     try {
-      const room = roomRepository.findById(roomId)
+      const room = await roomRepository.findByIdFresh(roomId)
       if (!room) {
         const error = { success: false, error: 'ROOM_NOT_FOUND', message: 'Phòng không tồn tại.' }
         if (callback) callback(error)
@@ -197,7 +197,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
    */
   socket.on('prev_turn', async ({ roomId, userId, deviceId }, callback) => {
     try {
-      const room = roomRepository.findById(roomId)
+      const room = await roomRepository.findByIdFresh(roomId)
       if (!room) {
         const error = { success: false, error: 'ROOM_NOT_FOUND', message: 'PhÃ²ng khÃ´ng tá»“n táº¡i.' }
         if (callback) callback(error)

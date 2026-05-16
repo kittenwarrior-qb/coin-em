@@ -45,18 +45,20 @@ export function registerPlayerHandlers(io: Server, socket: Socket) {
       return
     }
 
+    console.log(`[leave_room] Socket ${socket.id} leaving room ${roomId} (status: ${room.status}, players: ${room.players.length})`)
+
     // If game is playing or has started, don't remove player - just mark disconnected
     if (room.status === 'playing' || room.status === 'ended') {
       const updatedRoom = roomService.markPlayerDisconnected(roomId, socket.id)
       socket.leave(roomId)
-      console.log(`[leave_room] ${socket.id} left ${room.status} room ${roomId} - marked disconnected`)
+      console.log(`[leave_room] ${socket.id} left ${room.status} room ${roomId} - marked disconnected (remaining players: ${updatedRoom?.players.length})`)
       if (updatedRoom) emitDisconnectedSummary(io, roomId)
       return
     }
 
     // Only remove player if game is still in waiting phase
     const updatedRoom = roomService.removePlayer(roomId, socket.id)
-    console.log(`[leave_room] ${socket.id} intentionally left waiting room ${roomId}`)
+    console.log(`[leave_room] ${socket.id} intentionally left waiting room ${roomId} (room ${updatedRoom ? 'kept' : 'deleted'})`)
     if (updatedRoom) {
       io.to(roomId).emit('player_left', {
         socketId: socket.id,
