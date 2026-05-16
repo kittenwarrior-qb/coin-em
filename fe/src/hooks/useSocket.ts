@@ -66,6 +66,13 @@ interface GameLogEntry {
   timestamp: number
 }
 
+interface RoomActionAck {
+  success: boolean
+  data?: RoomState
+  message?: string
+  error?: string
+}
+
 interface Session {
   roomId: string
   userName: string
@@ -536,12 +543,27 @@ export function useSocket(): UseSocketReturn {
     if (now - lastNextTurnRef.current < 800) return
     lastNextTurnRef.current = now
     const session = loadSession()
-    socketRef.current.emit('next_turn', {
-      roomId,
-      userId: session?.userId ?? getUserId(),
-      deviceId: session?.deviceId ?? getDeviceId(),
-    })
-  }, [])
+    socketRef.current.emit(
+      'next_turn',
+      {
+        roomId,
+        userId: session?.userId ?? getUserId(),
+        deviceId: session?.deviceId ?? getDeviceId(),
+      },
+      (ack: RoomActionAck) => {
+        if (!ack?.success) {
+          setError(ack?.message ?? ack?.error ?? 'Không thể chuyển lượt.')
+          return
+        }
+        if (ack.data) {
+          roomStateRef.current = ack.data
+          setRoomState(ack.data)
+          persistResumeFromState(ack.data)
+          if (ack.data.phase) useGameStore.getState().setGameStep(ack.data.phase)
+        }
+      },
+    )
+  }, [persistResumeFromState])
 
   const prevTurn = useCallback((roomId: string) => {
     if (!socketRef.current) return
@@ -549,12 +571,27 @@ export function useSocket(): UseSocketReturn {
     if (now - lastNextTurnRef.current < 800) return
     lastNextTurnRef.current = now
     const session = loadSession()
-    socketRef.current.emit('prev_turn', {
-      roomId,
-      userId: session?.userId ?? getUserId(),
-      deviceId: session?.deviceId ?? getDeviceId(),
-    })
-  }, [])
+    socketRef.current.emit(
+      'prev_turn',
+      {
+        roomId,
+        userId: session?.userId ?? getUserId(),
+        deviceId: session?.deviceId ?? getDeviceId(),
+      },
+      (ack: RoomActionAck) => {
+        if (!ack?.success) {
+          setError(ack?.message ?? ack?.error ?? 'Không thể quay lại phase trước.')
+          return
+        }
+        if (ack.data) {
+          roomStateRef.current = ack.data
+          setRoomState(ack.data)
+          persistResumeFromState(ack.data)
+          if (ack.data.phase) useGameStore.getState().setGameStep(ack.data.phase)
+        }
+      },
+    )
+  }, [persistResumeFromState])
 
   const selectCard = useCallback((roomId: string, card: object, type: 'SELECT_CARD' | 'SELECT_SELFCARE_CARD' = 'SELECT_CARD') => {
     if (!socketRef.current) return
