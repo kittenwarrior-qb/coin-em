@@ -201,6 +201,12 @@ export function registerGameHandlers(io: Server, socket: Socket) {
    */
   socket.on('prev_turn', async ({ roomId, userId, deviceId }, callback) => {
     try {
+      console.log('[prev_turn] Received:', {
+        roomId,
+        socketId: socket.id,
+        userId,
+        deviceId,
+      })
       const room = await roomRepository.findByIdFresh(roomId)
       if (!room) {
         const error = { success: false, error: 'ROOM_NOT_FOUND', message: 'PhÃ²ng khÃ´ng tá»“n táº¡i.' }
@@ -244,9 +250,26 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         }
       }
 
+      const phaseBefore = room.phase
+      console.log('[prev_turn] Before:', {
+        roomId,
+        turn: room.turn,
+        phase: phaseBefore,
+        currentNarrator: room.currentNarrator,
+        actorUserId: narratorPlayer.userId,
+        actorSocketId: narratorPlayer.socketId,
+      })
+
       const result = await gameService.previousTurn(room, narratorPlayer.userId)
 
       if (!result.success) {
+        console.warn('[prev_turn] Failed:', {
+          roomId,
+          reason: result.error,
+          phase: room.phase,
+          currentNarrator: room.currentNarrator,
+          actorUserId: narratorPlayer.userId,
+        })
         const messages = {
           NOT_NARRATOR: 'Chỉ Quản trò mới có thể chuyển lượt.',
           NO_PREVIOUS_PHASE: 'Không thể quay lại phase trước.',
@@ -263,10 +286,12 @@ export function registerGameHandlers(io: Server, socket: Socket) {
 
       await roomRepository.saveAndWait(result.room!)
       phaseTimer.clearTimer(roomId)
-      console.log(`[prev_turn] Room ${roomId} -> Turn ${result.room!.turn}, Phase ${result.room!.phase}`)
-      io.to(roomId).emit('turn_changed', gameService.getPublicState(result.room!))
+      socket.join(roomId)
+      const publicState = gameService.getPublicState(result.room!)
+      console.log(`[prev_turn] Room ${roomId}: ${phaseBefore} -> ${result.room!.phase} (turn ${result.room!.turn})`)
+      io.to(roomId).emit('turn_changed', publicState)
 
-      if (callback) callback({ success: true, data: gameService.getPublicState(result.room!) })
+      if (callback) callback({ success: true, data: publicState, previousPhase: phaseBefore, phase: result.room!.phase })
     } catch (error: any) {
       console.error('[prev_turn] Error:', error)
       const err = { success: false, error: 'INTERNAL_ERROR', message: error.message }

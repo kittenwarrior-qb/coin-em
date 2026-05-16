@@ -85,8 +85,9 @@ export default function GameContainer() {
   }, [roomState, startGame])
 
   const handleLeaveRoom = useCallback(() => {
+    const keepResumeSession = roomState?.status === 'playing'
     if (roomState) leaveRoom(roomState.id)
-    clearSession()
+    clearSession({ keepStorage: keepResumeSession })
     setForceLobby(true)
     if (socket) {
       socket.disconnect()
