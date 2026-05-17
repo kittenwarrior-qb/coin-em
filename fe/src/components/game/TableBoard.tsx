@@ -7,13 +7,14 @@ import { CenterBoard } from './CenterBoard'
 
 interface TableBoardProps {
   selectedCards: SelectedCards
+  phase?: string
   revealSituation?: boolean
   onCardClick?: (card: CardData, revealed: boolean) => void
   status?: React.ReactNode
   actions?: React.ReactNode
 }
 
-export function TableBoard({ selectedCards, revealSituation, onCardClick, status, actions }: TableBoardProps) {
+export function TableBoard({ selectedCards, phase, revealSituation, onCardClick, status, actions }: TableBoardProps) {
   return (
     <div className="relative w-full h-full flex items-center justify-center">
       <div
@@ -49,7 +50,7 @@ export function TableBoard({ selectedCards, revealSituation, onCardClick, status
             </div>
           )}
           <div className="flex items-center justify-center overflow-y-auto">
-            <CenterBoard selectedCards={selectedCards} revealSituation={revealSituation} onCardClick={onCardClick} />
+            <CenterBoard selectedCards={selectedCards} phase={phase} revealSituation={revealSituation} onCardClick={onCardClick} />
           </div>
           {actions && (
             <div className="flex flex-col gap-2 w-full">

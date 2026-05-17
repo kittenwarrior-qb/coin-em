@@ -5,7 +5,7 @@ import { CARD_IMAGES, ROLE_TO_IMAGE } from '../constants/cardImages'
 import { useGameStore } from '../stores'
 import { useGameState, useGameActions, useGameUI } from '../hooks/useGameState'
 import { useGameFlow } from '../hooks/useGameFlow'
-import type { CardData } from '../stores/types'
+import type { CardData, SelectedCards } from '../stores/types'
 import { PHASE_LABELS, type GamePhase } from '../stores/types'
 
 import { CartoonButton, CartoonCircleButton } from '@/components/cartoon'
@@ -21,7 +21,6 @@ import { NtgRewardPicker } from '@/components/game/NtgRewardPicker'
 import { RoleRewardPicker } from '@/components/game/RoleRewardPicker'
 import { RandomSituationFan } from '@/components/game/RandomSituationFan'
 import {
-  ReflectionSharingOverlay,
   GuessSilencerOverlay,
   RevealSilencerOverlay,
   RewardOverlay,
@@ -41,7 +40,8 @@ interface GameBoardProps {
   nightAction: (roomId: string, action: string, targetSocketId?: string, cardData?: object) => void
   emitSelectCard: (roomId: string, card: object, type?: 'SELECT_CARD' | 'SELECT_SELFCARE_CARD') => void
   sendResponse: (roomId: string, message: string) => void
-  ntgVote: (roomId: string, targetSocketId: string) => void
+  ntgVote: (roomId: string, targetSocketId: string | string[]) => void
+  confirmRoleRewards: (roomId: string, targetSocketIds: string[], onDone?: () => void) => void
   shareReflection: (roomId: string, message: string) => void
   submitVote: (roomId: string, suspectSocketId: string) => void
 }
@@ -144,6 +144,7 @@ export default function GameBoard({
   nightAction,
   emitSelectCard,
   ntgVote,
+  confirmRoleRewards,
   shareReflection,
   submitVote,
 }: GameBoardProps) {
@@ -170,7 +171,6 @@ export default function GameBoard({
   const [ntgRewardSuccess, setNtgRewardSuccess] = useState<{names: string[]} | null>(null)
 
   // Phase-local state
-  const [reflectionShareText, setReflectionShareText] = useState('')
   const [ntgVotedIds, setNtgVotedIds] = useState<Set<string>>(() => new Set())
   const [hasSharedReflection, setHasSharedReflection] = useState(false)
   const [hasVoted,           setHasVoted]           = useState(false)
@@ -187,6 +187,7 @@ export default function GameBoard({
   const lastNightActionEffectRef = useRef<number | null>(null)
   const lastNtgRewardPreviewRef = useRef<number | null>(null)
   const lastReflectionRewardPreviewRef = useRef<number | null>(null)
+  const lastRoleRewardPreviewRef = useRef<number | null>(null)
 
   // Init
   useEffect(() => { setMyIds(mySocketId, myUserId) }, [mySocketId, myUserId, setMyIds])
@@ -195,6 +196,7 @@ export default function GameBoard({
   useEffect(() => {
     const converted = roomState.players.map(p => ({
       id: p.socketId,
+      userId: p.userId,
       name: p.name,
       role: p.role || 'Chưa chia vai trò',
       isMe: p.userId ? p.userId === myUserId : p.socketId === mySocketId,
@@ -269,9 +271,23 @@ export default function GameBoard({
     })
   }, [gameStep, myUserId, myPlayer?.isSender, roomState.gameLog])
 
+  useEffect(() => {
+    const latestRoleReward = [...(roomState.gameLog ?? [])]
+      .reverse()
+      .find((entry) => entry.type === 'ROLE_REWARD' && entry.targetId === myUserId)
+
+    if (!latestRoleReward || latestRoleReward.timestamp === lastRoleRewardPreviewRef.current) return
+
+    const bonus = latestRoleReward.data?.bonus ?? 2
+    lastRoleRewardPreviewRef.current = latestRoleReward.timestamp
+    setCoinPreview({
+      coinType: 'yellow',
+      title: `Bạn đã hoàn thành vai trò và nhận ${bonus} coin vàng`,
+    })
+  }, [myUserId, roomState.gameLog])
+
   // Reset phase state on step change
   useEffect(() => {
-    setReflectionShareText('')
     setNtgVotedIds(new Set())
     setHasSharedReflection(false); setHasVoted(false)
     setHasHealed(false)
@@ -364,12 +380,6 @@ export default function GameBoard({
     setSelectedSituationChoice(null)
   }
 
-  const handleNTGVote = (id: string) => {
-    if (!myPlayer?.isSender || id === myPlayer.id || ntgVotedIds.has(id)) return
-    ntgVote(roomState.id, id)
-    setNtgVotedIds((prev) => new Set(prev).add(id))
-  }
-
   const togglePendingNtgReward = (id: string) => {
     if (ntgVotedIds.has(id)) return
     setPendingNtgRewardIds((prev) => {
@@ -411,31 +421,11 @@ export default function GameBoard({
 
   const handleRoleRewards = (selectedPlayerIds: string[]) => {
     console.log('[Role Rewards] Selected players:', selectedPlayerIds)
-    
-    // Convert socketIds to userIds and check if they were voted by NTG
-    const rewardsData = selectedPlayerIds.map(socketId => {
-      const player = players.find(p => p.id === socketId)
-      const wasVoted = ntgVotedIds.has(socketId)
-      return {
-        userId: player?.id, // Will be converted to userId in backend
-        socketId: socketId,
-        wasVoted,
-      }
-    }).filter(r => r.userId)
-    
-    // TODO: Call backend API
-    // confirmRoleRewards(roomState.id, rewardsData)
-    
-    setShowRoleRewardPicker(false)
-    
-    // After confirming role rewards, advance to next phase
-    nextTurn(roomState.id)
-  }
 
-  const handleShareReflection = () => {
-    if (hasSharedReflection) return
-    shareReflection(roomState.id, reflectionShareText.trim())
-    setHasSharedReflection(true)
+    confirmRoleRewards(roomState.id, selectedPlayerIds, () => {
+      nextTurn(roomState.id)
+    })
+    setShowRoleRewardPicker(false)
   }
 
   const handleVoteSilencer = (id: string) => {
@@ -749,6 +739,11 @@ export default function GameBoard({
           title: `${senderTitle} đã chia sẻ phần phản tư`,
           detail: `Người Trao Gửi nhận thêm ${entry.data?.bonus ?? 5} coin vàng.`,
         }
+      case 'ROLE_REWARD':
+        return {
+          title: `Quản trò đã xác nhận ${targetName} hoàn thành vai trò`,
+          detail: `${targetName} nhận thêm ${entry.data?.bonus ?? 2} coin vàng.`,
+        }
       case 'GIVE_COIN':
         return {
           title: `Một người chơi đã tặng ${coinName(entry.data?.coinType)} cho ${targetName}`,
@@ -827,6 +822,9 @@ export default function GameBoard({
     ? PHASE_ORDER[currentPhaseIndex + 1]
     : 'role-reveal'
   const isNarratorNextDisabled = gameStep === 'emotion-card' && !selectedCards.emotion
+  const boardSelectedCards: SelectedCards = selectedCards.selfcare
+    ? { ...selectedCards, situation: undefined }
+    : selectedCards
 
   return (
     <div className="screen-cartoon" style={{ overflow: 'hidden' }}>
@@ -963,7 +961,7 @@ export default function GameBoard({
             players={players}
             renderCenter={() => (
               <TableBoard
-                selectedCards={selectedCards}
+                selectedCards={boardSelectedCards}
                 revealSituation={gameStep !== 'situation-card'}
                 onCardClick={(card, revealed) => setCardPreview({ card, revealed })}
                 status={
@@ -1122,7 +1120,10 @@ export default function GameBoard({
                   isActionTarget={canNightActionTarget}
                   actionTargetTone={actionTone}
                   isSelectedActionTarget={selectedNightActionTarget}
-                  showCheckmark={selectedNightActionTarget && selectedNightAction?.confirmed}
+                  showCheckmark={
+                    (canNightActionTarget && !selectedNightAction?.confirmed) ||
+                    (selectedNightActionTarget && selectedNightAction?.confirmed)
+                  }
                   onClick={isSilencerTurnAndSelf ? undefined : () => setExpandedPlayer(player)}
                   onActionClick={
                     canHealTarget
@@ -1289,7 +1290,7 @@ export default function GameBoard({
       </AnimatePresence>
 
       <AnimatePresence>
-        {gameStep === 'reveal-silencer' && <RevealSilencerOverlay players={players} />}
+        {gameStep === 'reveal-silencer' && <RevealSilencerOverlay players={players} votes={roomState.votes ?? {}} />}
       </AnimatePresence>
 
       <AnimatePresence>

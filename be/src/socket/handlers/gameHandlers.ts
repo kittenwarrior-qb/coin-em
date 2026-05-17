@@ -1,6 +1,6 @@
 import { Server, Socket } from 'socket.io'
 import { roomRepository, roomService } from '../../modules/room'
-import { gameService } from '../../modules/game'
+import { gameService, Role } from '../../modules/game'
 import { rateLimitAction } from '../middleware/rateLimiter'
 import { phaseTimer } from '../../modules/game/PhaseTimer'
 
@@ -515,7 +515,8 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       roomRepository.save(result.room!)
 
       console.log(`[vote] ${socket.id} votes ${suspectSocketId}`)
-      socket.emit('vote_submitted', { success: true })
+      socket.emit('vote_submitted', { success: true, room: gameService.getPublicState(result.room!) })
+      io.to(roomId).emit('vote_updated', { room: gameService.getPublicState(result.room!) })
 
       // Check if all voted
       if (result.autoAdvance) {
@@ -586,8 +587,12 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         room: gameService.getPublicState(result.room!),
       })
 
-      // Auto-advance to next phase after NTG selects situation/emotion cards.
-      if (actionType === 'SELECT_CARD' && (result.room!.phase === 'situation-card' || result.room!.phase === 'emotion-card')) {
+      // Auto-advance to next phase after card selections that do not need narrator confirmation.
+      const shouldAutoAdvance =
+        (actionType === 'SELECT_CARD' && (result.room!.phase === 'situation-card' || result.room!.phase === 'emotion-card')) ||
+        (actionType === 'SELECT_SELFCARE_CARD' && result.room!.phase === 'selfcare-card')
+
+      if (shouldAutoAdvance) {
         const selectedPhase = result.room!.phase
         const delayMs = selectedPhase === 'situation-card' ? 2000 : 350
         console.log(`[select_card] Auto-advancing after ${selectedPhase} selection in room ${roomId}`)
@@ -876,6 +881,124 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       if (callback) callback({ success: true })
     } catch (error: any) {
       console.error('[share_reflection] Error:', error)
+      const err = { success: false, error: 'INTERNAL_ERROR', message: error.message }
+      if (callback) callback(err)
+      else socket.emit('error', err)
+    }
+  })
+
+  /**
+   * Narrator confirms role completion rewards for Connector, Opener, and Guide.
+   * A player gets +5 yellow if NTG already rewarded them, otherwise +2 yellow.
+   */
+  socket.on('confirm_role_rewards', async ({ roomId, targetSocketIds }, callback) => {
+    if (!rateLimitAction(socket, 'confirm_role_rewards', 2000)) {
+      const error = { success: false, error: 'RATE_LIMITED', message: 'Vui lòng chờ.' }
+      if (callback) callback(error)
+      else socket.emit('error', error)
+      return
+    }
+
+    try {
+      const room = roomRepository.findById(roomId)
+      if (!room) {
+        const error = { success: false, error: 'ROOM_NOT_FOUND', message: 'Phòng không tồn tại.' }
+        if (callback) callback(error)
+        else socket.emit('error', error)
+        return
+      }
+
+      const actor = room.players.find((p) => p.socketId === socket.id)
+      if (!actor) {
+        const error = { success: false, error: 'PLAYER_NOT_FOUND', message: 'Người chơi không tồn tại.' }
+        if (callback) callback(error)
+        else socket.emit('error', error)
+        return
+      }
+
+      if (!actor.isNarrator) {
+        const error = { success: false, error: 'NOT_NARRATOR', message: 'Chỉ Quản trò mới có thể xác nhận phần thưởng vai trò.' }
+        if (callback) callback(error)
+        else socket.emit('error', error)
+        return
+      }
+
+      if (room.phase !== 'reflection-sharing') {
+        const error = { success: false, error: 'WRONG_PHASE', message: 'Không phải giai đoạn xác nhận phần thưởng vai trò.' }
+        if (callback) callback(error)
+        else socket.emit('error', error)
+        return
+      }
+
+      const targets: string[] = Array.isArray(targetSocketIds) ? targetSocketIds : []
+      if (targets.length === 0) {
+        const error = { success: false, error: 'NO_TARGET', message: 'Chưa chọn người chơi nào.' }
+        if (callback) callback(error)
+        else socket.emit('error', error)
+        return
+      }
+
+      const eligibleRoles = new Set([Role.CONNECTOR, Role.OPENER, Role.GUIDE])
+      const ntgVotedIds = new Set<string>(Object.values(room.ntgVotes ?? {}).flat())
+      const alreadyRewardedIds = new Set(
+        room.gameLog
+          .filter((entry) => entry.type === 'ROLE_REWARD' && entry.targetId)
+          .map((entry) => entry.targetId as string),
+      )
+      const now = Date.now()
+      const rewards: Array<{ userId: string; socketId: string; name: string; bonus: number }> = []
+
+      const updatedPlayers = room.players.map((player) => {
+        if (!targets.includes(player.socketId)) return player
+        if (!player.originalRole || !eligibleRoles.has(player.originalRole)) return player
+        if (alreadyRewardedIds.has(player.userId)) return player
+
+        const bonus = ntgVotedIds.has(player.userId) ? 5 : 2
+        rewards.push({ userId: player.userId, socketId: player.socketId, name: player.name, bonus })
+        alreadyRewardedIds.add(player.userId)
+
+        return {
+          ...player,
+          coins: {
+            ...player.coins,
+            yellow: player.coins.yellow + bonus,
+          },
+        }
+      })
+
+      if (rewards.length === 0) {
+        const error = { success: false, error: 'NO_REWARDS_PROCESSED', message: 'Không có phần thưởng nào được áp dụng.' }
+        if (callback) callback(error)
+        else socket.emit('error', error)
+        return
+      }
+
+      const updatedRoom = {
+        ...room,
+        players: updatedPlayers,
+        lastActivity: now,
+        gameLog: [
+          ...room.gameLog,
+          ...rewards.map((reward, index) => ({
+            type: 'ROLE_REWARD',
+            actorId: actor.userId,
+            targetId: reward.userId,
+            timestamp: now + index,
+            data: { bonus: reward.bonus },
+          })),
+        ],
+      }
+
+      roomRepository.save(updatedRoom)
+
+      io.to(roomId).emit('role_rewards_confirmed', {
+        rewards,
+        room: gameService.getPublicState(updatedRoom),
+      })
+
+      if (callback) callback({ success: true, rewards })
+    } catch (error: any) {
+      console.error('[confirm_role_rewards] Error:', error)
       const err = { success: false, error: 'INTERNAL_ERROR', message: error.message }
       if (callback) callback(err)
       else socket.emit('error', err)

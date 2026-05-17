@@ -52,6 +52,7 @@ export default function GameContainer() {
     selectCard,
     sendResponse,
     ntgVote,
+    confirmRoleRewards,
     shareReflection,
     submitVote,
   } = useSocket()
@@ -183,6 +184,7 @@ export default function GameContainer() {
         emitSelectCard={selectCard}
         sendResponse={sendResponse}
         ntgVote={ntgVote}
+        confirmRoleRewards={confirmRoleRewards}
         shareReflection={shareReflection}
         submitVote={submitVote}
       />

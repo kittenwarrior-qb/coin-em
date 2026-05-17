@@ -208,7 +208,10 @@ export class GameEngine {
     const actionTypes = new Set<string>()
     const addPhaseTypes = (phase: string) => {
       if (phase === 'group-response') actionTypes.add('NTG_VOTE')
-      if (phase === 'reflection-sharing') actionTypes.add('SHARE_REFLECTION')
+      if (phase === 'reflection-sharing') {
+        actionTypes.add('SHARE_REFLECTION')
+        actionTypes.add('ROLE_REWARD')
+      }
       if (phase === 'give-coins') actionTypes.add('GIVE_COIN')
       if (phase === 'reward') actionTypes.add('REWARDS_CALCULATED')
     }
@@ -276,6 +279,10 @@ export class GameEngine {
 
       if (entry.type === 'SHARE_REFLECTION') {
         adjustCoins(entry.actorId, { yellow: -(entry.data?.bonus ?? 5) })
+      }
+
+      if (entry.type === 'ROLE_REWARD') {
+        adjustCoins(entry.targetId, { yellow: -(entry.data?.bonus ?? 2) })
       }
 
       if (entry.type === 'GIVE_COIN') {

@@ -5,6 +5,7 @@ import type { CardData, SelectedCards } from '@/stores/types'
 
 interface CenterBoardProps {
   selectedCards: SelectedCards
+  phase?: string
   revealSituation?: boolean
   onCardClick?: (card: CardData, revealed: boolean) => void
 }
@@ -82,15 +83,23 @@ function CardImg({
   )
 }
 
-export function CenterBoard({ selectedCards, revealSituation = true, onCardClick }: CenterBoardProps) {
+export function CenterBoard({ selectedCards, phase, revealSituation = true, onCardClick }: CenterBoardProps) {
   const hasAny = selectedCards.situation || selectedCards.emotion ||
     selectedCards.reflections.length > 0 || selectedCards.selfcare
   const hasChosenCards = selectedCards.situation || selectedCards.emotion
+  const sectionCount = [hasChosenCards, selectedCards.reflections.length > 0, Boolean(selectedCards.selfcare)]
+    .filter(Boolean).length
+  const stackReflectionUnderChosen = phase === 'reflection-card' && hasChosenCards && selectedCards.reflections.length > 0
 
   if (!hasAny) return null
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center gap-2 p-2 overflow-hidden">
+    <div className={[
+      'relative h-full w-full place-items-center content-center gap-2 overflow-hidden p-2',
+      stackReflectionUnderChosen
+        ? 'flex flex-col items-center justify-center'
+        : `grid ${sectionCount > 1 ? 'grid-cols-2' : 'grid-cols-1'}`,
+    ].join(' ')}>
       {hasChosenCards && (
         <CardSlot label="Thẻ được chọn" color="pink">
           <div className="flex items-center justify-center gap-2">
@@ -111,7 +120,7 @@ export function CenterBoard({ selectedCards, revealSituation = true, onCardClick
       )}
       {selectedCards.reflections.length > 0 && (
         <CardSlot label="Phản tư" color="blue">
-          <div className="flex gap-1">
+          <div className={`flex justify-center gap-1 ${stackReflectionUnderChosen ? 'flex-row flex-nowrap' : 'max-w-[9rem] flex-wrap'}`}>
             {selectedCards.reflections.map((card, i) => (
               <motion.div key={card.id} initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: i * 0.1 }}>
                 <CardImg card={card} alt="reflection" size="sm" onClick={() => onCardClick?.(card, true)} />
