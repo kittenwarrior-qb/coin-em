@@ -47,6 +47,11 @@ export class RewardCalculator {
     const ntgVotedIds = new Set<string>(
       Object.values(room.ntgVotes ?? {}).flat()
     )
+    const roleRewardedIds = new Set<string>(
+      room.gameLog
+        .filter((entry) => entry.type === 'ROLE_REWARD' && entry.targetId)
+        .map((entry) => entry.targetId as string)
+    )
 
     const updatedPlayers = room.players.map((p) => {
       let yellowBonus = 0
@@ -54,10 +59,11 @@ export class RewardCalculator {
 
       const isMuted = p.userId === mutedUserId
       const wasNtgVoted = ntgVotedIds.has(p.userId)
+      const wasRoleRewarded = roleRewardedIds.has(p.userId)
 
       // ── Người Kết Nối / Người Gợi Mở ────────────────────────────────────────
       if (p.originalRole === Role.CONNECTOR || p.originalRole === Role.OPENER) {
-        if (!isMuted && room.responses?.[p.userId]) {
+        if (!isMuted && room.responses?.[p.userId] && !wasRoleRewarded) {
           // Only +2 if NOT already voted by NTG (NTGVoteCommand already gave +5)
           if (!wasNtgVoted) {
             yellowBonus += 2
@@ -69,7 +75,7 @@ export class RewardCalculator {
       // ── Người Dẫn Lối ────────────────────────────────────────────────────────
       if (p.originalRole === Role.GUIDE) {
         const completedRole = room.nightActions?.cardSelected
-        if (!isMuted && completedRole && room.responses?.[p.userId]) {
+        if (!isMuted && completedRole && room.responses?.[p.userId] && !wasRoleRewarded) {
           // Only +2 if NOT already voted by NTG (NTGVoteCommand already gave +5)
           if (!wasNtgVoted) {
             yellowBonus += 2

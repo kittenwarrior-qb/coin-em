@@ -106,6 +106,8 @@ export class ActionValidator {
       return { valid: false, error: 'Target not found' }
     }
 
+    // Healer CAN heal self (removed self-check)
+    // Cannot heal Narrator or Sender
     if (target.isNarrator || target.isSender) {
       return { valid: false, error: 'CANNOT_TARGET_PUBLIC_ROLE' }
     }
@@ -254,9 +256,21 @@ export class ActionValidator {
 
   /**
    * Check if player can advance turn
+   * Special case: In reflection-card phase, sender can also advance
    */
   canAdvanceTurn(room: Room, userId: string): boolean {
-    return room.currentNarrator === userId
+    // Narrator can always advance
+    if (room.currentNarrator === userId) {
+      return true
+    }
+    
+    // In reflection-card phase, sender can advance after selecting cards
+    if (room.phase === 'reflection-card') {
+      const sender = room.players.find(p => p.isSender)
+      return sender?.userId === userId
+    }
+    
+    return false
   }
 
   /**

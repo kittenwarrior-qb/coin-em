@@ -78,7 +78,6 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedE
   const [emotionSub, setEmotionSub]     = useState<EmotionSubType>('basic')
   const [preview, setPreview]           = useState<CardData | null>(null)
   const [previewDir, setPreviewDir]     = useState<1 | -1>(1)
-  const [confirmed, setConfirmed]       = useState<CardData | null>(null)
 
   // Filter tabs based on allowed groups
   const allowedEmotionTabs = EMOTION_TABS.filter(t =>
@@ -109,12 +108,11 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedE
   }
 
   const handleCardClick = (card: CardData) => {
-    if (showConfirmButton) setConfirmed(card)
-    else setPreview(card)
+    setPreview(card)
   }
 
-  const handleConfirm = () => {
-    if (confirmed && onSelectCard) { onSelectCard(confirmed); onClose() }
+  const handleConfirm = (card: CardData) => {
+    if (onSelectCard) { onSelectCard(card); onClose() }
   }
 
   return (
@@ -169,7 +167,7 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedE
 
             {/* Situation sub-tabs — ẩn nếu chỉ có 1 nhóm được phép */}
             {activeTab === 'situation' && allowedSituationTabs.length > 1 && (
-              <div className="flex bg-[var(--c-sky-mist)] px-2">
+              <div className="flex bg-[var(--c-sky-mist)] px-2 rounded-md">
                 {allowedSituationTabs.map(t => (
                   <button
                     key={t.key}
@@ -189,7 +187,7 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedE
 
             {/* Emotion sub-tabs — ẩn nếu chỉ có 1 nhóm được phép */}
             {activeTab === 'emotion' && allowedEmotionTabs.length > 1 && (
-              <div className="flex bg-[var(--c-sky-mist)] px-2">
+              <div className="flex bg-[var(--c-sky-mist)] px-2 rounded-md">
                 {allowedEmotionTabs.map(t => (
                   <button
                     key={t.key}
@@ -221,7 +219,7 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedE
                       onClick={() => handleCardClick(card)}
                       className={[
                         'aspect-[2/3] w-full rounded-[14px] border overflow-hidden',
-                        confirmed?.id === card.id
+                        preview?.id === card.id
                           ? 'border-[var(--c-blue-mid)] shadow-cartoon'
                           : 'border-[var(--c-black)] shadow-cartoon-sm',
                       ].join(' ')}
@@ -233,13 +231,6 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedE
                 ))}
               </div>
             </div>
-
-            {/* Footer */}
-            {showConfirmButton && confirmed && (
-              <div className="pt-2 flex justify-end">
-                <CartoonButton color="green" size="sm" onClick={handleConfirm}>✓ Chọn thẻ này</CartoonButton>
-              </div>
-            )}
 
           </div>
         </div>
@@ -266,7 +257,7 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedE
 
       {/* Preview overlay — constrained to 430px panel */}
       <AnimatePresence>
-        {preview && !showConfirmButton && (
+        {preview && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -307,6 +298,7 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedE
                   else if (info.offset.x > 60) navigatePreview(-1)
                 }}
                 onClick={e => e.stopPropagation()}
+                className="flex flex-col items-center"
               >
                 <FlipCard
                   frontImage={preview.frontImage}
@@ -315,6 +307,18 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedE
                   size="large"
                   onClose={() => setPreview(null)}
                 />
+                {showConfirmButton && (
+                  <div className="mt-12">
+                    <CartoonButton
+                      color="green"
+                      size="sm"
+                      onClick={e => { e.stopPropagation(); handleConfirm(preview) }}
+                      data-testid="btn-confirm-preview-card"
+                    >
+                      Chọn
+                    </CartoonButton>
+                  </div>
+                )}
               </motion.div>
             </AnimatePresence>
 

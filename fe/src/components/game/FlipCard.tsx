@@ -90,7 +90,7 @@ export function FlipCard({
       {size === 'large' && onClose && (
         <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-white text-sm whitespace-nowrap text-center">
           <div className="font-display">{flipped ? 'Nhấn để úp lại' : 'Nhấn để lật thẻ'}</div>
-          <div className="text-xs text-gray-300 mt-0.5">👆 Vuốt xuống để đóng</div>
+          {/* <div className="text-xs text-gray-300 mt-0.5">Vuốt xuống để đóng</div> */}
         </div>
       )}
     </motion.div>

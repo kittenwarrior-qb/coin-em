@@ -14,6 +14,7 @@ interface GameMenuModalProps {
 export function GameMenuModal({ open, onClose, onGuide, onQuit }: GameMenuModalProps) {
   const [showCardDeck, setShowCardDeck] = useState(false)
   const [showQuitConfirm, setShowQuitConfirm] = useState(false)
+  const [showSupport, setShowSupport] = useState(false)
 
   return (
     <>
@@ -26,6 +27,12 @@ export function GameMenuModal({ open, onClose, onGuide, onQuit }: GameMenuModalP
           <CartoonButton color="purple" size="lg" className="w-full" onClick={onGuide}>
             Hướng dẫn
           </CartoonButton>
+
+          {!onQuit && (
+            <CartoonButton color="orange" size="lg" className="w-full" onClick={() => setShowSupport(true)}>
+              Support
+            </CartoonButton>
+          )}
 
           {onQuit && (
             <CartoonButton color="orange" size="lg" className="w-full" onClick={() => setShowQuitConfirm(true)}>
@@ -71,6 +78,23 @@ export function GameMenuModal({ open, onClose, onGuide, onQuit }: GameMenuModalP
             >
               Thoát
             </CartoonButton>
+          </div>
+        </div>
+      </CartoonModal>
+
+      <CartoonModal
+        open={showSupport}
+        onClose={() => setShowSupport(false)}
+        title="Support"
+      >
+        <div className="flex justify-center py-3">
+          <div className="flex w-full max-w-[260px] flex-col items-center justify-center gap-4">
+            <img
+              src="/support/ricimi logo.png"
+              alt="ricimi"
+              className="object-contain"
+              draggable={false}
+            />
           </div>
         </div>
       </CartoonModal>

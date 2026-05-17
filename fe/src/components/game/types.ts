@@ -4,6 +4,7 @@ export type CoinType = 'red' | 'yellow' | 'green'
 
 export interface Player {
   id: string
+  userId?: string
   name: string
   role: string
   isMe: boolean
@@ -46,6 +47,8 @@ export interface RoomState {
   currentNarrator?: string | null
   mutedPlayer?: string | null
   selectedCard?: CardData | null
+  votes?: Record<string, string>
+  ntgVotes?: Record<string, string[]>
   gameLog?: GameLogEntry[]
   nightActions?: {
     silenced: boolean

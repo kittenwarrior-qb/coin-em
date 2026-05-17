@@ -159,13 +159,17 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
     // Send state to joiner
     socket.emit('room_state', roomService.getPublicState(room!))
 
-    // Notify others
+    // Notify others in room
     socket.to(roomId).emit('player_joined', {
       socketId: socket.id,
       userId,
       name,
       players: room!.players,
     })
+    
+    // Broadcast updated room list to all clients (for lobby)
+    const availableRooms = roomService.getAvailableRooms()
+    io.emit('rooms_list', availableRooms)
   })
 
   /**

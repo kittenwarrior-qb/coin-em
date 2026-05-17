@@ -58,15 +58,22 @@ export class GameService {
     return {
       id: room.id,
       host: room.host,
-      players: room.players.map(p => ({
-        ...p,
-        // Display role: current round role (narrator/sender override), else originalRole
-        role: p.isNarrator
-          ? p.role  // 'Người Quản trò'
+      players: room.players.map(p => {
+        const baseRole = p.originalRole ?? p.role
+        const displayRole = p.isNarrator
+          ? Role.NARRATOR
           : p.isSender
-            ? p.role  // 'Người Trao Gửi'
-            : p.originalRole ?? p.role,  // everyone else shows their fixed original role
-      })),
+            ? Role.SENDER
+            : baseRole === Role.NARRATOR || baseRole === Role.SENDER
+              ? undefined
+              : baseRole
+
+        return {
+          ...p,
+          // Public roles are current-round flags only; do not show stale narrator/sender roles after rotation.
+          role: displayRole,
+        }
+      }),
       status: room.status,
       phase: room.phase,
       turn: room.turn,

@@ -149,6 +149,92 @@ describe('GameEngine', () => {
     })
   })
 
+  describe('previousTurn - coin rollback', () => {
+    it('should undo NTG vote coins when rolling back to group-response', () => {
+      const room = setRoomPhase(createPlayingRoom(7), 'reflection-card')
+      const ntgId = room.currentNTG!
+      const target = room.players.find(p => p.userId !== ntgId && !p.isNarrator)!
+
+      room.players = room.players.map(p =>
+        p.userId === target.userId ? { ...p, coins: { ...p.coins, yellow: p.coins.yellow + 5 } } : p,
+      )
+      room.ntgVotes = { [ntgId]: [target.userId] }
+      room.gameLog = [
+        { type: 'ROUND_STARTED', actorId: 'system', timestamp: 1, data: { round: 1 } },
+        { type: 'NTG_VOTE', actorId: ntgId, targetId: target.userId, timestamp: 2, data: { bonus: 5 } },
+      ]
+
+      const result = engine.previousTurn(room, room.currentNarrator!)
+
+      expect(result.success).toBe(true)
+      expect(result.room?.phase).toBe('group-response')
+      expect(result.room?.players.find(p => p.userId === target.userId)?.coins.yellow).toBe(7)
+      expect(result.room?.ntgVotes).toEqual({})
+      expect(result.room?.gameLog.some(entry => entry.type === 'NTG_VOTE')).toBe(false)
+    })
+
+    it('should refund manual coin gifts when rolling back to give-coins', () => {
+      const room = setRoomPhase(createPlayingRoom(7), 'reward')
+      const giver = room.players.find(p => !p.isNarrator)!
+      const target = room.players.find(p => p.userId !== giver.userId)!
+
+      room.players = room.players.map(p => {
+        if (p.userId === giver.userId) return { ...p, coins: { ...p.coins, red: p.coins.red - 1 } }
+        if (p.userId === target.userId) return { ...p, coins: { ...p.coins, green: p.coins.green + 1 } }
+        return p
+      })
+      room.redCoinsGiven = { [giver.userId]: { [target.userId]: 1 } }
+      room.gameLog = [
+        { type: 'ROUND_STARTED', actorId: 'system', timestamp: 1, data: { round: 1 } },
+        {
+          type: 'GIVE_COIN',
+          actorId: giver.userId,
+          targetId: target.userId,
+          timestamp: 2,
+          data: { coinType: 'red', amount: 1, receiverGainsGreen: 1 },
+        },
+      ]
+
+      const result = engine.previousTurn(room, room.currentNarrator!)
+
+      expect(result.success).toBe(true)
+      expect(result.room?.phase).toBe('give-coins')
+      expect(result.room?.players.find(p => p.userId === giver.userId)?.coins.red).toBe(3)
+      expect(result.room?.players.find(p => p.userId === target.userId)?.coins.green).toBe(0)
+      expect(result.room?.redCoinsGiven).toEqual({})
+      expect(result.room?.gameLog.some(entry => entry.type === 'GIVE_COIN')).toBe(false)
+    })
+
+    it('should remove calculated reward coins when rolling back from reward', () => {
+      const room = setRoomPhase(createPlayingRoom(7), 'reward')
+      const silencer = room.players.find(p => p.originalRole === Role.SILENCER)!
+      const ntg = room.players.find(p => p.isSender)!
+
+      room.players = room.players.map(p => {
+        if (p.userId === silencer.userId) return { ...p, coins: { ...p.coins, yellow: p.coins.yellow + 7 } }
+        if (p.userId === ntg.userId) return { ...p, coins: { ...p.coins, green: p.coins.green + 4 } }
+        return p
+      })
+      room.gameLog = [
+        { type: 'ROUND_STARTED', actorId: 'system', timestamp: 1, data: { round: 1 } },
+        {
+          type: 'REWARDS_CALCULATED',
+          actorId: 'system',
+          timestamp: 2,
+          data: { silencerFound: false, silencerId: silencer.userId, mutedPlayerId: null, ntgGreenBonus: 4 },
+        },
+      ]
+
+      const result = engine.previousTurn(room, room.currentNarrator!)
+
+      expect(result.success).toBe(true)
+      expect(result.room?.phase).toBe('give-coins')
+      expect(result.room?.players.find(p => p.userId === silencer.userId)?.coins.yellow).toBe(7)
+      expect(result.room?.players.find(p => p.userId === ntg.userId)?.coins.green).toBe(0)
+      expect(result.room?.gameLog.some(entry => entry.type === 'REWARDS_CALCULATED')).toBe(false)
+    })
+  })
+
   describe('executeAction - SILENCE', () => {
     const canReceiveNightAction = (player: any, actorId: string) =>
       player.userId !== actorId && !player.isNarrator && !player.isSender

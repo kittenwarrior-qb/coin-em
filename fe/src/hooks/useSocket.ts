@@ -35,6 +35,8 @@ interface RoomState {
   currentNarrator?: string | null
   mutedPlayer?: string | null
   selectedCard?: CardData | null
+  votes?: Record<string, string>
+  ntgVotes?: Record<string, string[]>
   gameLog?: GameLogEntry[]
   nightActions?: {
     silenced: boolean
@@ -128,7 +130,8 @@ interface UseSocketReturn {
   prevTurn: (roomId: string) => void
   selectCard: (roomId: string, card: object, type?: 'SELECT_CARD' | 'SELECT_SELFCARE_CARD') => void
   sendResponse: (roomId: string, message: string) => void
-  ntgVote: (roomId: string, targetSocketId: string) => void
+  ntgVote: (roomId: string, targetSocketId: string | string[]) => void
+  confirmRoleRewards: (roomId: string, targetSocketIds: string[], onDone?: () => void) => void
   shareReflection: (roomId: string, message: string) => void
   updateProfile: (roomId: string, name: string, avatarIndex: number, bgIndex: number) => void
   updateRoomSettings: (roomId: string, situationGroups: string[], emotionGroups: string[]) => void
@@ -383,6 +386,13 @@ export function useSocket(): UseSocketReturn {
       persistResumeFromState(room)
     })
 
+    socket.on('role_rewards_confirmed', ({ rewards, room }: { rewards: Array<{ name: string; bonus: number }>; room: RoomState }) => {
+      console.log('[Socket] Role rewards confirmed:', rewards)
+      roomStateRef.current = room
+      setRoomState(room)
+      persistResumeFromState(room)
+    })
+
     socket.on('reflection_shared', ({ ntgName, message, room }: { ntgId: string; ntgName: string; message: string; bonus: number; room: RoomState }) => {
       console.log('[Socket] Reflection shared by:', ntgName, message)
       roomStateRef.current = room
@@ -390,12 +400,31 @@ export function useSocket(): UseSocketReturn {
       persistResumeFromState(room)
     })
 
-    socket.on('vote_submitted', () => {
+    socket.on('vote_submitted', ({ room }: { room?: RoomState } = {}) => {
       console.log('[Socket] Vote submitted')
+      if (room) {
+        roomStateRef.current = room
+        setRoomState(room)
+        persistResumeFromState(room)
+      }
     })
 
     socket.on('voting_complete', ({ votes }: { votes: Record<string, string> }) => {
       console.log('[Socket] Voting complete:', votes)
+      const current = roomStateRef.current
+      if (current) {
+        const next = { ...current, votes }
+        roomStateRef.current = next
+        setRoomState(next)
+        persistResumeFromState(next)
+      }
+    })
+
+    socket.on('vote_updated', ({ room }: { room: RoomState }) => {
+      console.log('[Socket] Vote updated')
+      roomStateRef.current = room
+      setRoomState(room)
+      persistResumeFromState(room)
     })
 
     socket.on('game_ended', ({ coinSummary }: { coinSummary: Array<{ userId: string; name: string; coins: { red: number; yellow: number; green: number } }> }) => {
@@ -414,10 +443,22 @@ export function useSocket(): UseSocketReturn {
       roomStateRef.current = null
       setRoomState(null)
       setResumeCandidates(removeResumeCandidate(roomId))
+      
+      // Auto-refresh room list to remove closed room from UI
+      if (socketRef.current) {
+        socketRef.current.emit('list_rooms')
+      }
     })
 
     socket.on('error', (err: { code: string; message: string }) => {
       console.error('[Socket] Error:', err)
+      
+      // Handle rate limit silently - the delay in confirmPendingNtgRewards should prevent this
+      if (err.code === 'RATE_LIMITED') {
+        console.warn('[Socket] Rate limited - requests are being sent too quickly')
+        return
+      }
+      
       // If error arrives while reconnect is pending
       if (reconnectPending.current) {
         reconnectPending.current = false
@@ -639,14 +680,25 @@ export function useSocket(): UseSocketReturn {
     socketRef.current.emit('send_response', { roomId, message })
   }, [])
 
-  const ntgVote = useCallback((roomId: string, targetSocketId: string) => {
+  const ntgVote = useCallback((roomId: string, targetSocketId: string | string[]) => {
     if (!socketRef.current) return
-    socketRef.current.emit('ntg_vote', { roomId, targetSocketId })
+    if (Array.isArray(targetSocketId)) {
+      socketRef.current.emit('ntg_vote', { roomId, targetSocketIds: targetSocketId })
+    } else {
+      socketRef.current.emit('ntg_vote', { roomId, targetSocketId })
+    }
   }, [])
 
   const shareReflection = useCallback((roomId: string, message: string) => {
     if (!socketRef.current) return
     socketRef.current.emit('share_reflection', { roomId, message })
+  }, [])
+
+  const confirmRoleRewards = useCallback((roomId: string, targetSocketIds: string[], onDone?: () => void) => {
+    if (!socketRef.current) return
+    socketRef.current.emit('confirm_role_rewards', { roomId, targetSocketIds }, (ack: { success?: boolean }) => {
+      if (ack?.success) onDone?.()
+    })
   }, [])
 
   const updateProfile = useCallback((roomId: string, name: string, avatarIndex: number, bgIndex: number) => {
@@ -691,6 +743,7 @@ export function useSocket(): UseSocketReturn {
     selectCard,
     sendResponse,
     ntgVote,
+    confirmRoleRewards,
     shareReflection,
     updateProfile,
     updateRoomSettings,

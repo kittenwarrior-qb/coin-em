@@ -151,6 +151,8 @@ export class GameEngine {
       lastActivity: Date.now(),
     }
 
+    updatedRoom = this.undoRollbackCoinEffects(updatedRoom, room.phase, previousPhase)
+
     switch (previousPhase) {
       case 'night':
         updatedRoom.nightActions = { silenced: false, healed: false, cardSelected: false }
@@ -175,6 +177,7 @@ export class GameEngine {
         break
       case 'group-response':
         updatedRoom.responses = {}
+        updatedRoom.ntgVotes = {}
         break
       case 'guess-silencer':
         updatedRoom.votes = {}
@@ -199,6 +202,139 @@ export class GameEngine {
     ]
 
     return { success: true, room: updatedRoom }
+  }
+
+  private undoRollbackCoinEffects(room: Room, currentPhase: string, previousPhase: string): Room {
+    const actionTypes = new Set<string>()
+    const addPhaseTypes = (phase: string) => {
+      if (phase === 'group-response') actionTypes.add('NTG_VOTE')
+      if (phase === 'reflection-sharing') {
+        actionTypes.add('SHARE_REFLECTION')
+        actionTypes.add('ROLE_REWARD')
+      }
+      if (phase === 'give-coins') actionTypes.add('GIVE_COIN')
+      if (phase === 'reward') actionTypes.add('REWARDS_CALCULATED')
+    }
+
+    addPhaseTypes(currentPhase)
+    addPhaseTypes(previousPhase)
+    if (actionTypes.size === 0) return room
+
+    const roundStartIndex = room.gameLog.reduce(
+      (latest, entry, index) => entry.type === 'ROUND_STARTED' && entry.data?.round === room.currentRound ? index : latest,
+      -1,
+    )
+    const firstRoundLog = roundStartIndex >= 0 ? roundStartIndex : 0
+    const logsToUndo = room.gameLog
+      .slice(firstRoundLog)
+      .filter((entry) => actionTypes.has(entry.type))
+
+    if (logsToUndo.length === 0) return room
+
+    let players = room.players
+    let redCoinsGiven = { ...room.redCoinsGiven }
+    let yellowCoinsGiven = { ...room.yellowCoinsGiven }
+    let ntgVotes: Record<string, string[]> = { ...room.ntgVotes }
+
+    const adjustCoins = (userId: string | undefined, delta: Partial<Record<'red' | 'yellow' | 'green', number>>) => {
+      if (!userId) return
+      players = players.map((player) => {
+        if (player.userId !== userId) return player
+        return {
+          ...player,
+          coins: {
+            red: Math.max(0, player.coins.red + (delta.red ?? 0)),
+            yellow: Math.max(0, player.coins.yellow + (delta.yellow ?? 0)),
+            green: Math.max(0, player.coins.green + (delta.green ?? 0)),
+          },
+        }
+      })
+    }
+
+    const subtractTrackedCoin = (
+      tracker: Record<string, Record<string, number>>,
+      actorId: string,
+      targetId: string | undefined,
+      amount: number,
+    ) => {
+      if (!targetId || !tracker[actorId]?.[targetId]) return tracker
+      const next = { ...tracker, [actorId]: { ...tracker[actorId] } }
+      next[actorId][targetId] = Math.max(0, next[actorId][targetId] - amount)
+      if (next[actorId][targetId] === 0) delete next[actorId][targetId]
+      if (Object.keys(next[actorId]).length === 0) delete next[actorId]
+      return next
+    }
+
+    for (const entry of [...logsToUndo].reverse()) {
+      if (entry.type === 'NTG_VOTE') {
+        const bonus = entry.data?.bonus ?? 5
+        adjustCoins(entry.targetId, { yellow: -bonus })
+        const existing = ntgVotes[entry.actorId] ?? []
+        ntgVotes = {
+          ...ntgVotes,
+          [entry.actorId]: existing.filter((id) => id !== entry.targetId),
+        }
+        if (ntgVotes[entry.actorId].length === 0) delete ntgVotes[entry.actorId]
+      }
+
+      if (entry.type === 'SHARE_REFLECTION') {
+        adjustCoins(entry.actorId, { yellow: -(entry.data?.bonus ?? 5) })
+      }
+
+      if (entry.type === 'ROLE_REWARD') {
+        adjustCoins(entry.targetId, { yellow: -(entry.data?.bonus ?? 2) })
+      }
+
+      if (entry.type === 'GIVE_COIN') {
+        const coinType = entry.data?.coinType as 'red' | 'yellow' | undefined
+        const amount = entry.data?.amount ?? 1
+        const greenAmount = entry.data?.receiverGainsGreen ?? amount
+        if (coinType === 'red' || coinType === 'yellow') {
+          adjustCoins(entry.actorId, { [coinType]: amount })
+          adjustCoins(entry.targetId, { green: -greenAmount })
+          if (coinType === 'red') redCoinsGiven = subtractTrackedCoin(redCoinsGiven, entry.actorId, entry.targetId, amount)
+          if (coinType === 'yellow') yellowCoinsGiven = subtractTrackedCoin(yellowCoinsGiven, entry.actorId, entry.targetId, amount)
+        }
+      }
+
+      if (entry.type === 'REWARDS_CALCULATED') {
+        const silencer = players.find((player) => player.originalRole === Role.SILENCER)
+        const ntg = players.find((player) => player.isSender)
+        const mutedUserId = entry.data?.mutedPlayerId ?? room.mutedPlayer
+        const silencerFound = Boolean(entry.data?.silencerFound)
+        const ntgGreenBonus = entry.data?.ntgGreenBonus ?? (silencerFound ? room.players.length : Math.max(0, room.players.length - 3))
+        const ntgVotedIds = new Set<string>(Object.values(ntgVotes ?? {}).flat())
+
+        for (const player of players) {
+          const isMuted = player.userId === mutedUserId
+          const wasNtgVoted = ntgVotedIds.has(player.userId)
+          let yellowBonus = 0
+
+          if ((player.originalRole === Role.CONNECTOR || player.originalRole === Role.OPENER) && !isMuted && room.responses?.[player.userId] && !wasNtgVoted) {
+            yellowBonus += 2
+          }
+          if (player.originalRole === Role.GUIDE && !isMuted && room.nightActions?.cardSelected && room.responses?.[player.userId] && !wasNtgVoted) {
+            yellowBonus += 2
+          }
+          if (player.userId === silencer?.userId) {
+            yellowBonus += silencerFound ? 2 : 7
+          }
+
+          if (yellowBonus > 0) adjustCoins(player.userId, { yellow: -yellowBonus })
+        }
+
+        adjustCoins(ntg?.userId, { green: -ntgGreenBonus })
+      }
+    }
+
+    return {
+      ...room,
+      players,
+      ntgVotes,
+      redCoinsGiven,
+      yellowCoinsGiven,
+      gameLog: room.gameLog.filter((entry, index) => index < firstRoundLog || !actionTypes.has(entry.type)),
+    }
   }
 
   /**
