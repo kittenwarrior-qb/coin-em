@@ -11,13 +11,16 @@ import { PHASE_LABELS, type GamePhase } from '../stores/types'
 import { CartoonButton, CartoonCircleButton } from '@/components/cartoon'
 import { TableBoard }      from '@/components/game/TableBoard'
 import { FlipCard }         from '@/components/game/FlipCard'
+import { CoinCarousel }     from '@/components/game/CoinCarousel'
 import { CardInventory, CARD_DATA } from '@/components/game/CardInventory'
 import { PlayerLayout }     from '@/components/game/PlayerLayout'
 import { MiniPlayerToken }  from '@/components/game/MiniPlayerToken'
 import { CoinDisplay }      from '@/components/game/CoinDisplay'
 import { GameMenuModal }    from '@/components/lobby/GameMenuModal'
+import { NtgRewardPicker } from '@/components/game/NtgRewardPicker'
+import { RoleRewardPicker } from '@/components/game/RoleRewardPicker'
+import { RandomSituationFan } from '@/components/game/RandomSituationFan'
 import {
-  GroupResponseOverlay,
   ReflectionSharingOverlay,
   GuessSilencerOverlay,
   RevealSilencerOverlay,
@@ -62,135 +65,9 @@ const PHASE_ORDER: GamePhase[] = [
   'reward',
 ]
 
-function RandomSituationFan({
-  cards,
-  selectedCard,
-  onPick,
-  onConfirm,
-}: {
-  cards: CardData[]
-  selectedCard: CardData | null
-  onPick: (card: CardData) => void
-  onConfirm: () => void
-}) {
-  const [activePosition, setActivePosition] = useState(0)
-  const [dragOffset, setDragOffset] = useState(0)
-  const cardSpacing = 58
-
-  const wrapPosition = (position: number) => {
-    if (!cards.length) return 0
-    return ((position % cards.length) + cards.length) % cards.length
-  }
-
-  const shortestDiff = (index: number, center: number) => {
-    if (!cards.length) return 0
-    const raw = index - center
-    return ((raw + cards.length / 2) % cards.length + cards.length) % cards.length - cards.length / 2
-  }
-
-  const pickCard = (card: CardData, index: number) => {
-    setActivePosition(index)
-    setDragOffset(0)
-    onPick(card)
-  }
-
-  const visualCenter = wrapPosition(activePosition - dragOffset / cardSpacing)
-  const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value))
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 80 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 80 }}
-      className="absolute inset-x-0 bottom-4 z-30 mx-auto w-full max-w-[430px] overflow-hidden px-3"
-      data-testid="random-situation-fan"
-    >
-      <div className="rounded-2xl bg-white/75 px-3 py-2 text-center mb-2">
-        <div className="font-display text-xs text-[var(--c-gray)]">Chọn một thẻ tình huống</div>
-        <div className="font-body text-[11px] text-black/55">Kéo qua lại để xem bộ thẻ úp</div>
-      </div>
-      <div className="flex h-52 items-center justify-center">
-        <AnimatePresence mode="wait">
-          {selectedCard && (
-            <motion.div
-              key={selectedCard.id}
-              initial={{ opacity: 0, y: 28, scale: 0.86 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 18, scale: 0.9 }}
-              className="flex flex-col items-center gap-2"
-            >
-              <div className="h-44 w-[7.35rem] overflow-hidden rounded-[14px] border border-[var(--c-black)] bg-white shadow-[0_7px_0_rgba(0,0,0,0.2)]" style={{ borderWidth: 1 }}>
-                <img src={selectedCard.backImage} alt="" className="h-full w-full object-cover" draggable={false} />
-              </div>
-              <CartoonButton color="green" size="sm" onClick={onConfirm} data-testid="btn-confirm-situation-card">
-                Xac nhan gui
-              </CartoonButton>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-      <motion.div
-        className="relative h-64 overflow-hidden pb-2"
-        drag="x"
-        dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={0.05}
-        dragMomentum={false}
-        onDrag={(_, info) => setDragOffset(info.offset.x)}
-        onDragEnd={(_, info) => {
-          const momentum = clamp(info.velocity.x * 0.08, -cardSpacing * 1.15, cardSpacing * 1.15)
-          setActivePosition((current) => wrapPosition(current - (info.offset.x + momentum) / cardSpacing))
-          setDragOffset(0)
-        }}
-        onWheel={(event) => {
-          const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY
-          if (Math.abs(delta) < 2) return
-          setActivePosition((current) => wrapPosition(current + delta / 180))
-        }}
-      >
-        <div className="absolute left-1/2 top-5 h-56 w-0">
-          {cards.map((card, index) => {
-            const diff = shortestDiff(index, visualCenter)
-            const absDiff = Math.abs(diff)
-            const selected = selectedCard?.id === card.id
-            if (absDiff > 4.25 && !selected) return null
-            const x = diff * cardSpacing
-            const y = Math.pow(absDiff, 1.45) * 10
-            const rotate = Math.max(-10, Math.min(10, diff * 4.1))
-            const scale = Math.max(0.9, 1.06 - absDiff * 0.04)
-            const opacity = absDiff > 3.55 ? 0.35 : absDiff > 3.15 ? 0.65 : 1
-            return (
-              <motion.button
-                key={card.id}
-                type="button"
-                initial={false}
-                animate={{
-                  opacity,
-                  x,
-                  y: selected ? y - 2 : y,
-                  rotate,
-                  scale: selected ? scale + 0.025 : scale,
-                }}
-                transition={{ type: 'spring', stiffness: 380, damping: 38, mass: 0.6 }}
-                whileTap={{ scale: selected ? scale + 0.015 : scale * 0.985 }}
-                onClick={() => pickCard(card, index)}
-                className={[
-                  'absolute top-0 h-44 w-[7.25rem] origin-bottom overflow-hidden rounded-[14px] border bg-white shadow-[0_6px_0_rgba(0,0,0,0.2)]',
-                  selected ? 'border-[var(--c-yellow)]' : 'border-[var(--c-black)]',
-                ].join(' ')}
-                style={{ zIndex: selected ? 100 : Math.round(30 - absDiff * 5), marginLeft: -58, borderWidth: 1 }}
-                data-testid={`random-situation-card-${index + 1}`}
-              >
-                <img src={card.backImage} alt="" className="h-full w-full object-cover" draggable={false} />
-              </motion.button>
-            )
-          })}
-        </div>
-        <div className="pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 rounded-full bg-white/70 px-2 py-0.5 font-body text-[10px] text-black/50">
-          {cards.length ? `${(Math.round(wrapPosition(activePosition)) % cards.length) + 1}/${cards.length}` : '0/0'}
-        </div>
-      </motion.div>
-    </motion.div>
-  )
+const getPhaseNumber = (phase: GamePhase): number | '?' => {
+  const index = PHASE_ORDER.indexOf(phase)
+  return index >= 0 ? index + 1 : '?'
 }
 
 function FlyingActionIconEffect({
@@ -266,14 +143,13 @@ export default function GameBoard({
   prevTurn,
   nightAction,
   emitSelectCard,
-  sendResponse,
   ntgVote,
   shareReflection,
   submitVote,
 }: GameBoardProps) {
   const [showMenu, setShowMenu] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
-  const [coinPreview, setCoinPreview] = useState<{ front: string; back: string; alt: string } | null>(null)
+  const [coinPreview, setCoinPreview] = useState<{ coinType: 'red' | 'yellow' | 'green'; title?: string } | null>(null)
   const [cardPreview, setCardPreview] = useState<{ card: CardData; revealed: boolean } | null>(null)
   const [flyingActionEffect, setFlyingActionEffect] = useState<{ fromId: string; toId: string; iconSrc: string; nonce: number } | null>(null)
   const [selectedNightAction, setSelectedNightAction] = useState<{
@@ -287,12 +163,15 @@ export default function GameBoard({
   const [selectedSituationChoice, setSelectedSituationChoice] = useState<CardData | null>(null)
   const [hideOtherPlayerBadges, setHideOtherPlayerBadges] = useState(false)
   const [phaseNavigation, setPhaseNavigation] = useState<{ direction: 'next' | 'prev'; targetPhase: GamePhase } | null>(null)
+  const [turnCountdownSeconds, setTurnCountdownSeconds] = useState(30)
+  const [showNtgRewardPicker, setShowNtgRewardPicker] = useState(false)
+  const [showRoleRewardPicker, setShowRoleRewardPicker] = useState(false)
+  const [pendingNtgRewardIds, setPendingNtgRewardIds] = useState<Set<string>>(() => new Set())
+  const [ntgRewardSuccess, setNtgRewardSuccess] = useState<{names: string[]} | null>(null)
 
   // Phase-local state
-  const [responseText,       setResponseText]       = useState('')
   const [reflectionShareText, setReflectionShareText] = useState('')
-  const [hasResponded,       setHasResponded]       = useState(false)
-  const [hasNTGVoted,        setHasNTGVoted]        = useState(false)
+  const [ntgVotedIds, setNtgVotedIds] = useState<Set<string>>(() => new Set())
   const [hasSharedReflection, setHasSharedReflection] = useState(false)
   const [hasVoted,           setHasVoted]           = useState(false)
   const [hasHealed,           setHasHealed]          = useState(false)
@@ -300,12 +179,14 @@ export default function GameBoard({
 
   // Stores
   const { players, myPlayer, isNarrator, selectedCards } = useGameState()
-  const { setPlayers, selectCard, clearSelectedCards } = useGameActions()
+  const { setPlayers, selectCard, clearSelectedCards, clearSelectedCard } = useGameActions()
   const { expandedPlayer, showInventory, inventoryMode, setExpandedPlayer, setShowInventory, setInventoryMode } = useGameUI()
   const { gameStep, handleSelectCard }                   = useGameFlow()
   const setMyIds      = useGameStore(s => s.setMyIds)
   const [dismissedRoleRevealRound, setDismissedRoleRevealRound] = useState<number | null>(null)
   const lastNightActionEffectRef = useRef<number | null>(null)
+  const lastNtgRewardPreviewRef = useRef<number | null>(null)
+  const lastReflectionRewardPreviewRef = useRef<number | null>(null)
 
   // Init
   useEffect(() => { setMyIds(mySocketId, myUserId) }, [mySocketId, myUserId, setMyIds])
@@ -354,10 +235,44 @@ export default function GameBoard({
     })
   }, [isNarrator, myUserId, roomState.gameLog, roomState.players])
 
+  useEffect(() => {
+    if (gameStep !== 'group-response') return
+
+    const latestNtgReward = [...(roomState.gameLog ?? [])]
+      .reverse()
+      .find((entry) => entry.type === 'NTG_VOTE' && entry.targetId === myUserId)
+
+    if (!latestNtgReward || latestNtgReward.timestamp === lastNtgRewardPreviewRef.current) return
+    if (latestNtgReward.actorId === myUserId) return
+
+    lastNtgRewardPreviewRef.current = latestNtgReward.timestamp
+    setCoinPreview({
+      coinType: 'yellow',
+      title: 'Bạn đã được Người Trao Gửi tặng 5 coin vàng',
+    })
+  }, [gameStep, myUserId, roomState.gameLog])
+
+  // Show coin preview when NTG receives reflection sharing reward
+  useEffect(() => {
+    if (gameStep !== 'reflection-sharing') return
+
+    const latestReflectionReward = [...(roomState.gameLog ?? [])]
+      .reverse()
+      .find((entry) => entry.type === 'SHARE_REFLECTION' && entry.actorId === myUserId)
+
+    if (!latestReflectionReward || latestReflectionReward.timestamp === lastReflectionRewardPreviewRef.current) return
+
+    lastReflectionRewardPreviewRef.current = latestReflectionReward.timestamp
+    setCoinPreview({
+      coinType: 'yellow',
+      title: 'Bạn đã hoàn thành vai trò và nhận 5 coin vàng',
+    })
+  }, [gameStep, myUserId, myPlayer?.isSender, roomState.gameLog])
+
   // Reset phase state on step change
   useEffect(() => {
-    setResponseText(''); setReflectionShareText('')
-    setHasResponded(false); setHasNTGVoted(false)
+    setReflectionShareText('')
+    setNtgVotedIds(new Set())
     setHasSharedReflection(false); setHasVoted(false)
     setHasHealed(false)
     setHasSilenced(false)
@@ -376,12 +291,46 @@ export default function GameBoard({
   }, [gameStep])
 
   useEffect(() => {
+    if (gameStep !== 'group-response') return
+    const votedUserIds = new Set(roomState.ntgVotes?.[myUserId] ?? [])
+    const votedSocketIds = roomState.players
+      .filter((p) => p.userId && votedUserIds.has(p.userId))
+      .map((p) => p.socketId)
+    // Merge with existing instead of replacing to preserve optimistic updates
+    setNtgVotedIds((prev) => {
+      const merged = new Set([...prev, ...votedSocketIds])
+      return merged
+    })
+  }, [gameStep, myUserId, roomState.ntgVotes, roomState.players])
+
+  useEffect(() => {
+    if (gameStep !== 'group-response') {
+      setShowNtgRewardPicker(false)
+      setPendingNtgRewardIds(new Set())
+      setNtgRewardSuccess(null)
+    }
+  }, [gameStep])
+
+  const hasConfirmedNtgRewards = gameStep === 'group-response' && ntgVotedIds.size > 0
+
+  useEffect(() => {
     if (!roomState.selectedCard?.category) {
-      if (gameStep === 'role-reveal' || gameStep === 'night') clearSelectedCards()
+      const phase = roomState.phase ?? gameStep
+      if (phase === 'role-reveal' || phase === 'night') {
+        clearSelectedCards()
+      } else if (phase === 'situation-card') {
+        clearSelectedCards()
+      } else if (phase === 'emotion-card') {
+        clearSelectedCard('emotion')
+      } else if (phase === 'reflection-card') {
+        clearSelectedCard('reflection')
+      } else if (phase === 'selfcare-card') {
+        clearSelectedCard('selfcare')
+      }
       return
     }
     selectCard(roomState.selectedCard, roomState.selectedCard.category)
-  }, [roomState.selectedCard, gameStep, selectCard, clearSelectedCards])
+  }, [roomState.phase, roomState.selectedCard, gameStep, selectCard, clearSelectedCards, clearSelectedCard])
 
   // ─── Handlers ──────────────────────────────────────────────────────────────
 
@@ -415,16 +364,72 @@ export default function GameBoard({
     setSelectedSituationChoice(null)
   }
 
-  const handleSendResponse = () => {
-    if (!responseText.trim() || hasResponded) return
-    sendResponse(roomState.id, responseText.trim())
-    setHasResponded(true)
+  const handleNTGVote = (id: string) => {
+    if (!myPlayer?.isSender || id === myPlayer.id || ntgVotedIds.has(id)) return
+    ntgVote(roomState.id, id)
+    setNtgVotedIds((prev) => new Set(prev).add(id))
   }
 
-  const handleNTGVote = (id: string) => {
-    if (hasNTGVoted) return
-    ntgVote(roomState.id, id)
-    setHasNTGVoted(true)
+  const togglePendingNtgReward = (id: string) => {
+    if (ntgVotedIds.has(id)) return
+    setPendingNtgRewardIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const confirmPendingNtgRewards = () => {
+    if (pendingNtgRewardIds.size === 0) {
+      setShowNtgRewardPicker(false)
+      return
+    }
+    
+    // Get names of rewarded players
+    const rewardedNames = players
+      .filter(p => pendingNtgRewardIds.has(p.id))
+      .map(p => p.name)
+    
+    // Send all votes in one request
+    const ids = Array.from(pendingNtgRewardIds)
+    ntgVote(roomState.id, ids)
+    
+    // Optimistic update: immediately mark these players as rewarded
+    setNtgVotedIds((prev) => {
+      const next = new Set(prev)
+      ids.forEach(id => next.add(id))
+      return next
+    })
+    
+    setPendingNtgRewardIds(new Set())
+    setShowNtgRewardPicker(false)
+    
+    // Show success popup
+    setNtgRewardSuccess({ names: rewardedNames })
+  }
+
+  const handleRoleRewards = (selectedPlayerIds: string[]) => {
+    console.log('[Role Rewards] Selected players:', selectedPlayerIds)
+    
+    // Convert socketIds to userIds and check if they were voted by NTG
+    const rewardsData = selectedPlayerIds.map(socketId => {
+      const player = players.find(p => p.id === socketId)
+      const wasVoted = ntgVotedIds.has(socketId)
+      return {
+        userId: player?.id, // Will be converted to userId in backend
+        socketId: socketId,
+        wasVoted,
+      }
+    }).filter(r => r.userId)
+    
+    // TODO: Call backend API
+    // confirmRoleRewards(roomState.id, rewardsData)
+    
+    setShowRoleRewardPicker(false)
+    
+    // After confirming role rewards, advance to next phase
+    nextTurn(roomState.id)
   }
 
   const handleShareReflection = () => {
@@ -441,7 +446,8 @@ export default function GameBoard({
 
   const handleHealTarget = (targetId: string) => {
     const target = players.find((p) => p.id === targetId)
-    if (!myPlayer || hasHealed || !target || target.id === myPlayer.id || target.isNarrator || target.isSender) return
+    // Healer CAN heal self - remove self-check
+    if (!myPlayer || hasHealed || !target || target.isNarrator || target.isSender) return
     setSelectedNightAction({
       type: 'heal',
       targetId,
@@ -517,6 +523,7 @@ export default function GameBoard({
   const healerActionDone = roomState.nightActions?.healed || hasHealed
   const silencerActionDone = roomState.nightActions?.silenced || hasSilenced
   const healerRole = Object.keys(ROLE_TO_IMAGE)[2]
+  const guideRole = Object.keys(ROLE_TO_IMAGE)[3]
   const silencerRole = Object.keys(ROLE_TO_IMAGE)[5]
   const isMyHealerRole = myPlayer?.role === healerRole
   const isMySilencerRole = myPlayer?.role === silencerRole
@@ -537,112 +544,124 @@ export default function GameBoard({
     switch (gameStep) {
       case 'role-reveal':
         return {
-          title: 'Lượt của quản trò',
-          description: 'Đang đợi quản trò tiếp tục',
+          title: 'Nhận vai trò',
+          description: 'Quản trò bắt đầu trò chơi',
         }
       case 'night':
         return {
-          title: 'Lượt của quản trò',
-          description: 'Đang đợi quản trò chuyển sang ban đêm',
+          title: 'Trời tối rồi',
+          description: 'Quản trò đang chuẩn bị cho đêm',
         }
       case 'healer-turn':
         if (healerActionDone) {
           return {
-            title: 'Lượt của quản trò',
+            title: 'Người Chữa Lành đã chọn xong',
             description: 'Đang đợi quản trò tiếp tục',
           }
         }
         if (isMyHealerRole) {
           return {
             title: 'Lượt của bạn',
-            description: 'Chọn người cần bảo vệ, trừ Quản trò và Người Trao Gửi',
+            description: 'Hãy chọn một người để bảo vệ (không được chọn Quản trò và Người Trao Gửi)',
           }
         }
         return {
           title: 'Lượt của Người Chữa Lành',
-          description: 'Đang đợi Người Chữa Lành chọn người bảo vệ',
+          description: 'Người Chữa Lành đang chọn ai đó để bảo vệ',
         }
       case 'silencer-turn':
         if (silencerActionDone) {
           return {
-            title: 'Lượt của quản trò',
+            title: 'Người Im Lặng đã chọn xong',
             description: 'Đang đợi quản trò tiếp tục',
           }
         }
         if (isMySilencerRole) {
           return {
             title: 'Lượt của bạn',
-            description: 'Chọn người cần làm im lặng, trừ Quản trò và Người Trao Gửi',
+            description: 'Hãy chọn một người để làm im lặng (không được chọn Quản trò và Người Trao Gửi)',
           }
         }
         return {
           title: 'Lượt của Người Im Lặng',
-          description: 'Đang đợi Người Im Lặng chọn mục tiêu',
+          description: 'Người Im Lặng đang chọn ai đó để làm im lặng',
         }
       case 'situation-card':
         return {
-          title: 'Lượt của Người Trao Gửi',
-          description: 'Đang đợi Người Trao Gửi bốc thẻ tình huống',
+          title: 'Lượt của Người trao gửi Chọn thẻ Tình huống',
+          description: 'Người Trao Gửi đang chọn thẻ tình huống',
         }
       case 'emotion-card':
+        if (myPlayer?.isSender && !selectedCards.emotion) {
+          return {
+            title: 'Chọn một thẻ Cảm xúc',
+            description: 'Hãy chọn một thẻ cảm xúc dựa trên tình huống của bạn',
+          }
+        }
         return {
-          title: 'Lượt của Người Trao Gửi',
-          description: 'Đang đợi Người Trao Gửi chọn thẻ cảm xúc',
+          title: 'Lượt của Người trao gửi Chọn thẻ Cảm xúc',
+          description: 'Người Trao Gửi đang chọn thẻ cảm xúc',
         }
       case 'story-telling':
         return {
-          title: 'Lượt kể chuyện',
-          description: 'Đang đợi Người Trao Gửi chia sẻ câu chuyện',
+          title: 'Lượt của Người trao gửi Kể chuyện',
+          description: 'Người Trao Gửi đang chia sẻ câu chuyện của mình',
         }
       case 'group-response':
+        if (myPlayer?.isSender) {
+          return {
+            title: 'Tặng coin cho các bạn có phản hồi tốt',
+            description: 'Cả bàn đã phản hồi, hãy tặng coin cho mọi người nếu bạn hài lòng nhé. Mở danh sách để chọn một hoặc nhiều người.',
+          }
+        }
         return {
-          title: 'Lượt phản hồi nhóm',
-          description: 'Mọi người cùng gửi phản hồi',
+          title: 'Phản hồi nhóm',
+          description: 'Cả bàn cùng phản hồi offline theo hướng dẫn của quản trò.',
         }
       case 'reflection-card':
         return {
-          title: 'Lượt của Người Trao Gửi',
-          description: 'Đang đợi chọn thẻ phản tư',
+          title: 'Lượt của Người trao gửi Chọn thẻ Phản tư',
+          description: 'Người Trao Gửi đang chọn thẻ phản tư',
         }
       case 'reflection-sharing':
         return {
-          title: 'Lượt chia sẻ phản tư',
-          description: 'Đang đợi Người Trao Gửi chia sẻ',
+          title: 'Lượt của Người trao gửi Chia sẻ suy nghĩ',
+          description: 'Người Trao Gửi đang chia sẻ suy nghĩ của mình',
         }
       case 'selfcare-card':
         return {
-          title: 'Lượt chọn bí kíp ôm',
-          description: 'Đang đợi người phụ trách chọn thẻ',
+          title: 'Lượt của Người trao gửi Chọn Bí kíp ôm',
+          description: 'Người Dẫn Lối đang chọn bí kíp ôm',
         }
       case 'hug-action':
         return {
-          title: 'Lượt hành động ôm',
-          description: 'Đang đợi nhóm thực hiện hành động ôm',
+          title: 'Hành động ôm',
+          description: 'Mọi người cùng thực hiện hành động ôm',
         }
       case 'guess-silencer':
         return {
-          title: 'Lượt đoán Người Im Lặng',
-          description: 'Mọi người cùng bình chọn',
+          title: 'Đoán ai là Người Im Lặng',
+          description: 'Hãy bình chọn ai bạn nghĩ là Người Im Lặng',
         }
       case 'reveal-silencer':
         return {
-          title: 'Lượt tiết lộ vai trò',
-          description: 'Đang xem kết quả Người Im Lặng',
+          title: 'Công bố Vai trò của người chơi',
+          description: 'Xem ai là Người Im Lặng thật sự',
         }
       case 'give-coins':
         return {
-          title: 'Lượt tặng coin',
-          description: 'Mọi người tặng coin cho nhau',
+          title: 'Tặng coin cho nhau',
+          description: 'Hãy tặng coin cho những người bạn thích',
         }
       case 'reward':
         return {
-          title: 'Tổng kết lượt',
-          description: 'Đang đợi quản trò sang lượt tiếp theo',
+          title: 'Kết thúc lượt',
+          description: 'Quản trò sẽ chuyển sang lượt tiếp theo',
         }
       default:
         return {
           title: PHASE_LABELS[gameStep] ?? gameStep,
-          description: 'Đang đợi lượt tiếp theo',
+          description: 'Đang chờ lượt tiếp theo',
         }
     }
   }
@@ -683,6 +702,12 @@ export default function GameBoard({
       case 'GAME_STARTED':
         return null
       case 'PHASE_CHANGED':
+        if ((entry.data as { direction?: string } | undefined)?.direction === 'previous') {
+          return {
+            title: `Quản trò đã cho quay về phase trước: ${phaseName(entry.data?.phase) ?? 'giai đoạn trước'} (${actorName})`,
+            detail: `Cả bàn quay lại: ${phaseName(entry.data?.phase) ?? 'giai đoạn trước'}.`,
+          }
+        }
         return {
           title: narratorTitle,
           detail: `Cả bàn chuyển sang: ${phaseName(entry.data?.phase) ?? 'giai đoạn tiếp theo'}.`,
@@ -755,11 +780,53 @@ export default function GameBoard({
   const isNight = ['night', 'healer-turn', 'silencer-turn'].includes(gameStep)
   const isMyHealerTurn = gameStep === 'healer-turn' && myPlayer?.role === healerRole && !healerActionDone
   const isMySilencerTurn = gameStep === 'silencer-turn' && myPlayer?.role === silencerRole && !silencerActionDone
+  const getCountdownKeyForPlayer = (player: typeof players[number]) => {
+    const baseKey = `${currentRound}-${gameStep}-${healerActionDone}-${silencerActionDone}-${selectedCards.situation?.id ?? 'no-situation'}-${selectedCards.emotion?.id ?? 'no-emotion'}-${selectedCards.selfcare?.id ?? 'no-selfcare'}`
+
+    if (gameStep === 'role-reveal' || gameStep === 'night') {
+      return player.isNarrator ? `${baseKey}-narrator` : null
+    }
+    if (gameStep === 'healer-turn') {
+      if (!healerActionDone && player.role === healerRole && (isNarrator || player.isMe)) return `${baseKey}-${player.id}`
+      return healerActionDone && player.isNarrator ? `${baseKey}-narrator` : null
+    }
+    if (gameStep === 'silencer-turn') {
+      if (!silencerActionDone && player.role === silencerRole && (isNarrator || player.isMe)) return `${baseKey}-${player.id}`
+      return silencerActionDone && player.isNarrator ? `${baseKey}-narrator` : null
+    }
+    if (gameStep === 'situation-card') return (!selectedCards.situation ? player.isSender : player.isNarrator) ? baseKey : null
+    if (gameStep === 'emotion-card') return (!selectedCards.emotion ? player.isSender : player.isNarrator) ? baseKey : null
+    if (gameStep === 'story-telling' || gameStep === 'reflection-sharing') return player.isSender ? baseKey : null
+    if (gameStep === 'reflection-card') return selectedCards.reflections.length < 3 && player.isSender ? baseKey : null
+    if (gameStep === 'selfcare-card') return !selectedCards.selfcare && player.role === guideRole ? baseKey : null
+    return null
+  }
+  const currentTurnCountdownKey = players.map(getCountdownKeyForPlayer).find(Boolean) ?? null
+  const currentTurnCountdownDuration = gameStep === 'story-telling' ? 60 : 30
+
+  useEffect(() => {
+    if (!currentTurnCountdownKey) {
+      setTurnCountdownSeconds(currentTurnCountdownDuration)
+      return
+    }
+
+    setTurnCountdownSeconds(currentTurnCountdownDuration)
+    const startedAt = Date.now()
+    const timer = window.setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startedAt) / 1000)
+      setTurnCountdownSeconds(Math.max(0, currentTurnCountdownDuration - elapsed))
+      if (elapsed >= currentTurnCountdownDuration) window.clearInterval(timer)
+    }, 250)
+
+    return () => window.clearInterval(timer)
+  }, [currentTurnCountdownKey, currentTurnCountdownDuration])
+
   const currentPhaseIndex = PHASE_ORDER.indexOf(gameStep as GamePhase)
   const previousPhase = currentPhaseIndex > 0 ? PHASE_ORDER[currentPhaseIndex - 1] : null
   const nextPhase = currentPhaseIndex >= 0 && currentPhaseIndex < PHASE_ORDER.length - 1
     ? PHASE_ORDER[currentPhaseIndex + 1]
     : 'role-reveal'
+  const isNarratorNextDisabled = gameStep === 'emotion-card' && !selectedCards.emotion
 
   return (
     <div className="screen-cartoon" style={{ overflow: 'hidden' }}>
@@ -801,7 +868,7 @@ export default function GameBoard({
         )}
 
         <div className="absolute top-2 left-2 z-20">
-          <CoinDisplay coins={myCoinCount} onCoinClick={(front, back, alt) => setCoinPreview({ front, back, alt })} />
+          <CoinDisplay coins={myCoinCount} onCoinClick={(_, __, coinType) => setCoinPreview({ coinType: coinType as 'red' | 'yellow' | 'green' })} />
         </div>
 
         {/* Menu button — top right */}
@@ -816,6 +883,24 @@ export default function GameBoard({
           onClick={() => setShowMenu(true)}
           aria-label="Menu"
         />
+
+        <AnimatePresence>
+          {currentTurnCountdownKey && (
+            <motion.div
+              key={currentTurnCountdownKey}
+              initial={{ opacity: 0, scale: 0.78, x: 10 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.78, x: 10 }}
+              transition={{ type: 'spring', stiffness: 420, damping: 22 }}
+              className="absolute top-2 right-[54px] z-30 flex h-[38px] min-w-[52px] items-center justify-center rounded-full border-2 border-[var(--c-black)] bg-[#e6f9ff] px-3 text-center shadow-[0_3px_0_rgba(0,0,0,0.2)]"
+              data-testid="turn-countdown-popup"
+            >
+              <span className="font-display text-base leading-none text-[var(--c-black)]">
+                {turnCountdownSeconds}
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* History log button */}
         <div className="absolute bottom-3 left-3 z-30 flex flex-col items-center gap-0.5">
@@ -856,7 +941,7 @@ export default function GameBoard({
             style={{ background: 'rgba(0,0,0,0.25)', backdropFilter: 'blur(6px)' }}
           >
             <div data-testid="game-phase" data-phase={gameStep} className="font-display text-[10px] text-white/70">
-              Round {currentRound}/{totalRounds} · {gameStep}
+              Round {currentRound}/{totalRounds} · Phase {getPhaseNumber(gameStep)}/{PHASE_ORDER.length}
             </div>
           </div>
         </div>
@@ -864,7 +949,7 @@ export default function GameBoard({
         {disconnectedPlayers.length > 0 && (
           <div className="absolute top-12 left-1/2 z-20 w-[min(92%,360px)] -translate-x-1/2 rounded-2xl bg-white/90 px-3 py-2 text-center shadow-[0_4px_0_rgba(0,0,0,0.16)]">
             <div className="font-display text-[11px] text-[var(--c-pink)]">
-              {disconnectedPlayers.length} nguoi choi da roi phong
+              {disconnectedPlayers.length} người chơi đã rời phòng
             </div>
             <div className="font-body text-[11px] leading-snug text-black/60">
               {disconnectedPlayers.map(p => p.name).join(', ')}
@@ -880,7 +965,7 @@ export default function GameBoard({
               <TableBoard
                 selectedCards={selectedCards}
                 revealSituation={gameStep !== 'situation-card'}
-                onCardClick={(card) => setCardPreview({ card, revealed: true })}
+                onCardClick={(card, revealed) => setCardPreview({ card, revealed })}
                 status={
                   showTurnStatus ? (
                     <div className="rounded-2xl bg-white/70 px-3 py-2 text-center" data-testid="turn-status-panel">
@@ -897,7 +982,7 @@ export default function GameBoard({
                         <button
                           type="button"
                           disabled={!previousPhase}
-                          className="shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-white/80 border-2 border-[var(--c-black)] shadow-[0_3px_0_rgba(0,0,0,0.18)] transition-all active:translate-y-[1px] active:shadow-[0_2px_0_rgba(0,0,0,0.18)] disabled:opacity-30 disabled:pointer-events-none"
+                          className="shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-[#96b886] border-2 border-[var(--c-black)] shadow-[0_3px_0_rgba(0,0,0,0.18)] transition-all active:translate-y-[1px] active:shadow-[0_2px_0_rgba(0,0,0,0.18)] disabled:opacity-30 disabled:pointer-events-none"
                           onClick={() => previousPhase && setPhaseNavigation({ direction: 'prev', targetPhase: previousPhase })}
                           data-testid="btn-prev-phase"
                           aria-label="Quay lại phase trước"
@@ -921,8 +1006,9 @@ export default function GameBoard({
                         {/* Next phase arrow */}
                         <button
                           type="button"
-                          className="shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-[var(--c-green)] border-2 border-[var(--c-black)] shadow-[0_3px_0_rgba(0,0,0,0.18)] transition-all active:translate-y-[1px] active:shadow-[0_2px_0_rgba(0,0,0,0.18)]"
-                          onClick={() => setPhaseNavigation({ direction: 'next', targetPhase: nextPhase })}
+                          disabled={isNarratorNextDisabled}
+                          className="shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-[var(--c-green)] border-2 border-[var(--c-black)] shadow-[0_3px_0_rgba(0,0,0,0.18)] transition-all active:translate-y-[1px] active:shadow-[0_2px_0_rgba(0,0,0,0.18)] disabled:opacity-30 disabled:pointer-events-none"
+                          onClick={() => !isNarratorNextDisabled && setPhaseNavigation({ direction: 'next', targetPhase: nextPhase })}
                           data-testid="btn-next-phase"
                           aria-label="Chuyển sang phase tiếp theo"
                         >
@@ -939,17 +1025,46 @@ export default function GameBoard({
                       <>
                         {gameStep === 'emotion-card' && (
                           <CartoonButton color="pink" size="md" className="w-full" onClick={() => openInventory('emotion')} data-testid="btn-select-emotion">
-                            💭 Chọn thẻ Cảm xúc
+                            Chọn Cảm Xúc
                           </CartoonButton>
                         )}
-                        {gameStep === 'reflection-card' && selectedCards.reflections.length < 3 && (
-                          <CartoonButton color="blue" size="md" className="w-full" onClick={() => openInventory('reflection')} data-testid="btn-select-reflection">
-                            🤔 Chọn Reflection ({selectedCards.reflections.length}/3)
-                          </CartoonButton>
+                        {gameStep === 'reflection-card' && (
+                          <>
+                            {selectedCards.reflections.length < 3 && (
+                              <CartoonButton color="blue" size="md" className="w-full" onClick={() => openInventory('reflection')} data-testid="btn-select-reflection">
+                                Chọn thẻ ({selectedCards.reflections.length}/3)
+                              </CartoonButton>
+                            )}
+                            {selectedCards.reflections.length > 0 && myPlayer?.isSender && (
+                              <CartoonButton 
+                                color="green" 
+                                size="md" 
+                                className="w-full mt-2" 
+                                onClick={() => nextTurn(roomState.id)} 
+                                data-testid="btn-confirm-reflection"
+                              >
+                                Xác nhận ({selectedCards.reflections.length} thẻ)
+                              </CartoonButton>
+                            )}
+                          </>
                         )}
                         {gameStep === 'selfcare-card' && !selectedCards.selfcare && (
                           <CartoonButton color="teal" size="md" className="w-full" onClick={() => openInventory('selfcare')} data-testid="btn-select-selfcare">
-                            🌟 Chọn Bí kíp ôm
+                            Chọn thẻ
+                          </CartoonButton>
+                        )}
+                        {gameStep === 'group-response' && (
+                          <CartoonButton
+                            color={hasConfirmedNtgRewards ? 'orange' : 'yellow'}
+                            size="md"
+                            className="w-full"
+                            disabled={hasConfirmedNtgRewards}
+                            onClick={() => {
+                              if (!hasConfirmedNtgRewards) setShowNtgRewardPicker(true)
+                            }}
+                            data-testid="btn-open-ntg-reward-picker"
+                          >
+                            {hasConfirmedNtgRewards ? 'Đã chọn' : 'Tặng coin'}
                           </CartoonButton>
                         )}
                       </>
@@ -963,7 +1078,8 @@ export default function GameBoard({
               const isHealerToken = isMyHealerTurn && player.id === myPlayer?.id
               const isSilencerToken = isMySilencerTurn && player.id === myPlayer?.id
               const isProtectedNightTarget = player.isNarrator || player.isSender
-              const canHealTarget = isMyHealerTurn && !isProtectedNightTarget && player.id !== myPlayer?.id
+              // Healer CAN heal self, Silencer CANNOT silence self
+              const canHealTarget = isMyHealerTurn && !isProtectedNightTarget
               const canSilenceTarget = isMySilencerTurn && !isProtectedNightTarget && player.id !== myPlayer?.id
               const canNightActionTarget = canHealTarget || canSilenceTarget
               const selectedNightActionTarget = selectedNightAction?.targetId === player.id
@@ -972,6 +1088,7 @@ export default function GameBoard({
                 : canSilenceTarget
                   ? 'silence'
                   : 'heal'
+              const actionTone = nightActionTone
               const isActiveNightRole =
                 (gameStep === 'healer-turn' && player.role === healerRole && !healerActionDone) ||
                 (gameStep === 'silencer-turn' && player.role === silencerRole && !silencerActionDone)
@@ -979,6 +1096,11 @@ export default function GameBoard({
               const activeNightActionIcon = gameStep === 'silencer-turn'
                 ? '/cartoon/icons/Lock-Sliver.svg'
                 : '/cartoon/icons/Potion-Green-Border.svg'
+              const countdownKey = getCountdownKeyForPlayer(player)
+              
+              // Only disable click on self during SILENCER turn (healer can heal self)
+              const isSilencerTurnAndSelf = isMySilencerTurn && player.id === myPlayer?.id
+              
               return (
                 <MiniPlayerToken
                   key={player.id}
@@ -992,12 +1114,16 @@ export default function GameBoard({
                   isNightDimmed={isNight && !canSeeActiveNightRole}
                   showSleepEffect={isNight && !canSeeActiveNightRole && !canNightActionTarget && !selectedNightActionTarget}
                   isRoleActive={canSeeActiveNightRole}
+                  showCountdown={Boolean(countdownKey)}
+                  countdownKey={countdownKey ?? undefined}
+                  countdownDurationSec={currentTurnCountdownDuration}
                   actionIconSrc={isSilencerToken || (isNarrator && isActiveNightRole) ? activeNightActionIcon : '/cartoon/icons/Potion-Green-Border.svg'}
                   actionIconSide={position === 'right' ? 'left' : 'right'}
                   isActionTarget={canNightActionTarget}
-                  actionTargetTone={nightActionTone}
+                  actionTargetTone={actionTone}
                   isSelectedActionTarget={selectedNightActionTarget}
-                  onClick={() => setExpandedPlayer(player)}
+                  showCheckmark={selectedNightActionTarget && selectedNightAction?.confirmed}
+                  onClick={isSilencerTurnAndSelf ? undefined : () => setExpandedPlayer(player)}
                   onActionClick={
                     canHealTarget
                       ? () => handleHealTarget(player.id)
@@ -1027,28 +1153,132 @@ export default function GameBoard({
 
       {/* ── Phase overlays ─────────────────────────────────────────────────── */}
       <AnimatePresence>
-        {gameStep === 'group-response' && (
-          <GroupResponseOverlay
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showNtgRewardPicker && gameStep === 'group-response' && myPlayer?.isSender && (
+          <NtgRewardPicker
             players={players}
-            myPlayer={myPlayer ?? null}
-            responseText={responseText}
-            hasResponded={hasResponded}
-            hasNTGVoted={hasNTGVoted}
-            onChangeResponse={setResponseText}
-            onSendResponse={handleSendResponse}
-            onNTGVote={handleNTGVote}
+            rewardedIds={ntgVotedIds}
+            pendingIds={pendingNtgRewardIds}
+            onTogglePending={togglePendingNtgReward}
+            onConfirm={confirmPendingNtgRewards}
+            onClose={() => {
+              setPendingNtgRewardIds(new Set())
+              setShowNtgRewardPicker(false)
+            }}
           />
         )}
       </AnimatePresence>
 
       <AnimatePresence>
-        {gameStep === 'reflection-sharing' && myPlayer?.isSender && (
-          <ReflectionSharingOverlay
-            text={reflectionShareText}
-            hasShared={hasSharedReflection}
-            onChange={setReflectionShareText}
-            onShare={handleShareReflection}
+        {showRoleRewardPicker && gameStep === 'reflection-sharing' && isNarrator && (
+          <RoleRewardPicker
+            players={players}
+            ntgVotedIds={ntgVotedIds}
+            onConfirm={handleRoleRewards}
+            onClose={() => {
+              setShowRoleRewardPicker(false)
+              nextTurn(roomState.id)
+            }}
           />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {gameStep === 'reflection-sharing' && isNarrator && !hasSharedReflection && !showRoleRewardPicker && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="relative w-full max-w-[320px] rounded-3xl bg-white px-6 py-5 shadow-[0_8px_0_rgba(0,0,0,0.12)] mx-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="text-center mb-4">
+                <div className="font-display text-lg text-[var(--c-pink)] mb-2">
+                  Xác nhận phần thưởng
+                </div>
+                <div className="font-body text-sm text-black/65 leading-relaxed">
+                  Người Trao Gửi đã chia sẻ đầy đủ cảm xúc và phản tư. Bạn có muốn trao thưởng +5 coin vàng không?
+                </div>
+              </div>
+              
+              <div className="flex gap-2">
+                <CartoonButton
+                  color="orange"
+                  size="md"
+                  className="flex-1"
+                  onClick={() => {
+                    console.log('[NTG Reward] Skip button clicked')
+                    
+                    // Check if there are eligible players for role rewards
+                    const hasEligiblePlayers = players.some(p => 
+                      p.role === 'Người Kết Nối' || 
+                      p.role === 'Người Gợi Mở' || 
+                      p.role === 'Người Dẫn Lối'
+                    )
+                    
+                    console.log('[NTG Reward] Has eligible players:', hasEligiblePlayers)
+                    
+                    setHasSharedReflection(true)
+                    
+                    if (hasEligiblePlayers) {
+                      // Small delay to ensure popup transition
+                      setTimeout(() => {
+                        console.log('[NTG Reward] Opening RoleRewardPicker')
+                        setShowRoleRewardPicker(true)
+                      }, 100)
+                    } else {
+                      console.log('[NTG Reward] No eligible players, advancing phase')
+                      nextTurn(roomState.id)
+                    }
+                  }}
+                >
+                  Bỏ qua
+                </CartoonButton>
+                <CartoonButton
+                  color="green"
+                  size="md"
+                  className="flex-1"
+                  onClick={() => {
+                    console.log('[NTG Reward] Confirm button clicked')
+                    shareReflection(roomState.id, 'Quản trò xác nhận NTG hoàn thành vai trò')
+                    
+                    // Check if there are eligible players for role rewards
+                    const hasEligiblePlayers = players.some(p => 
+                      p.role === 'Người Kết Nối' || 
+                      p.role === 'Người Gợi Mở' || 
+                      p.role === 'Người Dẫn Lối'
+                    )
+                    
+                    console.log('[NTG Reward] Has eligible players:', hasEligiblePlayers)
+                    
+                    setHasSharedReflection(true)
+                    
+                    if (hasEligiblePlayers) {
+                      // Small delay to ensure popup transition
+                      setTimeout(() => {
+                        console.log('[NTG Reward] Opening RoleRewardPicker')
+                        setShowRoleRewardPicker(true)
+                      }, 100)
+                    } else {
+                      console.log('[NTG Reward] No eligible players, advancing phase')
+                      nextTurn(roomState.id)
+                    }
+                  }}
+                >
+                Xác nhận
+                </CartoonButton>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -1115,7 +1345,9 @@ export default function GameBoard({
               </div>
               <div className="mt-1 font-body text-sm leading-snug text-black/65">
                 {selectedNightAction.type === 'heal'
-                  ? `Người Chữa Lành sẽ bảo vệ ${selectedNightAction.targetName}.`
+                  ? selectedNightAction.targetId === myPlayer?.id
+                    ? 'Người Chữa Lành sẽ bảo vệ bản thân.'
+                    : `Người Chữa Lành sẽ bảo vệ ${selectedNightAction.targetName}.`
                   : `Người Im Lặng sẽ chọn ${selectedNightAction.targetName}.`}
               </div>
               <div className="mt-4 grid grid-cols-2 gap-2">
@@ -1274,22 +1506,12 @@ export default function GameBoard({
       {/* Coin card overlay */}
       <AnimatePresence>
         {coinPreview && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-            onClick={() => setCoinPreview(null)}
-          >
-            <FlipCard
-              frontImage={coinPreview.front}
-              backImage={coinPreview.back}
-              altText={coinPreview.alt}
-              size="large"
-              aspect="coin"
-              onClose={() => setCoinPreview(null)}
-            />
-          </motion.div>
+          <CoinCarousel
+            initialCoinType={coinPreview.coinType}
+            title={coinPreview.title}
+            coins={myCoinCount}
+            onClose={() => setCoinPreview(null)}
+          />
         )}
       </AnimatePresence>
 
@@ -1419,6 +1641,43 @@ export default function GameBoard({
         onGuide={() => setShowMenu(false)}
         onQuit={() => { setShowMenu(false); onLeave() }}
       />
+
+      {/* NTG Reward Success Popup */}
+      <AnimatePresence>
+        {ntgRewardSuccess && (
+          <motion.div
+            className="absolute inset-0 z-[80] flex items-center justify-center bg-black/45 px-6 backdrop-blur-[2px]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setNtgRewardSuccess(null)}
+          >
+            <motion.div
+              className="relative w-full max-w-[300px] rounded-3xl bg-white px-6 py-5 text-center shadow-[0_8px_0_rgba(0,0,0,0.12)]"
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img src="/cartoon/icons/Checkmark.svg" alt="Success" className="w-16 h-16 mx-auto mb-3" />
+              <div className="font-display text-lg text-[var(--c-black)] mb-2">
+                Tặng coin thành công
+              </div>
+              <div className="font-body text-sm text-black/65 leading-relaxed">
+                Bạn đã tặng coin cho {ntgRewardSuccess.names.join(', ')}
+              </div>
+              <CartoonButton
+                color="green"
+                size="md"
+                className="w-full mt-4"
+                onClick={() => setNtgRewardSuccess(null)}
+              >
+                Đóng
+              </CartoonButton>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

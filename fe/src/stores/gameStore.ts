@@ -28,6 +28,7 @@ interface GameState {
   // Actions - Cards
   selectCard: (card: CardData, category: CardCategory | 'situation') => void
   clearSelectedCards: () => void
+  clearSelectedCard: (category: CardCategory) => void
 
   // Actions - UI
   setExpandedPlayer: (player: Player | null) => void
@@ -88,6 +89,19 @@ export const useGameStore = create<GameState>()(
         }),
 
       clearSelectedCards: () => set({ selectedCards: { reflections: [] } }),
+      clearSelectedCard: (category) =>
+        set((state) => {
+          if (category === 'reflection') {
+            return { selectedCards: { ...state.selectedCards, reflections: [] } }
+          }
+          if (category === 'role') {
+            return { selectedCards: state.selectedCards }
+          }
+
+          const selectedCards = { ...state.selectedCards }
+          delete selectedCards[category]
+          return { selectedCards }
+        }),
 
       // UI actions
       setExpandedPlayer: (player) => set({ expandedPlayer: player }),

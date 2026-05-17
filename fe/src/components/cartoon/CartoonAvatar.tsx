@@ -11,6 +11,10 @@ interface CartoonAvatarProps extends React.HTMLAttributes<HTMLDivElement> {
   bgIndex?: number
   /** Override the white border color */
   borderColor?: string
+  countdownColor?: string
+  showCountdown?: boolean
+  countdownKey?: string
+  countdownDurationSec?: number
   /** Legacy: single index for both */
   colorIndex?: number
 }
@@ -19,6 +23,10 @@ export function CartoonAvatar({
   name, size = 'md',
   avatarIndex, bgIndex, colorIndex = 0,
   borderColor = 'white',
+  countdownColor,
+  showCountdown,
+  countdownKey,
+  countdownDurationSec = 30,
   className, style, ...props
 }: CartoonAvatarProps) {
   const aIdx = (avatarIndex ?? colorIndex) % AVATAR_ICONS.length
@@ -43,13 +51,17 @@ export function CartoonAvatar({
     >
       {/* White border layer */}
       <div
-        className="absolute"
+        key={showCountdown ? countdownKey : 'static-border'}
+        className={cn('absolute', showCountdown && 'avatar-countdown-border')}
         style={{
           inset: s.inset,
-          background: borderColor,
+          background: showCountdown
+            ? `conic-gradient(from 0deg, #e6f9ff 0deg var(--avatar-countdown-gap), ${countdownColor ?? borderColor} var(--avatar-countdown-gap) 360deg)`
+            : borderColor,
+          '--avatar-countdown-duration': `${countdownDurationSec}s`,
           maskImage: MASK, maskSize: MASK_SIZE,
           WebkitMaskImage: MASK, WebkitMaskSize: MASK_SIZE,
-        }}
+        } as React.CSSProperties}
       />
       {/* Color fill */}
       <div

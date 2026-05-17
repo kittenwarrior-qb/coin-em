@@ -12,13 +12,17 @@ interface MiniPlayerTokenProps {
   actionIconSrc?: string
   actionIconSide?: 'left' | 'right'
   isActionTarget?: boolean
-  actionTargetTone?: 'heal' | 'silence'
+  actionTargetTone?: 'heal' | 'silence' | 'reward'
   isSelectedActionTarget?: boolean
   showRoleLabel?: boolean
   hideRoleBadge?: boolean
   isNightDimmed?: boolean
   showSleepEffect?: boolean
   isRoleActive?: boolean
+  showCountdown?: boolean
+  countdownKey?: string
+  countdownDurationSec?: number
+  showCheckmark?: boolean
   onClick?: () => void
   onActionClick?: () => void
   onUpdateProfile?: (name: string, avatarIndex: number, bgIndex: number) => void
@@ -34,6 +38,7 @@ const BORDER_SILENCER = '#7D7F8C'
 const BORDER_CONNECTOR = '#3FA7F5'
 const BORDER_OPENER = '#A66CFF'
 const BORDER_GUIDE = '#F59E42'
+const COUNTDOWN_OTHER = '#2F76AC'
 
 const ROLE_LABELS: Record<string, string> = {
   'Người Quản trò': 'Quản trò',
@@ -124,6 +129,10 @@ export function MiniPlayerToken({
   isNightDimmed,
   showSleepEffect,
   isRoleActive,
+  showCountdown,
+  countdownKey,
+  countdownDurationSec = 30,
+  showCheckmark,
   onClick,
   onActionClick,
   onUpdateProfile,
@@ -142,12 +151,21 @@ export function MiniPlayerToken({
   const shouldShowRoleLabel = Boolean(
     !hideRoleBadge && roleLabel && (showRoleLabel || isTop || isBottom || player.isNarrator || player.isSender)
   )
-  const actionTargetColor = actionTargetTone === 'silence' ? BORDER_SILENCER : BORDER_HEALER
+  const actionTargetColor = actionTargetTone === 'silence'
+    ? BORDER_SILENCER
+    : actionTargetTone === 'reward'
+      ? BORDER_NTG
+      : BORDER_HEALER
   const borderColor = shouldShowRoleLabel
       ? roleColor
       : player.isMe
         ? BORDER_ME
         : BORDER_DEFAULT
+  const countdownColor = (isTop || player.isNarrator)
+    ? BORDER_NTG
+    : (isBottom || player.isSender)
+      ? BORDER_SENDER
+      : COUNTDOWN_OTHER
   const labelPathId = `role-arc-${player.id.replace(/[^a-zA-Z0-9_-]/g, '-')}`
 
   const handleClick = () => {
@@ -240,6 +258,10 @@ export function MiniPlayerToken({
               avatarIndex={displayAvatarIdx}
               bgIndex={displayBgIdx}
               borderColor={borderColor}
+              countdownColor={countdownColor}
+              showCountdown={showCountdown}
+              countdownKey={countdownKey}
+              countdownDurationSec={countdownDurationSec}
               size="lg"
             />
           </motion.div>
@@ -287,6 +309,32 @@ export function MiniPlayerToken({
                 bottom: -8,
                 left: -8,
                 filter: 'drop-shadow(0 3px 4px rgba(0,0,0,0.28))',
+              }}
+              draggable={false}
+            />
+          )}
+          {showCheckmark && (
+            <motion.img
+              src="/cartoon/icons/Checkmark-Cartoon.svg"
+              alt=""
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{
+                scale: [0, 1.2, 1],
+                opacity: [0, 1, 0.85, 0.95, 0.85, 0.95, 0.85],
+              }}
+              transition={{
+                duration: 2,
+                times: [0, 0.2, 0.3, 0.5, 0.6, 0.8, 1],
+                repeat: Infinity,
+                repeatDelay: 0.5,
+                ease: 'easeOut',
+              }}
+              className="absolute z-40 h-12 w-12 object-contain pointer-events-none"
+              style={{
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.35))',
               }}
               draggable={false}
             />

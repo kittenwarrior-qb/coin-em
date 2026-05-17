@@ -46,6 +46,7 @@ export interface RoomState {
   currentNarrator?: string | null
   mutedPlayer?: string | null
   selectedCard?: CardData | null
+  ntgVotes?: Record<string, string[]>
   gameLog?: GameLogEntry[]
   nightActions?: {
     silenced: boolean

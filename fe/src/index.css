@@ -602,6 +602,21 @@
   .border-cartoon    { border: var(--border-width) solid var(--c-black); }
   .border-cartoon-2  { border: 2px solid var(--c-black); }
 
+  @property --avatar-countdown-gap {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+  }
+
+  @keyframes avatar-countdown-drain {
+    from { --avatar-countdown-gap: 0deg; }
+    to { --avatar-countdown-gap: 360deg; }
+  }
+
+  .avatar-countdown-border {
+    animation: avatar-countdown-drain var(--avatar-countdown-duration, 30s) linear forwards;
+  }
+
   /* Press animation (for non-button elements) */
   .press-cartoon {
     transition: transform 80ms ease;

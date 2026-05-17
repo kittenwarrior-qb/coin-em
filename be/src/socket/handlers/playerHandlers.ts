@@ -68,6 +68,10 @@ export function registerPlayerHandlers(io: Server, socket: Socket) {
     } else {
       io.to(roomId).emit('room_closed', { roomId })
       console.log(`[room_closed] Room ${roomId} closed after last player left`)
+      
+      // Broadcast updated room list to all connected clients
+      const availableRooms = roomService.getAvailableRooms()
+      io.emit('rooms_list', availableRooms)
     }
   })
 
@@ -110,6 +114,10 @@ export function registerPlayerHandlers(io: Server, socket: Socket) {
       } else {
         io.to(roomId).emit('room_closed', { roomId })
         console.log(`[room_closed] Phòng ${roomId} đã đóng`)
+        
+        // Broadcast updated room list to all connected clients
+        const availableRooms = roomService.getAvailableRooms()
+        io.emit('rooms_list', availableRooms)
       }
     }, 10_000)
 

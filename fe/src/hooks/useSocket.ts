@@ -35,6 +35,7 @@ interface RoomState {
   currentNarrator?: string | null
   mutedPlayer?: string | null
   selectedCard?: CardData | null
+  ntgVotes?: Record<string, string[]>
   gameLog?: GameLogEntry[]
   nightActions?: {
     silenced: boolean
@@ -414,10 +415,22 @@ export function useSocket(): UseSocketReturn {
       roomStateRef.current = null
       setRoomState(null)
       setResumeCandidates(removeResumeCandidate(roomId))
+      
+      // Auto-refresh room list to remove closed room from UI
+      if (socketRef.current) {
+        socketRef.current.emit('list_rooms')
+      }
     })
 
     socket.on('error', (err: { code: string; message: string }) => {
       console.error('[Socket] Error:', err)
+      
+      // Handle rate limit silently - the delay in confirmPendingNtgRewards should prevent this
+      if (err.code === 'RATE_LIMITED') {
+        console.warn('[Socket] Rate limited - requests are being sent too quickly')
+        return
+      }
+      
       // If error arrives while reconnect is pending
       if (reconnectPending.current) {
         reconnectPending.current = false
@@ -639,9 +652,13 @@ export function useSocket(): UseSocketReturn {
     socketRef.current.emit('send_response', { roomId, message })
   }, [])
 
-  const ntgVote = useCallback((roomId: string, targetSocketId: string) => {
+  const ntgVote = useCallback((roomId: string, targetSocketId: string | string[]) => {
     if (!socketRef.current) return
-    socketRef.current.emit('ntg_vote', { roomId, targetSocketId })
+    if (Array.isArray(targetSocketId)) {
+      socketRef.current.emit('ntg_vote', { roomId, targetSocketIds: targetSocketId })
+    } else {
+      socketRef.current.emit('ntg_vote', { roomId, targetSocketId })
+    }
   }, [])
 
   const shareReflection = useCallback((roomId: string, message: string) => {

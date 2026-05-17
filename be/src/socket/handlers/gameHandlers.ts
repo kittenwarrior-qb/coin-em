@@ -577,7 +577,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         return
       }
 
-      roomRepository.save(result.room!)
+      await roomRepository.saveAndWait(result.room!)
       console.log(`[select_card] ${actionType} by ${socket.id} in room ${roomId}`)
       io.to(roomId).emit('card_selected', {
         actorId: actor.userId,
@@ -585,6 +585,27 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         type: actionType,
         room: gameService.getPublicState(result.room!),
       })
+
+      // Auto-advance to next phase after NTG selects situation/emotion cards.
+      if (actionType === 'SELECT_CARD' && (result.room!.phase === 'situation-card' || result.room!.phase === 'emotion-card')) {
+        const selectedPhase = result.room!.phase
+        const delayMs = selectedPhase === 'situation-card' ? 2000 : 350
+        console.log(`[select_card] Auto-advancing after ${selectedPhase} selection in room ${roomId}`)
+        
+        // Let the selected card sync to clients before moving on.
+        setTimeout(async () => {
+          const currentRoom = roomRepository.findById(roomId)
+          if (!currentRoom || currentRoom.phase !== selectedPhase) return
+          if (!currentRoom.currentNarrator) return
+          
+          const advanceResult = await gameService.advanceTurn(currentRoom, currentRoom.currentNarrator)
+          if (advanceResult.success && advanceResult.room) {
+            await roomRepository.saveAndWait(advanceResult.room)
+            io.to(roomId).emit('turn_changed', gameService.getPublicState(advanceResult.room))
+            console.log(`[select_card] Auto-advanced to phase: ${advanceResult.room.phase}`)
+          }
+        }, delayMs)
+      }
 
       if (callback) callback({ success: true })
     } catch (error: any) {
@@ -660,10 +681,11 @@ export function registerGameHandlers(io: Server, socket: Socket) {
   })
 
   /**
-   * NTG votes for best responder in group-response phase
-   * Awards +5 yellow coins to the voted player
+   * NTG votes for best responder(s) in group-response phase
+   * Awards +5 yellow coins to each voted player
+   * Accepts single targetSocketId or array of targetSocketIds
    */
-  socket.on('ntg_vote', async ({ roomId, targetSocketId }, callback) => {
+  socket.on('ntg_vote', async ({ roomId, targetSocketId, targetSocketIds }, callback) => {
     if (!rateLimitAction(socket, 'ntg_vote', 2000)) {
       const error = { success: false, error: 'RATE_LIMITED', message: 'Vui lòng chờ trước khi vote.' }
       if (callback) callback(error)
@@ -681,9 +703,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       }
 
       const actor = room.players.find((p) => p.socketId === socket.id)
-      const target = room.players.find((p) => p.socketId === targetSocketId)
-
-      if (!actor || !target) {
+      if (!actor) {
         const error = { success: false, error: 'PLAYER_NOT_FOUND', message: 'Người chơi không tồn tại.' }
         if (callback) callback(error)
         else socket.emit('error', error)
@@ -706,33 +726,64 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         return
       }
 
-      const gameAction = {
-        type: 'NTG_VOTE' as const,
-        actorId: actor.userId,
-        targetId: target.userId,
-      }
-
-      const result = await gameService.executeAction(room, gameAction)
-
-      if (!result.success) {
-        const error = { success: false, error: result.error, message: result.error || 'Không thể vote.' }
+      // Support both single and multiple targets
+      const targets = targetSocketIds || (targetSocketId ? [targetSocketId] : [])
+      if (targets.length === 0) {
+        const error = { success: false, error: 'NO_TARGET', message: 'Chưa chọn người chơi nào.' }
         if (callback) callback(error)
         else socket.emit('error', error)
         return
       }
 
-      roomRepository.save(result.room!)
-      console.log(`[ntg_vote] NTG ${socket.id} voted ${targetSocketId} in room ${roomId}`)
+      let updatedRoom = room
+      const votedPlayers: Array<{ userId: string; name: string }> = []
 
-      io.to(roomId).emit('ntg_vote_cast', {
-        ntgId: actor.userId,
-        votedId: target.userId,
-        votedName: target.name,
-        bonus: 5,
-        room: gameService.getPublicState(result.room!),
-      })
+      // Execute vote for each target
+      for (const targetId of targets) {
+        const target = updatedRoom.players.find((p) => p.socketId === targetId)
+        if (!target) {
+          console.warn(`[ntg_vote] Target ${targetId} not found, skipping`)
+          continue
+        }
 
-      if (callback) callback({ success: true })
+        const gameAction = {
+          type: 'NTG_VOTE' as const,
+          actorId: actor.userId,
+          targetId: target.userId,
+        }
+
+        const result = await gameService.executeAction(updatedRoom, gameAction)
+        if (!result.success) {
+          console.warn(`[ntg_vote] Failed to vote for ${targetId}: ${result.error}`)
+          continue
+        }
+
+        updatedRoom = result.room!
+        votedPlayers.push({ userId: target.userId, name: target.name })
+      }
+
+      if (votedPlayers.length === 0) {
+        const error = { success: false, error: 'NO_VOTES_PROCESSED', message: 'Không thể vote cho người chơi nào.' }
+        if (callback) callback(error)
+        else socket.emit('error', error)
+        return
+      }
+
+      roomRepository.save(updatedRoom)
+      console.log(`[ntg_vote] NTG ${socket.id} voted for ${votedPlayers.length} player(s) in room ${roomId}`)
+
+      // Emit event for each voted player
+      for (const voted of votedPlayers) {
+        io.to(roomId).emit('ntg_vote_cast', {
+          ntgId: actor.userId,
+          votedId: voted.userId,
+          votedName: voted.name,
+          bonus: 5,
+          room: gameService.getPublicState(updatedRoom),
+        })
+      }
+
+      if (callback) callback({ success: true, votedCount: votedPlayers.length })
     } catch (error: any) {
       console.error('[ntg_vote] Error:', error)
       const err = { success: false, error: 'INTERNAL_ERROR', message: error.message }
@@ -770,9 +821,19 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         return
       }
 
-      // Must be NTG
-      if (!actor.isSender) {
-        const error = { success: false, error: 'ONLY_NTG_CAN_SHARE', message: 'Chỉ NTG mới có thể chia sẻ.' }
+      // Must be NTG or Narrator (narrator can confirm reward for NTG)
+      const isNarrator = room.players.find(p => p.isNarrator)?.socketId === socket.id
+      if (!actor.isSender && !isNarrator) {
+        const error = { success: false, error: 'ONLY_NTG_OR_NARRATOR', message: 'Chỉ NTG hoặc Quản trò mới có thể xác nhận.' }
+        if (callback) callback(error)
+        else socket.emit('error', error)
+        return
+      }
+
+      // If narrator is confirming, find the actual NTG
+      const ntgPlayer = actor.isSender ? actor : room.players.find(p => p.isSender)
+      if (!ntgPlayer) {
+        const error = { success: false, error: 'NTG_NOT_FOUND', message: 'Không tìm thấy Người Trao Gửi.' }
         if (callback) callback(error)
         else socket.emit('error', error)
         return
@@ -788,7 +849,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
 
       const gameAction = {
         type: 'SHARE_REFLECTION' as const,
-        actorId: actor.userId,
+        actorId: ntgPlayer.userId, // Use NTG's userId, not narrator's
         data: { message },
       }
 
@@ -802,11 +863,11 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       }
 
       roomRepository.save(result.room!)
-      console.log(`[share_reflection] NTG ${socket.id} shared reflection in room ${roomId}`)
+      console.log(`[share_reflection] ${isNarrator ? 'Narrator confirmed reward for' : ''} NTG ${ntgPlayer.socketId} in room ${roomId}`)
 
       io.to(roomId).emit('reflection_shared', {
-        ntgId: actor.userId,
-        ntgName: actor.name,
+        ntgId: ntgPlayer.userId,
+        ntgName: ntgPlayer.name,
         message,
         bonus: 5,
         room: gameService.getPublicState(result.room!),
