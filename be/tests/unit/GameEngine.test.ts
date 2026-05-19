@@ -205,32 +205,40 @@ describe('GameEngine', () => {
       expect(result.room?.gameLog.some(entry => entry.type === 'GIVE_COIN')).toBe(false)
     })
 
-    it('should remove calculated reward coins when rolling back from reward', () => {
-      const room = setRoomPhase(createPlayingRoom(7), 'reward')
+    it('should remove calculated reward coins when rolling back from reveal-silencer', () => {
+      const room = setRoomPhase(createPlayingRoom(7), 'reveal-silencer')
       const silencer = room.players.find(p => p.originalRole === Role.SILENCER)!
-      const ntg = room.players.find(p => p.isSender)!
+      const correctGuesser = room.players.find(p => p.userId !== silencer.userId && !p.isNarrator)!
 
       room.players = room.players.map(p => {
         if (p.userId === silencer.userId) return { ...p, coins: { ...p.coins, yellow: p.coins.yellow + 7 } }
-        if (p.userId === ntg.userId) return { ...p, coins: { ...p.coins, green: p.coins.green + 4 } }
+        if (p.userId === correctGuesser.userId) return { ...p, coins: { ...p.coins, green: p.coins.green + 4 } }
         return p
       })
+      room.votes = { [correctGuesser.userId]: silencer.userId }
       room.gameLog = [
         { type: 'ROUND_STARTED', actorId: 'system', timestamp: 1, data: { round: 1 } },
         {
           type: 'REWARDS_CALCULATED',
           actorId: 'system',
           timestamp: 2,
-          data: { silencerFound: false, silencerId: silencer.userId, mutedPlayerId: null, ntgGreenBonus: 4 },
+          data: {
+            silencerFound: false,
+            silencerId: silencer.userId,
+            mutedPlayerId: null,
+            silencerYellowBonus: 7,
+            greenGuessBonus: 4,
+            correctGuesserIds: [correctGuesser.userId],
+          },
         },
       ]
 
       const result = engine.previousTurn(room, room.currentNarrator!)
 
       expect(result.success).toBe(true)
-      expect(result.room?.phase).toBe('give-coins')
+      expect(result.room?.phase).toBe('guess-silencer')
       expect(result.room?.players.find(p => p.userId === silencer.userId)?.coins.yellow).toBe(7)
-      expect(result.room?.players.find(p => p.userId === ntg.userId)?.coins.green).toBe(0)
+      expect(result.room?.players.find(p => p.userId === correctGuesser.userId)?.coins.green).toBe(0)
       expect(result.room?.gameLog.some(entry => entry.type === 'REWARDS_CALCULATED')).toBe(false)
     })
   })

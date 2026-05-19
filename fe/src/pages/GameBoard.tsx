@@ -188,6 +188,8 @@ export default function GameBoard({
   const lastNtgRewardPreviewRef = useRef<number | null>(null)
   const lastReflectionRewardPreviewRef = useRef<number | null>(null)
   const lastRoleRewardPreviewRef = useRef<number | null>(null)
+  const lastSilencerRewardPreviewRef = useRef<number | null>(null)
+  const lastCorrectGuessRewardPreviewRef = useRef<number | null>(null)
 
   // Init
   useEffect(() => { setMyIds(mySocketId, myUserId) }, [mySocketId, myUserId, setMyIds])
@@ -285,6 +287,69 @@ export default function GameBoard({
       title: `Bạn đã hoàn thành vai trò và nhận ${bonus} coin vàng`,
     })
   }, [myUserId, roomState.gameLog])
+
+  useEffect(() => {
+    const latestReward = [...(roomState.gameLog ?? [])]
+      .reverse()
+      .find((entry) => entry.type === 'REWARDS_CALCULATED')
+
+    if (gameStep === 'reveal-silencer') return
+    if (!latestReward || latestReward.timestamp === lastSilencerRewardPreviewRef.current) return
+    if (latestReward.data?.silencerId !== myUserId) return
+
+    const bonus = latestReward.data?.silencerYellowBonus ?? (latestReward.data?.silencerFound ? 2 : 7)
+    lastSilencerRewardPreviewRef.current = latestReward.timestamp
+    setCoinPreview({
+      coinType: 'yellow',
+      title: latestReward.data?.silencerFound
+        ? `B\u1ea1n \u0111\u00e3 ho\u00e0n th\u00e0nh vai tr\u00f2 Ng\u01b0\u1eddi Im L\u1eb7ng: b\u1ecb \u0111o\u00e1n ra, nh\u1eadn ${bonus} coin v\u00e0ng`
+        : `B\u1ea1n \u0111\u00e3 ho\u00e0n th\u00e0nh vai tr\u00f2 Ng\u01b0\u1eddi Im L\u1eb7ng: kh\u00f4ng b\u1ecb \u0111o\u00e1n ra, nh\u1eadn ${bonus} coin v\u00e0ng`,
+    })
+  }, [gameStep, myUserId, roomState.gameLog])
+
+  useEffect(() => {
+    const latestReward = [...(roomState.gameLog ?? [])]
+      .reverse()
+      .find((entry) => entry.type === 'REWARDS_CALCULATED')
+
+    if (gameStep === 'reveal-silencer') return
+    if (!latestReward || latestReward.timestamp === lastCorrectGuessRewardPreviewRef.current) return
+    if (!latestReward.data?.correctGuesserIds?.includes(myUserId)) return
+
+    const bonus = latestReward.data?.greenGuessBonus ?? (latestReward.data?.silencerFound ? roomState.players.length : Math.max(0, roomState.players.length - 3))
+    lastCorrectGuessRewardPreviewRef.current = latestReward.timestamp
+    setCoinPreview({
+      coinType: 'green',
+      title: `B\u1ea1n \u0111\u00e3 \u0111o\u00e1n tr\u00fang Ng\u01b0\u1eddi Im L\u1eb7ng v\u00e0 nh\u1eadn ${bonus} coin xanh`,
+    })
+  }, [gameStep, myUserId, roomState.gameLog, roomState.players.length])
+
+  const showRevealRewardPreview = useCallback(() => {
+    const latestReward = [...(roomState.gameLog ?? [])]
+      .reverse()
+      .find((entry) => entry.type === 'REWARDS_CALCULATED')
+
+    if (!latestReward) return
+
+    if (latestReward.data?.silencerId === myUserId && latestReward.timestamp !== lastSilencerRewardPreviewRef.current) {
+      const bonus = latestReward.data?.silencerYellowBonus ?? (latestReward.data?.silencerFound ? 2 : 7)
+      lastSilencerRewardPreviewRef.current = latestReward.timestamp
+      setCoinPreview({
+        coinType: 'yellow',
+        title: `B\u1ea1n nh\u1eadn \u0111\u01b0\u1ee3c ${bonus} coin v\u00e0ng khi ho\u00e0n th\u00e0nh vai tr\u00f2 Ng\u01b0\u1eddi Im L\u1eb7ng`,
+      })
+      return
+    }
+
+    if (latestReward.data?.correctGuesserIds?.includes(myUserId) && latestReward.timestamp !== lastCorrectGuessRewardPreviewRef.current) {
+      const bonus = latestReward.data?.greenGuessBonus ?? (latestReward.data?.silencerFound ? roomState.players.length : Math.max(0, roomState.players.length - 3))
+      lastCorrectGuessRewardPreviewRef.current = latestReward.timestamp
+      setCoinPreview({
+        coinType: 'green',
+        title: `B\u1ea1n nh\u1eadn \u0111\u01b0\u1ee3c ${bonus} coin xanh khi \u0111o\u00e1n \u0111\u00fang Ng\u01b0\u1eddi Im L\u1eb7ng`,
+      })
+    }
+  }, [myUserId, roomState.gameLog, roomState.players.length])
 
   // Reset phase state on step change
   useEffect(() => {
@@ -962,6 +1027,7 @@ export default function GameBoard({
             renderCenter={() => (
               <TableBoard
                 selectedCards={boardSelectedCards}
+                phase={gameStep}
                 revealSituation={gameStep !== 'situation-card'}
                 onCardClick={(card, revealed) => setCardPreview({ card, revealed })}
                 status={
@@ -1290,7 +1356,13 @@ export default function GameBoard({
       </AnimatePresence>
 
       <AnimatePresence>
-        {gameStep === 'reveal-silencer' && <RevealSilencerOverlay players={players} votes={roomState.votes ?? {}} />}
+        {gameStep === 'reveal-silencer' && (
+          <RevealSilencerOverlay
+            players={players}
+            votes={roomState.votes ?? {}}
+            onCloseComplete={showRevealRewardPreview}
+          />
+        )}
       </AnimatePresence>
 
       <AnimatePresence>

@@ -87,8 +87,9 @@ export class GameEngine {
       ]
     }
 
-    // Calculate rewards when entering reward phase
-    if (nextPhase === 'reward') {
+    // Calculate end-of-round rewards as soon as roles are revealed so coin popups
+    // can appear right after the reveal overlay is dismissed.
+    if (nextPhase === 'reveal-silencer' && !this.hasCalculatedRewardsForRound(updatedRoom)) {
       updatedRoom = this.calculateRewards(updatedRoom)
     }
 
@@ -213,7 +214,7 @@ export class GameEngine {
         actionTypes.add('ROLE_REWARD')
       }
       if (phase === 'give-coins') actionTypes.add('GIVE_COIN')
-      if (phase === 'reward') actionTypes.add('REWARDS_CALCULATED')
+      if (phase === 'reveal-silencer') actionTypes.add('REWARDS_CALCULATED')
     }
 
     addPhaseTypes(currentPhase)
@@ -299,10 +300,12 @@ export class GameEngine {
 
       if (entry.type === 'REWARDS_CALCULATED') {
         const silencer = players.find((player) => player.originalRole === Role.SILENCER)
-        const ntg = players.find((player) => player.isSender)
         const mutedUserId = entry.data?.mutedPlayerId ?? room.mutedPlayer
         const silencerFound = Boolean(entry.data?.silencerFound)
-        const ntgGreenBonus = entry.data?.ntgGreenBonus ?? (silencerFound ? room.players.length : Math.max(0, room.players.length - 3))
+        const greenGuessBonus = entry.data?.greenGuessBonus ?? entry.data?.ntgGreenBonus ?? (silencerFound ? room.players.length : Math.max(0, room.players.length - 3))
+        const correctGuesserIds = entry.data?.correctGuesserIds ?? Object.entries(room.votes ?? {})
+          .filter(([, targetId]) => targetId === silencer?.userId)
+          .map(([voterId]) => voterId)
         const ntgVotedIds = new Set<string>(Object.values(ntgVotes ?? {}).flat())
 
         for (const player of players) {
@@ -323,7 +326,9 @@ export class GameEngine {
           if (yellowBonus > 0) adjustCoins(player.userId, { yellow: -yellowBonus })
         }
 
-        adjustCoins(ntg?.userId, { green: -ntgGreenBonus })
+        for (const guesserId of correctGuesserIds) {
+          adjustCoins(guesserId, { green: -greenGuessBonus })
+        }
       }
     }
 
@@ -364,6 +369,15 @@ export class GameEngine {
    */
   private calculateRewards(room: Room): Room {
     return this.rewardCalculator.calculateRewards(room)
+  }
+
+  private hasCalculatedRewardsForRound(room: Room): boolean {
+    const roundStartIndex = room.gameLog.reduce(
+      (latest, entry, index) => entry.type === 'ROUND_STARTED' && entry.data?.round === room.currentRound ? index : latest,
+      -1,
+    )
+    const firstRoundLog = roundStartIndex >= 0 ? roundStartIndex : 0
+    return room.gameLog.slice(firstRoundLog).some((entry) => entry.type === 'REWARDS_CALCULATED')
   }
 
   /**

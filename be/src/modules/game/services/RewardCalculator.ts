@@ -17,15 +17,14 @@ import { Room, Role } from '../types'
  *   - Người Im Lặng:
  *       not found by vote → +7 yellow
  *       found by vote → +2 yellow
- *   - NTG (Người Trao Gửi):
- *       silencer found → +N green (N = player count)
- *       silencer not found → +(N-3) green, min 0
+ *   - Correct silencer guessers:
+ *       table found silencer -> +N green (N = player count)
+ *       table missed silencer -> +(N-3) green, min 0
  */
 export class RewardCalculator {
   calculateRewards(room: Room): Room {
     const playerCount = room.players.length
     const silencer = room.players.find((p) => p.originalRole === Role.SILENCER)
-    const ntg = room.players.find((p) => p.isSender)
     const guide = room.players.find((p) => p.originalRole === Role.GUIDE)
 
     // Determine if silencer was correctly identified (majority vote)
@@ -39,6 +38,11 @@ export class RewardCalculator {
       if (count > maxVotes) { maxVotes = count; mostVotedId = id }
     })
     const silencerFound = mostVotedId === silencer?.userId
+    const correctGuesserIds = Object.entries(room.votes)
+      .filter(([, targetId]) => targetId === silencer?.userId)
+      .map(([voterId]) => voterId)
+    const greenGuessBonus = silencerFound ? playerCount : Math.max(0, playerCount - 3)
+    const silencerYellowBonus = silencerFound ? 2 : 7
 
     // Who was muted this round (silencer's target, unless healed)
     const mutedUserId = room.mutedPlayer // null if healed or no silence
@@ -86,12 +90,12 @@ export class RewardCalculator {
 
       // ── Người Im Lặng ────────────────────────────────────────────────────────
       if (p.originalRole === Role.SILENCER) {
-        yellowBonus += silencerFound ? 2 : 7
+        yellowBonus += silencerYellowBonus
       }
 
-      // ── NTG: green coins accumulate across all rounds ─────────────────────────
-      if (p.userId === ntg?.userId) {
-        greenBonus = silencerFound ? playerCount : Math.max(0, playerCount - 3)
+      // Correct guessers receive green coins for finding the silencer.
+      if (correctGuesserIds.includes(p.userId)) {
+        greenBonus += greenGuessBonus
       }
 
       return {
@@ -117,7 +121,9 @@ export class RewardCalculator {
             silencerFound,
             silencerId: silencer?.userId,
             mutedPlayerId: mutedUserId,
-            ntgGreenBonus: silencerFound ? playerCount : Math.max(0, playerCount - 3),
+            silencerYellowBonus,
+            greenGuessBonus,
+            correctGuesserIds,
           },
         },
       ],

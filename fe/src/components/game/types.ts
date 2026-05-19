@@ -76,6 +76,10 @@ export interface GameLogEntry {
     amount?: number
     coinType?: CoinType | string
     silencerFound?: boolean
+    silencerId?: string
+    silencerYellowBonus?: number
+    greenGuessBonus?: number
+    correctGuesserIds?: string[]
   }
   timestamp: number
 }
