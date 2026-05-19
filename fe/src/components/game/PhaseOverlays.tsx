@@ -238,9 +238,10 @@ function RevealRoleArc({ text, color, id }: { text: string; color: string; id: s
 interface RevealSilencerProps {
   players: Player[]
   votes: Record<string, string>
+  onCloseComplete?: () => void
 }
 
-export function RevealSilencerOverlay({ players, votes }: RevealSilencerProps) {
+export function RevealSilencerOverlay({ players, votes, onCloseComplete }: RevealSilencerProps) {
   const [closing, setClosing] = useState(false)
   const [hidden, setHidden] = useState(false)
   const voteCounts = Object.values(votes).reduce<Record<string, number>>((acc, targetId) => {
@@ -249,8 +250,7 @@ export function RevealSilencerOverlay({ players, votes }: RevealSilencerProps) {
   }, {})
 
   const voteStats = players
-    .map((player) => ({ player, count: voteCounts[player.userId ?? player.id] ?? 0 }))
-    .filter((item) => item.count > 0)
+    .map((player) => ({ player, roleMeta: getRevealRoleMeta(player), count: voteCounts[player.userId ?? player.id] ?? 0 }))
     .sort((a, b) => b.count - a.count || a.player.name.localeCompare(b.player.name))
 
   const close = () => setClosing(true)
@@ -265,7 +265,10 @@ export function RevealSilencerOverlay({ players, votes }: RevealSilencerProps) {
       className="absolute inset-0 z-40 flex items-center justify-center bg-black/45 px-4 backdrop-blur-[2px]"
       onClick={close}
       onAnimationComplete={() => {
-        if (closing) setHidden(true)
+        if (closing && !hidden) {
+          setHidden(true)
+          onCloseComplete?.()
+        }
       }}
     >
       <motion.div
@@ -340,12 +343,23 @@ export function RevealSilencerOverlay({ players, votes }: RevealSilencerProps) {
           <div className="font-display text-xs text-[var(--c-pink)]">{'Th\u1ed1ng k\u00ea b\u00ecnh ch\u1ecdn'}</div>
           {voteStats.length > 0 ? (
             <div className="mt-2 flex flex-col gap-1.5">
-              {voteStats.map(({ player, count }, index) => (
-                <div key={player.id} className="flex items-center justify-between rounded-xl bg-white/80 px-3 py-2">
-                  <div className="min-w-0 font-display text-[11px] text-[#2F76AC]">
-                    {index + 1}. {player.isMe ? 'B\u1ea1n' : player.name}
+              {voteStats.map(({ player, roleMeta, count }, index) => (
+                <div
+                  key={player.id}
+                  className="flex items-center justify-between gap-3 rounded-xl border bg-white/80 px-3 py-2"
+                  style={{ borderColor: `${roleMeta.color}66` }}
+                >
+                  <div className="min-w-0">
+                    <div className="truncate font-display text-[11px] text-[#2F76AC]">
+                      {index + 1}. {player.isMe ? 'B\u1ea1n' : player.name}
+                    </div>
                   </div>
-                  <div className="font-display text-[11px] text-[var(--c-pink)]">{count} vote</div>
+                  <div className="shrink-0 text-right">
+                    <div className="font-display text-[11px] text-[var(--c-pink)]">{count} vote</div>
+                    <div className="font-body text-[10px] leading-tight" style={{ color: roleMeta.color }}>
+                      {roleMeta.label}
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>

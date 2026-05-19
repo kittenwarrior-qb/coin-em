@@ -286,7 +286,77 @@ describe('Coin Reward System', () => {
     })
   })
 
-  describe('Green Coin Rewards (NTG Only)', () => {
+  describe('Green Coin Rewards (Silencer Guessers)', () => {
+    it('should give +N green coins to every player who guessed the silencer when the table finds them', () => {
+      const narrator = new PlayerBuilder().withUserId('narrator-1').asNarrator().build()
+      const ntg = new PlayerBuilder().withUserId('ntg-1').asSender().withGreenCoins(0).build()
+      const silencer = new PlayerBuilder().withUserId('silencer-1').asSilencer().withYellowCoins(7).build()
+      const otherPlayers = Array.from({ length: 4 }, (_, i) =>
+        new PlayerBuilder()
+          .withUserId(`player-${i}`)
+          .withGreenCoins(0)
+          .build()
+      )
+
+      const room = new RoomBuilder()
+        .withCustomPlayers([narrator, ntg, silencer, ...otherPlayers])
+        .asPlaying()
+        .inPhase('guess-silencer')
+        .withVotes({
+          [ntg.userId]: silencer.userId,
+          [otherPlayers[0].userId]: silencer.userId,
+          [otherPlayers[1].userId]: silencer.userId,
+          [otherPlayers[2].userId]: otherPlayers[0].userId,
+          [otherPlayers[3].userId]: otherPlayers[0].userId,
+        })
+        .build()
+
+      const result = engine.advanceTurn(room, narrator.userId)
+
+      assertThat(result).isSuccessful().hasPhase('reveal-silencer')
+      expect(result.room?.players.find(p => p.userId === silencer.userId)?.coins.yellow).toBe(9)
+      expect(result.room?.players.find(p => p.userId === ntg.userId)?.coins.green).toBe(7)
+      expect(result.room?.players.find(p => p.userId === otherPlayers[0].userId)?.coins.green).toBe(7)
+      expect(result.room?.players.find(p => p.userId === otherPlayers[1].userId)?.coins.green).toBe(7)
+      expect(result.room?.players.find(p => p.userId === otherPlayers[2].userId)?.coins.green).toBe(0)
+      expect(result.room?.gameLog.at(-2)?.data?.correctGuesserIds).toEqual([ntg.userId, otherPlayers[0].userId, otherPlayers[1].userId])
+      expect(result.room?.gameLog.at(-2)?.data?.greenGuessBonus).toBe(7)
+    })
+
+    it('should give +(N - 3) green coins to correct individual guessers when the table misses the silencer', () => {
+      const narrator = new PlayerBuilder().withUserId('narrator-1').asNarrator().build()
+      const ntg = new PlayerBuilder().withUserId('ntg-1').asSender().withGreenCoins(0).build()
+      const silencer = new PlayerBuilder().withUserId('silencer-1').asSilencer().withYellowCoins(7).build()
+      const otherPlayers = Array.from({ length: 4 }, (_, i) =>
+        new PlayerBuilder()
+          .withUserId(`player-${i}`)
+          .withGreenCoins(0)
+          .build()
+      )
+
+      const room = new RoomBuilder()
+        .withCustomPlayers([narrator, ntg, silencer, ...otherPlayers])
+        .asPlaying()
+        .inPhase('guess-silencer')
+        .withVotes({
+          [ntg.userId]: silencer.userId,
+          [otherPlayers[0].userId]: otherPlayers[1].userId,
+          [otherPlayers[1].userId]: otherPlayers[1].userId,
+          [otherPlayers[2].userId]: otherPlayers[1].userId,
+          [otherPlayers[3].userId]: otherPlayers[0].userId,
+        })
+        .build()
+
+      const result = engine.advanceTurn(room, narrator.userId)
+
+      assertThat(result).isSuccessful().hasPhase('reveal-silencer')
+      expect(result.room?.players.find(p => p.userId === silencer.userId)?.coins.yellow).toBe(14)
+      expect(result.room?.players.find(p => p.userId === ntg.userId)?.coins.green).toBe(4)
+      expect(result.room?.players.find(p => p.userId === otherPlayers[0].userId)?.coins.green).toBe(0)
+      expect(result.room?.gameLog.at(-2)?.data?.correctGuesserIds).toEqual([ntg.userId])
+      expect(result.room?.gameLog.at(-2)?.data?.greenGuessBonus).toBe(4)
+    })
+
     it('should give playerCount green coins when silencer found', () => {
       const playerCount = 7
       const ntg = new PlayerBuilder()

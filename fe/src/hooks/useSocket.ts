@@ -64,6 +64,10 @@ interface GameLogEntry {
     amount?: number
     coinType?: string
     silencerFound?: boolean
+    silencerId?: string
+    silencerYellowBonus?: number
+    greenGuessBonus?: number
+    correctGuesserIds?: string[]
   }
   timestamp: number
 }
