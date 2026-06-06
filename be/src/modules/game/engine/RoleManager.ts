@@ -18,19 +18,6 @@ export class RoleManager {
     }
 
     // Restore original roles — clear narrator/sender flags
-    players[currentNarratorIndex] = {
-      ...players[currentNarratorIndex],
-      role: players[currentNarratorIndex].originalRole,
-      isNarrator: false,
-      isSender: false,
-    }
-    players[currentSenderIndex] = {
-      ...players[currentSenderIndex],
-      role: players[currentSenderIndex].originalRole,
-      isNarrator: false,
-      isSender: false,
-    }
-
     // Next narrator (circular)
     const nextNarratorIndex = (currentNarratorIndex + 1) % players.length
 
@@ -44,27 +31,52 @@ export class RoleManager {
       nextSenderIndex = (nextSenderIndex + 1) % players.length
     }
 
+    const isSpecialRole = (role?: Role) => role === Role.NARRATOR || role === Role.SENDER
+    const displacedPlayableRoles = [nextNarratorIndex, nextSenderIndex]
+      .map((index) => players[index].originalRole ?? players[index].role)
+      .filter((role): role is Role => Boolean(role) && !isSpecialRole(role))
+    let displacedIndex = 0
+
+    const rotatedPlayers = players.map((player, index) => {
+      const currentRole = player.originalRole ?? player.role
+      let nextRole = currentRole
+
+      if (isSpecialRole(currentRole) && index !== nextNarratorIndex && index !== nextSenderIndex) {
+        nextRole = displacedPlayableRoles[displacedIndex++] ?? currentRole
+      }
+
+      return {
+        ...player,
+        role: nextRole,
+        originalRole: nextRole,
+        isNarrator: false,
+        isSender: false,
+      }
+    })
+
     // Assign new narrator
-    players[nextNarratorIndex] = {
-      ...players[nextNarratorIndex],
+    rotatedPlayers[nextNarratorIndex] = {
+      ...rotatedPlayers[nextNarratorIndex],
       role: Role.NARRATOR,
+      originalRole: Role.NARRATOR,
       isNarrator: true,
       isSender: false,
     }
 
     // Assign new sender
-    players[nextSenderIndex] = {
-      ...players[nextSenderIndex],
+    rotatedPlayers[nextSenderIndex] = {
+      ...rotatedPlayers[nextSenderIndex],
       role: Role.SENDER,
+      originalRole: Role.SENDER,
       isNarrator: false,
       isSender: true,
     }
 
     return {
       ...room,
-      players,
-      currentNarrator: players[nextNarratorIndex].userId,
-      currentNTG: players[nextSenderIndex].userId,
+      players: rotatedPlayers,
+      currentNarrator: rotatedPlayers[nextNarratorIndex].userId,
+      currentNTG: rotatedPlayers[nextSenderIndex].userId,
     }
   }
 

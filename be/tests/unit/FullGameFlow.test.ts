@@ -31,6 +31,20 @@ function advanceThrough(engine: GameEngine, room: Room, phases: string[]): Room 
   return current
 }
 
+function expectUniqueRoundRoles(room: Room): void {
+  const narrators = room.players.filter(p => p.isNarrator)
+  const senders = room.players.filter(p => p.isSender)
+
+  expect(narrators, `Round ${room.currentRound} should have exactly one narrator`).toHaveLength(1)
+  expect(senders, `Round ${room.currentRound} should have exactly one sender`).toHaveLength(1)
+  expect(narrators[0].userId).not.toBe(senders[0].userId)
+  expect(room.currentNarrator).toBe(narrators[0].userId)
+  expect(room.currentNTG).toBe(senders[0].userId)
+  expect(room.players.every(p => Boolean(p.role))).toBe(true)
+  expect(room.players.filter(p => p.role === Role.NARRATOR)).toHaveLength(1)
+  expect(room.players.filter(p => p.role === Role.SENDER)).toHaveLength(1)
+}
+
 describe('Full Game Flow', () => {
   let engine: GameEngine
 
@@ -203,6 +217,7 @@ describe('Full Game Flow', () => {
     expect(started.room!.totalRounds).toBe(7)
 
     let current = started.room!
+    expectUniqueRoundRoles(current)
 
     // Simulate all 7 rounds
     for (let round = 1; round <= 7; round++) {
@@ -217,6 +232,7 @@ describe('Full Game Flow', () => {
         expect(next.room!.phase).toBe('role-reveal')
         expect(next.room!.currentRound).toBe(round + 1)
         current = next.room!
+        expectUniqueRoundRoles(current)
       }
     }
 
@@ -226,6 +242,23 @@ describe('Full Game Flow', () => {
     expect(endResult.room!.status).toBe('ended')
     expect(endResult.room!.phase).toBe('ended')
     expect(endResult.message).toBe('GAME_ENDED')
+  })
+
+  it('keeps exactly one narrator and one sender across every new round', () => {
+    const started = engine.startGame(createMockRoom(7))
+    let current = started.room!
+
+    expectUniqueRoundRoles(current)
+
+    for (let round = 1; round < current.totalRounds; round++) {
+      current = advanceThrough(engine, current, PHASE_ORDER.slice(1))
+      const nextRound = engine.advanceTurn(current, current.currentNarrator!)
+      expect(nextRound.success).toBe(true)
+      current = nextRound.room!
+      expect(current.phase).toBe('role-reveal')
+      expect(current.currentRound).toBe(round + 1)
+      expectUniqueRoundRoles(current)
+    }
   })
 
   it('Connector gets +5 yellow when responded AND voted by NTG', () => {
@@ -302,6 +335,50 @@ describe('Full Game Flow', () => {
     const connectorAfter = current.players.find(p => p.userId === connector.userId)!
     // Muted → no +2 bonus
     expect(connectorAfter.coins.yellow).toBe(yellowBefore)
+  })
+
+  it('5-player game skips healer-turn (no healer role assigned)', () => {
+    const room = createMockRoom(5)
+    const started = engine.startGame(room)
+    expect(started.success).toBe(true)
+    let current = started.room!
+
+    expect(current.players.some(p => p.originalRole === Role.HEALER)).toBe(false)
+
+    // night → should jump straight to silencer-turn
+    const nightResult = engine.advanceTurn(current, current.currentNarrator!)
+    expect(nightResult.success).toBe(true)
+    current = nightResult.room!
+    expect(current.phase).toBe('night')
+
+    const afterNight = engine.advanceTurn(current, current.currentNarrator!)
+    expect(afterNight.success).toBe(true)
+    expect(afterNight.room!.phase).toBe('silencer-turn')
+  })
+
+  it('6-player game skips healer-turn (no healer role assigned)', () => {
+    const room = createMockRoom(6)
+    const started = engine.startGame(room)
+    expect(started.success).toBe(true)
+    let current = started.room!
+
+    expect(current.players.some(p => p.originalRole === Role.HEALER)).toBe(false)
+
+    current = engine.advanceTurn(current, current.currentNarrator!).room! // → night
+    const afterNight = engine.advanceTurn(current, current.currentNarrator!)
+    expect(afterNight.room!.phase).toBe('silencer-turn')
+  })
+
+  it('7-player game includes healer-turn', () => {
+    const room = createMockRoom(7)
+    const started = engine.startGame(room)
+    let current = started.room!
+
+    expect(current.players.some(p => p.originalRole === Role.HEALER)).toBe(true)
+
+    current = engine.advanceTurn(current, current.currentNarrator!).room! // → night
+    const afterNight = engine.advanceTurn(current, current.currentNarrator!)
+    expect(afterNight.room!.phase).toBe('healer-turn')
   })
 
   it('Connector gets +2 yellow when responded but NOT voted by NTG', () => {

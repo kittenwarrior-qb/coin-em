@@ -192,6 +192,21 @@ describe('RoleManager', () => {
       }
     })
 
+    it('should keep exactly one role per player across rotations', () => {
+      let rotated = createPlayingRoom(7)
+
+      for (let i = 0; i < 20; i++) {
+        rotated = roleManager.rotateRoles(rotated)
+
+        expect(rotated.players.filter(p => p.isNarrator)).toHaveLength(1)
+        expect(rotated.players.filter(p => p.isSender)).toHaveLength(1)
+        expect(rotated.players.every(p => Boolean(p.role))).toBe(true)
+        expect(rotated.players.every(p => Boolean(p.originalRole))).toBe(true)
+        expect(rotated.players.filter(p => p.role === Role.NARRATOR)).toHaveLength(1)
+        expect(rotated.players.filter(p => p.role === Role.SENDER)).toHaveLength(1)
+      }
+    })
+
     it('should skip sender to next player if would collide with narrator', () => {
       // Create room where narrator and sender are adjacent
       const room = createPlayingRoom(5) // Smaller group to test easier

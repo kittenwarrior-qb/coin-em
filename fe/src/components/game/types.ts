@@ -74,6 +74,7 @@ export interface GameLogEntry {
     message?: string
     bonus?: number
     amount?: number
+    receiverGainsGreen?: number
     coinType?: CoinType | string
     silencerFound?: boolean
     silencerId?: string

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { GameEngine } from '../../src/modules/game/engine/GameEngine'
 import { createMockRoom, createPlayingRoom, setRoomPhase } from '../helpers/mockData'
 import { Room, Role } from '../../src/modules/game/types'
@@ -35,6 +35,20 @@ describe('GameEngine', () => {
 
       expect(result.success).toBe(true)
       expect(result.room?.status).toBe('playing')
+    })
+
+    it('should keep exactly one sender when host is forced to narrator', () => {
+      const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0)
+      const room = createMockRoom(7)
+
+      const result = engine.startGame(room)
+
+      randomSpy.mockRestore()
+      expect(result.success).toBe(true)
+      expect(result.room?.players.filter(p => p.isNarrator)).toHaveLength(1)
+      expect(result.room?.players.filter(p => p.isSender)).toHaveLength(1)
+      expect(result.room?.currentNarrator).toBe(room.host)
+      expect(result.room?.currentNTG).toBe(result.room?.players.find(p => p.isSender)?.userId)
     })
 
     it('should fail with less than 5 players', () => {
@@ -243,6 +257,56 @@ describe('GameEngine', () => {
     })
   })
 
+  describe('previousTurn - selected card rollback', () => {
+    it('should remove situation and emotion card logs when rolling back to situation-card', () => {
+      const room = setRoomPhase(createPlayingRoom(7), 'emotion-card')
+      room.selectedCard = { id: 'emotion-vui', category: 'emotion', name: 'Vui' }
+      room.gameLog = [
+        { type: 'ROUND_STARTED', actorId: 'system', timestamp: 1, data: { round: 1 } },
+        {
+          type: 'SELECT_CARD',
+          actorId: room.currentNTG!,
+          timestamp: 2,
+          data: { card: { id: 'situation-1', category: 'situation', name: 'T\u00ecnh hu\u1ed1ng 1' } },
+        },
+        {
+          type: 'SELECT_CARD',
+          actorId: room.currentNTG!,
+          timestamp: 3,
+          data: { card: { id: 'emotion-vui', category: 'emotion', name: 'Vui' } },
+        },
+      ]
+
+      const result = engine.previousTurn(room, room.currentNarrator!)
+
+      expect(result.success).toBe(true)
+      expect(result.room?.phase).toBe('situation-card')
+      expect(result.room?.selectedCard).toBeNull()
+      expect(result.room?.gameLog.some(entry => entry.type === 'SELECT_CARD')).toBe(false)
+    })
+
+    it('should remove reflection card logs when rolling back to group-response', () => {
+      const room = setRoomPhase(createPlayingRoom(7), 'reflection-card')
+      room.selectedCard = { id: 'reflection-1', category: 'reflection', name: 'Ph\u1ea3n t\u01b0 1' }
+      room.gameLog = [
+        { type: 'ROUND_STARTED', actorId: 'system', timestamp: 1, data: { round: 1 } },
+        {
+          type: 'SELECT_CARD',
+          actorId: room.currentNTG!,
+          timestamp: 2,
+          data: { card: { id: 'reflection-1', category: 'reflection', name: 'Ph\u1ea3n t\u01b0 1' } },
+        },
+      ]
+
+      const result = engine.previousTurn(room, room.currentNarrator!)
+
+      expect(result.success).toBe(true)
+      expect(result.room?.phase).toBe('group-response')
+      expect(result.room?.selectedCard).toBeNull()
+      expect(result.room?.gameLog.some(entry => entry.type === 'SELECT_CARD')).toBe(false)
+    })
+  })
+
   describe('executeAction - SILENCE', () => {
     const canReceiveNightAction = (player: any, actorId: string) =>
       player.userId !== actorId && !player.isNarrator && !player.isSender
@@ -439,6 +503,31 @@ describe('GameEngine', () => {
 
       expect(result.success).toBe(false)
       expect(result.error).toBe('Cannot give green coins')
+    })
+
+    it('should fail if coin amount is not a positive integer', () => {
+      const room = setRoomPhase(createPlayingRoom(7), 'give-coins')
+      const giver = room.players[0]
+      const receiver = room.players[1]
+
+      const negative = engine.executeAction(room, {
+        type: 'GIVE_COIN',
+        actorId: giver.userId,
+        targetId: receiver.userId,
+        data: { coinType: 'yellow', amount: -2 },
+      })
+
+      const decimal = engine.executeAction(room, {
+        type: 'GIVE_COIN',
+        actorId: giver.userId,
+        targetId: receiver.userId,
+        data: { coinType: 'yellow', amount: 1.5 },
+      })
+
+      expect(negative.success).toBe(false)
+      expect(negative.error).toBe('Invalid coin amount')
+      expect(decimal.success).toBe(false)
+      expect(decimal.error).toBe('Invalid coin amount')
     })
 
     it('should fail if giver has no yellow coins left', () => {

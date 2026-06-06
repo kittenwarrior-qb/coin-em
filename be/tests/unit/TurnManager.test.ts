@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { TurnManager } from '../../src/modules/game/engine/TurnManager'
+import { Role } from '../../src/modules/game/types'
 import { createPlayingRoom, setRoomPhase } from '../helpers/mockData'
 
 describe('TurnManager', () => {
@@ -104,6 +105,42 @@ describe('TurnManager', () => {
       room.totalRounds = 7
 
       expect(turnManager.shouldEndGame(room)).toBe(false)
+    })
+  })
+
+  describe('healer-turn skip when no healer in room', () => {
+    it('should skip healer-turn when room has no healer (5-6 players)', () => {
+      const room = createPlayingRoom(5)
+      // Override all players to not have healer role (5-player game has no healer)
+      room.players = room.players.map((p) => ({
+        ...p,
+        role: p.originalRole === Role.HEALER ? Role.OPENER : (p.role ?? Role.OPENER),
+        originalRole: p.originalRole === Role.HEALER ? Role.OPENER : p.originalRole,
+      }))
+      expect(room.players.some((p) => p.originalRole === Role.HEALER)).toBe(false)
+
+      const nextFromNight = turnManager.getNextPhase('night', room)
+      expect(nextFromNight).toBe('silencer-turn')
+    })
+
+    it('should include healer-turn when room has a healer (7+ players)', () => {
+      const room = createPlayingRoom(7)
+      expect(room.players.some((p) => p.originalRole === Role.HEALER)).toBe(true)
+
+      const nextFromNight = turnManager.getNextPhase('night', room)
+      expect(nextFromNight).toBe('healer-turn')
+    })
+
+    it('getPreviousPhase should also skip healer-turn when no healer', () => {
+      const room = createPlayingRoom(5)
+      room.players = room.players.map((p) => ({
+        ...p,
+        role: p.originalRole === Role.HEALER ? Role.OPENER : (p.role ?? Role.OPENER),
+        originalRole: p.originalRole === Role.HEALER ? Role.OPENER : p.originalRole,
+      }))
+
+      const prevFromSilencer = turnManager.getPreviousPhase('silencer-turn', room)
+      expect(prevFromSilencer).toBe('night')
     })
   })
 

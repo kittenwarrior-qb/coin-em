@@ -62,6 +62,7 @@ interface GameLogEntry {
     message?: string
     bonus?: number
     amount?: number
+    receiverGainsGreen?: number
     coinType?: string
     silencerFound?: boolean
     silencerId?: string
@@ -126,7 +127,7 @@ interface UseSocketReturn {
   leaveRoom: (roomId: string) => void
   nightAction: (roomId: string, action: string, targetSocketId?: string, cardData?: object) => void
   nextPhase: (roomId: string) => void
-  giveCoin: (roomId: string, receiverSocketId: string, coinType: string) => void
+  giveCoin: (roomId: string, receiverSocketId: string, coinType: string, amount?: number) => void
   submitVote: (roomId: string, suspectSocketId: string) => void
   endGame: (roomId: string) => void
   addFakePlayers: (roomId: string) => void
@@ -206,6 +207,9 @@ export function useSocket(): UseSocketReturn {
   const reconnectPending = useRef(false)
   const roomStateRef = useRef<RoomState | null>(null)
   const [currentSocketId, setCurrentSocketId] = useState<string>('')
+  const [situationPreviewCard, setSituationPreviewCard] = useState<CardData | null>(null)
+  const [situationFanState, setSituationFanState] = useState<{ cards: CardData[]; activePosition: number } | null>(null)
+  const situationFanCardsRef = useRef<CardData[]>([])
 
   const persistResumeFromState = useCallback((state: RoomState) => {
     const userId = getUserId()
@@ -441,6 +445,20 @@ export function useSocket(): UseSocketReturn {
       setAvailableRooms(rooms)
     })
 
+    socket.on('card_preview', ({ card }: { card: CardData | null }) => {
+      setSituationPreviewCard(card)
+    })
+
+    socket.on('situation_fan_state', ({ cards, activePosition }: { cards?: CardData[]; activePosition: number }) => {
+      if (cards && cards.length > 0) situationFanCardsRef.current = cards
+      const resolvedCards = situationFanCardsRef.current
+      if (activePosition < 0) {
+        setSituationFanState(null)
+      } else if (resolvedCards.length > 0) {
+        setSituationFanState({ cards: resolvedCards, activePosition })
+      }
+    })
+
     socket.on('room_closed', ({ roomId }: { roomId: string; reason?: string }) => {
       console.log('[Socket] Room closed:', roomId)
       clearSessionStorage()
@@ -536,9 +554,9 @@ export function useSocket(): UseSocketReturn {
     socketRef.current.emit('next_phase', { roomId })
   }, [])
 
-  const giveCoin = useCallback((roomId: string, receiverSocketId: string, coinType: string) => {
+  const giveCoin = useCallback((roomId: string, receiverSocketId: string, coinType: string, amount = 1) => {
     if (!socketRef.current) return
-    socketRef.current.emit('give_coin', { roomId, receiverSocketId, coinType })
+    socketRef.current.emit('give_coin', { roomId, receiverSocketId, coinType, amount })
   }, [])
 
   const submitVote = useCallback((roomId: string, suspectSocketId: string) => {
@@ -693,6 +711,14 @@ export function useSocket(): UseSocketReturn {
     }
   }, [])
 
+  const emitCardPreview = useCallback((roomId: string, card: CardData | null) => {
+    socketRef.current?.emit('card_preview', { roomId, card })
+  }, [])
+
+  const emitSituationFanState = useCallback((roomId: string, activePosition: number, cards?: CardData[]) => {
+    socketRef.current?.emit('situation_fan_state', { roomId, activePosition, cards })
+  }, [])
+
   const shareReflection = useCallback((roomId: string, message: string) => {
     if (!socketRef.current) return
     socketRef.current.emit('share_reflection', { roomId, message })
@@ -749,6 +775,10 @@ export function useSocket(): UseSocketReturn {
     ntgVote,
     confirmRoleRewards,
     shareReflection,
+    emitCardPreview,
+    emitSituationFanState,
+    situationPreviewCard,
+    situationFanState,
     updateProfile,
     updateRoomSettings,
     setDebugRolePreference,

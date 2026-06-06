@@ -204,7 +204,11 @@ export class ActionValidator {
     }
 
     const coinType = action.data.coinType
-    const amount = action.data.amount || 1
+    const amount = action.data.amount ?? 1
+
+    if (!Number.isInteger(amount) || amount <= 0) {
+      return { valid: false, error: 'Invalid coin amount' }
+    }
 
     // Cannot give green coins
     if (coinType === 'green') {
@@ -322,16 +326,19 @@ export class ActionValidator {
    * Validate share reflection (NTG shares in reflection-sharing phase)
    */
   private validateShareReflection(room: Room, actor: any, action: GameAction): { valid: boolean; error?: string } {
-    // Must be reflection-sharing phase
     if (room.phase !== 'reflection-sharing') {
       return { valid: false, error: 'Not reflection-sharing phase' }
     }
-
-    // Only NTG can share
     if (!actor.isSender) {
       return { valid: false, error: 'ONLY_NTG_CAN_SHARE' }
     }
-
+    // Idempotency: prevent double reward if called twice
+    const alreadyRewarded = room.gameLog.some(
+      (entry) => entry.type === 'SHARE_REFLECTION' && entry.actorId === actor.userId
+    )
+    if (alreadyRewarded) {
+      return { valid: false, error: 'ALREADY_SHARED_REFLECTION' }
+    }
     return { valid: true }
   }
 }
