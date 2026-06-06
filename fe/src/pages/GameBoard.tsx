@@ -278,15 +278,17 @@ export default function GameBoard({
     if (!latestSilence || latestSilence.timestamp === lastMutedNoticeRef.current) return
     if (!latestSilence.targetId || roomState.mutedPlayer !== latestSilence.targetId) return
 
-    const target = roomState.players.find((p) => p.userId === latestSilence.targetId)
+    const targetIdx = roomState.players.findIndex((p) => p.userId === latestSilence.targetId)
+    const target = targetIdx >= 0 ? roomState.players[targetIdx] : null
     if (!target) return
 
     lastMutedNoticeRef.current = latestSilence.timestamp
     setMutedNotice({
       name: target.name,
       isMe: target.userId === myUserId,
-      avatarIndex: target.avatarIndex,
-      bgIndex: target.bgIndex,
+      // Mirror MiniPlayerToken fallback: avatarIndex ?? player position
+      avatarIndex: target.avatarIndex ?? targetIdx,
+      bgIndex: target.bgIndex ?? targetIdx,
       nonce: latestSilence.timestamp,
     })
   }, [myUserId, roomState.gameLog, roomState.mutedPlayer, roomState.players])
