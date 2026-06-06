@@ -211,29 +211,6 @@ function getRevealRoleMeta(player: Player) {
   return REVEAL_ROLE_META.unknown
 }
 
-function RevealRoleArc({ text, color, id }: { text: string; color: string; id: string }) {
-  return (
-    <svg viewBox="0 0 150 34" className="pointer-events-none h-[34px] w-[150px] overflow-visible" aria-hidden="true">
-      <defs>
-        <path id={id} d="M 10 26 Q 75 4 140 26" />
-      </defs>
-      <text
-        className="font-display"
-        fill={color}
-        stroke="rgba(255,255,255,0.92)"
-        strokeWidth={4}
-        paintOrder="stroke fill"
-        fontSize={14}
-        fontWeight={800}
-        textAnchor="middle"
-      >
-        <textPath href={`#${id}`} startOffset="50%" method="align" spacing="auto">
-          {text}
-        </textPath>
-      </text>
-    </svg>
-  )
-}
 
 interface RevealSilencerProps {
   players: Player[]

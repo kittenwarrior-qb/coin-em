@@ -133,7 +133,7 @@ export function GiveCoinPicker({ players, myPlayer, onGiveCoin, onClose }: GiveC
 
           {/* Player grid */}
           <div className="grid max-h-[36dvh] grid-cols-2 gap-2 overflow-y-auto [scrollbar-width:none]">
-            {giftablePlayers.map((player, i) => {
+            {giftablePlayers.map((player) => {
               const avatarIdx = player.avatarIndex ?? players.findIndex(p => p.id === player.id)
               const bgIdx = player.bgIndex ?? players.findIndex(p => p.id === player.id)
               const isSelected = selectedPlayer === player.id
