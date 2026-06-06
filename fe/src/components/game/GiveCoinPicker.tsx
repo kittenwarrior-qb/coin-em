@@ -17,20 +17,22 @@ export function GiveCoinPicker({ players, myPlayer, onGiveCoin, onClose }: GiveC
   const [amount, setAmount] = useState(1)
   const [successName, setSuccessName] = useState<string | null>(null)
 
+  // Everyone except yourself can receive coins
   const giftablePlayers = useMemo(
-    () => players.filter((player) => player.id !== myPlayer?.id && !player.isNarrator && !player.isSender),
+    () => players.filter(p => p.id !== myPlayer?.id),
     [myPlayer?.id, players],
   )
-  const selectedTarget = giftablePlayers.find((player) => player.id === selectedPlayer)
+
+  const selectedTarget = giftablePlayers.find(p => p.id === selectedPlayer)
   const redMax = Math.max(0, myPlayer?.coins.red ?? 0)
   const yellowMax = Math.max(0, myPlayer?.coins.yellow ?? 0)
   const currentMax = coinType === 'red' ? redMax : yellowMax
   const safeAmount = currentMax <= 0 ? 0 : Math.min(Math.max(1, amount), currentMax)
   const canGive = Boolean(selectedTarget && safeAmount > 0)
 
-  const chooseCoinType = (nextType: 'red' | 'yellow') => {
-    const nextMax = nextType === 'red' ? redMax : yellowMax
-    setCoinType(nextType)
+  const chooseCoinType = (next: 'red' | 'yellow') => {
+    const nextMax = next === 'red' ? redMax : yellowMax
+    setCoinType(next)
     setAmount(nextMax <= 0 ? 0 : Math.min(Math.max(1, amount), nextMax))
   }
 
@@ -42,166 +44,154 @@ export function GiveCoinPicker({ players, myPlayer, onGiveCoin, onClose }: GiveC
     setAmount(1)
   }
 
+  const coinColor = coinType === 'yellow' ? '#F5A623' : '#F97BB0'
+  const coinSrc = coinType === 'yellow' ? '/coins/vang.png' : '/coins/do.png'
+  const coinLabel = coinType === 'yellow' ? 'vàng' : 'đỏ'
+
   return (
     <motion.div
-      className="absolute inset-0 z-[90] flex items-center justify-center overflow-hidden bg-black/50 px-4 backdrop-blur-[2px]"
+      className="absolute inset-0 z-[90] flex items-end justify-center overflow-hidden bg-black/50 px-3 pb-3 backdrop-blur-[2px]"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
     >
       <motion.div
-        className="relative flex max-h-[88dvh] w-full max-w-[390px] flex-col overflow-hidden rounded-[30px] border-[3px] border-[var(--c-black)] bg-white shadow-[0_8px_0_rgba(0,0,0,0.24)]"
-        initial={{ scale: 0.88, y: 26 }}
-        animate={{ scale: 1, y: 0 }}
-        exit={{ scale: 0.88, y: 26 }}
-        transition={{ type: 'spring', stiffness: 420, damping: 28 }}
-        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-[390px] overflow-hidden rounded-[28px] border-[3px] border-[var(--c-black)] bg-white shadow-[0_8px_0_rgba(0,0,0,0.22)]"
+        initial={{ y: 80, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 80, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+        onClick={e => e.stopPropagation()}
       >
-        <div className="flex shrink-0 items-center justify-between gap-3 border-b-[3px] border-[var(--c-black)] bg-[var(--c-pink)] px-4 py-3">
-          <div className="min-w-0">
-            <div className="font-display text-sm text-white">Tặng coin cho bạn thích</div>
-          </div>
+        {/* Header */}
+        <div className="flex items-center justify-between gap-3 border-b-[3px] border-[var(--c-black)] bg-[var(--c-pink)] px-4 py-3">
+          <div className="font-display text-sm text-white">🎁 Tặng coin cho bạn</div>
           <button
             type="button"
             className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/20 font-display text-lg leading-none text-white"
             onClick={onClose}
-            aria-label="Đóng"
-          >
-            x
-          </button>
+          >×</button>
         </div>
 
-        <div className="flex shrink-0 items-center justify-center gap-5 bg-[#e6f9ff] px-4 py-2 font-display text-xs text-[var(--c-black)]">
-          <span className="inline-flex items-center gap-1.5">
-            <img src="/coins/do.png" alt="" className="h-5 w-5 object-contain" draggable={false} />
-            {redMax}
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <img src="/coins/vang.png" alt="" className="h-5 w-5 object-contain" draggable={false} />
-            {yellowMax}
-          </span>
-        </div>
-
-        <div className="flex shrink-0 items-center gap-3 bg-[#fff8dc] px-4 py-3">
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => chooseCoinType('yellow')}
-              className={[
-                'flex items-center gap-1 rounded-full border-2 px-3 py-1.5 font-display text-xs transition-all',
-                coinType === 'yellow'
-                  ? 'border-yellow-400 bg-yellow-100 text-yellow-800'
-                  : 'border-transparent bg-white text-gray-500',
-              ].join(' ')}
-            >
-              <img src="/coins/vang.png" alt="" className="h-5 w-5 object-contain" draggable={false} />
-              Vàng
-            </button>
-            <button
-              type="button"
-              onClick={() => chooseCoinType('red')}
-              className={[
-                'flex items-center gap-1 rounded-full border-2 px-3 py-1.5 font-display text-xs transition-all',
-                coinType === 'red'
-                  ? 'border-[var(--c-pink)] bg-pink-100 text-[var(--c-pink)]'
-                  : 'border-transparent bg-white text-gray-500',
-              ].join(' ')}
-            >
-              <img src="/coins/do.png" alt="" className="h-5 w-5 object-contain" draggable={false} />
-              Đỏ
-            </button>
+        <div className="p-4 space-y-4">
+          {/* Coin type selector */}
+          <div className="grid grid-cols-2 gap-2">
+            {(['yellow', 'red'] as const).map(type => {
+              const max = type === 'yellow' ? yellowMax : redMax
+              const active = coinType === type
+              const src = type === 'yellow' ? '/coins/vang.png' : '/coins/do.png'
+              const label = type === 'yellow' ? 'Vàng' : 'Đỏ'
+              const activeColor = type === 'yellow' ? 'border-yellow-400 bg-yellow-50' : 'border-pink-400 bg-pink-50'
+              return (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => chooseCoinType(type)}
+                  disabled={max <= 0}
+                  className={[
+                    'flex items-center justify-center gap-2 rounded-2xl border-2 py-3 font-display text-sm transition-all',
+                    active ? activeColor + ' shadow-[0_3px_0_rgba(0,0,0,0.12)]' : 'border-gray-100 bg-gray-50 text-gray-400',
+                    max <= 0 ? 'opacity-40' : '',
+                  ].join(' ')}
+                >
+                  <img src={src} alt="" className="h-7 w-7 object-contain" draggable={false} />
+                  <span style={{ color: active ? (type === 'yellow' ? '#B45309' : '#BE185D') : undefined }}>
+                    {label} · {max}
+                  </span>
+                </button>
+              )
+            })}
           </div>
 
-          <div className="ml-auto flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setAmount(Math.max(1, safeAmount - 1))}
-              disabled={safeAmount <= 1}
-              className="h-8 w-8 rounded-full border-2 border-gray-300 bg-white font-display text-sm text-gray-600 disabled:opacity-30"
-            >
-              -
-            </button>
-            <input
-              type="number"
-              min={currentMax > 0 ? 1 : 0}
-              max={currentMax}
-              value={safeAmount}
-              disabled={currentMax <= 0}
-              onChange={(event) => setAmount(Math.max(1, Math.min(currentMax, Number(event.target.value) || 1)))}
-              className="h-8 w-12 rounded-lg border-2 border-gray-300 bg-white px-1 text-center font-display text-sm text-[var(--c-black)] disabled:opacity-40"
-            />
-            <button
-              type="button"
-              onClick={() => setAmount(Math.min(currentMax, safeAmount + 1))}
-              disabled={safeAmount >= currentMax}
-              className="h-8 w-8 rounded-full border-2 border-gray-300 bg-white font-display text-sm text-gray-600 disabled:opacity-30"
-            >
-              +
-            </button>
+          {/* Amount selector */}
+          <div className="flex items-center justify-between gap-3 rounded-2xl bg-gray-50 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <img src={coinSrc} alt="" className="h-8 w-8 object-contain" draggable={false} />
+              <span className="font-display text-sm" style={{ color: coinColor }}>
+                Tặng {coinLabel}
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setAmount(Math.max(1, safeAmount - 1))}
+                disabled={safeAmount <= 1 || currentMax <= 0}
+                className="grid h-9 w-9 place-items-center rounded-full border-2 border-gray-200 bg-white font-display text-lg text-gray-600 shadow-[0_2px_0_rgba(0,0,0,0.08)] disabled:opacity-30"
+              >−</button>
+              <span className="w-6 text-center font-display text-xl" style={{ color: coinColor }}>
+                {safeAmount}
+              </span>
+              <button
+                type="button"
+                onClick={() => setAmount(Math.min(currentMax, safeAmount + 1))}
+                disabled={safeAmount >= currentMax || currentMax <= 0}
+                className="grid h-9 w-9 place-items-center rounded-full border-2 border-gray-200 bg-white font-display text-lg text-gray-600 shadow-[0_2px_0_rgba(0,0,0,0.08)] disabled:opacity-30"
+              >+</button>
+            </div>
           </div>
-        </div>
 
-        <div className="min-h-0 flex-1 overflow-hidden bg-[#f9fdff] px-3 py-3">
-          <div className="grid max-h-[40dvh] grid-cols-2 gap-2 overflow-y-auto overflow-x-hidden pr-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-            {giftablePlayers.map((player, index) => {
-              const avatarIndex = player.avatarIndex ?? index
-              const bgIndex = player.bgIndex ?? index
+          {/* Player grid */}
+          <div className="grid max-h-[36dvh] grid-cols-2 gap-2 overflow-y-auto [scrollbar-width:none]">
+            {giftablePlayers.map((player, i) => {
+              const avatarIdx = player.avatarIndex ?? players.findIndex(p => p.id === player.id)
+              const bgIdx = player.bgIndex ?? players.findIndex(p => p.id === player.id)
               const isSelected = selectedPlayer === player.id
-
               return (
                 <button
                   key={player.id}
                   type="button"
                   onClick={() => setSelectedPlayer(isSelected ? null : player.id)}
                   className={[
-                    'flex min-w-0 items-center gap-2 rounded-2xl border-2 p-2 text-left transition-all',
+                    'flex min-w-0 items-center gap-2.5 rounded-2xl border-2 p-2.5 text-left transition-all',
                     isSelected
-                      ? 'border-[var(--c-orange)] bg-[#fff1d6] shadow-[0_3px_0_rgba(0,0,0,0.12)]'
+                      ? 'border-[var(--c-orange)] bg-orange-50 shadow-[0_3px_0_rgba(0,0,0,0.12)]'
                       : 'border-white bg-white shadow-[0_2px_0_rgba(0,0,0,0.08)]',
                   ].join(' ')}
                 >
                   <div
-                    className="grid h-10 w-10 shrink-0 place-items-center rounded-full border-2 border-white shadow-[0_2px_0_rgba(0,0,0,0.12)]"
-                    style={{ background: AVATAR_BG_COLORS[Math.abs(bgIndex) % AVATAR_BG_COLORS.length] }}
+                    className="relative grid h-11 w-11 shrink-0 place-items-center rounded-full border-2 shadow-[0_2px_0_rgba(0,0,0,0.12)]"
+                    style={{
+                      background: AVATAR_BG_COLORS[Math.abs(bgIdx) % AVATAR_BG_COLORS.length],
+                      borderColor: isSelected ? 'var(--c-orange)' : 'white',
+                    }}
                   >
-                    <img
-                      src={AVATAR_ICONS[Math.abs(avatarIndex) % AVATAR_ICONS.length]}
-                      alt=""
-                      className="h-7 w-7 object-contain"
-                      draggable={false}
-                    />
+                    <img src={AVATAR_ICONS[Math.abs(avatarIdx) % AVATAR_ICONS.length]} alt="" className="h-8 w-8 object-contain" draggable={false} />
+                    {isSelected && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-[var(--c-orange)]"
+                      >
+                        <img src="/cartoon/icons/Checkmark-Cartoon.svg" alt="" className="h-3 w-3 object-contain brightness-0 invert" draggable={false} />
+                      </motion.div>
+                    )}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="truncate font-display text-xs text-[#2F76AC]">{player.name}</div>
                   </div>
-                  {isSelected && (
-                    <motion.img
-                      src="/cartoon/icons/Checkmark-Cartoon.svg"
-                      alt=""
-                      className="h-5 w-5 shrink-0"
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: 'spring', stiffness: 480, damping: 16 }}
-                      draggable={false}
-                    />
-                  )}
                 </button>
               )
             })}
           </div>
-        </div>
 
-        <div className="shrink-0 px-4 pb-4">
-          <CartoonButton color="green" size="md" className="w-full" disabled={!canGive} onClick={handleConfirm}>
+          {/* Confirm */}
+          <CartoonButton
+            color="green"
+            size="md"
+            className="w-full"
+            disabled={!canGive}
+            onClick={handleConfirm}
+          >
             {canGive
-              ? `Tặng ${safeAmount} coin ${coinType === 'red' ? 'đỏ' : 'vàng'}`
+              ? `Tặng ${safeAmount} coin ${coinLabel} cho ${selectedTarget?.name}`
               : currentMax <= 0
-                ? `Bạn không còn coin ${coinType === 'red' ? 'đỏ' : 'vàng'}`
+                ? `Hết coin ${coinLabel} rồi!`
                 : 'Chọn người nhận'}
           </CartoonButton>
         </div>
 
+        {/* Success overlay */}
         <AnimatePresence>
           {successName && (
             <motion.div
@@ -217,15 +207,11 @@ export function GiveCoinPicker({ players, myPlayer, onGiveCoin, onClose }: GiveC
                 exit={{ scale: 0.9, opacity: 0 }}
                 transition={{ type: 'spring', stiffness: 440, damping: 24 }}
               >
-                <img
-                  src="/cartoon/icons/Checkmark-Cartoon.svg"
-                  alt=""
-                  className="mx-auto h-14 w-14 object-contain"
-                  draggable={false}
-                />
-                <div className="mt-3 font-display text-base leading-tight text-[var(--c-pink)]">
-                  Bạn đã tặng coin thành công cho {successName}
+                <div className="text-4xl mb-1">🎁</div>
+                <div className="font-display text-base leading-tight text-[var(--c-pink)]">
+                  Tặng coin thành công!
                 </div>
+                <div className="mt-1 font-body text-xs text-black/50">cho {successName}</div>
                 <div className="mt-4 grid grid-cols-2 gap-2">
                   <CartoonButton color="orange" size="sm" onClick={() => setSuccessName(null)}>
                     Tặng tiếp

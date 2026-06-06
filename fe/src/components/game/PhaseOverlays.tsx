@@ -244,17 +244,18 @@ interface RevealSilencerProps {
 export function RevealSilencerOverlay({ players, votes, onCloseComplete }: RevealSilencerProps) {
   const [closing, setClosing] = useState(false)
   const [hidden, setHidden] = useState(false)
+
   const voteCounts = Object.values(votes).reduce<Record<string, number>>((acc, targetId) => {
     acc[targetId] = (acc[targetId] ?? 0) + 1
     return acc
   }, {})
 
-  const voteStats = players
-    .map((player) => ({ player, roleMeta: getRevealRoleMeta(player), count: voteCounts[player.userId ?? player.id] ?? 0 }))
-    .sort((a, b) => b.count - a.count || a.player.name.localeCompare(b.player.name))
+  const silencer = players.find(p => getRevealRoleMeta(p) === REVEAL_ROLE_META.silencer)
+  const silencerVotes = silencer ? (voteCounts[silencer.userId ?? silencer.id] ?? 0) : 0
+  const totalVoters = Object.keys(votes).length
+  const others = players.filter(p => p.id !== silencer?.id)
 
   const close = () => setClosing(true)
-
   if (hidden) return null
 
   return (
@@ -265,111 +266,97 @@ export function RevealSilencerOverlay({ players, votes, onCloseComplete }: Revea
       className="absolute inset-0 z-40 flex items-center justify-center bg-black/45 px-4 backdrop-blur-[2px]"
       onClick={close}
       onAnimationComplete={() => {
-        if (closing && !hidden) {
-          setHidden(true)
-          onCloseComplete?.()
-        }
+        if (closing && !hidden) { setHidden(true); onCloseComplete?.() }
       }}
     >
       <motion.div
         initial={{ scale: 0.9, y: 20, opacity: 0 }}
         animate={{ scale: closing ? 0.92 : 1, y: closing ? 16 : 0, opacity: closing ? 0 : 1 }}
         transition={{ type: 'spring', stiffness: 420, damping: 28 }}
-        className="relative w-full max-w-sm rounded-[28px] border-[3px] border-[var(--c-black)] bg-white p-4 shadow-[0_8px_0_rgba(0,0,0,0.22)] max-h-[82vh] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-        onClick={(event) => event.stopPropagation()}
+        className="relative w-full max-w-sm rounded-[28px] border-[3px] border-[var(--c-black)] bg-white p-5 shadow-[0_8px_0_rgba(0,0,0,0.22)]"
+        onClick={(e) => e.stopPropagation()}
       >
         <button
           type="button"
           className="absolute right-3 top-2 z-20 font-display text-xl leading-none text-[var(--c-pink)]"
           onClick={close}
           aria-label="Đóng"
-        >
-          x
-        </button>
+        >×</button>
 
-        <div className="text-center pr-5">
-          <div className="font-display text-base text-[var(--c-pink)]">{'Tiết lộ vai trò'}</div>
-          <div className="mt-1 font-body text-[11px] leading-snug text-black/55">
-            {'Xem vai trò thật và kết quả bình chọn của cả bàn.'}
-          </div>
+        <div className="text-center mb-5">
+          <div className="font-display text-base text-[var(--c-pink)]">🎭 Tiết lộ vai trò!</div>
         </div>
 
-        <div className="mt-5 grid grid-cols-2 gap-x-2 gap-y-4 pt-3">
-          {players.map((player) => {
-            const playerIndex = players.findIndex((p) => p.id === player.id)
-            const avatarIndex = player.avatarIndex ?? playerIndex
-            const bgIndex = player.bgIndex ?? playerIndex
-            const roleMeta = getRevealRoleMeta(player)
-            const roleArcId = `reveal-role-${player.id.replace(/[^a-zA-Z0-9_-]/g, '-')}`
-
-            return (
+        {/* Silencer hero card */}
+        {silencer && (() => {
+          const idx = players.findIndex(p => p.id === silencer.id)
+          const avatarIdx = silencer.avatarIndex ?? idx
+          const bgIdx = silencer.bgIndex ?? idx
+          const caught = silencerVotes > 0
+          return (
+            <div className="mb-5 rounded-3xl border-[3px] border-[#7D7F8C] bg-[#f4f4f6] px-4 py-4 text-center shadow-[0_4px_0_rgba(0,0,0,0.14)]">
+              <img
+                src="/cartoon/icons/Lock-Sliver.svg"
+                alt=""
+                className="mx-auto mb-2 h-10 w-10 object-contain drop-shadow"
+                draggable={false}
+              />
               <div
-                key={player.id}
-                className="relative min-w-0 rounded-2xl border-2 bg-white px-2 pb-2 pt-7 text-center shadow-[0_2px_0_rgba(0,0,0,0.12)]"
-                style={{ borderColor: roleMeta.color }}
+                className="mx-auto grid h-20 w-20 place-items-center rounded-full border-[3px] border-[#7D7F8C] shadow-[0_3px_0_rgba(0,0,0,0.18)]"
+                style={{ background: AVATAR_BG_COLORS[Math.abs(bgIdx) % AVATAR_BG_COLORS.length] }}
               >
-                <div className="absolute left-1/2 top-0 z-10 -translate-x-1/2 -translate-y-[56%]">
-                  <RevealRoleArc text={roleMeta.label} color={roleMeta.color} id={roleArcId} />
-                </div>
                 <img
-                  src={roleMeta.icon}
+                  src={AVATAR_ICONS[Math.abs(avatarIdx) % AVATAR_ICONS.length]}
                   alt=""
-                  className="pointer-events-none absolute left-3 top-4 z-20 h-7 w-7 -rotate-6 object-contain drop-shadow"
+                  className="h-14 w-14 object-contain"
                   draggable={false}
                 />
-                <div
-                  className="mx-auto grid h-16 w-16 place-items-center rounded-full border-[3px] shadow-[0_2px_0_rgba(0,0,0,0.18)]"
-                  style={{
-                    background: AVATAR_BG_COLORS[Math.abs(bgIndex) % AVATAR_BG_COLORS.length],
-                    borderColor: roleMeta.color,
-                  }}
-                >
-                  <img
-                    src={AVATAR_ICONS[Math.abs(avatarIndex) % AVATAR_ICONS.length]}
-                    alt=""
-                    className="h-11 w-11 object-contain"
-                    draggable={false}
-                  />
-                </div>
-                <div className="mt-2 truncate font-display text-sm text-[#2F76AC]">
-                  {player.isMe ? 'Bạn' : player.name}
-                </div>
               </div>
-            )
-          })}
-        </div>
+              <div className="mt-2 font-display text-base text-[#2F76AC]">
+                {silencer.isMe ? 'Bạn' : silencer.name}
+              </div>
+              <div className="mt-1 inline-block rounded-full bg-[#7D7F8C] px-3 py-0.5 font-display text-[11px] text-white">
+                Người Im Lặng
+              </div>
+              {totalVoters > 0 && (
+                <div className={['mt-2 font-body text-[11px]', caught ? 'text-green-600' : 'text-black/40'].join(' ')}>
+                  {caught ? `✓ ${silencerVotes}/${totalVoters} người đoán đúng!` : 'Không ai đoán ra 🫢'}
+                </div>
+              )}
+            </div>
+          )
+        })()}
 
-        <div className="mt-4 rounded-2xl bg-[var(--c-sky-mist)] px-3 py-3">
-          <div className="font-display text-xs text-[var(--c-pink)]">{'Thống kê bình chọn'}</div>
-          {voteStats.length > 0 ? (
-            <div className="mt-2 flex flex-col gap-1.5">
-              {voteStats.map(({ player, roleMeta, count }, index) => (
-                <div
-                  key={player.id}
-                  className="flex items-center justify-between gap-3 rounded-xl border bg-white/80 px-3 py-2"
-                  style={{ borderColor: `${roleMeta.color}66` }}
-                >
-                  <div className="min-w-0">
-                    <div className="truncate font-display text-[11px] text-[#2F76AC]">
-                      {index + 1}. {player.isMe ? 'Bạn' : player.name}
-                    </div>
+        {/* Other players — compact rows */}
+        {others.length > 0 && (
+          <div className="grid grid-cols-3 gap-2 mb-5">
+            {others.map((player) => {
+              const idx = players.findIndex(p => p.id === player.id)
+              const avatarIdx = player.avatarIndex ?? idx
+              const bgIdx = player.bgIndex ?? idx
+              const roleMeta = getRevealRoleMeta(player)
+              return (
+                <div key={player.id} className="flex flex-col items-center gap-1 rounded-2xl border-2 bg-white py-2.5 px-1 shadow-[0_2px_0_rgba(0,0,0,0.08)]" style={{ borderColor: `${roleMeta.color}66` }}>
+                  <div
+                    className="grid h-11 w-11 place-items-center rounded-full border-2 shadow-[0_2px_0_rgba(0,0,0,0.12)]"
+                    style={{ background: AVATAR_BG_COLORS[Math.abs(bgIdx) % AVATAR_BG_COLORS.length], borderColor: roleMeta.color }}
+                  >
+                    <img src={AVATAR_ICONS[Math.abs(avatarIdx) % AVATAR_ICONS.length]} alt="" className="h-8 w-8 object-contain" draggable={false} />
                   </div>
-                  <div className="shrink-0 text-right">
-                    <div className="font-display text-[11px] text-[var(--c-pink)]">{count} vote</div>
-                    <div className="font-body text-[10px] leading-tight" style={{ color: roleMeta.color }}>
-                      {roleMeta.label}
-                    </div>
+                  <div className="w-full truncate px-0.5 text-center font-display text-[10px] text-[#2F76AC]">
+                    {player.isMe ? 'Bạn' : player.name}
+                  </div>
+                  <div className="rounded-full px-1.5 py-0.5 font-display text-[8px]" style={{ backgroundColor: `${roleMeta.color}18`, color: roleMeta.color }}>
+                    {roleMeta.label}
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="mt-2 font-body text-[11px] text-black/55">{'Chưa có lượt bình chọn nào.'}</div>
-          )}
-        </div>
+              )
+            })}
+          </div>
+        )}
 
-        <CartoonButton color="green" size="md" className="mt-4 w-full" onClick={close}>
-          {'Đã xem'}
+        <CartoonButton color="green" size="md" className="w-full" onClick={close}>
+          Đã xem
         </CartoonButton>
       </motion.div>
     </motion.div>

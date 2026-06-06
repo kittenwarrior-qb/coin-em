@@ -278,15 +278,17 @@ export default function GameBoard({
     if (!latestSilence || latestSilence.timestamp === lastMutedNoticeRef.current) return
     if (!latestSilence.targetId || roomState.mutedPlayer !== latestSilence.targetId) return
 
-    const target = roomState.players.find((p) => p.userId === latestSilence.targetId)
+    const targetIdx = roomState.players.findIndex((p) => p.userId === latestSilence.targetId)
+    const target = targetIdx >= 0 ? roomState.players[targetIdx] : null
     if (!target) return
 
     lastMutedNoticeRef.current = latestSilence.timestamp
     setMutedNotice({
       name: target.name,
       isMe: target.userId === myUserId,
-      avatarIndex: target.avatarIndex,
-      bgIndex: target.bgIndex,
+      // Mirror MiniPlayerToken fallback: avatarIndex ?? player position
+      avatarIndex: target.avatarIndex ?? targetIdx,
+      bgIndex: target.bgIndex ?? targetIdx,
       nonce: latestSilence.timestamp,
     })
   }, [myUserId, roomState.gameLog, roomState.mutedPlayer, roomState.players])
@@ -315,9 +317,9 @@ export default function GameBoard({
   }, [activePhase])
 
   useEffect(() => {
-    if (activePhase === 'give-coins' && !myPlayer?.isNarrator && !myPlayer?.isSender) setShowGiveCoinPicker(true)
+    if (activePhase === 'give-coins') setShowGiveCoinPicker(true)
     else setShowGiveCoinPicker(false)
-  }, [activePhase, myPlayer?.isNarrator, myPlayer?.isSender])
+  }, [activePhase])
 
   useEffect(() => {
     if (activePhase === 'reflection-sharing' && isNarrator) setShowRoleRewardPicker(true)
@@ -330,14 +332,7 @@ export default function GameBoard({
     }
   }, [activePhase])
 
-  // Auto-open inventory for NTG on card-selection phases
-  // emotion-card is intentionally excluded — NTG must first read the revealed situation card
-  useEffect(() => {
-    if (!myPlayer?.isSender) return
-    if (activePhase === 'reflection-card' && selectedCards.reflections.length < 3) openInventory('reflection')
-    else if (activePhase === 'selfcare-card' && !selectedCards.selfcare) openInventory('selfcare')
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activePhase, myPlayer?.isSender])
+  // No auto-open for any card-selection phase — player needs to see board state first
 
   useEffect(() => {
     if (activePhase !== 'group-response') return
@@ -567,6 +562,8 @@ export default function GameBoard({
   const silencerRole = Object.keys(ROLE_TO_IMAGE)[5]
   const isMyHealerRole = myPlayer?.role === healerRole
   const isMySilencerRole = myPlayer?.role === silencerRole
+  const hasGuide = players.some(p => p.role === guideRole)
+  const isMySelfcareTurn = hasGuide ? myPlayer?.role === guideRole : myPlayer?.isSender
   const canShowMyRole =
     !!myPlayer?.role &&
     myPlayer.role !== 'Chưa chia vai trò' &&
@@ -627,9 +624,7 @@ export default function GameBoard({
           return { title: '🪞 Chia sẻ suy nghĩ', description: 'Hãy chia sẻ điều bạn cảm nhận được' }
         return { title: '🪞 Người Trao Gửi đang chia sẻ...' }
       case 'selfcare-card': {
-        const hasGuide = players.some(p => p.role === guideRole)
         const selfcareChooser = hasGuide ? 'Người Dẫn Lối' : 'Người Trao Gửi'
-        const isMySelfcareTurn = hasGuide ? myPlayer?.role === guideRole : myPlayer?.isSender
         if (isMySelfcareTurn)
           return { title: '🤗 Chọn Bí kíp ôm', description: 'Chọn một thẻ để cả nhóm cùng thực hiện' }
         return { title: `🤗 ${selfcareChooser} đang chọn Bí kíp ôm...` }
@@ -643,9 +638,7 @@ export default function GameBoard({
       case 'reveal-silencer':
         return { title: '🎭 Công bố vai trò!' }
       case 'give-coins':
-        if (!myPlayer?.isNarrator && !myPlayer?.isSender)
-          return { title: '🪙 Tặng coin cho nhau', description: 'Chọn người bạn muốn tặng coin' }
-        return { title: '🪙 Mọi người đang tặng coin...' }
+        return { title: '🪙 Tặng coin cho nhau', description: 'Chọn người bạn muốn tặng coin' }
       case 'reward':
         return { title: '🏆 Kết thúc lượt!' }
       default:
@@ -1065,7 +1058,7 @@ export default function GameBoard({
                           <>
                             {selectedCards.reflections.length < 3 && (
                               <CartoonButton color="blue" size="sm" className="w-full" onClick={() => openInventory('reflection')} data-testid="btn-select-reflection">
-                                Thêm thẻ ({selectedCards.reflections.length}/3)
+                                {selectedCards.reflections.length === 0 ? 'Chọn thẻ phản tư' : `Thêm thẻ (${selectedCards.reflections.length}/3)`}
                               </CartoonButton>
                             )}
                             {selectedCards.reflections.length > 0 && (
@@ -1080,11 +1073,6 @@ export default function GameBoard({
                               </CartoonButton>
                             )}
                           </>
-                        )}
-                        {activePhase === 'selfcare-card' && selectedCards.selfcare && (
-                          <CartoonButton color="teal" size="sm" className="w-full" onClick={() => openInventory('selfcare')} data-testid="btn-select-selfcare">
-                            Đổi thẻ
-                          </CartoonButton>
                         )}
                         {activePhase === 'group-response' && (
                           <CartoonButton
@@ -1102,7 +1090,12 @@ export default function GameBoard({
                         )}
                       </>
                     )}
-                    {activePhase === 'give-coins' && !myPlayer?.isNarrator && !myPlayer?.isSender && (
+                    {activePhase === 'selfcare-card' && isMySelfcareTurn && (
+                      <CartoonButton color="teal" size="sm" className="w-full" onClick={() => openInventory('selfcare')} data-testid="btn-select-selfcare">
+                        {selectedCards.selfcare ? 'Đổi thẻ' : 'Chọn thẻ bí kíp ôm'}
+                      </CartoonButton>
+                    )}
+                    {activePhase === 'give-coins' && (
                       <CartoonButton
                         color="yellow"
                         size="md"

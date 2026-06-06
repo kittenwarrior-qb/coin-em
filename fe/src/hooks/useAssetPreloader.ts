@@ -7,12 +7,15 @@ function label(url: string): string {
 }
 
 // ─── Phase 1 (blocking — shown in preloader) ─────────────────────────────────
-// MINIMAL: chỉ những gì cần để render HOME screen ngay lập tức
+// Chỉ logo + background — đủ để render màn hình chọn phòng ngay lập tức
 const CRITICAL_URLS: Array<{ url: string; tag: string }> = [
-  // Logo + home background
   { url: '/emcoin_logo.png',        tag: 'bg' },
   { url: '/cartoon/ui/home-bg.png', tag: 'bg' },
+]
 
+// ─── Phase 2 (background, non-blocking) ──────────────────────────────────────
+// Tải sau khi home screen đã hiện — UI panels, buttons, avatars, cards, heavy BGs
+const BACKGROUND_URLS: Array<{ url: string; tag: string }> = [
   // Core UI panels
   { url: '/cartoon/ui/Panel-Teal.png',           tag: 'ui' },
   { url: '/cartoon/ui/Rounded-Rectangle-256.png', tag: 'ui' },
@@ -36,11 +39,7 @@ const CRITICAL_URLS: Array<{ url: string; tag: string }> = [
   { url: '/cartoon/buttons/circle/Blue.png',       tag: 'btn' },
   { url: '/cartoon/buttons/circle/Dark.png',       tag: 'btn' },
   { url: '/cartoon/buttons/circle/White.png',      tag: 'btn' },
-]
 
-// ─── Phase 2 (background, non-blocking) ──────────────────────────────────────
-// Tải sau khi home screen đã hiện — avatars, card backs, card fronts, heavy BGs
-const BACKGROUND_URLS: Array<{ url: string; tag: string }> = [
   // Remaining UI
   { url: '/cartoon/ui/Coin-x1.png',                      tag: 'ui2' },
   { url: '/cartoon/ui/Star-Blue.png',                     tag: 'ui2' },
