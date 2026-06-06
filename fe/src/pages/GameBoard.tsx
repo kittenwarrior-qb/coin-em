@@ -317,9 +317,9 @@ export default function GameBoard({
   }, [activePhase])
 
   useEffect(() => {
-    if (activePhase === 'give-coins' && !myPlayer?.isNarrator && !myPlayer?.isSender) setShowGiveCoinPicker(true)
+    if (activePhase === 'give-coins') setShowGiveCoinPicker(true)
     else setShowGiveCoinPicker(false)
-  }, [activePhase, myPlayer?.isNarrator, myPlayer?.isSender])
+  }, [activePhase])
 
   useEffect(() => {
     if (activePhase === 'reflection-sharing' && isNarrator) setShowRoleRewardPicker(true)
@@ -638,9 +638,7 @@ export default function GameBoard({
       case 'reveal-silencer':
         return { title: '🎭 Công bố vai trò!' }
       case 'give-coins':
-        if (!myPlayer?.isNarrator && !myPlayer?.isSender)
-          return { title: '🪙 Tặng coin cho nhau', description: 'Chọn người bạn muốn tặng coin' }
-        return { title: '🪙 Mọi người đang tặng coin...' }
+        return { title: '🪙 Tặng coin cho nhau', description: 'Chọn người bạn muốn tặng coin' }
       case 'reward':
         return { title: '🏆 Kết thúc lượt!' }
       default:
@@ -1097,7 +1095,7 @@ export default function GameBoard({
                         {selectedCards.selfcare ? 'Đổi thẻ' : 'Chọn thẻ bí kíp ôm'}
                       </CartoonButton>
                     )}
-                    {activePhase === 'give-coins' && !myPlayer?.isNarrator && !myPlayer?.isSender && (
+                    {activePhase === 'give-coins' && (
                       <CartoonButton
                         color="yellow"
                         size="md"
