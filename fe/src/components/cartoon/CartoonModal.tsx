@@ -63,15 +63,14 @@ export function CartoonModal({
           style={{ background: 'rgba(0,0,0,0.35)' }}
           onClick={persistent ? undefined : onClose}
         >
-          {/* Wrapper — squash & stretch entry: starts flat/wide, springs to full with blob wobble */}
+          {/* Wrapper — blob spring: uniform small scale → low-damping spring overshoots → wobble */}
           <motion.div
-            initial={{ scaleX: 0.55, scaleY: 0.35, opacity: 0 }}
-            animate={{ scaleX: 1, scaleY: 1, opacity: 1 }}
-            exit={{ scaleX: 1.06, scaleY: 0.6, opacity: 0, transition: { duration: 0.14, ease: 'easeIn' } }}
+            initial={{ scale: 0.35, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.5, opacity: 0, transition: { duration: 0.14, ease: 'easeIn' } }}
             transition={{
-              scaleX: { type: 'spring', stiffness: 320, damping: 14 },
-              scaleY: { type: 'spring', stiffness: 280, damping: 11 },
-              opacity: { duration: 0.12 },
+              scale:   { type: 'spring', stiffness: 300, damping: 11 },
+              opacity: { duration: 0.08 },
             }}
             onClick={(e) => e.stopPropagation()}
             className={cn('relative w-full', className)}
