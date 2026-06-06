@@ -101,6 +101,22 @@ export default function Lobby({
         className="flex-1 flex flex-col justify-center p-8 gap-4 relative"
         data-testid="lobby-menu"
       >
+        {/* About button — top left */}
+        <div className="absolute top-4 left-4">
+          <PopIn delay={0.16}>
+            <CartoonCircleButton
+              color="blue"
+              size="sm"
+              iconSrc="/cartoon/icons/Question-Mark.svg"
+              iconAlt="Về dự án"
+              iconSize="42%"
+              aria-label="Về dự án"
+              style={{ height: 45, width: 45 }}
+              onClick={() => window.open('/about', '_blank')}
+            />
+          </PopIn>
+        </div>
+
         <div className="absolute top-4 right-4">
           {ready ? (
             <PopIn delay={0.16}>

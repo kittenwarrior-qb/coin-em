@@ -27,11 +27,18 @@ export function GuideBook({ onClose }: GuideBookProps) {
 
   return (
     <motion.div
-      className="fixed inset-0 z-[200] flex flex-col bg-black"
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      onClick={onClose}
     >
+      {/* Inner container — max-width so slides don't stretch on wide screens */}
+      <motion.div
+        className="relative flex flex-col bg-black"
+        style={{ width: '100%', maxWidth: 480, height: '100%', maxHeight: '100dvh' }}
+        onClick={e => e.stopPropagation()}
+      >
       {/* Close */}
       <button
         type="button"
@@ -144,6 +151,7 @@ export function GuideBook({ onClose }: GuideBookProps) {
           ›
         </button>
       </div>
+      </motion.div>
     </motion.div>
   )
 }
