@@ -63,15 +63,18 @@ export function CartoonModal({
           style={{ background: 'rgba(0,0,0,0.35)' }}
           onClick={persistent ? undefined : onClose}
         >
-          {/* Wrapper — chứa cả headline nhô ra ngoài + close button */}
+          {/* Wrapper — blob spring: uniform small scale → low-damping spring overshoots → wobble */}
           <motion.div
-            initial={{ scale: 0, opacity: 0 }}
+            initial={{ scale: 0.35, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 320, damping: 26 }}
+            exit={{ scale: 0.5, opacity: 0, transition: { duration: 0.14, ease: 'easeIn' } }}
+            transition={{
+              scale:   { type: 'spring', stiffness: 300, damping: 11 },
+              opacity: { duration: 0.08 },
+            }}
             onClick={(e) => e.stopPropagation()}
             className={cn('relative w-full', className)}
-            style={{ maxWidth: '23rem' }}
+            style={{ maxWidth: '23rem', transformOrigin: 'center' }}
           >
 
             {/* ── Headline Flag — nhô lên trên panel, căn giữa ── */}
