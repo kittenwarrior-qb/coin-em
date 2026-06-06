@@ -332,12 +332,10 @@ export default function GameBoard({
     }
   }, [activePhase])
 
-  // Auto-open inventory for NTG on card-selection phases
-  // emotion-card is intentionally excluded — NTG must first read the revealed situation card
+  // Auto-open inventory for selfcare only — emotion/reflection excluded so NTG can review board first
   useEffect(() => {
     if (!myPlayer?.isSender) return
-    if (activePhase === 'reflection-card' && selectedCards.reflections.length < 3) openInventory('reflection')
-    else if (activePhase === 'selfcare-card' && !selectedCards.selfcare) openInventory('selfcare')
+    if (activePhase === 'selfcare-card' && !selectedCards.selfcare) openInventory('selfcare')
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activePhase, myPlayer?.isSender])
 
@@ -1067,7 +1065,7 @@ export default function GameBoard({
                           <>
                             {selectedCards.reflections.length < 3 && (
                               <CartoonButton color="blue" size="sm" className="w-full" onClick={() => openInventory('reflection')} data-testid="btn-select-reflection">
-                                Thêm thẻ ({selectedCards.reflections.length}/3)
+                                {selectedCards.reflections.length === 0 ? 'Chọn thẻ phản tư' : `Thêm thẻ (${selectedCards.reflections.length}/3)`}
                               </CartoonButton>
                             )}
                             {selectedCards.reflections.length > 0 && (
