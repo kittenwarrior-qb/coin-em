@@ -332,12 +332,7 @@ export default function GameBoard({
     }
   }, [activePhase])
 
-  // Auto-open inventory for selfcare only — emotion/reflection excluded so NTG can review board first
-  useEffect(() => {
-    if (!myPlayer?.isSender) return
-    if (activePhase === 'selfcare-card' && !selectedCards.selfcare) openInventory('selfcare')
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activePhase, myPlayer?.isSender])
+  // No auto-open for any card-selection phase — player needs to see board state first
 
   useEffect(() => {
     if (activePhase !== 'group-response') return
@@ -567,6 +562,8 @@ export default function GameBoard({
   const silencerRole = Object.keys(ROLE_TO_IMAGE)[5]
   const isMyHealerRole = myPlayer?.role === healerRole
   const isMySilencerRole = myPlayer?.role === silencerRole
+  const hasGuide = players.some(p => p.role === guideRole)
+  const isMySelfcareTurn = hasGuide ? myPlayer?.role === guideRole : myPlayer?.isSender
   const canShowMyRole =
     !!myPlayer?.role &&
     myPlayer.role !== 'Chưa chia vai trò' &&
@@ -627,9 +624,7 @@ export default function GameBoard({
           return { title: '🪞 Chia sẻ suy nghĩ', description: 'Hãy chia sẻ điều bạn cảm nhận được' }
         return { title: '🪞 Người Trao Gửi đang chia sẻ...' }
       case 'selfcare-card': {
-        const hasGuide = players.some(p => p.role === guideRole)
         const selfcareChooser = hasGuide ? 'Người Dẫn Lối' : 'Người Trao Gửi'
-        const isMySelfcareTurn = hasGuide ? myPlayer?.role === guideRole : myPlayer?.isSender
         if (isMySelfcareTurn)
           return { title: '🤗 Chọn Bí kíp ôm', description: 'Chọn một thẻ để cả nhóm cùng thực hiện' }
         return { title: `🤗 ${selfcareChooser} đang chọn Bí kíp ôm...` }
@@ -1081,11 +1076,6 @@ export default function GameBoard({
                             )}
                           </>
                         )}
-                        {activePhase === 'selfcare-card' && selectedCards.selfcare && (
-                          <CartoonButton color="teal" size="sm" className="w-full" onClick={() => openInventory('selfcare')} data-testid="btn-select-selfcare">
-                            Đổi thẻ
-                          </CartoonButton>
-                        )}
                         {activePhase === 'group-response' && (
                           <CartoonButton
                             color={hasConfirmedNtgRewards ? 'orange' : 'yellow'}
@@ -1101,6 +1091,11 @@ export default function GameBoard({
                           </CartoonButton>
                         )}
                       </>
+                    )}
+                    {activePhase === 'selfcare-card' && isMySelfcareTurn && (
+                      <CartoonButton color="teal" size="sm" className="w-full" onClick={() => openInventory('selfcare')} data-testid="btn-select-selfcare">
+                        {selectedCards.selfcare ? 'Đổi thẻ' : 'Chọn thẻ bí kíp ôm'}
+                      </CartoonButton>
                     )}
                     {activePhase === 'give-coins' && !myPlayer?.isNarrator && !myPlayer?.isSender && (
                       <CartoonButton
