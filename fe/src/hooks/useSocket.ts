@@ -144,6 +144,10 @@ interface UseSocketReturn {
   resumeCandidates: ResumeCandidate[]
   resumeRoom: (candidate: ResumeCandidate) => void
   dismissResumeCandidate: (roomId: string) => void
+  emitCardPreview: (roomId: string, card: CardData | null) => void
+  emitSituationFanState: (roomId: string, activePosition: number, cards?: CardData[]) => void
+  situationPreviewCard: CardData | null
+  situationFanState: { cards: CardData[]; activePosition: number } | null
 }
 
 // Session helpers
