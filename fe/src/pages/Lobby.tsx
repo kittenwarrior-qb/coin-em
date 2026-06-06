@@ -200,7 +200,6 @@ export default function Lobby({
       <GameMenuModal
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
-        onGuide={() => { setMenuOpen(false) }}
         onSettings={() => { setMenuOpen(false) }}
       />
 
