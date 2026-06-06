@@ -1,4 +1,4 @@
-/**
+﻿/**
  * All bottom-sheet overlays that appear during specific game phases.
  * Kept in one file since they share the same slide-up animation pattern.
  */
@@ -124,9 +124,9 @@ export function GuessSilencerOverlay({ players, hasVoted, onVote }: GuessSilence
       {!hasVoted ? (
         <>
           <div className="text-center">
-            <div className="font-display text-base text-[var(--c-pink)]">{'\u0110o\u00e1n Ng\u01b0\u1eddi Im L\u1eb7ng'}</div>
+            <div className="font-display text-base text-[var(--c-pink)]">{'Đoán Người Im Lặng'}</div>
             <div className="mt-1 font-body text-[11px] leading-snug text-black/55">
-              {'Ch\u1ecdn ng\u01b0\u1eddi b\u1ea1n ngh\u0129 l\u00e0 Ng\u01b0\u1eddi Im L\u1eb7ng trong l\u01b0\u1ee3t n\u00e0y.'}
+              {'Chọn người bạn nghĩ là Người Im Lặng trong lượt này.'}
             </div>
           </div>
           <div className="grid max-h-[58dvh] grid-cols-2 gap-2 overflow-x-hidden overflow-y-auto pr-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
@@ -156,7 +156,7 @@ export function GuessSilencerOverlay({ players, hasVoted, onVote }: GuessSilence
                   </div>
                   <div className="min-w-0">
                     <div className="truncate font-display text-xs text-[#2F76AC]">{player.name}</div>
-                    <div className="truncate font-body text-[10px] text-black/50">{'Ch\u1ea1m \u0111\u1ec3 \u0111o\u00e1n'}</div>
+                    <div className="truncate font-body text-[10px] text-black/50">{'Chạm để đoán'}</div>
                   </div>
                 </button>
               )
@@ -171,9 +171,9 @@ export function GuessSilencerOverlay({ players, hasVoted, onVote }: GuessSilence
           className="rounded-2xl bg-[var(--c-sky-mist)] px-4 py-4 text-center"
         >
           <img src="/cartoon/icons/Checkmark-Cartoon.svg" alt="" className="mx-auto mb-2 h-12 w-12 object-contain drop-shadow" draggable={false} />
-          <div className="font-display text-sm text-[var(--c-pink)]">{'\u0110\u00e3 ghi nh\u1eadn b\u00ecnh ch\u1ecdn'}</div>
+          <div className="font-display text-sm text-[var(--c-pink)]">{'Đã ghi nhận bình chọn'}</div>
           <div className="mt-1 font-body text-[11px] leading-snug text-black/55">
-            {'Ch\u1edd c\u1ea3 b\u00e0n ho\u00e0n t\u1ea5t b\u00ecnh ch\u1ecdn.'}
+            {'Chờ cả bàn hoàn tất bình chọn.'}
           </div>
         </motion.div>
       )}
@@ -183,14 +183,14 @@ export function GuessSilencerOverlay({ players, hasVoted, onVote }: GuessSilence
 
 // Reveal silencer
 const REVEAL_ROLE_META = {
-  narrator: { label: '\u0051u\u1ea3n tr\u00f2', color: '#FFB830', icon: '/cartoon/icons/Crown.svg' },
-  sender: { label: 'Ng\u01b0\u1eddi trao g\u1eedi', color: '#FF6B9D', icon: '/cartoon/icons/Flower-Multicolor.svg' },
-  healer: { label: 'Ng\u01b0\u1eddi ch\u1eefa l\u00e0nh', color: '#62C76D', icon: '/cartoon/icons/Life-Bag.svg' },
-  silencer: { label: 'Ng\u01b0\u1eddi im l\u1eb7ng', color: '#7D7F8C', icon: '/cartoon/icons/Lock-Gold.svg' },
-  connector: { label: 'Ng\u01b0\u1eddi k\u1ebft n\u1ed1i', color: '#3FA7F5', icon: '/cartoon/icons/Magic.svg' },
-  opener: { label: 'Ng\u01b0\u1eddi g\u1ee3i m\u1edf', color: '#A66CFF', icon: '/cartoon/icons/Gift-Pink-Border.svg' },
-  guide: { label: 'Ng\u01b0\u1eddi d\u1eabn l\u1ed1i', color: '#F59E42', icon: '/cartoon/icons/Key-Gold.svg' },
-  unknown: { label: 'Vai tr\u00f2', color: '#2F76AC', icon: '/cartoon/icons/Star-Yellow.svg' },
+  narrator: { label: 'Quản trò', color: '#FFB830', icon: '/cartoon/icons/Crown.svg' },
+  sender: { label: 'Người trao gửi', color: '#FF6B9D', icon: '/cartoon/icons/Flower-Multicolor.svg' },
+  healer: { label: 'Người chữa lành', color: '#62C76D', icon: '/cartoon/icons/Life-Bag.svg' },
+  silencer: { label: 'Người im lặng', color: '#7D7F8C', icon: '/cartoon/icons/Lock-Gold.svg' },
+  connector: { label: 'Người kết nối', color: '#3FA7F5', icon: '/cartoon/icons/Magic.svg' },
+  opener: { label: 'Người gợi mở', color: '#A66CFF', icon: '/cartoon/icons/Gift-Pink-Border.svg' },
+  guide: { label: 'Người dẫn lối', color: '#F59E42', icon: '/cartoon/icons/Key-Gold.svg' },
+  unknown: { label: 'Vai trò', color: '#2F76AC', icon: '/cartoon/icons/Star-Yellow.svg' },
 }
 
 function getRevealRoleMeta(player: Player) {
@@ -198,7 +198,7 @@ function getRevealRoleMeta(player: Player) {
   if (player.isSender) return REVEAL_ROLE_META.sender
 
   const role = player.role ?? ''
-  const normalized = role.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+  const normalized = role.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
   const compact = normalized.replace(/[^a-z?]+/g, '')
 
   if (normalized.includes('quan tro') || compact.includes('qu?ntro')) return REVEAL_ROLE_META.narrator
@@ -282,15 +282,15 @@ export function RevealSilencerOverlay({ players, votes, onCloseComplete }: Revea
           type="button"
           className="absolute right-3 top-2 z-20 font-display text-xl leading-none text-[var(--c-pink)]"
           onClick={close}
-          aria-label="\u0110\u00f3ng"
+          aria-label="Đóng"
         >
           x
         </button>
 
         <div className="text-center pr-5">
-          <div className="font-display text-base text-[var(--c-pink)]">{'Ti\u1ebft l\u1ed9 vai tr\u00f2'}</div>
+          <div className="font-display text-base text-[var(--c-pink)]">{'Tiết lộ vai trò'}</div>
           <div className="mt-1 font-body text-[11px] leading-snug text-black/55">
-            {'Xem vai tr\u00f2 th\u1eadt v\u00e0 k\u1ebft qu\u1ea3 b\u00ecnh ch\u1ecdn c\u1ee7a c\u1ea3 b\u00e0n.'}
+            {'Xem vai trò thật và kết quả bình chọn của cả bàn.'}
           </div>
         </div>
 
@@ -332,7 +332,7 @@ export function RevealSilencerOverlay({ players, votes, onCloseComplete }: Revea
                   />
                 </div>
                 <div className="mt-2 truncate font-display text-sm text-[#2F76AC]">
-                  {player.isMe ? 'B\u1ea1n' : player.name}
+                  {player.isMe ? 'Bạn' : player.name}
                 </div>
               </div>
             )
@@ -340,7 +340,7 @@ export function RevealSilencerOverlay({ players, votes, onCloseComplete }: Revea
         </div>
 
         <div className="mt-4 rounded-2xl bg-[var(--c-sky-mist)] px-3 py-3">
-          <div className="font-display text-xs text-[var(--c-pink)]">{'Th\u1ed1ng k\u00ea b\u00ecnh ch\u1ecdn'}</div>
+          <div className="font-display text-xs text-[var(--c-pink)]">{'Thống kê bình chọn'}</div>
           {voteStats.length > 0 ? (
             <div className="mt-2 flex flex-col gap-1.5">
               {voteStats.map(({ player, roleMeta, count }, index) => (
@@ -351,7 +351,7 @@ export function RevealSilencerOverlay({ players, votes, onCloseComplete }: Revea
                 >
                   <div className="min-w-0">
                     <div className="truncate font-display text-[11px] text-[#2F76AC]">
-                      {index + 1}. {player.isMe ? 'B\u1ea1n' : player.name}
+                      {index + 1}. {player.isMe ? 'Bạn' : player.name}
                     </div>
                   </div>
                   <div className="shrink-0 text-right">
@@ -364,12 +364,12 @@ export function RevealSilencerOverlay({ players, votes, onCloseComplete }: Revea
               ))}
             </div>
           ) : (
-            <div className="mt-2 font-body text-[11px] text-black/55">{'Ch\u01b0a c\u00f3 l\u01b0\u1ee3t b\u00ecnh ch\u1ecdn n\u00e0o.'}</div>
+            <div className="mt-2 font-body text-[11px] text-black/55">{'Chưa có lượt bình chọn nào.'}</div>
           )}
         </div>
 
         <CartoonButton color="green" size="md" className="mt-4 w-full" onClick={close}>
-          {'\u0110\u00e3 xem'}
+          {'Đã xem'}
         </CartoonButton>
       </motion.div>
     </motion.div>
@@ -411,11 +411,11 @@ export function RewardOverlay({ players, currentRound, totalRounds, isNarrator, 
 
         {ownPlayer && (
           <div className="px-3 py-2 card-cartoon card-cartoon-sm">
-            <div className="font-display text-sm text-[#2F76AC]">{'\u0110i\u1ec3m coin c\u1ee7a b\u1ea1n'}</div>
+            <div className="font-display text-sm text-[#2F76AC]">{'Điểm coin của bạn'}</div>
             <div className="mt-2 flex justify-center gap-4 font-display text-sm">
               <span>{'\u{1F49A}'} {ownPlayer.coins.green}</span>
               <span>{'\u{1F49B}'} {ownPlayer.coins.yellow}</span>
-              <span>{'\u2764\uFE0F'} {ownPlayer.coins.red}</span>
+              <span>{'❤️'} {ownPlayer.coins.red}</span>
             </div>
           </div>
         )}

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CartoonButton } from '@/components/cartoon'
 import type { CardData } from '@/stores/types'
@@ -7,13 +7,21 @@ interface RandomSituationFanProps {
   cards: CardData[]
   selectedCard: CardData | null
   onPick: (card: CardData) => void
+  onBrowse?: (card: CardData) => void
+  onStateChange?: (cards: CardData[], activePosition: number) => void
   onConfirm: () => void
 }
 
-export function RandomSituationFan({ cards, selectedCard, onPick, onConfirm }: RandomSituationFanProps) {
+export function RandomSituationFan({ cards, selectedCard, onPick, onBrowse, onStateChange, onConfirm }: RandomSituationFanProps) {
   const [activePosition, setActivePosition] = useState(0)
   const [dragOffset, setDragOffset] = useState(0)
   const cardSpacing = 58
+
+  useEffect(() => {
+    if (cards.length) onStateChange?.(cards, 0)
+    return () => { onStateChange?.([], -1) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const wrapPosition = (position: number) => {
     if (!cards.length) return 0
@@ -30,6 +38,7 @@ export function RandomSituationFan({ cards, selectedCard, onPick, onConfirm }: R
     setActivePosition(index)
     setDragOffset(0)
     onPick(card)
+    onStateChange?.(cards, index)
   }
 
   const visualCenter = wrapPosition(activePosition - dragOffset / cardSpacing)
@@ -76,8 +85,12 @@ export function RandomSituationFan({ cards, selectedCard, onPick, onConfirm }: R
         onDrag={(_, info) => setDragOffset(info.offset.x)}
         onDragEnd={(_, info) => {
           const momentum = clamp(info.velocity.x * 0.08, -cardSpacing * 1.15, cardSpacing * 1.15)
-          setActivePosition((current) => wrapPosition(current - (info.offset.x + momentum) / cardSpacing))
+          const newPos = wrapPosition(activePosition - (info.offset.x + momentum) / cardSpacing)
+          setActivePosition(newPos)
           setDragOffset(0)
+          const browsed = cards[Math.round(wrapPosition(newPos)) % cards.length]
+          if (browsed) onBrowse?.(browsed)
+          onStateChange?.(cards, newPos)
         }}
         onWheel={(event) => {
           const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY

@@ -152,17 +152,6 @@ export default function WaitingRoom({
             <span data-testid="player-count" className="font-display text-xs">{players.length} / {MAX_PLAYERS}</span>
           </div>
 
-          {canHostPickRoles && (
-            <div className="rounded-2xl bg-white/70 px-3 py-2" data-testid="debug-role-picker">
-              <div className="font-display text-xs text-[var(--c-gray)]">Debug role round 1</div>
-              <div className="font-body text-[11px] text-black/55">
-                {roleDeck.length
-                  ? 'Host chọn role cho từng người. Người cuối sẽ tự nhận role còn lại.'
-                  : 'Cần ít nhất 5 người chơi hoặc bot để chọn role.'}
-              </div>
-            </div>
-          )}
-
           <CartoonScrollArea
             className="flex-shrink-0"
             style={{ height: canHostPickRoles ? 260 : 220 }}

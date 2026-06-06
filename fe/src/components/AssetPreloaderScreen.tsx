@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import type { PreloadState } from '@/hooks/useAssetPreloader'
 
@@ -16,10 +16,25 @@ export function AssetPreloaderScreen({ state, onExited, onFullyGone }: Props) {
   const [rippling, setRippling] = useState(false)
   const [gone, setGone] = useState(false)
   const splashLogoRef = useRef<HTMLImageElement>(null)
+  const finishedRef = useRef(false)
+  const callbacksRef = useRef({ onExited, onFullyGone })
+  const splashRectRef = useRef<Rect | null>(null)
+
+  useEffect(() => {
+    callbacksRef.current = { onExited, onFullyGone }
+  }, [onExited, onFullyGone])
 
   // Measured positions for flying logo
   const [splashRect, setSplashRect] = useState<Rect | null>(null)
   const [targetRect, setTargetRect] = useState<Rect | null>(null)
+
+  const finishSplash = useCallback(() => {
+    if (finishedRef.current) return
+    finishedRef.current = true
+    callbacksRef.current.onExited?.(splashRectRef.current ?? { left: 0, top: 0, w: 64, h: 64 })
+    setGone(true)
+    callbacksRef.current.onFullyGone?.()
+  }, [])
 
   useEffect(() => {
     if (!done) return
@@ -30,7 +45,9 @@ export function AssetPreloaderScreen({ state, onExited, onFullyGone }: Props) {
       const homeEl = document.getElementById('home-logo')
       if (splashEl) {
         const r = splashEl.getBoundingClientRect()
-        setSplashRect({ left: r.left, top: r.top, w: r.width, h: r.height })
+        const rect = { left: r.left, top: r.top, w: r.width, h: r.height }
+        splashRectRef.current = rect
+        setSplashRect(rect)
       }
       if (homeEl) {
         const r = homeEl.getBoundingClientRect()
@@ -38,8 +55,9 @@ export function AssetPreloaderScreen({ state, onExited, onFullyGone }: Props) {
       }
       setRippling(true)
     }, 900)
-    return () => { clearTimeout(t1); clearTimeout(t2) }
-  }, [done])
+    const fallback = setTimeout(finishSplash, 1800)
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(fallback) }
+  }, [done, finishSplash])
 
   if (gone) return null
 
@@ -80,11 +98,7 @@ export function AssetPreloaderScreen({ state, onExited, onFullyGone }: Props) {
             }}
             animate={{ clipPath: 'circle(150% at 50% 40%)' }}
             transition={{ duration: 0.7, ease: [0.85, 0, 0.15, 1] }}
-            onAnimationComplete={() => {
-              onExited?.(splashRect ?? { left: 0, top: 0, w: 64, h: 64 })
-              setGone(true)
-              onFullyGone?.()
-            }}
+            onAnimationComplete={finishSplash}
           />
         )}
 

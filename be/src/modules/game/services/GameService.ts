@@ -88,6 +88,7 @@ export class GameService {
       gameLog: room.gameLog,
       nightActions: room.nightActions,
       votes: room.votes,
+      ntgVotes: room.ntgVotes,
       selfcareActor, // userId of who draws selfcare card (Guide or NTG fallback)
       debugRolePickerEnabled: room.debugRolePickerEnabled,
     }

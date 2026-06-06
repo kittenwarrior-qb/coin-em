@@ -9,12 +9,13 @@ interface TableBoardProps {
   selectedCards: SelectedCards
   phase?: string
   revealSituation?: boolean
+  previewSituationCard?: CardData | null
   onCardClick?: (card: CardData, revealed: boolean) => void
   status?: React.ReactNode
   actions?: React.ReactNode
 }
 
-export function TableBoard({ selectedCards, phase, revealSituation, onCardClick, status, actions }: TableBoardProps) {
+export function TableBoard({ selectedCards, phase, revealSituation, previewSituationCard, onCardClick, status, actions }: TableBoardProps) {
   return (
     <div className="relative w-full h-full flex items-center justify-center">
       <div
@@ -43,14 +44,14 @@ export function TableBoard({ selectedCards, phase, revealSituation, onCardClick,
         />
 
         {/* Cards + Actions — centered */}
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center min-h-0 gap-3 px-3 py-3">
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center min-h-0 gap-3 px-4 py-5">
           {status && (
             <div className="w-full">
               {status}
             </div>
           )}
-          <div className="flex items-center justify-center overflow-y-auto">
-            <CenterBoard selectedCards={selectedCards} phase={phase} revealSituation={revealSituation} onCardClick={onCardClick} />
+          <div className="flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden">
+            <CenterBoard selectedCards={selectedCards} phase={phase} revealSituation={revealSituation} previewSituationCard={previewSituationCard} onCardClick={onCardClick} />
           </div>
           {actions && (
             <div className="flex flex-col gap-2 w-full">

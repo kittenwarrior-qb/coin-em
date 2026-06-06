@@ -37,8 +37,8 @@ export function NtgRewardPicker({
       >
         <div className="text-center">
           <div className="font-display text-base text-[var(--c-pink)]">Tặng coin</div>
-          <div className="mt-1 font-body text-[11px] leading-snug text-black/55">
-            Bạn có thể chọn một hoặc nhiều người đã phản hồi. Họ sẽ nhận +5 coin vàng.
+          <div className="mt-0.5 font-body text-[11px] text-black/45">
+            Chọn người phản hồi hay nhất · +5 🪙
           </div>
         </div>
 
@@ -90,9 +90,9 @@ export function NtgRewardPicker({
                   ].join(' ')}>
                     {player.name}
                   </div>
-                  <div className="truncate font-body text-[10px] text-black/50">
-                    {rewarded ? 'Đã tặng +5 coin vàng' : selected ? 'Đang chọn' : 'Chạm để chọn'}
-                  </div>
+                  {rewarded && (
+                    <div className="truncate font-body text-[10px] text-black/50">Đã tặng +5 🪙</div>
+                  )}
                 </div>
                 {(rewarded || selected) && (
                   <motion.img

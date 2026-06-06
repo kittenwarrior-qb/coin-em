@@ -179,6 +179,7 @@ export class GameEngine {
       case 'group-response':
         updatedRoom.responses = {}
         updatedRoom.ntgVotes = {}
+        updatedRoom.selectedCard = null
         break
       case 'guess-silencer':
         updatedRoom.votes = {}
@@ -215,6 +216,8 @@ export class GameEngine {
       }
       if (phase === 'give-coins') actionTypes.add('GIVE_COIN')
       if (phase === 'reveal-silencer') actionTypes.add('REWARDS_CALCULATED')
+      if (phase === 'situation-card' || phase === 'emotion-card' || phase === 'reflection-card') actionTypes.add('SELECT_CARD')
+      if (phase === 'selfcare-card') actionTypes.add('SELECT_SELFCARE_CARD')
     }
 
     addPhaseTypes(currentPhase)
@@ -466,7 +469,7 @@ export class GameEngine {
         playersWithRoles[narratorIndex].role = hostRole
         playersWithRoles[narratorIndex].originalRole = hostRole  // update originalRole too
         playersWithRoles[narratorIndex].isNarrator = false
-        playersWithRoles[narratorIndex].isSender = hostRole === 'Người Trao Gửi'
+        playersWithRoles[narratorIndex].isSender = hostRole === Role.SENDER
       }
     }
 

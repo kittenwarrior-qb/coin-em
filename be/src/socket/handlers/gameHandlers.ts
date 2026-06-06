@@ -359,10 +359,10 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         return
       }
 
-      // Save room
-      roomRepository.save(result.room!)
+      // Save room before broadcasting
+      await roomRepository.saveAndWait(result.room!)
 
-      // Broadcast
+      // Broadcast night action to all clients
       console.log(`[night_action] ${action} by ${socket.id} in room ${roomId}`)
       io.to(roomId).emit('night_action_completed', {
         action,
@@ -374,6 +374,26 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       })
 
       if (callback) callback({ success: true })
+
+      // Auto-advance after healer/silencer acts — narrator doesn't need to tap through these
+      const autoPhase = result.room!.phase
+      const narratorId = result.room!.currentNarrator
+      if (narratorId && (autoPhase === 'healer-turn' || autoPhase === 'silencer-turn')) {
+        setTimeout(async () => {
+          try {
+            const freshRoom = await roomRepository.findByIdFresh(roomId)
+            if (!freshRoom || freshRoom.phase !== autoPhase) return
+            const advResult = await gameService.advanceTurn(freshRoom, narratorId)
+            if (advResult.success && advResult.room) {
+              await roomRepository.saveAndWait(advResult.room)
+              io.to(roomId).emit('turn_changed', gameService.getPublicState(advResult.room))
+              console.log(`[night_action] Auto-advanced ${autoPhase} → ${advResult.room.phase} in room ${roomId}`)
+            }
+          } catch (e) {
+            console.error('[night_action] Auto-advance error:', e)
+          }
+        }, 1200)
+      }
     } catch (error: any) {
       console.error('[night_action] Error:', error)
       const err = { success: false, error: 'INTERNAL_ERROR', message: error.message }
@@ -385,7 +405,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
   /**
    * Give coin
    */
-  socket.on('give_coin', async ({ roomId, receiverSocketId, coinType }, callback) => {
+  socket.on('give_coin', async ({ roomId, receiverSocketId, coinType, amount = 1 }, callback) => {
     // Rate limit: 1 coin per second
     if (!rateLimitAction(socket, 'give_coin', 1000)) {
       const error = { success: false, error: 'RATE_LIMITED', message: 'Vui lòng chờ trước khi tặng coin tiếp theo.' }
@@ -419,7 +439,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         type: 'GIVE_COIN' as const,
         actorId: giver.userId,
         targetId: receiver.userId,
-        data: { coinType },
+        data: { coinType, amount },
       }
 
       // Execute via engine
@@ -587,7 +607,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         room: gameService.getPublicState(result.room!),
       })
 
-      // Auto-advance to next phase after card selections that do not need narrator confirmation.
+      // Auto-advance after card selection (situation, emotion, selfcare)
       const shouldAutoAdvance =
         (actionType === 'SELECT_CARD' && (result.room!.phase === 'situation-card' || result.room!.phase === 'emotion-card')) ||
         (actionType === 'SELECT_SELFCARE_CARD' && result.room!.phase === 'selfcare-card')
@@ -595,9 +615,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       if (shouldAutoAdvance) {
         const selectedPhase = result.room!.phase
         const delayMs = selectedPhase === 'situation-card' ? 2000 : 350
-        console.log(`[select_card] Auto-advancing after ${selectedPhase} selection in room ${roomId}`)
         
-        // Let the selected card sync to clients before moving on.
         setTimeout(async () => {
           const currentRoom = roomRepository.findById(roomId)
           if (!currentRoom || currentRoom.phase !== selectedPhase) return
@@ -607,7 +625,6 @@ export function registerGameHandlers(io: Server, socket: Socket) {
           if (advanceResult.success && advanceResult.room) {
             await roomRepository.saveAndWait(advanceResult.room)
             io.to(roomId).emit('turn_changed', gameService.getPublicState(advanceResult.room))
-            console.log(`[select_card] Auto-advanced to phase: ${advanceResult.room.phase}`)
           }
         }, delayMs)
       }
@@ -745,7 +762,9 @@ export function registerGameHandlers(io: Server, socket: Socket) {
 
       // Execute vote for each target
       for (const targetId of targets) {
-        const target = updatedRoom.players.find((p) => p.socketId === targetId)
+        // Find target by socketId first, then try matching by index position
+        const target = updatedRoom.players.find((p) => p.socketId === targetId) 
+          || updatedRoom.players.find((p) => p.userId === targetId)
         if (!target) {
           console.warn(`[ntg_vote] Target ${targetId} not found, skipping`)
           continue
@@ -795,6 +814,16 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       if (callback) callback(err)
       else socket.emit('error', err)
     }
+  })
+
+  // Relay: NTG is browsing situation cards — broadcast current card to others (read-only)
+  socket.on('card_preview', ({ roomId, card }: { roomId: string; card: object | null }) => {
+    socket.to(roomId).emit('card_preview', { card })
+  })
+
+  // Relay: NTG fan state for spectators (only position changes + initial cards)
+  socket.on('situation_fan_state', ({ roomId, cards, activePosition }: { roomId: string; cards?: object[]; activePosition: number }) => {
+    socket.to(roomId).emit('situation_fan_state', { cards, activePosition })
   })
 
   /**
@@ -949,7 +978,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       const rewards: Array<{ userId: string; socketId: string; name: string; bonus: number }> = []
 
       const updatedPlayers = room.players.map((player) => {
-        if (!targets.includes(player.socketId)) return player
+        if (!targets.includes(player.socketId) && !targets.includes(player.userId)) return player
         if (!player.originalRole || !eligibleRoles.has(player.originalRole)) return player
         if (alreadyRewardedIds.has(player.userId)) return player
 

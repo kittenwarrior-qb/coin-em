@@ -36,7 +36,7 @@ export function CoinCarousel({ initialCoinType = 'yellow', title, coins, onClose
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="absolute inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm"
       style={{ maxWidth: 430, margin: '0 auto' }}
       onClick={onClose}
     >

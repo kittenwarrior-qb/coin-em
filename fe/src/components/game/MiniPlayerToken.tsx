@@ -224,18 +224,21 @@ export function MiniPlayerToken({
           )}
           {(isActionTarget || isSelectedActionTarget) && (
             <motion.div
-              className="pointer-events-none absolute z-10 rounded-[18px] border-[3px]"
-              initial={{ opacity: 0, scale: 0.9 }}
+              className="pointer-events-none absolute z-10 rounded-full border-[3px]"
+              initial={{ opacity: 0, scale: 0.85 }}
               animate={{
                 opacity: 1,
-                scale: isSelectedActionTarget ? 1.08 : 1,
+                scale: isSelectedActionTarget ? 1.1 : [1, 1.06, 1],
                 boxShadow: isSelectedActionTarget
-                  ? `0 0 22px 6px ${actionTargetColor}`
-                  : `0 0 10px 1px ${actionTargetColor}`,
+                  ? `0 0 24px 8px ${actionTargetColor}`
+                  : `0 0 12px 2px ${actionTargetColor}`,
               }}
-              transition={{ duration: 0.22 }}
+              transition={isSelectedActionTarget
+                ? { duration: 0.22 }
+                : { duration: 1.6, repeat: Infinity, ease: 'easeInOut' }
+              }
               style={{
-                inset: -9,
+                inset: -8,
                 borderColor: actionTargetColor,
                 background: 'transparent',
               }}

@@ -54,7 +54,12 @@ export default function GameContainer() {
     ntgVote,
     confirmRoleRewards,
     shareReflection,
+    emitCardPreview,
+    emitSituationFanState,
+    situationPreviewCard,
+    situationFanState,
     submitVote,
+    giveCoin,
   } = useSocket()
   
   const mySocketId = currentSocketId || socket?.id || ''
@@ -186,7 +191,12 @@ export default function GameContainer() {
         ntgVote={ntgVote}
         confirmRoleRewards={confirmRoleRewards}
         shareReflection={shareReflection}
+        emitCardPreview={emitCardPreview}
+        emitSituationFanState={emitSituationFanState}
+        situationPreviewCard={situationPreviewCard}
+        situationFanState={situationFanState}
         submitVote={submitVote}
+        giveCoin={giveCoin}
       />
     )
   }
