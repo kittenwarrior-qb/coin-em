@@ -2,19 +2,21 @@ import { useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { CartoonModal, CartoonButton } from '@/components/cartoon'
 import { CardInventory } from '@/components/game/CardInventory'
+import { GuideBook } from '@/components/game/GuideBook'
 
 interface GameMenuModalProps {
   open: boolean
   onClose: () => void
-  onGuide: () => void
+  onGuide?: () => void
   onSettings?: () => void
   onQuit?: () => void
 }
 
-export function GameMenuModal({ open, onClose, onGuide, onQuit }: GameMenuModalProps) {
+export function GameMenuModal({ open, onClose, onQuit }: GameMenuModalProps) {
   const [showCardDeck, setShowCardDeck] = useState(false)
   const [showQuitConfirm, setShowQuitConfirm] = useState(false)
   const [showSupport, setShowSupport] = useState(false)
+  const [showGuide, setShowGuide] = useState(false)
 
   return (
     <>
@@ -24,7 +26,7 @@ export function GameMenuModal({ open, onClose, onGuide, onQuit }: GameMenuModalP
             Bộ thẻ
           </CartoonButton>
 
-          <CartoonButton color="purple" size="lg" className="w-full" onClick={onGuide}>
+          <CartoonButton color="purple" size="lg" className="w-full" onClick={() => setShowGuide(true)}>
             Hướng dẫn
           </CartoonButton>
 
@@ -45,6 +47,12 @@ export function GameMenuModal({ open, onClose, onGuide, onQuit }: GameMenuModalP
       <AnimatePresence>
         {showCardDeck && (
           <CardInventory onClose={() => setShowCardDeck(false)} />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showGuide && (
+          <GuideBook onClose={() => setShowGuide(false)} />
         )}
       </AnimatePresence>
 

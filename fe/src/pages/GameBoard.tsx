@@ -1594,7 +1594,6 @@ export default function GameBoard({
       <GameMenuModal
         open={showMenu}
         onClose={() => setShowMenu(false)}
-        onGuide={() => setShowMenu(false)}
         onQuit={() => { setShowMenu(false); onLeave() }}
       />
 
