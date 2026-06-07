@@ -3,566 +3,706 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CoinEm — Guide Slides Preview (1080×1920)</title>
+<title>EmCoin — Guide Slides Preview</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: #1a1120;
-    font-family: 'Nunito', 'Segoe UI', sans-serif;
-    padding: 40px 20px;
-    color: #fff;
-  }
-  h1 {
-    text-align: center;
-    font-size: 22px;
-    color: #F97BB0;
-    margin-bottom: 8px;
-    font-weight: 800;
-  }
-  .subtitle {
-    text-align: center;
-    font-size: 13px;
-    color: rgba(255,255,255,0.4);
-    margin-bottom: 40px;
-  }
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 32px;
-    max-width: 1280px;
-    margin: 0 auto;
-  }
+/* ─── Base ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #1a1530;
+  font-family: 'Quicksand', 'Segoe UI', sans-serif;
+  padding: 48px 24px 80px;
+  color: #fff;
+}
 
-  /* Each slide card is 9:16 */
-  .slide-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .slide-label {
-    font-size: 11px;
-    font-weight: 700;
-    color: rgba(255,255,255,0.35);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    padding-left: 4px;
-  }
-  .slide {
-    width: 100%;
-    aspect-ratio: 9 / 16;
-    border-radius: 24px;
-    overflow: hidden;
-    position: relative;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-    display: flex;
-    flex-direction: column;
-  }
+/* ─── Page header ──────────────────────────────────────── */
+.page-title {
+  text-align: center;
+  font-family: 'Lilita One', sans-serif;
+  font-size: 28px;
+  color: #FF6993;
+  margin-bottom: 6px;
+  letter-spacing: .5px;
+}
+.page-sub {
+  text-align: center;
+  font-size: 13px;
+  color: rgba(255,255,255,.35);
+  margin-bottom: 56px;
+  font-weight: 600;
+}
 
-  /* ── Shared inner elements ────────────────────────────── */
-  .s-badge {
-    display: inline-block;
-    background: rgba(255,255,255,0.18);
-    border: 1.5px solid rgba(255,255,255,0.25);
-    backdrop-filter: blur(6px);
-    border-radius: 99px;
-    padding: 5px 14px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    color: rgba(255,255,255,0.9);
-  }
-  .s-title {
-    font-size: clamp(22px, 7vw, 30px);
-    font-weight: 900;
-    line-height: 1.15;
-    color: #fff;
-    text-shadow: 0 2px 12px rgba(0,0,0,0.3);
-  }
-  .s-body {
-    font-size: clamp(11px, 3.5vw, 14px);
-    font-weight: 600;
-    color: rgba(255,255,255,0.88);
-    line-height: 1.55;
-  }
-  .s-divider {
-    width: 40px;
-    height: 4px;
-    border-radius: 99px;
-    background: rgba(255,255,255,0.35);
-    margin: 10px 0;
-  }
-  .pill-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: rgba(255,255,255,0.14);
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 14px;
-    padding: 9px 12px;
-    font-size: 12px;
-    font-weight: 700;
-    color: #fff;
-    backdrop-filter: blur(4px);
-  }
-  .pill-item .icon { font-size: 18px; flex-shrink: 0; }
-  .pill-item .text { flex: 1; }
-  .pill-item .sub { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.6); }
+/* ─── Grid ─────────────────────────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
 
-  /* ── SLIDE 01 — Cover ─────────────────────────────────── */
-  .s01 { background: linear-gradient(160deg, #FF6B6B 0%, #FF8E3C 35%, #F97BB0 70%, #9B5DE5 100%); }
-  .s01 .inner { padding: 10% 8%; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 5%; }
-  .s01 .logo-ring {
-    width: 52%; aspect-ratio: 1; border-radius: 50%;
-    background: rgba(255,255,255,0.18);
-    border: 3px solid rgba(255,255,255,0.35);
-    backdrop-filter: blur(8px);
-    display: flex; align-items: center; justify-content: center;
-    font-size: clamp(42px, 14vw, 72px);
-    box-shadow: 0 0 40px rgba(255,255,255,0.2);
-  }
-  .s01 .game-name { font-size: clamp(30px, 9vw, 44px); font-weight: 900; letter-spacing: -0.5px; color: #fff; text-shadow: 0 2px 16px rgba(0,0,0,0.25); }
-  .s01 .main-title { font-size: clamp(14px, 4.5vw, 20px); font-weight: 700; color: rgba(255,255,255,0.8); text-align: center; }
-  .s01 .tagline { font-size: clamp(11px, 3.5vw, 15px); font-weight: 600; color: rgba(255,255,255,0.65); text-align: center; }
-  .coins-float { display: flex; gap: 10px; align-items: center; }
-  .coin { font-size: 20px; }
+/* ─── Slide wrapper ────────────────────────────────────── */
+.sw { display: flex; flex-direction: column; gap: 10px; }
+.sw-num {
+  font-family: 'Lilita One', sans-serif;
+  font-size: 11px;
+  color: rgba(255,255,255,.28);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding-left: 2px;
+}
+.slide {
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  border-radius: 22px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 12px 48px rgba(0,0,0,.55), 0 0 0 1.5px rgba(255,255,255,.07);
+  display: flex;
+  flex-direction: column;
+}
 
-  /* ── SLIDE 02 — What is CoinEm ───────────────────────── */
-  .s02 { background: linear-gradient(155deg, #1B4332 0%, #2D6A4F 40%, #40916C 100%); }
-  .s02 .inner { padding: 8% 7%; display: flex; flex-direction: column; gap: 5%; height: 100%; justify-content: center; }
-  .people-circle { font-size: clamp(48px, 15vw, 80px); text-align: center; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3)); }
+/* ─── Shared elements ──────────────────────────────────── */
+.tag {
+  display: inline-block;
+  background: rgba(255,255,255,.15);
+  border: 1.5px solid rgba(255,255,255,.22);
+  border-radius: 99px;
+  padding: 3px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  color: rgba(255,255,255,.85);
+  backdrop-filter: blur(4px);
+}
+.h1 {
+  font-family: 'Lilita One', sans-serif;
+  font-size: clamp(20px, 8vw, 30px);
+  line-height: 1.1;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0,0,0,.25);
+}
+.h1 span { display: block; }
+.body {
+  font-size: clamp(10px, 3.5vw, 13px);
+  font-weight: 600;
+  color: rgba(255,255,255,.8);
+  line-height: 1.55;
+}
+.divider {
+  width: 36px; height: 3px; border-radius: 99px;
+  background: rgba(255,255,255,.3);
+}
 
-  /* ── SLIDE 03 — 7 Roles ──────────────────────────────── */
-  .s03 { background: linear-gradient(155deg, #3A0CA3 0%, #7209B7 50%, #B5179E 100%); }
-  .s03 .inner { padding: 7% 6%; display: flex; flex-direction: column; gap: 3%; height: 100%; justify-content: center; }
-  .role-grid { display: flex; flex-direction: column; gap: 5px; }
+/* Image placeholder */
+.img-ph {
+  border-radius: 14px;
+  border: 2px dashed rgba(255,255,255,.3);
+  background: rgba(255,255,255,.07);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: rgba(255,255,255,.35);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+.img-ph .ph-icon { font-size: 24px; opacity: .5; }
 
-  /* ── SLIDE 04 — Coins ────────────────────────────────── */
-  .s04 { background: linear-gradient(155deg, #5C3317 0%, #8B4513 40%, #D4A017 100%); }
-  .s04 .inner { padding: 8% 7%; display: flex; flex-direction: column; gap: 6%; height: 100%; justify-content: center; align-items: center; }
-  .coin-big { display: flex; flex-direction: column; align-items: center; gap: 6px; background: rgba(255,255,255,0.12); border: 2px solid rgba(255,255,255,0.22); border-radius: 20px; padding: 14px 20px; width: 100%; }
-  .coin-big .icon { font-size: clamp(32px, 10vw, 44px); }
-  .coin-big .name { font-size: clamp(14px, 4.5vw, 18px); font-weight: 800; color: #fff; }
-  .coin-big .desc { font-size: clamp(10px, 3vw, 12px); color: rgba(255,255,255,0.7); text-align: center; font-weight: 600; }
+/* Pill row item */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: rgba(255,255,255,.11);
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 12px;
+  padding: 8px 10px;
+}
+.row .ico { font-size: 17px; flex-shrink: 0; }
+.row .txt { flex: 1; }
+.row .name { font-size: 11px; font-weight: 700; color: #fff; line-height: 1.2; }
+.row .desc { font-size: 9.5px; color: rgba(255,255,255,.5); font-weight: 600; margin-top: 1px; }
 
-  /* ── SLIDE 05 — Night Phase ──────────────────────────── */
-  .s05 { background: linear-gradient(160deg, #0a0a1a 0%, #1a0533 40%, #2a1060 100%); }
-  .s05 .inner { padding: 8% 7%; display: flex; flex-direction: column; gap: 5%; height: 100%; justify-content: center; }
-  .night-visual { font-size: clamp(52px, 16vw, 80px); text-align: center; }
-  .stars { font-size: 16px; color: rgba(255,255,255,0.4); text-align: center; }
+/* Coin card */
+.coin-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(255,255,255,.18);
+  padding: 11px 13px;
+  background: rgba(0,0,0,.2);
+}
+.coin-card .ci { font-size: 26px; flex-shrink: 0; }
+.coin-card .cn { font-family: 'Lilita One', sans-serif; font-size: 13px; color: #fff; }
+.coin-card .cd { font-size: 10px; color: rgba(255,255,255,.55); font-weight: 600; margin-top: 2px; line-height: 1.3; }
 
-  /* ── SLIDE 06 — Choose Cards ─────────────────────────── */
-  .s06 { background: linear-gradient(155deg, #1A237E 0%, #283593 40%, #3949AB 100%); }
-  .s06 .inner { padding: 8% 7%; display: flex; flex-direction: column; gap: 4%; height: 100%; justify-content: center; }
-  .card-fan { font-size: clamp(40px, 12vw, 64px); text-align: center; }
+/* Highlight box */
+.hbox {
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: rgba(255,255,255,.75);
+  line-height: 1.5;
+}
 
-  /* ── SLIDE 07 — Story Time ───────────────────────────── */
-  .s07 { background: linear-gradient(155deg, #1B0000 0%, #6B1A1A 40%, #C0392B 100%); }
-  .s07 .inner { padding: 8% 7%; display: flex; flex-direction: column; gap: 5%; height: 100%; justify-content: center; align-items: center; }
-  .timer-big { font-size: clamp(48px, 14vw, 72px); font-weight: 900; color: #FF6B6B; text-shadow: 0 0 30px rgba(255,100,100,0.5); }
-  .timer-label { font-size: clamp(11px, 3.5vw, 14px); font-weight: 700; color: rgba(255,255,255,0.5); letter-spacing: 2px; text-transform: uppercase; }
+/* ════════════════════════════════════════════════════════ */
+/* SLIDE 01 — Cover                                         */
+/* ════════════════════════════════════════════════════════ */
+.s01 { background: linear-gradient(160deg, #FF6B35 0%, #FF6993 45%, #9B5DE5 100%); }
+.s01 .inner {
+  padding: 9% 8%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  height: 100%; gap: 5%;
+  text-align: center;
+}
+.logo-circle {
+  width: 50%; aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgba(255,255,255,.18);
+  border: 3px solid rgba(255,255,255,.35);
+  box-shadow: 0 0 40px rgba(255,255,255,.15);
+  display: flex; align-items: center; justify-content: center;
+}
+.logo-circle .img-ph { width: 100%; height: 100%; border-radius: 50%; border: none; background: transparent; font-size: 9px; }
+.coins-row { display: flex; gap: 8px; align-items: center; font-size: 19px; }
+.game-name { font-family: 'Lilita One', sans-serif; font-size: clamp(28px, 10vw, 42px); color: #fff; text-shadow: 0 2px 16px rgba(0,0,0,.2); }
+.slide-title { font-size: clamp(12px, 4.5vw, 18px); font-weight: 700; color: rgba(255,255,255,.75); }
+.tagline { font-size: clamp(9px, 3.2vw, 13px); font-weight: 600; color: rgba(255,255,255,.55); }
 
-  /* ── SLIDE 08 — Group Response ───────────────────────── */
-  .s08 { background: linear-gradient(155deg, #0D3B2E 0%, #1B7A5A 40%, #2ECC71 100%); }
-  .s08 .inner { padding: 8% 7%; display: flex; flex-direction: column; gap: 5%; height: 100%; justify-content: center; }
+/* ════════════════════════════════════════════════════════ */
+/* SLIDE 02 — What is EmCoin                                */
+/* ════════════════════════════════════════════════════════ */
+.s02 { background: linear-gradient(155deg, #0D3B2E 0%, #1B7A5A 60%, #22B8CF 100%); }
+.s02 .inner { padding: 7% 7%; display: flex; flex-direction: column; gap: 4%; height: 100%; justify-content: center; }
 
-  /* ── SLIDE 09 — Reflection Card ──────────────────────── */
-  .s09 { background: linear-gradient(155deg, #1A1A2E 0%, #16213E 40%, #0F3460 100%); }
-  .s09 .inner { padding: 8% 7%; display: flex; flex-direction: column; gap: 5%; height: 100%; justify-content: center; }
-  .quote-box {
-    background: rgba(255,255,255,0.08);
-    border-left: 3px solid #F97BB0;
-    border-radius: 8px;
-    padding: 12px 14px;
-    font-size: clamp(11px, 3.5vw, 14px);
-    font-style: italic;
-    color: rgba(255,255,255,0.8);
-    font-weight: 600;
-  }
+/* ════════════════════════════════════════════════════════ */
+/* SLIDE 03 — 7 Roles                                       */
+/* ════════════════════════════════════════════════════════ */
+.s03 { background: linear-gradient(155deg, #2D0B6B 0%, #7B4FD4 55%, #B89EF0 100%); }
+.s03 .inner { padding: 6% 6%; display: flex; flex-direction: column; gap: 3%; height: 100%; justify-content: center; }
+.s03 .row { padding: 7px 10px; }
 
-  /* ── SLIDE 10 — Hug Tips ─────────────────────────────── */
-  .s10 { background: linear-gradient(155deg, #4A1942 0%, #7B2D8B 40%, #F97BB0 100%); }
-  .s10 .inner { padding: 8% 7%; display: flex; flex-direction: column; gap: 5%; height: 100%; justify-content: center; align-items: center; }
+/* ════════════════════════════════════════════════════════ */
+/* SLIDE 04 — 3 Coin Types                                  */
+/* ════════════════════════════════════════════════════════ */
+.s04 { background: linear-gradient(155deg, #3B1A08 0%, #8B4513 40%, #E8A020 100%); }
+.s04 .inner { padding: 8% 7%; display: flex; flex-direction: column; gap: 5%; height: 100%; justify-content: center; }
 
-  /* ── SLIDE 11 — Vote ─────────────────────────────────── */
-  .s11 { background: linear-gradient(155deg, #1C1C2E 0%, #4A4A8A 40%, #6C63FF 100%); }
-  .s11 .inner { padding: 8% 7%; display: flex; flex-direction: column; gap: 5%; height: 100%; justify-content: center; }
-  .avatar-row { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
-  .avatar { width: clamp(32px, 10vw, 44px); aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; font-size: 18px; }
-  .avatar.selected { background: rgba(255,99,99,0.3); border-color: #FF6B6B; box-shadow: 0 0 10px rgba(255,100,100,0.4); }
+/* ════════════════════════════════════════════════════════ */
+/* SLIDE 05 — Night Phase                                   */
+/* ════════════════════════════════════════════════════════ */
+.s05 { background: linear-gradient(160deg, #04040E 0%, #0F0B2A 50%, #2A1060 100%); }
+.s05 .inner { padding: 7% 7%; display: flex; flex-direction: column; gap: 4%; height: 100%; justify-content: center; }
+.moon { font-size: clamp(44px, 16vw, 72px); text-align: center; filter: drop-shadow(0 0 20px rgba(200,180,255,.4)); }
+.stars { text-align: center; color: rgba(255,255,255,.3); font-size: 12px; letter-spacing: 6px; }
 
-  /* ── SLIDE 12 — Reveal & Give Coin ──────────────────── */
-  .s12 { background: linear-gradient(155deg, #4A2000 0%, #8B4513 30%, #FF8E3C 100%); }
-  .s12 .inner { padding: 8% 7%; display: flex; flex-direction: column; gap: 4%; height: 100%; justify-content: center; }
-  .reveal-box { background: rgba(0,0,0,0.25); border: 2px solid rgba(255,200,100,0.3); border-radius: 16px; padding: 12px 14px; text-align: center; }
-  .reveal-name { font-size: clamp(16px, 5vw, 22px); font-weight: 900; color: #FFD700; }
+/* ════════════════════════════════════════════════════════ */
+/* SLIDE 06 — Choose Cards                                  */
+/* ════════════════════════════════════════════════════════ */
+.s06 { background: linear-gradient(155deg, #0E1A4A 0%, #1B3A8C 50%, #2F76AC 100%); }
+.s06 .inner { padding: 7% 7%; display: flex; flex-direction: column; gap: 4%; height: 100%; justify-content: center; }
+.card-row { display: flex; gap: 8px; }
+.card-ph {
+  flex: 1; aspect-ratio: 2/3;
+  border-radius: 10px;
+  border: 2px dashed rgba(255,255,255,.3);
+  background: rgba(255,255,255,.07);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 4px;
+  font-size: 9px; font-weight: 700;
+  color: rgba(255,255,255,.3);
+  text-transform: uppercase; letter-spacing: .5px;
+}
+.card-ph .ph-icon { font-size: 20px; opacity: .5; }
 
-  /* ── SLIDE 13 — End of Round ─────────────────────────── */
-  .s13 { background: linear-gradient(155deg, #1B2838 0%, #2A475E 40%, #1B9CFC 100%); }
-  .s13 .inner { padding: 8% 7%; display: flex; flex-direction: column; gap: 5%; height: 100%; justify-content: center; }
-  .reward-item { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.1); border-radius: 12px; padding: 9px 12px; }
-  .reward-coins { font-size: clamp(16px, 5vw, 20px); font-weight: 900; color: #FFD700; }
+/* ════════════════════════════════════════════════════════ */
+/* SLIDE 07 — Story Time 60s                                */
+/* ════════════════════════════════════════════════════════ */
+.s07 { background: linear-gradient(155deg, #200000 0%, #7A1A1A 45%, #EB3C54 100%); }
+.s07 .inner { padding: 8% 7%; display: flex; flex-direction: column; gap: 5%; height: 100%; justify-content: center; align-items: center; }
+.timer {
+  font-family: 'Lilita One', sans-serif;
+  font-size: clamp(52px, 18vw, 80px);
+  color: #FF8FAF;
+  text-shadow: 0 0 40px rgba(255,105,147,.5), 0 2px 8px rgba(0,0,0,.4);
+  line-height: 1;
+}
+.timer-label { font-size: 10px; font-weight: 700; letter-spacing: 2.5px; color: rgba(255,255,255,.35); text-transform: uppercase; }
 
-  /* ── SLIDE 14 — Closing ──────────────────────────────── */
-  .s14 { background: linear-gradient(160deg, #FF6B6B 0%, #F97BB0 40%, #9B5DE5 80%, #3A0CA3 100%); }
-  .s14 .inner { padding: 10% 8%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5%; height: 100%; text-align: center; }
-  .heart-big { font-size: clamp(52px, 16vw, 80px); filter: drop-shadow(0 0 20px rgba(255,100,150,0.5)); }
-  .closing-lines { display: flex; flex-direction: column; gap: 8px; }
-  .closing-line { font-size: clamp(12px, 3.8vw, 16px); font-weight: 700; color: rgba(255,255,255,0.9); }
-  .closing-line.main { font-size: clamp(14px, 4.5vw, 19px); font-weight: 800; color: #fff; }
-  .footer-logo { font-size: clamp(13px, 4vw, 16px); font-weight: 900; color: rgba(255,255,255,0.5); margin-top: 8px; letter-spacing: 1px; }
+/* ════════════════════════════════════════════════════════ */
+/* SLIDE 08 — Group Response                                */
+/* ════════════════════════════════════════════════════════ */
+.s08 { background: linear-gradient(155deg, #082820 0%, #1A6B4A 50%, #53B025 100%); }
+.s08 .inner { padding: 7% 7%; display: flex; flex-direction: column; gap: 4%; height: 100%; justify-content: center; }
+
+/* ════════════════════════════════════════════════════════ */
+/* SLIDE 09 — Reflection Card                               */
+/* ════════════════════════════════════════════════════════ */
+.s09 { background: linear-gradient(155deg, #0C0C22 0%, #1A1A42 50%, #2F2FAA 100%); }
+.s09 .inner { padding: 7% 7%; display: flex; flex-direction: column; gap: 4%; height: 100%; justify-content: center; }
+.quote {
+  border-left: 3px solid #FF6993;
+  border-radius: 0 10px 10px 0;
+  background: rgba(255,105,147,.1);
+  padding: 10px 12px;
+  font-size: 10.5px;
+  font-style: italic;
+  color: rgba(255,255,255,.7);
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+/* ════════════════════════════════════════════════════════ */
+/* SLIDE 10 — Hug Tips                                      */
+/* ════════════════════════════════════════════════════════ */
+.s10 { background: linear-gradient(155deg, #3D0A38 0%, #8B1A7A 45%, #FF6993 100%); }
+.s10 .inner { padding: 7% 7%; display: flex; flex-direction: column; gap: 4%; height: 100%; justify-content: center; align-items: center; }
+
+/* ════════════════════════════════════════════════════════ */
+/* SLIDE 11 — Vote                                          */
+/* ════════════════════════════════════════════════════════ */
+.s11 { background: linear-gradient(155deg, #0D0D2A 0%, #2B2B8A 50%, #6C63FF 100%); }
+.s11 .inner { padding: 7% 7%; display: flex; flex-direction: column; gap: 4%; height: 100%; justify-content: center; }
+.avatars { display: flex; gap: 7px; justify-content: center; flex-wrap: wrap; margin: 4px 0; }
+.av {
+  width: clamp(30px, 10vw, 42px); aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgba(255,255,255,.12);
+  border: 2px solid rgba(255,255,255,.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+}
+.av.hot { background: rgba(235,60,84,.25); border-color: #EB3C54; box-shadow: 0 0 10px rgba(235,60,84,.4); }
+
+/* ════════════════════════════════════════════════════════ */
+/* SLIDE 12 — Reveal & Give Coin                            */
+/* ════════════════════════════════════════════════════════ */
+.s12 { background: linear-gradient(155deg, #3A1200 0%, #8B3A00 40%, #FF8C42 100%); }
+.s12 .inner { padding: 7% 7%; display: flex; flex-direction: column; gap: 4%; height: 100%; justify-content: center; }
+.reveal {
+  border-radius: 14px;
+  border: 2px solid rgba(255,220,100,.3);
+  background: rgba(0,0,0,.25);
+  padding: 12px;
+  text-align: center;
+}
+.reveal .rlabel { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,.35); margin-bottom: 5px; }
+.reveal .rname { font-family: 'Lilita One', sans-serif; font-size: clamp(16px, 6vw, 22px); color: #FFD700; }
+
+/* ════════════════════════════════════════════════════════ */
+/* SLIDE 13 — End of Round                                  */
+/* ════════════════════════════════════════════════════════ */
+.s13 { background: linear-gradient(155deg, #0A1A2E 0%, #1A4A7A 45%, #2F76AC 100%); }
+.s13 .inner { padding: 7% 7%; display: flex; flex-direction: column; gap: 4%; height: 100%; justify-content: center; }
+.reward {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  background: rgba(255,255,255,.1);
+  border-radius: 11px;
+  padding: 9px 11px;
+}
+.reward .rn { font-size: 11px; font-weight: 700; color: #fff; }
+.reward .rs { font-size: 9px; color: rgba(255,255,255,.45); font-weight: 600; margin-top: 1px; }
+.reward .rc { font-family: 'Lilita One', sans-serif; font-size: clamp(15px, 5.5vw, 20px); color: #F5CC00; }
+
+/* ════════════════════════════════════════════════════════ */
+/* SLIDE 14 — Closing                                       */
+/* ════════════════════════════════════════════════════════ */
+.s14 { background: linear-gradient(160deg, #FF6B35 0%, #FF6993 38%, #9B5DE5 72%, #2D0B6B 100%); }
+.s14 .inner {
+  padding: 10% 8%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  height: 100%; gap: 5%; text-align: center;
+}
+.heart { font-size: clamp(52px, 18vw, 80px); filter: drop-shadow(0 0 24px rgba(255,105,147,.5)); }
+.closing { display: flex; flex-direction: column; gap: 8px; }
+.cl { font-size: clamp(12px, 4vw, 16px); font-weight: 700; color: rgba(255,255,255,.85); }
+.cl.main { font-family: 'Lilita One', sans-serif; font-size: clamp(15px, 5.5vw, 20px); color: #fff; }
+.footer { font-family: 'Lilita One', sans-serif; font-size: 13px; color: rgba(255,255,255,.35); letter-spacing: 2px; margin-top: 4px; }
+
+/* ─── footer ───────────────────────────────────────────── */
+.page-footer { text-align: center; color: rgba(255,255,255,.15); font-size: 12px; margin-top: 64px; }
 </style>
 </head>
 <body>
 
-<h1>CoinEm — Slide Preview</h1>
-<p class="subtitle">14 trang · 9:16 portrait (1080×1920) · Thiết kế trong Canva</p>
+<p class="page-title">EmCoin — Guide Slides</p>
+<p class="page-sub">14 trang · 1080 × 1920 px (9:16) · Dùng làm khung Canva — bạn tự chụp ảnh điền vào chỗ nét đứt</p>
 
 <div class="grid">
 
-  <!-- ═══ SLIDE 01 — COVER ═══ -->
-  <div class="slide-wrap">
-    <div class="slide-label">01 — Bìa</div>
-    <div class="slide s01">
-      <div class="inner">
-        <div class="coins-float"><span class="coin">🪙</span><span class="coin">💛</span><span class="coin">🪙</span></div>
-        <div class="logo-ring">🫀</div>
-        <div class="game-name">CoinEm</div>
-        <div class="main-title">Hướng dẫn chơi</div>
-        <div class="s-divider" style="margin:0 auto;"></div>
-        <div class="tagline">Kết nối cảm xúc — Chia sẻ thật lòng</div>
-        <div class="coins-float"><span class="coin">🔴</span><span class="coin">💛</span><span class="coin">💚</span></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ SLIDE 02 — WHAT IS COINEM ═══ -->
-  <div class="slide-wrap">
-    <div class="slide-label">02 — CoinEm là gì?</div>
-    <div class="slide s02">
-      <div class="inner">
-        <div class="people-circle">👥</div>
-        <div class="s-title">CoinEm<br>là gì?</div>
-        <div class="s-divider"></div>
-        <div style="display:flex;flex-direction:column;gap:7px;">
-          <div class="pill-item"><span class="icon">👤</span><div class="text">4–8 người chơi<span class="sub" style="display:block">Quanh 1 bàn hoặc ngồi vòng tròn</span></div></div>
-          <div class="pill-item"><span class="icon">💌</span><div class="text">1 người Trao Gửi mỗi vòng<span class="sub" style="display:block">Kể câu chuyện cảm xúc thật</span></div></div>
-          <div class="pill-item"><span class="icon">👂</span><div class="text">Cả nhóm lắng nghe<span class="sub" style="display:block">Đồng cảm, không phán xét</span></div></div>
-          <div class="pill-item"><span class="icon">🪙</span><div class="text">Tặng coin để ghi nhận<span class="sub" style="display:block">Cảm xúc được nhìn thấy</span></div></div>
+<!-- ══════════════════════════════════════════════════════
+     SLIDE 01 — Cover
+══════════════════════════════════════════════════════════ -->
+<div class="sw">
+  <div class="sw-num">Slide 01 — Bìa</div>
+  <div class="slide s01">
+    <div class="inner">
+      <div class="coins-row">🔴 💛 💚</div>
+      <div class="logo-circle">
+        <div class="img-ph">
+          <span class="ph-icon">🖼</span>
+          logo<br>EmCoin
         </div>
       </div>
+      <div class="game-name">EmCoin</div>
+      <div class="slide-title">Hướng dẫn chơi</div>
+      <div class="divider" style="margin:0 auto;"></div>
+      <div class="tagline">Kết nối cảm xúc — Chia sẻ thật lòng</div>
+      <div class="coins-row">🪙 🪙 🪙</div>
     </div>
   </div>
-
-  <!-- ═══ SLIDE 03 — 7 ROLES ═══ -->
-  <div class="slide-wrap">
-    <div class="slide-label">03 — 7 Vai trò</div>
-    <div class="slide s03">
-      <div class="inner">
-        <div class="s-title">7 Vai trò</div>
-        <div class="s-divider"></div>
-        <div class="role-grid">
-          <div class="pill-item"><span class="icon">🎭</span><div class="text">Quản Trò<span class="sub" style="display:block">Điều hành trò chơi</span></div></div>
-          <div class="pill-item"><span class="icon">💌</span><div class="text">Người Trao Gửi<span class="sub" style="display:block">Chia sẻ câu chuyện cảm xúc thật</span></div></div>
-          <div class="pill-item"><span class="icon">💚</span><div class="text">Người Chữa Lành<span class="sub" style="display:block">Bảo vệ 1 người mỗi đêm</span></div></div>
-          <div class="pill-item"><span class="icon">🤐</span><div class="text">Người Im Lặng<span class="sub" style="display:block">Im lặng 1 người mỗi đêm</span></div></div>
-          <div class="pill-item"><span class="icon">🔗</span><div class="text">Người Kết Nối<span class="sub" style="display:block">Kết nối câu chuyện với nhóm</span></div></div>
-          <div class="pill-item"><span class="icon">✨</span><div class="text">Người Gợi Mở<span class="sub" style="display:block">Đặt câu hỏi chạm sâu</span></div></div>
-          <div class="pill-item"><span class="icon">🗺️</span><div class="text">Người Dẫn Lối<span class="sub" style="display:block">Hướng dẫn chăm sóc bản thân</span></div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ SLIDE 04 — 3 COINS ═══ -->
-  <div class="slide-wrap">
-    <div class="slide-label">04 — 3 Loại đồng xu</div>
-    <div class="slide s04">
-      <div class="inner">
-        <div class="s-title" style="text-align:center;">3 Loại<br>đồng xu</div>
-        <div class="s-divider" style="margin:0 auto;"></div>
-        <div class="coin-big" style="border-color:rgba(255,80,80,0.4);">
-          <div class="icon">🔴</div>
-          <div class="name" style="color:#FF6B6B;">Coin Đỏ</div>
-          <div class="desc">Nhận 3 coin mỗi vòng<br>Tặng cho người khác để đồng cảm</div>
-        </div>
-        <div class="coin-big" style="border-color:rgba(255,215,0,0.4);">
-          <div class="icon">💛</div>
-          <div class="name" style="color:#FFD700;">Coin Vàng</div>
-          <div class="desc">Tích lũy theo thời gian<br>Nhận khi hoàn thành vai trò tốt</div>
-        </div>
-        <div class="coin-big" style="border-color:rgba(46,204,113,0.4);">
-          <div class="icon">💚</div>
-          <div class="name" style="color:#2ECC71;">Coin Xanh</div>
-          <div class="desc">Nhận được khi người khác<br>tặng coin cho bạn</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ SLIDE 05 — NIGHT PHASE ═══ -->
-  <div class="slide-wrap">
-    <div class="slide-label">05 — Giai đoạn Đêm</div>
-    <div class="slide s05">
-      <div class="inner">
-        <div class="night-visual">🌙</div>
-        <div class="stars">✦ ✦ ✦ ✦ ✦</div>
-        <div class="s-title">Giai đoạn<br>Đêm</div>
-        <div class="s-divider"></div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <div class="pill-item" style="border-color:rgba(46,204,113,0.3);">
-            <span class="icon">💚</span>
-            <div class="text">Người Chữa Lành<span class="sub" style="display:block">Chọn 1 người để bảo vệ</span></div>
-          </div>
-          <div class="pill-item" style="border-color:rgba(255,100,100,0.3);">
-            <span class="icon">🤐</span>
-            <div class="text">Người Im Lặng<span class="sub" style="display:block">Chọn 1 người bị im lặng vòng này</span></div>
-          </div>
-        </div>
-        <div class="quote-box" style="border-left-color:#6C63FF;">
-          Người bị im lặng → không thể phản hồi khi nghe câu chuyện
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ SLIDE 06 — CHOOSE CARDS ═══ -->
-  <div class="slide-wrap">
-    <div class="slide-label">06 — Chọn thẻ</div>
-    <div class="slide s06">
-      <div class="inner">
-        <div class="card-fan">🃏</div>
-        <div class="s-title">Chọn thẻ<br>Tình huống<br>& Cảm xúc</div>
-        <div class="s-divider"></div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <div class="pill-item">
-            <span class="icon">📋</span>
-            <div class="text">Thẻ Tình huống<span class="sub" style="display:block">Vuốt chọn 1 thẻ phù hợp</span></div>
-          </div>
-          <div class="pill-item">
-            <span class="icon">🫀</span>
-            <div class="text">Thẻ Cảm xúc<span class="sub" style="display:block">Chọn cảm xúc của câu chuyện</span></div>
-          </div>
-          <div class="pill-item">
-            <span class="icon">👀</span>
-            <div class="text">2 thẻ hiện trên bàn<span class="sub" style="display:block">Cả nhóm đều thấy</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ SLIDE 07 — STORY TIME ═══ -->
-  <div class="slide-wrap">
-    <div class="slide-label">07 — Kể chuyện</div>
-    <div class="slide s07">
-      <div class="inner">
-        <div class="timer-label">Đếm ngược</div>
-        <div class="timer-big">60s</div>
-        <div class="s-title" style="text-align:center;">Kể chuyện</div>
-        <div class="s-divider" style="margin:0 auto;"></div>
-        <div style="display:flex;flex-direction:column;gap:8px;width:100%;">
-          <div class="pill-item">
-            <span class="icon">💌</span>
-            <div class="text">Người Trao Gửi kể<span class="sub" style="display:block">Câu chuyện thật dựa vào 2 thẻ</span></div>
-          </div>
-          <div class="pill-item">
-            <span class="icon">🔇</span>
-            <div class="text">Cả nhóm im lặng<span class="sub" style="display:block">Lắng nghe không phán xét</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ SLIDE 08 — GROUP RESPONSE ═══ -->
-  <div class="slide-wrap">
-    <div class="slide-label">08 — Phản hồi nhóm</div>
-    <div class="slide s08">
-      <div class="inner">
-        <div style="font-size:clamp(44px,14vw,72px);text-align:center;">🗣️</div>
-        <div class="s-title">Phản hồi<br>nhóm</div>
-        <div class="s-divider"></div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <div class="pill-item">
-            <span class="icon">💬</span>
-            <div class="text">Lần lượt phản hồi<span class="sub" style="display:block">Mỗi người chia sẻ cảm nhận</span></div>
-          </div>
-          <div class="pill-item">
-            <span class="icon">🔴</span>
-            <div class="text">Tặng coin đỏ<span class="sub" style="display:block">Thể hiện sự đồng cảm</span></div>
-          </div>
-          <div class="pill-item" style="border-color:rgba(255,100,100,0.3);">
-            <span class="icon">🤐</span>
-            <div class="text">Người Im Lặng<span class="sub" style="display:block">Không nói, vẫn tặng coin được</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ SLIDE 09 — REFLECTION ═══ -->
-  <div class="slide-wrap">
-    <div class="slide-label">09 — Thẻ phản tư</div>
-    <div class="slide s09">
-      <div class="inner">
-        <div style="font-size:clamp(44px,14vw,72px);text-align:center;">🪞</div>
-        <div class="s-title">Thẻ phản tư</div>
-        <div class="s-divider"></div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <div class="pill-item">
-            <span class="icon">🃏</span>
-            <div class="text">Người Trao Gửi chọn thẻ<span class="sub" style="display:block">Thẻ phản tư ngẫu nhiên</span></div>
-          </div>
-          <div class="pill-item">
-            <span class="icon">💭</span>
-            <div class="text">Chia sẻ thêm<span class="sub" style="display:block">Sau khi nghe nhóm, tôi cảm thấy...</span></div>
-          </div>
-        </div>
-        <div class="quote-box">
-          "Sau khi nghe nhóm, tôi cảm thấy..."
-        </div>
-        <div class="s-body" style="color:rgba(255,255,255,0.5);font-size:11px;">Giai đoạn nhìn lại bản thân</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ SLIDE 10 — HUG TIPS ═══ -->
-  <div class="slide-wrap">
-    <div class="slide-label">10 — Bí kíp ôm</div>
-    <div class="slide s10">
-      <div class="inner">
-        <div style="font-size:clamp(52px,16vw,80px);">🤗</div>
-        <div class="s-title" style="text-align:center;">Bí kíp ôm<br>& Chăm sóc</div>
-        <div class="s-divider" style="margin:0 auto;"></div>
-        <div style="display:flex;flex-direction:column;gap:8px;width:100%;">
-          <div class="pill-item">
-            <span class="icon">🗺️</span>
-            <div class="text">Người Dẫn Lối chọn thẻ<span class="sub" style="display:block">Hoặc Người Trao Gửi nếu không có</span></div>
-          </div>
-          <div class="pill-item">
-            <span class="icon">🫂</span>
-            <div class="text">Cả nhóm thực hiện cùng nhau<span class="sub" style="display:block">Ôm, vỗ vai, bắt tay...</span></div>
-          </div>
-          <div class="pill-item">
-            <span class="icon">💓</span>
-            <div class="text">Kết nối cơ thể & cảm xúc<span class="sub" style="display:block">Hoàn thành vòng kết nối</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ SLIDE 11 — VOTE ═══ -->
-  <div class="slide-wrap">
-    <div class="slide-label">11 — Đoán Người Im Lặng</div>
-    <div class="slide s11">
-      <div class="inner">
-        <div style="font-size:clamp(44px,14vw,72px);text-align:center;">🗳️</div>
-        <div class="s-title">Đoán Người<br>Im Lặng</div>
-        <div class="s-divider"></div>
-        <div class="avatar-row">
-          <div class="avatar">👤</div>
-          <div class="avatar selected">👤</div>
-          <div class="avatar">👤</div>
-          <div class="avatar">👤</div>
-          <div class="avatar">👤</div>
-          <div class="avatar">👤</div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <div class="pill-item">
-            <span class="icon">🤔</span>
-            <div class="text">Ai là Người Im Lặng?<span class="sub" style="display:block">Tap vào avatar để bỏ phiếu</span></div>
-          </div>
-          <div class="pill-item">
-            <span class="icon">🔒</span>
-            <div class="text">Kết quả tiết lộ sau<span class="sub" style="display:block">Sau khi tất cả đã vote</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ SLIDE 12 — REVEAL & GIVE COIN ═══ -->
-  <div class="slide-wrap">
-    <div class="slide-label">12 — Tiết lộ & Tặng coin</div>
-    <div class="slide s12">
-      <div class="inner">
-        <div style="font-size:clamp(44px,14vw,72px);text-align:center;">🎁</div>
-        <div class="s-title">Tiết lộ<br>& Tặng coin</div>
-        <div class="s-divider"></div>
-        <div class="reveal-box">
-          <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:4px;">NGƯỜI IM LẶNG VÒI NÀY</div>
-          <div class="reveal-name">??? 🤐</div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <div class="pill-item">
-            <span class="icon">🎁</span>
-            <div class="text">Tặng coin tự do<span class="sub" style="display:block">Cho bất kỳ ai trong nhóm</span></div>
-          </div>
-          <div class="pill-item">
-            <span class="icon">🔴💛</span>
-            <div class="text">Tặng Đỏ hoặc Vàng<span class="sub" style="display:block">Người nhận được coin Xanh 💚</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ SLIDE 13 — END OF ROUND ═══ -->
-  <div class="slide-wrap">
-    <div class="slide-label">13 — Kết thúc vòng</div>
-    <div class="slide s13">
-      <div class="inner">
-        <div style="font-size:clamp(44px,14vw,72px);text-align:center;">🏆</div>
-        <div class="s-title">Kết thúc<br>vòng</div>
-        <div class="s-divider"></div>
-        <div style="display:flex;flex-direction:column;gap:7px;">
-          <div class="reward-item">
-            <div>
-              <div style="font-size:12px;font-weight:700;">💌 Người Trao Gửi hoàn thành</div>
-              <div style="font-size:10px;color:rgba(255,255,255,0.5);">Đã chia sẻ câu chuyện thật</div>
-            </div>
-            <div class="reward-coins">+5 💛</div>
-          </div>
-          <div class="reward-item">
-            <div>
-              <div style="font-size:12px;font-weight:700;">🎭 Vai trò khác hoàn thành</div>
-              <div style="font-size:10px;color:rgba(255,255,255,0.5);">Thực hiện đúng nhiệm vụ</div>
-            </div>
-            <div class="reward-coins">+2 💛</div>
-          </div>
-        </div>
-        <div class="pill-item" style="margin-top:4px;">
-          <span class="icon">🔄</span>
-          <div class="text">Vòng tiếp theo<span class="sub" style="display:block">Người khác làm Người Trao Gửi</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ SLIDE 14 — CLOSING ═══ -->
-  <div class="slide-wrap">
-    <div class="slide-label">14 — Lời kết</div>
-    <div class="slide s14">
-      <div class="inner">
-        <div class="heart-big">💝</div>
-        <div class="closing-lines">
-          <div class="closing-line main">Hãy chia sẻ thật lòng</div>
-          <div class="closing-line">Lắng nghe không phán xét</div>
-          <div class="closing-line">Mỗi câu chuyện đều<br>xứng đáng được lắng nghe</div>
-        </div>
-        <div class="s-divider" style="margin:0 auto;"></div>
-        <div class="footer-logo">✦ CoinEm ✦</div>
-      </div>
-    </div>
-  </div>
-
 </div>
 
-<p style="text-align:center;color:rgba(255,255,255,0.2);font-size:12px;margin-top:48px;">
-  Thiết kế trong Canva · 1080×1920px · 9:16 portrait · PNG xuất ra /fe/public/guide/slide-01.png → slide-14.png
+<!-- ══════════════════════════════════════════════════════
+     SLIDE 02 — What is EmCoin
+══════════════════════════════════════════════════════════ -->
+<div class="sw">
+  <div class="sw-num">Slide 02 — EmCoin là gì?</div>
+  <div class="slide s02">
+    <div class="inner">
+      <!-- Image placeholder: chụp ảnh nhóm người ngồi vòng tròn -->
+      <div class="img-ph" style="flex:1; margin-bottom:4px;">
+        <span class="ph-icon">📷</span>
+        ảnh nhóm ngồi vòng tròn
+      </div>
+      <div class="h1">EmCoin<span style="color:#54F1FC;">là gì?</span></div>
+      <div class="divider"></div>
+      <div style="display:flex;flex-direction:column;gap:5px;">
+        <div class="row"><span class="ico">👥</span><div class="txt"><div class="name">4–8 người chơi</div><div class="desc">Quanh bàn hoặc ngồi vòng tròn</div></div></div>
+        <div class="row"><span class="ico">💌</span><div class="txt"><div class="name">1 người Trao Gửi mỗi vòng</div><div class="desc">Chia sẻ câu chuyện cảm xúc thật</div></div></div>
+        <div class="row"><span class="ico">👂</span><div class="txt"><div class="name">Cả nhóm lắng nghe</div><div class="desc">Đồng cảm, không phán xét</div></div></div>
+        <div class="row"><span class="ico">🪙</span><div class="txt"><div class="name">Tặng coin để ghi nhận</div><div class="desc">Cảm xúc được nhìn thấy</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SLIDE 03 — 7 Roles
+══════════════════════════════════════════════════════════ -->
+<div class="sw">
+  <div class="sw-num">Slide 03 — 7 Vai trò</div>
+  <div class="slide s03">
+    <div class="inner">
+      <div class="tag">Vai trò</div>
+      <div class="h1">7 Vai trò</div>
+      <div class="divider"></div>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <div class="row"><span class="ico">🎭</span><div class="txt"><div class="name">Quản Trò</div><div class="desc">Điều hành trò chơi, đọc hướng dẫn</div></div></div>
+        <div class="row"><span class="ico">💌</span><div class="txt"><div class="name">Người Trao Gửi</div><div class="desc">Chia sẻ câu chuyện cảm xúc thật</div></div></div>
+        <div class="row"><span class="ico">💚</span><div class="txt"><div class="name">Người Chữa Lành</div><div class="desc">Bảo vệ 1 người mỗi đêm</div></div></div>
+        <div class="row"><span class="ico">🤐</span><div class="txt"><div class="name">Người Im Lặng</div><div class="desc">Im lặng 1 người mỗi đêm</div></div></div>
+        <div class="row"><span class="ico">🔗</span><div class="txt"><div class="name">Người Kết Nối</div><div class="desc">Kết nối câu chuyện với nhóm</div></div></div>
+        <div class="row"><span class="ico">✨</span><div class="txt"><div class="name">Người Gợi Mở</div><div class="desc">Đặt câu hỏi chạm sâu</div></div></div>
+        <div class="row"><span class="ico">🗺️</span><div class="txt"><div class="name">Người Dẫn Lối</div><div class="desc">Hướng dẫn chăm sóc bản thân</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SLIDE 04 — 3 Coin Types
+══════════════════════════════════════════════════════════ -->
+<div class="sw">
+  <div class="sw-num">Slide 04 — 3 Loại đồng xu</div>
+  <div class="slide s04">
+    <div class="inner">
+      <div class="tag">Đồng xu</div>
+      <div class="h1">3 Loại<span> đồng xu</span></div>
+      <div class="divider"></div>
+      <!-- Image placeholder: chụp ảnh 3 loại coin vật lý hoặc screenshot màn hình game -->
+      <div class="img-ph" style="flex:1; margin-bottom:2px;">
+        <span class="ph-icon">📷</span>
+        ảnh 3 coin<br>(chụp màn hình game)
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div class="coin-card" style="border-color:rgba(255,105,147,.35);">
+          <span class="ci">🔴</span>
+          <div><div class="cn" style="color:#FF8FAF;">Coin Đỏ</div><div class="cd">Nhận 3 coin / vòng · Tặng cho người khác</div></div>
+        </div>
+        <div class="coin-card" style="border-color:rgba(245,204,0,.35);">
+          <span class="ci">💛</span>
+          <div><div class="cn" style="color:#F5CC00;">Coin Vàng</div><div class="cd">Tích lũy · Nhận khi hoàn thành vai trò</div></div>
+        </div>
+        <div class="coin-card" style="border-color:rgba(83,176,37,.35);">
+          <span class="ci">💚</span>
+          <div><div class="cn" style="color:#94DD26;">Coin Xanh</div><div class="cd">Nhận được khi người khác tặng bạn</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SLIDE 05 — Night Phase
+══════════════════════════════════════════════════════════ -->
+<div class="sw">
+  <div class="sw-num">Slide 05 — Giai đoạn Đêm</div>
+  <div class="slide s05">
+    <div class="inner">
+      <div class="moon">🌙</div>
+      <div class="stars">✦ · ✦ · ✦ · ✦</div>
+      <div class="h1">Giai đoạn<span style="color:#B89EF0;"> Đêm</span></div>
+      <div class="divider"></div>
+      <!-- Image placeholder: chụp màn hình night phase trong game -->
+      <div class="img-ph" style="height:22%;">
+        <span class="ph-icon">📷</span>
+        screenshot đêm trong game
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div class="row" style="border-color:rgba(83,176,37,.3);"><span class="ico">💚</span><div class="txt"><div class="name">Người Chữa Lành chọn 1 người</div><div class="desc">Bảo vệ khỏi bị im lặng vòng này</div></div></div>
+        <div class="row" style="border-color:rgba(235,60,84,.3);"><span class="ico">🤐</span><div class="txt"><div class="name">Người Im Lặng chọn 1 người</div><div class="desc">Người đó sẽ không thể phản hồi</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SLIDE 06 — Choose Cards
+══════════════════════════════════════════════════════════ -->
+<div class="sw">
+  <div class="sw-num">Slide 06 — Chọn thẻ</div>
+  <div class="slide s06">
+    <div class="inner">
+      <div class="tag">Chọn thẻ</div>
+      <div class="h1">Chọn thẻ<span style="color:#54F1FC;"> Tình huống</span><span style="color:#A7F1FC;"> & Cảm xúc</span></div>
+      <div class="divider"></div>
+      <!-- 2 card image placeholders side by side -->
+      <div class="card-row" style="flex:1;">
+        <div class="card-ph">
+          <span class="ph-icon">📷</span>
+          thẻ<br>tình huống
+        </div>
+        <div class="card-ph">
+          <span class="ph-icon">📷</span>
+          thẻ<br>cảm xúc
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div class="row"><span class="ico">👆</span><div class="txt"><div class="name">Vuốt chọn thẻ Tình huống</div><div class="desc">Phù hợp với câu chuyện sắp kể</div></div></div>
+        <div class="row"><span class="ico">🫀</span><div class="txt"><div class="name">Chọn thẻ Cảm xúc</div><div class="desc">2 thẻ hiện ra — cả nhóm đều thấy</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SLIDE 07 — Story Time
+══════════════════════════════════════════════════════════ -->
+<div class="sw">
+  <div class="sw-num">Slide 07 — Kể chuyện</div>
+  <div class="slide s07">
+    <div class="inner">
+      <div class="timer-label">Đếm ngược</div>
+      <div class="timer">60s</div>
+      <!-- Image placeholder: ảnh người đang kể chuyện, hoặc screenshot timer -->
+      <div class="img-ph" style="width:80%;aspect-ratio:4/3;margin:0 auto;">
+        <span class="ph-icon">📷</span>
+        ảnh người đang kể<br>(hoặc screenshot timer)
+      </div>
+      <div class="h1" style="text-align:center;">Kể chuyện</div>
+      <div style="display:flex;flex-direction:column;gap:6px;width:100%;">
+        <div class="row"><span class="ico">💌</span><div class="txt"><div class="name">Người Trao Gửi kể</div><div class="desc">Câu chuyện thật dựa vào 2 thẻ</div></div></div>
+        <div class="row"><span class="ico">🔇</span><div class="txt"><div class="name">Cả nhóm im lặng lắng nghe</div><div class="desc">Không phán xét, không ngắt lời</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SLIDE 08 — Group Response
+══════════════════════════════════════════════════════════ -->
+<div class="sw">
+  <div class="sw-num">Slide 08 — Phản hồi nhóm</div>
+  <div class="slide s08">
+    <div class="inner">
+      <div class="tag">Phản hồi</div>
+      <div class="h1">Phản hồi<span style="color:#94DD26;"> nhóm</span></div>
+      <div class="divider"></div>
+      <!-- Image placeholder: ảnh nhóm phản hồi, ai đó đang nói -->
+      <div class="img-ph" style="flex:1; margin-bottom:4px;">
+        <span class="ph-icon">📷</span>
+        ảnh nhóm phản hồi<br>/ ai đó đang nói
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div class="row"><span class="ico">💬</span><div class="txt"><div class="name">Lần lượt phản hồi câu chuyện</div><div class="desc">Mỗi người chia sẻ cảm nhận</div></div></div>
+        <div class="row"><span class="ico">🔴</span><div class="txt"><div class="name">Tặng coin đỏ để đồng cảm</div><div class="desc">Cho Người Trao Gửi</div></div></div>
+        <div class="row" style="border-color:rgba(235,60,84,.3);"><span class="ico">🤐</span><div class="txt"><div class="name">Người Im Lặng</div><div class="desc">Không nói được, vẫn tặng coin</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SLIDE 09 — Reflection Card
+══════════════════════════════════════════════════════════ -->
+<div class="sw">
+  <div class="sw-num">Slide 09 — Thẻ phản tư</div>
+  <div class="slide s09">
+    <div class="inner">
+      <div class="tag">Phản tư</div>
+      <div class="h1">Thẻ<span style="color:#B89EF0;"> phản tư</span></div>
+      <div class="divider"></div>
+      <!-- Image placeholder: ảnh thẻ phản tư, hoặc screenshot chọn thẻ -->
+      <div class="img-ph" style="flex:1; margin-bottom:4px;">
+        <span class="ph-icon">📷</span>
+        ảnh thẻ phản tư<br>(hoặc screenshot game)
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div class="row"><span class="ico">🃏</span><div class="txt"><div class="name">Người Trao Gửi chọn thẻ</div><div class="desc">Thẻ phản tư ngẫu nhiên</div></div></div>
+        <div class="row"><span class="ico">💭</span><div class="txt"><div class="name">Chia sẻ thêm với nhóm</div></div></div>
+      </div>
+      <div class="quote">"Sau khi nghe nhóm, tôi cảm thấy..."</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SLIDE 10 — Hug Tips
+══════════════════════════════════════════════════════════ -->
+<div class="sw">
+  <div class="sw-num">Slide 10 — Bí kíp ôm</div>
+  <div class="slide s10">
+    <div class="inner">
+      <div class="tag">Kết nối</div>
+      <div class="h1" style="text-align:center;">Bí kíp ôm<span style="color:#FFB3C9;"><br>& Chăm sóc</span></div>
+      <div class="divider" style="margin:0 auto;"></div>
+      <!-- Image placeholder: ảnh nhóm ôm nhau / bắt tay / vỗ vai -->
+      <div class="img-ph" style="width:90%;aspect-ratio:1.2;margin:0 auto;">
+        <span class="ph-icon">📷</span>
+        ảnh nhóm ôm / bắt tay<br>/ vỗ vai nhau
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;width:100%;">
+        <div class="row"><span class="ico">🗺️</span><div class="txt"><div class="name">Người Dẫn Lối chọn thẻ</div><div class="desc">Hoặc Người Trao Gửi nếu không có</div></div></div>
+        <div class="row"><span class="ico">🫂</span><div class="txt"><div class="name">Cả nhóm thực hiện cùng nhau</div><div class="desc">Ôm · Vỗ vai · Bắt tay...</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SLIDE 11 — Vote
+══════════════════════════════════════════════════════════ -->
+<div class="sw">
+  <div class="sw-num">Slide 11 — Đoán Người Im Lặng</div>
+  <div class="slide s11">
+    <div class="inner">
+      <div class="tag">Vote</div>
+      <div class="h1">Đoán<span style="color:#A7F1FC;"><br>Người Im Lặng</span></div>
+      <div class="divider"></div>
+      <!-- Image placeholder: screenshot màn hình vote trong game -->
+      <div class="img-ph" style="flex:1; margin-bottom:4px;">
+        <span class="ph-icon">📷</span>
+        screenshot màn hình vote
+      </div>
+      <div class="avatars">
+        <div class="av">👤</div><div class="av hot">👤</div><div class="av">👤</div>
+        <div class="av">👤</div><div class="av">👤</div><div class="av">👤</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div class="row"><span class="ico">👆</span><div class="txt"><div class="name">Tap vào avatar để vote</div><div class="desc">Ai là Người Im Lặng vòng này?</div></div></div>
+        <div class="row"><span class="ico">🔒</span><div class="txt"><div class="name">Kết quả tiết lộ sau</div><div class="desc">Sau khi tất cả đã bỏ phiếu</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SLIDE 12 — Reveal & Give Coin
+══════════════════════════════════════════════════════════ -->
+<div class="sw">
+  <div class="sw-num">Slide 12 — Tiết lộ & Tặng coin</div>
+  <div class="slide s12">
+    <div class="inner">
+      <div class="tag">Tiết lộ</div>
+      <div class="h1">Tiết lộ<span style="color:#FFD93D;"><br>& Tặng coin</span></div>
+      <div class="divider"></div>
+      <div class="reveal">
+        <div class="rlabel">Người Im Lặng vòng này</div>
+        <div class="rname">???  🤐</div>
+      </div>
+      <!-- Image placeholder: screenshot tiết lộ -->
+      <div class="img-ph" style="flex:1; margin:2px 0;">
+        <span class="ph-icon">📷</span>
+        screenshot màn hình tiết lộ
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div class="row"><span class="ico">🎁</span><div class="txt"><div class="name">Tặng coin tự do cho bất kỳ ai</div></div></div>
+        <div class="row"><span class="ico">🔴💛</span><div class="txt"><div class="name">Tặng Đỏ hoặc Vàng</div><div class="desc">Người nhận được Coin Xanh 💚</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SLIDE 13 — End of Round
+══════════════════════════════════════════════════════════ -->
+<div class="sw">
+  <div class="sw-num">Slide 13 — Kết thúc vòng</div>
+  <div class="slide s13">
+    <div class="inner">
+      <div class="tag">Kết thúc vòng</div>
+      <div class="h1">Kết thúc<span style="color:#54F1FC;"><br>vòng</span></div>
+      <div class="divider"></div>
+      <!-- Image placeholder: screenshot kết thúc vòng / leaderboard -->
+      <div class="img-ph" style="flex:1; margin-bottom:4px;">
+        <span class="ph-icon">📷</span>
+        screenshot kết thúc vòng<br>/ bảng điểm
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div class="reward">
+          <div><div class="rn">💌 Người Trao Gửi hoàn thành</div><div class="rs">Đã kể câu chuyện thật</div></div>
+          <div class="rc">+5 💛</div>
+        </div>
+        <div class="reward">
+          <div><div class="rn">🎭 Vai trò khác hoàn thành</div><div class="rs">Thực hiện đúng nhiệm vụ</div></div>
+          <div class="rc">+2 💛</div>
+        </div>
+        <div class="row"><span class="ico">🔄</span><div class="txt"><div class="name">Vòng tiếp theo bắt đầu</div><div class="desc">Người khác làm Người Trao Gửi</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SLIDE 14 — Closing
+══════════════════════════════════════════════════════════ -->
+<div class="sw">
+  <div class="sw-num">Slide 14 — Lời kết</div>
+  <div class="slide s14">
+    <div class="inner">
+      <div class="heart">💝</div>
+      <!-- Image placeholder: ảnh nhóm cùng nhau sau game / khoảnh khắc đẹp -->
+      <div class="img-ph" style="width:80%;aspect-ratio:1;margin:0 auto;border-radius:50%;">
+        <span class="ph-icon">📷</span>
+        ảnh nhóm<br>sau trò chơi
+      </div>
+      <div class="closing">
+        <div class="cl main">Hãy chia sẻ thật lòng</div>
+        <div class="cl">Lắng nghe không phán xét</div>
+        <div class="cl">Mỗi câu chuyện đều<br>xứng đáng được lắng nghe</div>
+      </div>
+      <div class="divider" style="margin:0 auto;"></div>
+      <div class="footer">✦ EmCoin ✦</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /grid -->
+
+<p class="page-footer">
+  Xuất từ Canva: 1080×1920 px · PNG · Lưu vào <code style="color:rgba(255,255,255,.3)">fe/public/guide/slide-01.png</code> → <code style="color:rgba(255,255,255,.3)">slide-14.png</code>
 </p>
 
 </body>

@@ -178,8 +178,8 @@ export class ActionValidator {
    * UPDATED: Support flexible amounts, multiple recipients
    */
   private validateGiveCoin(room: Room, actor: any, action: GameAction): { valid: boolean; error?: string } {
-    // Must be give-coins phase
-    if (room.phase !== 'give-coins') {
+    // Allow giving coins during give-coins and group-response phases
+    if (room.phase !== 'give-coins' && room.phase !== 'group-response') {
       return { valid: false, error: 'Not give-coins phase' }
     }
 

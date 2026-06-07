@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 
 export default function About() {
   useEffect(() => {
-    document.title = 'CoinEm — Về dự án'
+    document.title = 'EmCoin — Về dự án'
   }, [])
 
   return (
@@ -186,7 +186,7 @@ export default function About() {
           {/* ── HEADER ───────────────────────────────── */}
           <header className="ab-header ab-reveal">
             <p className="ab-eyebrow">Dự án UPSHIFT · AIESEC Việt Nam × UNICEF</p>
-            <h1 className="ab-h1">CoinEm — <em>Đồng tiền tử tế</em></h1>
+            <h1 className="ab-h1">EmCoin — <em>Đồng tiền tử tế</em></h1>
             <p className="ab-lede">
               Bộ thẻ bài nhập vai giúp học sinh 10–19 tuổi học cách nhận diện, gọi tên và chia sẻ cảm xúc trong một không gian an toàn, gần gũi cùng bạn bè.
             </p>
@@ -215,17 +215,17 @@ export default function About() {
             <h2 className="ab-h2">Về dự án</h2>
 
             <div className="ab-hero">
-              <img src="/ingame_background.png" alt="CoinEm gameplay" />
+              <img src="/ingame_background.png" alt="EmCoin gameplay" />
               <div className="ab-hero-overlay">
                 <div className="ab-hero-content">
-                  <img src="/emcoin_logo.png" alt="CoinEm" />
+                  <img src="/emcoin_logo.png" alt="EmCoin" />
                   <p className="ab-hero-tagline">Kết nối cảm xúc — Chia sẻ thật lòng</p>
                 </div>
               </div>
             </div>
 
             <p className="ab-p">
-              CoinEm là <strong>bộ thẻ bài giáo dục cảm xúc</strong> được thiết kế cho học sinh vị thành niên, sử dụng hình thức nhập vai và phản tư nhóm. Mỗi lượt chơi, một người chia sẻ câu chuyện thật của mình — cả nhóm lắng nghe, đồng cảm và phản hồi qua hệ thống đồng xu.
+              EmCoin là <strong>bộ thẻ bài giáo dục cảm xúc</strong> được thiết kế cho học sinh vị thành niên, sử dụng hình thức nhập vai và phản tư nhóm. Mỗi lượt chơi, một người chia sẻ câu chuyện thật của mình — cả nhóm lắng nghe, đồng cảm và phản hồi qua hệ thống đồng xu.
             </p>
             <p className="ab-p">
               Ý tưởng lấy cảm hứng từ bộ phim <strong>Inside Out</strong> và <strong>Bánh xe cảm xúc của Plutchik</strong>, biến thành trò chơi tương tác nhóm, đặt học sinh vào hành trình khám phá cảm xúc của chính mình.
@@ -293,7 +293,7 @@ export default function About() {
 
             <div className="ab-note">
               <p className="ab-lbl">Gốc rễ</p>
-              <p className="ab-p">Nỗi đau lớn nhất của trẻ vị thành niên là bị kẹt giữa áp lực học tập từ gia đình–xã hội và thiếu sự đồng hành, thấu hiểu về mặt cảm xúc. CoinEm tạo ra không gian trung lập — nơi cảm xúc được phép tồn tại mà không bị phán xét.</p>
+              <p className="ab-p">Nỗi đau lớn nhất của trẻ vị thành niên là bị kẹt giữa áp lực học tập từ gia đình–xã hội và thiếu sự đồng hành, thấu hiểu về mặt cảm xúc. EmCoin tạo ra không gian trung lập — nơi cảm xúc được phép tồn tại mà không bị phán xét.</p>
             </div>
           </section>
 
@@ -457,7 +457,7 @@ export default function About() {
             <p className="ab-snum">05</p>
             <h2 className="ab-h2">Thử nghiệm &amp; Đánh giá</h2>
             <p className="ab-p">
-              CoinEm đang trong giai đoạn <strong>thử nghiệm thí điểm</strong> tại các trường học, trung tâm và cơ sở thanh thiếu niên tại TP.HCM. Mỗi buổi chơi 60–90 phút, có cộng tác viên tâm lý/CTXH được tập huấn hỗ trợ.
+              EmCoin đang trong giai đoạn <strong>thử nghiệm thí điểm</strong> tại các trường học, trung tâm và cơ sở thanh thiếu niên tại TP.HCM. Mỗi buổi chơi 60–90 phút, có cộng tác viên tâm lý/CTXH được tập huấn hỗ trợ.
             </p>
 
             <h3 className="ab-h3">Mục tiêu đo lường</h3>
@@ -492,7 +492,7 @@ export default function About() {
 
             <h3 className="ab-h3">Ứng dụng kỹ thuật số</h3>
             <p className="ab-p">
-              Song song với bộ thẻ vật lý, CoinEm có phiên bản <strong>web app</strong> cho phép chơi trực tuyến hoặc trong cùng phòng. Đồng xu, vai trò và lịch sử chia sẻ được đồng bộ realtime.
+              Song song với bộ thẻ vật lý, EmCoin có phiên bản <strong>web app</strong> cho phép chơi trực tuyến hoặc trong cùng phòng. Đồng xu, vai trò và lịch sử chia sẻ được đồng bộ realtime.
             </p>
 
             <div className="ab-avatars">
@@ -510,11 +510,11 @@ export default function About() {
             <p className="ab-snum">06</p>
             <h2 className="ab-h2">Đội ngũ</h2>
             <p className="ab-p">
-              Nhóm dự án <strong>Đồng Tiền Tử Tế</strong> gồm 3 thành viên trẻ đến từ TP.HCM, cùng nhau xây dựng CoinEm trong khuôn khổ chương trình UPSHIFT 2025.
+              Nhóm dự án <strong>Đồng Tiền Tử Tế</strong> gồm 3 thành viên trẻ đến từ TP.HCM, cùng nhau xây dựng EmCoin trong khuôn khổ chương trình UPSHIFT 2025.
             </p>
 
             <div className="ab-team-card">
-              <img src="/about.png" alt="Đội ngũ Đồng Tiền Tử Tế — CoinEm" />
+              <img src="/about.png" alt="Đội ngũ Đồng Tiền Tử Tế — EmCoin" />
             </div>
 
             <div className="ab-team-grid">
@@ -538,7 +538,7 @@ export default function About() {
             <p>
               Mỗi câu chuyện đều xứng đáng được lắng nghe.<br />
               Mỗi cảm xúc đều xứng đáng được gọi tên.<br />
-              <b>CoinEm</b> là không gian để cả hai điều đó xảy ra.
+              <b>EmCoin</b> là không gian để cả hai điều đó xảy ra.
             </p>
           </div>
 
