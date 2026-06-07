@@ -53,11 +53,11 @@ ocr2.quocbui.dev {
     encode zstd gzip
 
     handle /api/* {
-        reverse_proxy misa2-backend-1:8000
+        reverse_proxy misa-api2-backend-1:8000
     }
 
     handle /* {
-        reverse_proxy misa2-frontend-1:80
+        reverse_proxy misa-api2-frontend-1:80
     }
 
     header {
