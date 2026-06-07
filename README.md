@@ -1,6 +1,6 @@
-# CoinEm — Bộ thẻ giáo dục cảm xúc
+# EmCoin — Bộ thẻ giáo dục cảm xúc
 
-CoinEm là trò chơi thẻ bài kết hợp nhập vai giúp học sinh 10–19 tuổi học cách nhận diện, gọi tên và chia sẻ cảm xúc trong một môi trường an toàn. Dự án thuộc chương trình **UPSHIFT** do AIESEC Việt Nam phối hợp UNICEF tổ chức.
+EmCoin là trò chơi thẻ bài kết hợp nhập vai giúp học sinh 10–19 tuổi học cách nhận diện, gọi tên và chia sẻ cảm xúc trong một môi trường an toàn. Dự án thuộc chương trình **UPSHIFT** do AIESEC Việt Nam phối hợp UNICEF tổ chức.
 
 ---
 
@@ -25,7 +25,7 @@ CoinEm là trò chơi thẻ bài kết hợp nhập vai giúp học sinh 10–19
 ## Cấu trúc project
 
 ```
-coinem/
+EmCoin/
 ├── be/               # Backend Node.js
 │   ├── src/
 │   │   ├── modules/game/   # Game engine, phases, roles, coin logic

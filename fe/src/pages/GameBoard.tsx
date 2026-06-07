@@ -188,6 +188,7 @@ export default function GameBoard({
   const [showNtgRewardPicker, setShowNtgRewardPicker] = useState(false)
   const [showRoleRewardPicker, setShowRoleRewardPicker] = useState(false)
   const [showGiveCoinPicker, setShowGiveCoinPicker] = useState(false)
+  const [showNtgTargetedCoinPicker, setShowNtgTargetedCoinPicker] = useState(false)
   const [pendingNtgRewardIds, setPendingNtgRewardIds] = useState<Set<string>>(() => new Set())
   const [ntgRewardSuccess, setNtgRewardSuccess] = useState<{names: string[]} | null>(null)
   const [mutedNotice, setMutedNotice] = useState<{
@@ -302,6 +303,7 @@ export default function GameBoard({
     setSelectedNightAction(null)
     setShowRoleRewardPicker(false)
     setShowNtgRewardPicker(false)
+    setShowNtgTargetedCoinPicker(false)
     setPendingNtgRewardIds(new Set())
     setNtgRewardSuccess(null)
   }, [activePhase])
@@ -471,7 +473,7 @@ export default function GameBoard({
   }
 
   const handleGiveCoin = (targetId: string, coinType: 'red' | 'yellow', amount = 1) => {
-    if (!myPlayer || activePhase !== 'give-coins') return
+    if (!myPlayer || (activePhase !== 'give-coins' && activePhase !== 'group-response')) return
     if (targetId === myPlayer.id) return
     if (amount <= 0) return
     if (coinType === 'red' && myPlayer.coins.red < amount) return
@@ -1074,7 +1076,7 @@ export default function GameBoard({
                             )}
                           </>
                         )}
-                        {activePhase === 'group-response' && (
+                        {activePhase === 'group-response' && myPlayer?.isSender && (
                           <CartoonButton
                             color={hasConfirmedNtgRewards ? 'orange' : 'yellow'}
                             size="md"
@@ -1086,6 +1088,17 @@ export default function GameBoard({
                             data-testid="btn-open-ntg-reward-picker"
                           >
                             {hasConfirmedNtgRewards ? 'Đã chọn' : 'Tặng coin'}
+                          </CartoonButton>
+                        )}
+                        {activePhase === 'group-response' && !myPlayer?.isSender && (
+                          <CartoonButton
+                            color="yellow"
+                            size="md"
+                            className="w-full"
+                            onClick={() => setShowNtgTargetedCoinPicker(true)}
+                            data-testid="btn-give-coin-to-ntg"
+                          >
+                            Tặng coin cho NTG
                           </CartoonButton>
                         )}
                       </>
@@ -1213,6 +1226,17 @@ export default function GameBoard({
             myPlayer={myPlayer}
             onGiveCoin={handleGiveCoin}
             onClose={() => setShowGiveCoinPicker(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showNtgTargetedCoinPicker && activePhase === 'group-response' && !myPlayer?.isSender && (
+          <GiveCoinPicker
+            players={players.filter(p => p.isSender)}
+            myPlayer={myPlayer}
+            onGiveCoin={handleGiveCoin}
+            onClose={() => setShowNtgTargetedCoinPicker(false)}
           />
         )}
       </AnimatePresence>
