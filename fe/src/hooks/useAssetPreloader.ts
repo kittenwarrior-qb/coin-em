@@ -9,8 +9,10 @@ function label(url: string): string {
 // ─── Phase 1 (blocking — shown in preloader) ─────────────────────────────────
 // Chỉ logo + background — đủ để render màn hình chọn phòng ngay lập tức
 const CRITICAL_URLS: Array<{ url: string; tag: string }> = [
-  { url: '/emcoin_logo.png',        tag: 'bg' },
-  { url: '/cartoon/ui/home-bg.png', tag: 'bg' },
+  { url: '/emcoin_logo.png',                tag: 'bg' },
+  { url: '/cartoon/ui/home-bg.png',         tag: 'bg' },
+  { url: '/cartoon/buttons/pill/Green.png', tag: 'btn' },
+  { url: '/cartoon/buttons/pill/Pink.png',  tag: 'btn' },
 ]
 
 // ─── Phase 2 (background, non-blocking) ──────────────────────────────────────
