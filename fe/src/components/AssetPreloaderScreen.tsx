@@ -131,7 +131,7 @@ export function AssetPreloaderScreen({ state, onExited, onFullyGone }: Props) {
                 transition={{ ease: 'easeOut', duration: 0.3 }}
               />
             </div>
-            <p className="font-display text-xs" style={{ color: '#fff' }}>
+            <p className="font-display text-base" style={{ color: '#fff' }}>
               {showFinished ? 'Finished' : `${state.loaded}/${state.total}`}
             </p>
             {!showFinished && state.currentFile ? (

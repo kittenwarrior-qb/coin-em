@@ -6,28 +6,24 @@ interface PopInProps {
   className?: string
 }
 
-// Squash & stretch pop:
-//  t=0:    tiny seed (scaleX 0.2, scaleY 0.2)
-//  t=0.38: lands wide — squash flat (scaleX 1.16, scaleY 0.82) + slight rotation
-//  t=0.62: bounces up — stretch tall (scaleX 0.93, scaleY 1.10)
-//  t=0.80: slight over-correct (scaleX 1.03, scaleY 0.97)
-//  t=1:    settle
+// Soft pop — gentle scale-up with a faint settle, no squash/stretch wobble
+//  t=0:    slightly shrunk (scale 0.92)
+//  t=0.7:  settle (scale 1.02)
+//  t=1:    rest (scale 1)
 export function PopIn({ children, delay = 0, className }: PopInProps) {
   return (
     <motion.div
       className={className}
-      initial={{ scaleX: 0.15, scaleY: 0.15, opacity: 0, rotate: 0 }}
+      initial={{ scale: 0.92, opacity: 0 }}
       animate={{
-        scaleX:  [0.15, 1.16,  0.93,  1.03,  1],
-        scaleY:  [0.15, 0.82,  1.10,  0.97,  1],
-        opacity: [0,    1,     1,     1,     1],
-        rotate:  [0,    -5,    2,     -1,    0],
+        scale:   [0.92, 1.02, 1],
+        opacity: [0,    1,    1],
       }}
       transition={{
-        duration: 0.42,
+        duration: 0.32,
         delay,
         ease: 'easeOut',
-        times: [0, 0.38, 0.62, 0.80, 1],
+        times: [0, 0.7, 1],
       }}
       style={{ transformOrigin: 'center' }}
     >
