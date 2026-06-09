@@ -46,7 +46,7 @@ export function FlipCard({
     WebkitBackfaceVisibility: 'hidden',
     borderRadius: radius,
     overflow: 'hidden',
-    boxShadow: '6px 6px 0 #1A1A1A',
+    filter: 'drop-shadow(6px 6px 0 #1A1A1A)',
   }
   const imageStyle: React.CSSProperties = {
     display: 'block',
@@ -65,14 +65,25 @@ export function FlipCard({
       dragElastic={0.2}
       onDragEnd={onClose ? (_, info) => { if (info.offset.y > 100) onClose() } : undefined}
       className="relative"
-      style={{ perspective: '1000px', width, aspectRatio: cardAspectRatio }}
+      style={{
+        perspective: '1000px',
+        width,
+        aspectRatio: cardAspectRatio,
+      }}
       onClick={e => e.stopPropagation()}
     >
       <motion.div
         initial={{ rotateY: initialFlipped ? 180 : 0 }}
         animate={{ rotateY: flipped ? 180 : 0 }}
         transition={{ duration: 0.7, ease: 'easeInOut' }}
-        style={{ transformStyle: 'preserve-3d', position: 'relative', cursor: allowFlip ? 'pointer' : 'default', width: '100%', height: '100%' }}
+        style={{
+          transformStyle: 'preserve-3d',
+          position: 'relative',
+          cursor: allowFlip ? 'pointer' : 'default',
+          width: '100%',
+          height: '100%',
+          willChange: 'transform',
+        }}
         onClick={() => {
           if (allowFlip) setFlipped(f => !f)
         }}
