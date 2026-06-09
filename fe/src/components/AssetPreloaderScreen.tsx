@@ -83,24 +83,13 @@ export function AssetPreloaderScreen({ state, onExited, onFullyGone }: Props) {
           backgroundPosition: 'center top',
         }} />
 
-        {/* Layer 2: bg */}
-        <div style={{ position: 'absolute', inset: 0, background: '#1695b1' }} />
-
-        {/* Layer 3: expanding home-bg circle */}
-        {rippling && (
-          <motion.div
-            style={{
-              position: 'absolute', inset: 0,
-              backgroundImage: 'url(/cartoon/ui/home-bg.png)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center top',
-              clipPath: 'circle(0% at 50% 40%)',
-            }}
-            animate={{ clipPath: 'circle(150% at 50% 40%)' }}
-            transition={{ duration: 0.7, ease: [0.85, 0, 0.15, 1] }}
-            onAnimationComplete={finishSplash}
-          />
-        )}
+        {/* Layer 2: solid cover — fades out to reveal home-bg (GPU-compositable opacity, no clip-path) */}
+        <motion.div
+          style={{ position: 'absolute', inset: 0, background: '#1695b1' }}
+          animate={{ opacity: rippling ? 0 : 1 }}
+          transition={{ duration: 0.55, ease: [0.85, 0, 0.15, 1] }}
+          onAnimationComplete={() => { if (rippling) finishSplash() }}
+        />
 
         {/* Static content (progress bar only, logo handled separately) */}
         <div
@@ -155,10 +144,10 @@ export function AssetPreloaderScreen({ state, onExited, onFullyGone }: Props) {
             width: splashRect.w,
             height: splashRect.h,
             objectFit: 'contain',
-            filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))',
             zIndex: 10000,
             pointerEvents: 'none',
             transformOrigin: 'center center',
+            willChange: 'transform',
           }}
           initial={{ x: 0, y: 0, scale: 1 }}
           animate={{
