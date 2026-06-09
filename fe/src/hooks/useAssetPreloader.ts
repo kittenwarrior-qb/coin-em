@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { CARD_IMAGES } from '@/constants/cardImages'
 
 // Helper: extract a readable label from a URL or path for logging
 function label(url: string): string {
@@ -16,7 +15,8 @@ const CRITICAL_URLS: Array<{ url: string; tag: string }> = [
 ]
 
 // ─── Phase 2 (background, non-blocking) ──────────────────────────────────────
-// Tải sau khi home screen đã hiện — UI panels, buttons, avatars, cards, heavy BGs
+// Chỉ load UI/button/avatar local — tất cả card images (CDN) và heavy BG
+// load on-demand khi vào game để không block màn hình chờ.
 const BACKGROUND_URLS: Array<{ url: string; tag: string }> = [
   // Core UI panels
   { url: '/cartoon/ui/Panel-Teal.png',           tag: 'ui' },
@@ -34,11 +34,34 @@ const BACKGROUND_URLS: Array<{ url: string; tag: string }> = [
   { url: '/cartoon/buttons/pill/Purple.png', tag: 'btn' },
   { url: '/cartoon/buttons/pill/Teal.png',   tag: 'btn' },
 
-  // Buttons — circle (close/action buttons)
-  { url: '/cartoon/buttons/circle/Blue-Teal.png', tag: 'btn' },
-  { url: '/cartoon/buttons/circle/Blue.png',       tag: 'btn' },
-  { url: '/cartoon/buttons/circle/Dark.png',       tag: 'btn' },
-  { url: '/cartoon/buttons/circle/White.png',      tag: 'btn' },
+  // Buttons — circle
+  { url: '/cartoon/buttons/circle/Blue-Teal.png',  tag: 'btn' },
+  { url: '/cartoon/buttons/circle/Blue.png',        tag: 'btn' },
+  { url: '/cartoon/buttons/circle/Dark.png',        tag: 'btn' },
+  { url: '/cartoon/buttons/circle/White.png',       tag: 'btn' },
+  { url: '/cartoon/buttons/circle/Gray.png',        tag: 'btn' },
+  { url: '/cartoon/buttons/circle/Light.png',       tag: 'btn' },
+  { url: '/cartoon/buttons/circle/Neutral.png',     tag: 'btn' },
+  { url: '/cartoon/buttons/circle/Purple.png',      tag: 'btn' },
+  { url: '/cartoon/buttons/circle/Yellow.png',      tag: 'btn' },
+  { url: '/cartoon/buttons/circle/Red.png',         tag: 'btn' },
+  { url: '/cartoon/buttons/circle/Green.png',       tag: 'btn' },
+  { url: '/cartoon/buttons/circle/Bordeaux.png',    tag: 'btn' },
+  { url: '/cartoon/buttons/circle/Brown.png',       tag: 'btn' },
+  { url: '/cartoon/buttons/circle/Transparent.png', tag: 'btn' },
+  { url: '/cartoon/buttons/circle/Violet.png',      tag: 'btn' },
+
+  // Button shared assets
+  { url: '/cartoon/buttons/Border.png',                         tag: 'btn' },
+  { url: '/cartoon/buttons/Bottom.png',                         tag: 'btn' },
+  { url: '/cartoon/buttons/Gradient.png',                       tag: 'btn' },
+  { url: '/cartoon/buttons/Handle.png',                         tag: 'btn' },
+  { url: '/cartoon/buttons/Inner-Glow---Rounded-Rectangle.png', tag: 'btn' },
+  { url: '/cartoon/buttons/Lines.png',                          tag: 'btn' },
+  { url: '/cartoon/buttons/Radial-Shine.png',                   tag: 'btn' },
+  { url: '/cartoon/buttons/Shape.png',                          tag: 'btn' },
+  { url: '/cartoon/buttons/Shine.png',                          tag: 'btn' },
+  { url: '/cartoon/buttons/Top.png',                            tag: 'btn' },
 
   // Remaining UI
   { url: '/cartoon/ui/Coin-x1.png',                      tag: 'ui2' },
@@ -50,29 +73,6 @@ const BACKGROUND_URLS: Array<{ url: string; tag: string }> = [
   { url: '/cartoon/ui/Gradient.png',                      tag: 'ui2' },
   { url: '/cartoon/ui/Inner-Glow-Rounded-Rectangle.png',  tag: 'ui2' },
   { url: '/cartoon/ui/Shine.png',                         tag: 'ui2' },
-
-  // Remaining buttons
-  { url: '/cartoon/buttons/circle/Gray.png',                  tag: 'btn2' },
-  { url: '/cartoon/buttons/circle/Light.png',                 tag: 'btn2' },
-  { url: '/cartoon/buttons/circle/Neutral.png',               tag: 'btn2' },
-  { url: '/cartoon/buttons/circle/Purple.png',                tag: 'btn2' },
-  { url: '/cartoon/buttons/circle/Yellow.png',                tag: 'btn2' },
-  { url: '/cartoon/buttons/circle/Bordeaux.png',              tag: 'btn2' },
-  { url: '/cartoon/buttons/circle/Brown.png',                 tag: 'btn2' },
-  { url: '/cartoon/buttons/circle/Red.png',                   tag: 'btn2' },
-  { url: '/cartoon/buttons/circle/Transparent.png',           tag: 'btn2' },
-  { url: '/cartoon/buttons/circle/Violet.png',                tag: 'btn2' },
-  { url: '/cartoon/buttons/Border.png',                       tag: 'btn2' },
-  { url: '/cartoon/buttons/Bottom.png',                       tag: 'btn2' },
-  { url: '/cartoon/buttons/Gradient.png',                     tag: 'btn2' },
-  { url: '/cartoon/buttons/Handle.png',                       tag: 'btn2' },
-  { url: '/cartoon/buttons/Inner-Glow---Rounded-Rectangle.png', tag: 'btn2' },
-  { url: '/cartoon/buttons/Lines.png',                        tag: 'btn2' },
-  { url: '/cartoon/buttons/None.png',                         tag: 'btn2' },
-  { url: '/cartoon/buttons/Radial-Shine.png',                 tag: 'btn2' },
-  { url: '/cartoon/buttons/Shape.png',                        tag: 'btn2' },
-  { url: '/cartoon/buttons/Shine.png',                        tag: 'btn2' },
-  { url: '/cartoon/buttons/Top.png',                          tag: 'btn2' },
 
   // Avatars (waiting room)
   { url: '/cartoon/icons/avatars/Bear.png',              tag: 'avatar' },
@@ -102,64 +102,15 @@ const BACKGROUND_URLS: Array<{ url: string; tag: string }> = [
   { url: '/cartoon/icons/avatars/Rabbit Head.png',       tag: 'avatar' },
   { url: '/cartoon/icons/white/Photo.png',               tag: 'avatar' },
 
-  // Coins local icons
+  // Coin icons (local, small)
   { url: '/coins/do.png',   tag: 'coin-icon' },
   { url: '/coins/vang.png', tag: 'coin-icon' },
   { url: '/coins/xanh.png', tag: 'coin-icon' },
 
-  // Heavy backgrounds (in-game)
-  { url: '/ingame_background.png',      tag: 'bg-heavy' },
-  { url: '/ingame_dark_background.png', tag: 'bg-heavy' },
-  { url: '/pink_carpet.jpg',            tag: 'bg-heavy' },
-  { url: '/capybara_wallpaper.jpg',     tag: 'bg-heavy' },
-
-  // Card backs
-  { url: CARD_IMAGES.roles.back,      tag: 'card-back' },
-  { url: CARD_IMAGES.situation.back,  tag: 'card-back' },
-  { url: CARD_IMAGES.reflection.back, tag: 'card-back' },
-  { url: CARD_IMAGES.selfcare.back,   tag: 'card-back' },
-  ...Object.values(CARD_IMAGES.emotionBasic).map(e => ({ url: e.back, tag: 'card-back' })),
-
-  // Role card fronts
-  ...Object.entries(CARD_IMAGES.roles)
-    .filter(([k]) => k !== 'back')
-    .map(([k, url]) => ({ url, tag: `vai-tro/${k}` })),
-
-  // Card fronts — situation
-  ...Object.entries(CARD_IMAGES.situation)
-    .filter(([k]) => k !== 'back')
-    .map(([k, url]) => ({ url, tag: `tinh-huong/${k}` })),
-
-  // Card fronts — emotion basic
-  ...Object.entries(CARD_IMAGES.emotionBasic)
-    .map(([k, e]) => ({ url: e.front, tag: `cam-xuc-basic/${k}` })),
-
-  // Card fronts — reflection
-  ...Object.entries(CARD_IMAGES.reflection)
-    .filter(([k]) => k !== 'back')
-    .map(([k, url]) => ({ url, tag: `phan-tu/${k}` })),
-
-  // Card fronts — selfcare
-  ...Object.entries(CARD_IMAGES.selfcare)
-    .filter(([k]) => k !== 'back')
-    .map(([k, url]) => ({ url, tag: `bi-kip/${k}` })),
-
-  // Emotion light/strong/advanced
-  ...CARD_IMAGES.emotionLight.flatMap((e, i) => [
-    { url: e.front, tag: `cam-xuc-nhe/${i + 1}-front` },
-    { url: e.back,  tag: `cam-xuc-nhe/${i + 1}-back` },
-  ]),
-  ...CARD_IMAGES.emotionStrong.flatMap((e, i) => [
-    { url: e.front, tag: `cam-xuc-manh/${i + 1}-front` },
-    { url: e.back,  tag: `cam-xuc-manh/${i + 1}-back` },
-  ]),
-  ...CARD_IMAGES.emotionAdvanced.flatMap((e, i) => [
-    { url: e.front, tag: `cam-xuc-nc/${i + 1}-front` },
-    { url: e.back,  tag: `cam-xuc-nc/${i + 1}-back` },
-  ]),
-
-  // Coin card images (CDN)
-  ...Object.entries(CARD_IMAGES.coins).map(([k, url]) => ({ url, tag: `coin/${k}` })),
+  // ── Đã xóa khỏi preload (load on-demand khi vào game) ──────────────────────
+  // - Heavy backgrounds: /ingame_background.png, /ingame_dark_background.png, ...
+  // - Tất cả card fronts + backs (Cloudinary CDN): ~130 requests
+  // - Coin card images (Cloudinary CDN): 6 requests
 ]
 
 export interface PreloadState {

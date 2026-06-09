@@ -1,10 +1,18 @@
 import { AnimatePresence, motion, type PanInfo } from 'framer-motion'
 import { useState } from 'react'
 
-const SLIDE_COUNT = 14
-const SLIDES = Array.from({ length: SLIDE_COUNT }, (_, i) =>
-  `/guide/slide-${String(i + 1).padStart(2, '0')}.png`,
-)
+const SLIDES = [
+  '/tutorial/1.png',
+  '/tutorial/2.png',
+  '/tutorial/3.png',
+  '/tutorial/4.png',
+  '/tutorial/5.png',
+  '/tutorial/6.png',
+  '/tutorial/7.png',
+  '/tutorial/8.png',
+  '/tutorial/9.png',
+]
+const SLIDE_COUNT = SLIDES.length
 
 interface GuideBookProps {
   onClose: () => void

@@ -1059,7 +1059,7 @@ export default function GameBoard({
                         {activePhase === 'reflection-card' && (
                           <>
                             {selectedCards.reflections.length < 3 && (
-                              <CartoonButton color="blue" size="sm" className="w-full" onClick={() => openInventory('reflection')} data-testid="btn-select-reflection">
+                              <CartoonButton color="teal" size="md" className="w-full" onClick={() => openInventory('reflection')} data-testid="btn-select-reflection">
                                 {selectedCards.reflections.length === 0 ? 'Chọn thẻ phản tư' : `Thêm thẻ (${selectedCards.reflections.length}/3)`}
                               </CartoonButton>
                             )}
