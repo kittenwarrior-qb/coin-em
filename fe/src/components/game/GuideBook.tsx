@@ -39,27 +39,29 @@ export function GuideBook({ onClose }: GuideBookProps) {
 
   return (
     <motion.div
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90"
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
     >
       <motion.div
-        className="relative flex flex-col bg-black"
+        className="flex flex-col"
         style={{ width: '100%', maxWidth: 480, height: '100%', maxHeight: '100dvh' }}
         onClick={e => e.stopPropagation()}
       >
 
-        {/* Close */}
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute right-3 top-3 z-20 grid h-9 w-9 place-items-center rounded-full bg-black/60 backdrop-blur-sm"
-          style={{ fontFamily: 'system-ui', fontSize: 20, color: 'rgba(255,255,255,0.7)' }}
-        >
-          ×
-        </button>
+        {/* Top bar — same height as bottom bar for balance */}
+        <div className="flex h-[52px] shrink-0 items-center justify-end px-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="grid h-9 w-9 place-items-center rounded-full bg-black/60 backdrop-blur-sm"
+            style={{ fontFamily: 'system-ui', fontSize: 20, color: 'rgba(255,255,255,0.7)' }}
+          >
+            ×
+          </button>
+        </div>
 
         {/* Slide area */}
         <div className="relative flex-1 overflow-hidden">
@@ -137,9 +139,8 @@ export function GuideBook({ onClose }: GuideBookProps) {
           </button>
         </div>
 
-        {/* Bottom bar — page number + dots */}
-        <div className="flex flex-col items-center gap-2 py-3">
-          {/* Page number */}
+        {/* Bottom bar — same height as top bar */}
+        <div className="flex h-[52px] shrink-0 flex-col items-center justify-center gap-1.5">
           <div className="flex items-baseline gap-1">
             <span className="font-display text-white" style={{ fontSize: 22, lineHeight: 1 }}>
               {current + 1}
@@ -148,8 +149,6 @@ export function GuideBook({ onClose }: GuideBookProps) {
               / {SLIDE_COUNT}
             </span>
           </div>
-
-          {/* Dots */}
           <div className="flex items-center gap-1.5">
             {SLIDES.map((_, i) => (
               <motion.button
