@@ -240,16 +240,17 @@ export function RevealSilencerOverlay({ players, votes, onCloseComplete }: Revea
       initial={{ opacity: 0 }}
       animate={{ opacity: closing ? 0 : 1 }}
       transition={{ duration: 0.18 }}
-      className="absolute inset-0 z-40 flex items-center justify-center bg-black/45 px-4 backdrop-blur-[2px]"
+      className="absolute inset-0 z-40 flex items-center justify-center bg-black/55 px-4"
       onClick={close}
       onAnimationComplete={() => {
         if (closing && !hidden) { setHidden(true); onCloseComplete?.() }
       }}
     >
       <motion.div
-        initial={{ scale: 0.9, y: 20, opacity: 0 }}
-        animate={{ scale: closing ? 0.92 : 1, y: closing ? 16 : 0, opacity: closing ? 0 : 1 }}
+        initial={{ scale: 0.9, y: 20 }}
+        animate={{ scale: closing ? 0.92 : 1, y: closing ? 16 : 0 }}
         transition={{ type: 'spring', stiffness: 420, damping: 28 }}
+        style={{ willChange: 'transform' }}
         className="relative w-full max-w-sm rounded-[28px] border-[3px] border-[var(--c-black)] bg-white p-5 shadow-[0_8px_0_rgba(0,0,0,0.22)]"
         onClick={(e) => e.stopPropagation()}
       >

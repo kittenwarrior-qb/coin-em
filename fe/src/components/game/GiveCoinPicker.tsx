@@ -50,18 +50,20 @@ export function GiveCoinPicker({ players, myPlayer, onGiveCoin, onClose }: GiveC
 
   return (
     <motion.div
-      className="absolute inset-0 z-[90] flex items-end justify-center overflow-hidden bg-black/50 px-3 pb-3 backdrop-blur-[2px]"
+      className="absolute inset-0 z-[90] flex items-end justify-center overflow-hidden bg-black/55 px-3 pb-3"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      transition={{ duration: 0.15 }}
       onClick={onClose}
     >
       <motion.div
         className="relative w-full max-w-[390px] overflow-hidden rounded-[28px] border-[3px] border-[var(--c-black)] bg-white shadow-[0_8px_0_rgba(0,0,0,0.22)]"
-        initial={{ y: 80, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 80, opacity: 0 }}
+        initial={{ y: 80 }}
+        animate={{ y: 0 }}
+        exit={{ y: 80 }}
         transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+        style={{ willChange: 'transform' }}
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
