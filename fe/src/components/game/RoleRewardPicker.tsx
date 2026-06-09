@@ -54,17 +54,19 @@ export function RoleRewardPicker({
 
   return (
     <motion.div
-      className="absolute inset-0 z-[70] flex items-end justify-center overflow-hidden bg-black/45 px-4 pb-4 backdrop-blur-[2px]"
+      className="absolute inset-0 z-[70] flex items-end justify-center overflow-hidden bg-black/55 px-4 pb-4"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      transition={{ duration: 0.15 }}
       onClick={onClose}
     >
       <motion.div
         className="w-full max-w-sm overflow-hidden rounded-t-[28px] border-t-[3px] border-[var(--c-black)] bg-white p-4 shadow-[0_-5px_0_rgba(0,0,0,0.16)]"
-        initial={{ y: 80, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 80, opacity: 0 }}
+        initial={{ y: 80 }}
+        animate={{ y: 0 }}
+        exit={{ y: 80 }}
+        style={{ willChange: 'transform' }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="text-center mb-4">

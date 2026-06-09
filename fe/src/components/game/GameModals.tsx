@@ -5,6 +5,9 @@ import { AVATAR_BG_COLORS, AVATAR_ICONS } from '@/components/cartoon/avatarConfi
 import { PHASE_LABELS, type GamePhase } from '@/stores/types'
 import type { Player } from './types'
 
+const BACKDROP_TRANSITION = { duration: 0.15 }
+const PANEL_STYLE: React.CSSProperties = { willChange: 'transform' }
+
 // ─── Muted notice ─────────────────────────────────────────────────────────────
 interface MutedNoticeProps {
   notice: { name: string; isMe: boolean; avatarIndex?: number; bgIndex?: number; nonce: number } | null
@@ -16,18 +19,20 @@ export function MutedNoticeModal({ notice, onDismiss }: MutedNoticeProps) {
   return (
     <motion.div
       key={notice.nonce}
-      className="absolute inset-0 z-[71] flex items-center justify-center bg-black/45 px-6 backdrop-blur-[2px]"
+      className="absolute inset-0 z-[71] flex items-center justify-center bg-black/55 px-6"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      transition={BACKDROP_TRANSITION}
       onClick={onDismiss}
     >
       <motion.div
         className="relative w-full max-w-[330px] rounded-[30px] border-[3px] border-[var(--c-black)] bg-white px-5 pb-5 pt-6 text-center shadow-[0_8px_0_rgba(0,0,0,0.24)]"
-        initial={{ scale: 0.84, y: 24, rotate: -1.5 }}
-        animate={{ scale: 1, y: 0, rotate: 0 }}
-        exit={{ scale: 0.9, y: 18, opacity: 0 }}
+        initial={{ scale: 0.84, y: 24 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.9, y: 18 }}
         transition={{ type: 'spring', stiffness: 420, damping: 26 }}
+        style={PANEL_STYLE}
         onClick={(e) => e.stopPropagation()}
       >
         <img
@@ -76,10 +81,11 @@ export function NightActionConfirmModal({ action, myPlayerId, onCancel, onConfir
   if (!action) return null
   return (
     <motion.div
-      className="absolute inset-0 z-[72] flex items-center justify-center bg-black/45 px-6 backdrop-blur-[2px]"
+      className="absolute inset-0 z-[72] flex items-center justify-center bg-black/55 px-6"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      transition={BACKDROP_TRANSITION}
       onClick={onCancel}
     >
       <motion.div
@@ -87,6 +93,8 @@ export function NightActionConfirmModal({ action, myPlayerId, onCancel, onConfir
         initial={{ scale: 0.86, y: 26 }}
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.86, y: 26 }}
+        transition={{ type: 'spring', stiffness: 420, damping: 28 }}
+        style={PANEL_STYLE}
         onClick={(e) => e.stopPropagation()}
       >
         <img src={action.iconSrc} alt="" className="mx-auto mb-2 h-12 w-12 object-contain" draggable={false} />
@@ -127,10 +135,11 @@ export function PhaseNavConfirmModal({ navigation, activePhase, onCancel, onConf
   if (!navigation) return null
   return (
     <motion.div
-      className="absolute inset-0 z-[72] flex items-center justify-center bg-black/45 px-6 backdrop-blur-[2px]"
+      className="absolute inset-0 z-[72] flex items-center justify-center bg-black/55 px-6"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      transition={BACKDROP_TRANSITION}
       onClick={onCancel}
     >
       <motion.div
@@ -138,6 +147,8 @@ export function PhaseNavConfirmModal({ navigation, activePhase, onCancel, onConf
         initial={{ scale: 0.86, y: 26 }}
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.86, y: 26 }}
+        transition={{ type: 'spring', stiffness: 420, damping: 28 }}
+        style={PANEL_STYLE}
         onClick={(e) => e.stopPropagation()}
         data-testid="phase-nav-confirm-popup"
       >
@@ -196,6 +207,7 @@ export function NtgRewardSuccessPopup({ names, onClose }: NtgRewardSuccessProps)
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: 40, opacity: 0 }}
       transition={{ type: 'spring', stiffness: 420, damping: 28 }}
+      style={PANEL_STYLE}
     >
       <div className="flex items-center gap-3 rounded-2xl bg-[#1e6b2e] px-4 py-3 shadow-[0_4px_16px_rgba(0,0,0,0.3)]">
         <img src="/cartoon/icons/Checkmark.svg" alt="" className="h-8 w-8 shrink-0" draggable={false} />
@@ -227,13 +239,16 @@ export function ReflectionRewardConfirmModal({ players, onSkip, onConfirm }: Ref
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="absolute inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      transition={BACKDROP_TRANSITION}
+      className="absolute inset-0 z-[60] flex items-center justify-center bg-black/55"
       onClick={(e) => e.stopPropagation()}
     >
       <motion.div
         initial={{ scale: 0.9, y: 20 }}
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.9, y: 20 }}
+        transition={{ type: 'spring', stiffness: 420, damping: 28 }}
+        style={PANEL_STYLE}
         className="relative w-full max-w-[320px] rounded-3xl bg-white px-6 py-5 shadow-[0_8px_0_rgba(0,0,0,0.12)] mx-4"
         onClick={(e) => e.stopPropagation()}
       >

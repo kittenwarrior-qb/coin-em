@@ -58,23 +58,20 @@ export function CartoonModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
+          transition={{ duration: 0.18 }}
           className="absolute inset-0 z-50 flex items-center justify-center px-4"
-          style={{ background: 'rgba(0,0,0,0.35)' }}
+          style={{ background: 'rgba(0,0,0,0.35)', willChange: 'opacity' }}
           onClick={persistent ? undefined : onClose}
         >
-          {/* Wrapper — gentle pop, minimal overshoot to avoid dizziness */}
+          {/* Wrapper — scale only (no opacity change here, backdrop handles fade) */}
           <motion.div
-            initial={{ scale: 0.85, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.92, opacity: 0, transition: { duration: 0.12, ease: 'easeIn' } }}
-            transition={{
-              scale:   { type: 'spring', stiffness: 340, damping: 26 },
-              opacity: { duration: 0.1 },
-            }}
+            initial={{ scale: 0.85 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0.92, transition: { duration: 0.12, ease: 'easeIn' } }}
+            transition={{ type: 'spring', stiffness: 340, damping: 26 }}
             onClick={(e) => e.stopPropagation()}
             className={cn('relative w-full', className)}
-            style={{ maxWidth: '23rem', transformOrigin: 'center' }}
+            style={{ maxWidth: '23rem', transformOrigin: 'center', willChange: 'transform' }}
           >
 
             {/* ── Headline Flag — nhô lên trên panel, căn giữa ── */}
