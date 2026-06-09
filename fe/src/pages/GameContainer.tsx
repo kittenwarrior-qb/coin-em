@@ -126,26 +126,24 @@ export default function GameContainer() {
     return (
       <>
         {!splashGone && <AssetPreloaderScreen state={preloadState} onExited={handleSplashReady} onFullyGone={handleSplashFullyGone} />}
-        <CartoonScreen data-testid="connecting" purpleBg>
-          <div className="flex flex-col items-center justify-center flex-1 p-8 text-center gap-5">
-            <div className="relative">
-              <img
-                src="/emcoin_logo.png"
-                alt="EmCoin"
-                className="w-28 h-28 object-contain drop-shadow-lg"
-                style={{ animation: 'float-logo 2.4s ease-in-out infinite' }}
-                draggable={false}
-              />
-              <img
-                src="/cartoon/icons/Loading-Spinner.svg"
-                alt=""
-                className="absolute -bottom-3 -right-3 w-9 h-9 spin-cartoon"
-                draggable={false}
-              />
-            </div>
-            <div>
-              <h2 className="font-display text-2xl text-white drop-shadow">Đang kết nối...</h2>
-              <p className="font-body text-sm text-white/70 mt-1">Vui lòng đợi một chút</p>
+        <CartoonScreen data-testid="connecting">
+          <div className="flex flex-col items-center justify-center flex-1 gap-6">
+            <img
+              src="/emcoin_logo.png"
+              alt="EmCoin"
+              className="w-44 object-contain"
+              style={{ animation: 'float-logo 2.4s ease-in-out infinite' }}
+              draggable={false}
+            />
+            <img
+              src="/cartoon/icons/Loading-Spinner.svg"
+              alt=""
+              className="w-10 h-10 spin-cartoon opacity-70"
+              draggable={false}
+            />
+            <div className="text-center">
+              <h2 className="font-display text-2xl">Đang kết nối...</h2>
+              <p className="font-body text-sm text-[var(--c-gray)] mt-1">Vui lòng đợi một chút</p>
             </div>
           </div>
         </CartoonScreen>
