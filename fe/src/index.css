@@ -654,6 +654,11 @@
     to { transform: rotate(360deg); }
   }
 
+  @keyframes float-logo {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-10px); }
+  }
+
   /* Glossy highlight overlay (top-left white ellipse, like pack SVGs) */
   .gloss-cartoon {
     position: relative;
