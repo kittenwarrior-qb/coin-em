@@ -1090,18 +1090,18 @@ export default function GameBoard({
                             {hasConfirmedNtgRewards ? 'Đã chọn' : 'Tặng coin'}
                           </CartoonButton>
                         )}
-                        {activePhase === 'group-response' && !myPlayer?.isSender && (
-                          <CartoonButton
-                            color="yellow"
-                            size="md"
-                            className="w-full"
-                            onClick={() => setShowNtgTargetedCoinPicker(true)}
-                            data-testid="btn-give-coin-to-ntg"
-                          >
-                            Tặng coin cho NTG
-                          </CartoonButton>
-                        )}
                       </>
+                    )}
+                    {activePhase === 'group-response' && !myPlayer?.isSender && !isNarrator && (
+                      <CartoonButton
+                        color="yellow"
+                        size="md"
+                        className="w-full"
+                        onClick={() => setShowNtgTargetedCoinPicker(true)}
+                        data-testid="btn-give-coin-to-ntg"
+                      >
+                        Tặng coin cho NTG
+                      </CartoonButton>
                     )}
                     {activePhase === 'selfcare-card' && isMySelfcareTurn && (
                       <CartoonButton color="teal" size="sm" className="w-full" onClick={() => openInventory('selfcare')} data-testid="btn-select-selfcare">

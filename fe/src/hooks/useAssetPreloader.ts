@@ -29,10 +29,8 @@ const BACKGROUND_URLS: Array<{ url: string; tag: string }> = [
   { url: '/cartoon/ui/Circle-Cartoon.png',        tag: 'ui' },
   { url: '/cartoon/ui/background.png',            tag: 'ui' },
 
-  // Buttons — pill (lobby CTAs)
-  { url: '/cartoon/buttons/pill/Green.png',  tag: 'btn' },
+  // Buttons — pill (lobby CTAs); Green + Pink already in CRITICAL_URLS
   { url: '/cartoon/buttons/pill/Orange.png', tag: 'btn' },
-  { url: '/cartoon/buttons/pill/Pink.png',   tag: 'btn' },
   { url: '/cartoon/buttons/pill/Purple.png', tag: 'btn' },
   { url: '/cartoon/buttons/pill/Teal.png',   tag: 'btn' },
 
