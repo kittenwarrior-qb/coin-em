@@ -1,0 +1,120 @@
+{
+  "trial": [
+    {
+      "source": "IMG_0750.JPG",
+      "large": "/landing/trial-01.webp",
+      "thumb": "/landing/trial-01-thumb.webp",
+      "largeBytes": 61032,
+      "thumbBytes": 15254
+    },
+    {
+      "source": "IMG_0756.JPG",
+      "large": "/landing/trial-02.webp",
+      "thumb": "/landing/trial-02-thumb.webp",
+      "largeBytes": 48880,
+      "thumbBytes": 9038
+    },
+    {
+      "source": "IMG_0759.JPG",
+      "large": "/landing/trial-03.webp",
+      "thumb": "/landing/trial-03-thumb.webp",
+      "largeBytes": 45020,
+      "thumbBytes": 11378
+    },
+    {
+      "source": "IMG_0760.JPG",
+      "large": "/landing/trial-04.webp",
+      "thumb": "/landing/trial-04-thumb.webp",
+      "largeBytes": 44636,
+      "thumbBytes": 9734
+    },
+    {
+      "source": "IMG_0807.JPG",
+      "large": "/landing/trial-05.webp",
+      "thumb": "/landing/trial-05-thumb.webp",
+      "largeBytes": 56234,
+      "thumbBytes": 15108
+    },
+    {
+      "source": "IMG_0815.JPG",
+      "large": "/landing/trial-06.webp",
+      "thumb": "/landing/trial-06-thumb.webp",
+      "largeBytes": 89832,
+      "thumbBytes": 22972
+    },
+    {
+      "source": "IMG_0841.JPG",
+      "large": "/landing/trial-07.webp",
+      "thumb": "/landing/trial-07-thumb.webp",
+      "largeBytes": 64252,
+      "thumbBytes": 17444
+    },
+    {
+      "source": "IMG_0867.JPG",
+      "large": "/landing/trial-08.webp",
+      "thumb": "/landing/trial-08-thumb.webp",
+      "largeBytes": 39846,
+      "thumbBytes": 11520
+    },
+    {
+      "source": "IMG_0883.JPG",
+      "large": "/landing/trial-09.webp",
+      "thumb": "/landing/trial-09-thumb.webp",
+      "largeBytes": 35270,
+      "thumbBytes": 10676
+    },
+    {
+      "source": "IMG_0890.JPG",
+      "large": "/landing/trial-10.webp",
+      "thumb": "/landing/trial-10-thumb.webp",
+      "largeBytes": 52142,
+      "thumbBytes": 14260
+    },
+    {
+      "source": "MEITU_20260723_133505355.jpg",
+      "large": "/landing/trial-11.webp",
+      "thumb": "/landing/trial-11-thumb.webp",
+      "largeBytes": 84112,
+      "thumbBytes": 22562
+    },
+    {
+      "source": "MEITU_20260723_134050467.jpg",
+      "large": "/landing/trial-12.webp",
+      "thumb": "/landing/trial-12-thumb.webp",
+      "largeBytes": 104608,
+      "thumbBytes": 24632
+    }
+  ],
+  "cards": [
+    {
+      "name": "role-card",
+      "source": "VT2.png",
+      "src": "/landing/role-card.webp",
+      "bytes": 17598
+    },
+    {
+      "name": "situation-card",
+      "source": "TH1.png",
+      "src": "/landing/situation-card.webp",
+      "bytes": 8434
+    },
+    {
+      "name": "emotion-card",
+      "source": "Vui 0.png",
+      "src": "/landing/emotion-card.webp",
+      "bytes": 13928
+    },
+    {
+      "name": "reflection-card",
+      "source": "PT1.png",
+      "src": "/landing/reflection-card.webp",
+      "bytes": 10984
+    },
+    {
+      "name": "selfcare-card",
+      "source": "BK1.png",
+      "src": "/landing/selfcare-card.webp",
+      "bytes": 15654
+    }
+  ]
+}

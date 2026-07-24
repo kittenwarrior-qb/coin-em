@@ -26,6 +26,22 @@ export function GameMenuModal({ open, onClose, onQuit }: GameMenuModalProps) {
             Bộ thẻ
           </CartoonButton>
 
+          <CartoonButton
+            color="pink"
+            size="lg"
+            className="w-full"
+            onClick={() => window.open('/cards', '_blank', 'noopener,noreferrer')}
+            aria-label="Mở Bộ thẻ 3d trong tab mới"
+          >
+            <span>Bộ thẻ 3d</span>
+            <span
+              className="absolute right-14 -top-3 z-10 rounded-lg border border-[#e84a5f]/40 bg-[#fff1f4] px-2 py-1 text-[11px] font-black leading-none tracking-wide text-[#e84a5f] shadow-[0_4px_10px_rgba(232,74,95,0.16)] rotate-[8deg] pointer-events-none"
+              aria-hidden="true"
+            >
+              MỚI
+            </span>
+          </CartoonButton>
+
           <CartoonButton color="purple" size="lg" className="w-full" onClick={() => setShowGuide(true)}>
             Hướng dẫn
           </CartoonButton>

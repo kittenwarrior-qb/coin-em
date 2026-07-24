@@ -36,6 +36,7 @@ import {
   RewardOverlay,
   EndedOverlay,
 } from '@/components/game/PhaseOverlays'
+import { PhaseCelebration } from '@/components/game/PhaseCelebration'
 import type { RoomState } from '@/components/game/types'
 
 interface GameBoardProps {
@@ -84,6 +85,12 @@ const getPhaseNumber = (phase: GamePhase): number | '?' => {
   const index = PHASE_ORDER.indexOf(phase)
   return index >= 0 ? index + 1 : '?'
 }
+
+// Which phase's completion should fire the center handshake-confetti celebration.
+// It fires when the game ENTERS one of these phases (i.e. the previous phase just
+// completed). Set to 'all' to celebrate every phase change, or list specific
+// GamePhase values below to keep it to key moments only.
+const CELEBRATE_ON_ENTER: GamePhase[] | 'all' = ['role-reveal']
 
 function FlyingActionIconEffect({
   fromId,
@@ -184,6 +191,8 @@ export default function GameBoard({
   const cardPreviewDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [hideOtherPlayerBadges, setHideOtherPlayerBadges] = useState(false)
   const [phaseNavigation, setPhaseNavigation] = useState<{ direction: 'next' | 'prev'; targetPhase: GamePhase } | null>(null)
+  const [celebrationRun, setCelebrationRun] = useState(0)
+  const prevPhaseRef = useRef<GamePhase | null>(null)
   const [turnCountdownSeconds, setTurnCountdownSeconds] = useState(30)
   const [showNtgRewardPicker, setShowNtgRewardPicker] = useState(false)
   const [showRoleRewardPicker, setShowRoleRewardPicker] = useState(false)
@@ -293,6 +302,18 @@ export default function GameBoard({
       nonce: latestSilence.timestamp,
     })
   }, [myUserId, roomState.gameLog, roomState.mutedPlayer, roomState.players])
+
+  // Fire the center handshake-confetti when a phase completes (a new phase begins).
+  // See CELEBRATE_ON_ENTER above to control which phases trigger it.
+  useEffect(() => {
+    const previous = prevPhaseRef.current
+    prevPhaseRef.current = activePhase
+    // Fire on the first entry too (previous == null), so opening the game on
+    // phase 1 still celebrates — only skip when the phase hasn't actually changed.
+    if (previous === activePhase) return
+    const shouldCelebrate = CELEBRATE_ON_ENTER === 'all' || CELEBRATE_ON_ENTER.includes(activePhase)
+    if (shouldCelebrate) setCelebrationRun((n) => n + 1)
+  }, [activePhase])
 
   // Reset phase state on step change
   useEffect(() => {
@@ -854,7 +875,7 @@ export default function GameBoard({
           width: 430,
           height: '100dvh',
           overflow: 'hidden',
-          backgroundImage: 'url(/ingame_background.png)',
+          backgroundImage: 'url(/ingame_background.webp)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -871,7 +892,7 @@ export default function GameBoard({
         <motion.div
           className="absolute inset-0 z-0 pointer-events-none"
           style={{
-            backgroundImage: 'url(/ingame_dark_background.png)',
+            backgroundImage: 'url(/ingame_dark_background.webp)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
@@ -1191,6 +1212,8 @@ export default function GameBoard({
           />
         </div>
 
+        {/* Center celebration — plays handshake-confetti Rive when a phase completes */}
+        <PhaseCelebration runId={celebrationRun} />
       </div>
 
       <AnimatePresence>

@@ -23,7 +23,7 @@ export function TableBoard({ selectedCards, phase, revealSituation, previewSitua
         style={{
           borderRadius: '5px',
           overflow: 'hidden',
-          backgroundImage: 'url(/pink_carpet.jpg)',
+          backgroundImage: 'url(/pink_carpet.webp)',
           backgroundSize: '100% 100%',
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center',

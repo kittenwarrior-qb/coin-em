@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
 
 const HOME_BG: React.CSSProperties = {
-  backgroundImage: 'url(/cartoon/ui/home-bg.png)',
+  backgroundImage: 'url(/cartoon/ui/home-bg.webp)',
   backgroundSize: 'cover',
   backgroundPosition: 'center top',
   backgroundRepeat: 'no-repeat',
