@@ -78,7 +78,7 @@ export function AssetPreloaderScreen({ state, onExited, onFullyGone }: Props) {
         {/* Layer 1: home background */}
         <div style={{
           position: 'absolute', inset: 0,
-          backgroundImage: 'url(/cartoon/ui/home-bg.png)',
+          backgroundImage: 'url(/cartoon/ui/home-bg.webp)',
           backgroundSize: 'cover',
           backgroundPosition: 'center top',
         }} />

@@ -152,6 +152,12 @@ export default function WaitingRoom({
             <span data-testid="player-count" className="font-display text-xs">{players.length} / {MAX_PLAYERS}</span>
           </div>
 
+          {canHostPickRoles && !canStart && (
+            <div data-testid="role-pick-hint" className="text-center font-body text-[11px] text-black/50 px-1">
+              Cần đủ 5 người mới chọn role được
+            </div>
+          )}
+
           <CartoonScrollArea
             className="flex-shrink-0"
             style={{ height: canHostPickRoles ? 260 : 220 }}
@@ -240,7 +246,7 @@ export default function WaitingRoom({
                             options={getRoleOptionsForPlayer(player)}
                             value={player.debugPreferredRole}
                             placeholder="Chọn role"
-                            disabled={roleDeck.length === 0}
+                            disabled={roleDeck.length === 0 || !canStart}
                             onChange={(role) => assignDebugRole(player, role)}
                           />
                         )}

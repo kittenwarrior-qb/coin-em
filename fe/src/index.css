@@ -516,7 +516,7 @@
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: url('/animal_wallpaper.jpg') center / cover no-repeat;
+    background: url('/capybara_wallpaper.jpg') center / cover no-repeat;
     opacity: 0.15;
     pointer-events: none;
   }

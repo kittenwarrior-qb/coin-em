@@ -9,7 +9,7 @@ function label(url: string): string {
 // Chỉ logo + background — đủ để render màn hình chọn phòng ngay lập tức
 const CRITICAL_URLS: Array<{ url: string; tag: string }> = [
   { url: '/emcoin_logo.png',                tag: 'bg' },
-  { url: '/cartoon/ui/home-bg.png',         tag: 'bg' },
+  { url: '/cartoon/ui/home-bg.webp',        tag: 'bg' },
   { url: '/cartoon/buttons/pill/Green.png', tag: 'btn' },
   { url: '/cartoon/buttons/pill/Pink.png',  tag: 'btn' },
 ]
@@ -60,7 +60,7 @@ const BACKGROUND_URLS: Array<{ url: string; tag: string }> = [
   { url: '/cartoon/buttons/Lines.png',                          tag: 'btn' },
   { url: '/cartoon/buttons/Radial-Shine.png',                   tag: 'btn' },
   { url: '/cartoon/buttons/Shape.png',                          tag: 'btn' },
-  { url: '/cartoon/buttons/Shine.png',                          tag: 'btn' },
+  { url: '/cartoon/buttons/Shine.webp',                         tag: 'btn' },
   { url: '/cartoon/buttons/Top.png',                            tag: 'btn' },
 
   // Remaining UI
@@ -72,7 +72,7 @@ const BACKGROUND_URLS: Array<{ url: string; tag: string }> = [
   { url: '/cartoon/ui/Confetti.png',                      tag: 'ui2' },
   { url: '/cartoon/ui/Gradient.png',                      tag: 'ui2' },
   { url: '/cartoon/ui/Inner-Glow-Rounded-Rectangle.png',  tag: 'ui2' },
-  { url: '/cartoon/ui/Shine.png',                         tag: 'ui2' },
+  { url: '/cartoon/ui/Shine.webp',                        tag: 'ui2' },
 
   // Avatars (waiting room)
   { url: '/cartoon/icons/avatars/Bear.png',              tag: 'avatar' },
@@ -108,7 +108,7 @@ const BACKGROUND_URLS: Array<{ url: string; tag: string }> = [
   { url: '/coins/xanh.png', tag: 'coin-icon' },
 
   // ── Đã xóa khỏi preload (load on-demand khi vào game) ──────────────────────
-  // - Heavy backgrounds: /ingame_background.png, /ingame_dark_background.png, ...
+  // - Heavy backgrounds: /ingame_background.webp, /ingame_dark_background.webp, ...
   // - Tất cả card fronts + backs (Cloudinary CDN): ~130 requests
   // - Coin card images (Cloudinary CDN): 6 requests
 ]

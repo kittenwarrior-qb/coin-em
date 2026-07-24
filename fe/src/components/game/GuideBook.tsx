@@ -2,15 +2,15 @@ import { AnimatePresence, motion, type PanInfo } from 'framer-motion'
 import { useState } from 'react'
 
 const SLIDES = [
-  '/tutorial/1.png',
-  '/tutorial/2.png',
-  '/tutorial/3.png',
-  '/tutorial/4.png',
-  '/tutorial/5.png',
-  '/tutorial/6.png',
-  '/tutorial/7.png',
-  '/tutorial/8.png',
-  '/tutorial/9.png',
+  '/tutorial/1.webp',
+  '/tutorial/2.webp',
+  '/tutorial/3.webp',
+  '/tutorial/4.webp',
+  '/tutorial/5.webp',
+  '/tutorial/6.webp',
+  '/tutorial/7.webp',
+  '/tutorial/8.webp',
+  '/tutorial/9.webp',
 ]
 const SLIDE_COUNT = SLIDES.length
 
