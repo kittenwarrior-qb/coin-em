@@ -45,13 +45,13 @@ test.describe('Role-based Actions', () => {
 
     // role-reveal → night → healer-turn → silencer-turn → situation-card
     await narrator!.clickNextTurn()
-    await orchestrator.waitForAllPhase('night', 5_000)
+    await orchestrator.waitForAllPhase('night')
     await narrator!.clickNextTurn()
-    await orchestrator.waitForAllPhase('healer-turn', 5_000)
+    await orchestrator.waitForAllPhase('healer-turn')
     await narrator!.clickNextTurn()
-    await orchestrator.waitForAllPhase('silencer-turn', 5_000)
+    await orchestrator.waitForAllPhase('silencer-turn')
     await narrator!.clickNextTurn()
-    await orchestrator.waitForAllPhase('situation-card', 5_000)
+    await orchestrator.waitForAllPhase('situation-card')
 
     const sender = await orchestrator.findSender()
     test.skip(!sender, 'No sender among human players')
@@ -76,7 +76,7 @@ test.describe('Role-based Actions', () => {
     const phases = ['night', 'healer-turn', 'silencer-turn', 'situation-card', 'emotion-card']
     for (const phase of phases) {
       await narrator!.clickNextTurn()
-      await orchestrator.waitForAllPhase(phase, 5_000)
+      await orchestrator.waitForAllPhase(phase)
     }
 
     const sender = await orchestrator.findSender()
@@ -95,13 +95,13 @@ test.describe('Role-based Actions', () => {
     test.skip(!narrator, 'No narrator among human players')
 
     await narrator!.clickNextTurn()
-    await orchestrator.waitForAllPhase('night', 5_000)
+    await orchestrator.waitForAllPhase('night')
     await narrator!.clickNextTurn()
-    await orchestrator.waitForAllPhase('healer-turn', 5_000)
+    await orchestrator.waitForAllPhase('healer-turn')
     await narrator!.clickNextTurn()
-    await orchestrator.waitForAllPhase('silencer-turn', 5_000)
+    await orchestrator.waitForAllPhase('silencer-turn')
     await narrator!.clickNextTurn()
-    await orchestrator.waitForAllPhase('situation-card', 5_000)
+    await orchestrator.waitForAllPhase('situation-card')
 
     const sender = await orchestrator.findSender()
     const nonSenders = orchestrator.getPlayers().filter(p => p !== sender && p !== narrator)
@@ -123,6 +123,9 @@ test.describe('Role-based Actions', () => {
     // Click own card → role card opens, no coin popup
     await player1.p.click(`[data-testid="player-card-${player1.name}"][data-is-me="true"]`)
     await expect(player1.p.locator('[data-testid="coin-btn-yellow"]')).not.toBeVisible()
+
+    // Dismiss the role card overlay before next click
+    await player1.dismissOverlay()
 
     // Click another player → coin popup appears
     await player1.p.click(`[data-testid="player-card-${player2.name}"]`)

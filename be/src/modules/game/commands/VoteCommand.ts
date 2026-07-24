@@ -1,4 +1,4 @@
-import { Room, GameAction, GameResult } from '../types'
+import { Room, GameAction, GameResult, Role } from '../types'
 import { ICommand } from './base/ICommand'
 
 /**
@@ -9,7 +9,10 @@ import { ICommand } from './base/ICommand'
 export class VoteCommand implements ICommand {
   execute(room: Room, action: GameAction): GameResult {
     const newVotes = { ...room.votes, [action.actorId]: action.targetId! }
-    const allVoted = room.players.length === Object.keys(newVotes).length
+    const eligibleVoters = room.players.filter(
+      (player) => !player.isNarrator && player.originalRole !== Role.SILENCER && player.role !== Role.SILENCER
+    )
+    const allVoted = eligibleVoters.every((player) => !!newVotes[player.userId])
 
     const updatedRoom: Room = {
       ...room,

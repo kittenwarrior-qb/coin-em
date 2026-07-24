@@ -1,0 +1,661 @@
+[
+  {
+    "id": "role",
+    "label": "Vai trò",
+    "count": 7,
+    "cards": [
+      {
+        "title": "VT1",
+        "group": "vai-tro",
+        "front": "/card-showcase/role/01-vt1.webp",
+        "back": "/card-showcase/role/back.webp"
+      },
+      {
+        "title": "VT2",
+        "group": "vai-tro",
+        "front": "/card-showcase/role/02-vt2.webp",
+        "back": "/card-showcase/role/back.webp"
+      },
+      {
+        "title": "VT3",
+        "group": "vai-tro",
+        "front": "/card-showcase/role/03-vt3.webp",
+        "back": "/card-showcase/role/back.webp"
+      },
+      {
+        "title": "VT4",
+        "group": "vai-tro",
+        "front": "/card-showcase/role/04-vt4.webp",
+        "back": "/card-showcase/role/back.webp"
+      },
+      {
+        "title": "VT5",
+        "group": "vai-tro",
+        "front": "/card-showcase/role/05-vt5.webp",
+        "back": "/card-showcase/role/back.webp"
+      },
+      {
+        "title": "VT6",
+        "group": "vai-tro",
+        "front": "/card-showcase/role/06-vt6.webp",
+        "back": "/card-showcase/role/back.webp"
+      },
+      {
+        "title": "VT7",
+        "group": "vai-tro",
+        "front": "/card-showcase/role/07-vt7.webp",
+        "back": "/card-showcase/role/back.webp"
+      }
+    ]
+  },
+  {
+    "id": "situation",
+    "label": "Tình huống",
+    "count": 32,
+    "cards": [
+      {
+        "title": "TH1",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/01-th1.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH2",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/02-th2.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH3",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/03-th3.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH4",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/04-th4.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH5",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/05-th5.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH6",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/06-th6.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH7",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/07-th7.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH8",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/08-th8.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH9",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/09-th9.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH10",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/10-th10.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH11",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/11-th11.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH12",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/12-th12.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH13",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/13-th13.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH14",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/14-th14.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH15",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/15-th15.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH16",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/16-th16.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH17",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/17-th17.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH18",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/18-th18.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH19",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/19-th19.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH20",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/20-th20.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH21",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/21-th21.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH22",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/22-th22.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH23",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/23-th23.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH24",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/24-th24.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH25",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/25-th25.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH26",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/26-th26.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH27",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/27-th27.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH28",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/28-th28.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH29",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/29-th29.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH30",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/30-th30.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH31",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/31-th31.webp",
+        "back": "/card-showcase/situation/back.webp"
+      },
+      {
+        "title": "TH32",
+        "group": "tinh-huong",
+        "front": "/card-showcase/situation/32-th32.webp",
+        "back": "/card-showcase/situation/back.webp"
+      }
+    ]
+  },
+  {
+    "id": "emotion",
+    "label": "Cảm xúc",
+    "count": 36,
+    "cards": [
+      {
+        "title": "Buồn 0",
+        "group": "basic",
+        "front": "/card-showcase/emotion/01-buon-0.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "Buồn 1",
+        "group": "basic",
+        "front": "/card-showcase/emotion/02-buon-1.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "Chán 0",
+        "group": "basic",
+        "front": "/card-showcase/emotion/03-chan-0.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "Chán 1",
+        "group": "basic",
+        "front": "/card-showcase/emotion/04-chan-1.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "Giận 0",
+        "group": "basic",
+        "front": "/card-showcase/emotion/05-gian-0.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "Giận 1",
+        "group": "basic",
+        "front": "/card-showcase/emotion/06-gian-1.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "mạnh 1",
+        "group": "manh",
+        "front": "/card-showcase/emotion/07-manh-1.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "mạnh 2",
+        "group": "manh",
+        "front": "/card-showcase/emotion/08-manh-2.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "mạnh 3",
+        "group": "manh",
+        "front": "/card-showcase/emotion/09-manh-3.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "mạnh 4",
+        "group": "manh",
+        "front": "/card-showcase/emotion/10-manh-4.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "mạnh 5",
+        "group": "manh",
+        "front": "/card-showcase/emotion/11-manh-5.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "mạnh 6",
+        "group": "manh",
+        "front": "/card-showcase/emotion/12-manh-6.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "mạnh 7",
+        "group": "manh",
+        "front": "/card-showcase/emotion/13-manh-7.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "mạnh 8",
+        "group": "manh",
+        "front": "/card-showcase/emotion/14-manh-8.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "Mong 0",
+        "group": "basic",
+        "front": "/card-showcase/emotion/15-mong-0.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "Mong 1",
+        "group": "basic",
+        "front": "/card-showcase/emotion/16-mong-1.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "NC 1",
+        "group": "advance",
+        "front": "/card-showcase/emotion/17-nc-1.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "NC 2",
+        "group": "advance",
+        "front": "/card-showcase/emotion/18-nc-2.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "NC 3",
+        "group": "advance",
+        "front": "/card-showcase/emotion/19-nc-3.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "NC 4",
+        "group": "advance",
+        "front": "/card-showcase/emotion/20-nc-4.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "NC 5",
+        "group": "advance",
+        "front": "/card-showcase/emotion/21-nc-5.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "NC 6",
+        "group": "advance",
+        "front": "/card-showcase/emotion/22-nc-6.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "NC 7",
+        "group": "advance",
+        "front": "/card-showcase/emotion/23-nc-7.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "NC 8",
+        "group": "advance",
+        "front": "/card-showcase/emotion/24-nc-8.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "nhẹ 1",
+        "group": "nhe",
+        "front": "/card-showcase/emotion/25-nhe-1.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "nhẹ 2",
+        "group": "nhe",
+        "front": "/card-showcase/emotion/26-nhe-2.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "nhẹ 3",
+        "group": "nhe",
+        "front": "/card-showcase/emotion/27-nhe-3.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "nhẹ 4",
+        "group": "nhe",
+        "front": "/card-showcase/emotion/28-nhe-4.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "nhẹ 5",
+        "group": "nhe",
+        "front": "/card-showcase/emotion/29-nhe-5.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "nhẹ 6",
+        "group": "nhe",
+        "front": "/card-showcase/emotion/30-nhe-6.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "nhẹ 7",
+        "group": "nhe",
+        "front": "/card-showcase/emotion/31-nhe-7.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "nhẹ 8",
+        "group": "nhe",
+        "front": "/card-showcase/emotion/32-nhe-8.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "Sợ 0",
+        "group": "basic",
+        "front": "/card-showcase/emotion/33-so-0.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "Sợ 1",
+        "group": "basic",
+        "front": "/card-showcase/emotion/34-so-1.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "Tin 0",
+        "group": "basic",
+        "front": "/card-showcase/emotion/35-tin-0.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      },
+      {
+        "title": "Tin 1",
+        "group": "basic",
+        "front": "/card-showcase/emotion/36-tin-1.webp",
+        "back": "/card-showcase/emotion/back.webp"
+      }
+    ]
+  },
+  {
+    "id": "reflection",
+    "label": "Phản tư",
+    "count": 14,
+    "cards": [
+      {
+        "title": "PT1",
+        "group": "phan-tu",
+        "front": "/card-showcase/reflection/01-pt1.webp",
+        "back": "/card-showcase/reflection/back.webp"
+      },
+      {
+        "title": "PT2",
+        "group": "phan-tu",
+        "front": "/card-showcase/reflection/02-pt2.webp",
+        "back": "/card-showcase/reflection/back.webp"
+      },
+      {
+        "title": "PT3",
+        "group": "phan-tu",
+        "front": "/card-showcase/reflection/03-pt3.webp",
+        "back": "/card-showcase/reflection/back.webp"
+      },
+      {
+        "title": "PT4",
+        "group": "phan-tu",
+        "front": "/card-showcase/reflection/04-pt4.webp",
+        "back": "/card-showcase/reflection/back.webp"
+      },
+      {
+        "title": "PT5",
+        "group": "phan-tu",
+        "front": "/card-showcase/reflection/05-pt5.webp",
+        "back": "/card-showcase/reflection/back.webp"
+      },
+      {
+        "title": "PT6",
+        "group": "phan-tu",
+        "front": "/card-showcase/reflection/06-pt6.webp",
+        "back": "/card-showcase/reflection/back.webp"
+      },
+      {
+        "title": "PT7",
+        "group": "phan-tu",
+        "front": "/card-showcase/reflection/07-pt7.webp",
+        "back": "/card-showcase/reflection/back.webp"
+      },
+      {
+        "title": "PT8",
+        "group": "phan-tu",
+        "front": "/card-showcase/reflection/08-pt8.webp",
+        "back": "/card-showcase/reflection/back.webp"
+      },
+      {
+        "title": "PT9",
+        "group": "phan-tu",
+        "front": "/card-showcase/reflection/09-pt9.webp",
+        "back": "/card-showcase/reflection/back.webp"
+      },
+      {
+        "title": "PT10",
+        "group": "phan-tu",
+        "front": "/card-showcase/reflection/10-pt10.webp",
+        "back": "/card-showcase/reflection/back.webp"
+      },
+      {
+        "title": "PT11",
+        "group": "phan-tu",
+        "front": "/card-showcase/reflection/11-pt11.webp",
+        "back": "/card-showcase/reflection/back.webp"
+      },
+      {
+        "title": "PT12",
+        "group": "phan-tu",
+        "front": "/card-showcase/reflection/12-pt12.webp",
+        "back": "/card-showcase/reflection/back.webp"
+      },
+      {
+        "title": "PT13",
+        "group": "phan-tu",
+        "front": "/card-showcase/reflection/13-pt13.webp",
+        "back": "/card-showcase/reflection/back.webp"
+      },
+      {
+        "title": "PT14",
+        "group": "phan-tu",
+        "front": "/card-showcase/reflection/14-pt14.webp",
+        "back": "/card-showcase/reflection/back.webp"
+      }
+    ]
+  },
+  {
+    "id": "selfcare",
+    "label": "Bí kíp ôm",
+    "count": 15,
+    "cards": [
+      {
+        "title": "BK1",
+        "group": "bi-kip-om",
+        "front": "/card-showcase/selfcare/01-bk1.webp",
+        "back": "/card-showcase/selfcare/back.webp"
+      },
+      {
+        "title": "BK2",
+        "group": "bi-kip-om",
+        "front": "/card-showcase/selfcare/02-bk2.webp",
+        "back": "/card-showcase/selfcare/back.webp"
+      },
+      {
+        "title": "BK3",
+        "group": "bi-kip-om",
+        "front": "/card-showcase/selfcare/03-bk3.webp",
+        "back": "/card-showcase/selfcare/back.webp"
+      },
+      {
+        "title": "BK4",
+        "group": "bi-kip-om",
+        "front": "/card-showcase/selfcare/04-bk4.webp",
+        "back": "/card-showcase/selfcare/back.webp"
+      },
+      {
+        "title": "BK5",
+        "group": "bi-kip-om",
+        "front": "/card-showcase/selfcare/05-bk5.webp",
+        "back": "/card-showcase/selfcare/back.webp"
+      },
+      {
+        "title": "BK6",
+        "group": "bi-kip-om",
+        "front": "/card-showcase/selfcare/06-bk6.webp",
+        "back": "/card-showcase/selfcare/back.webp"
+      },
+      {
+        "title": "BK7",
+        "group": "bi-kip-om",
+        "front": "/card-showcase/selfcare/07-bk7.webp",
+        "back": "/card-showcase/selfcare/back.webp"
+      },
+      {
+        "title": "BK8",
+        "group": "bi-kip-om",
+        "front": "/card-showcase/selfcare/08-bk8.webp",
+        "back": "/card-showcase/selfcare/back.webp"
+      },
+      {
+        "title": "BK9",
+        "group": "bi-kip-om",
+        "front": "/card-showcase/selfcare/09-bk9.webp",
+        "back": "/card-showcase/selfcare/back.webp"
+      },
+      {
+        "title": "BK10",
+        "group": "bi-kip-om",
+        "front": "/card-showcase/selfcare/10-bk10.webp",
+        "back": "/card-showcase/selfcare/back.webp"
+      },
+      {
+        "title": "BK11",
+        "group": "bi-kip-om",
+        "front": "/card-showcase/selfcare/11-bk11.webp",
+        "back": "/card-showcase/selfcare/back.webp"
+      },
+      {
+        "title": "BK12",
+        "group": "bi-kip-om",
+        "front": "/card-showcase/selfcare/12-bk12.webp",
+        "back": "/card-showcase/selfcare/back.webp"
+      },
+      {
+        "title": "BK13",
+        "group": "bi-kip-om",
+        "front": "/card-showcase/selfcare/13-bk13.webp",
+        "back": "/card-showcase/selfcare/back.webp"
+      },
+      {
+        "title": "BK14",
+        "group": "bi-kip-om",
+        "front": "/card-showcase/selfcare/14-bk14.webp",
+        "back": "/card-showcase/selfcare/back.webp"
+      },
+      {
+        "title": "BK15",
+        "group": "bi-kip-om",
+        "front": "/card-showcase/selfcare/15-bk15.webp",
+        "back": "/card-showcase/selfcare/back.webp"
+      }
+    ]
+  }
+]

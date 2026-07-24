@@ -1,32 +1,45 @@
 {
-    # Global options
-    email admin@emcoin.example.com
+    email admin@emcoin.cloud
     admin off
 }
 
-# Production domain - Change this to your actual domain
-emcoin.example.com {
-    # Enable compression
-    encode gzip zstd
+emcoin.cloud {
+    encode zstd gzip
 
-    # Backend API
     handle /api/* {
         reverse_proxy backend:3001
     }
 
-    # Socket.IO WebSocket
     handle /socket.io/* {
-        reverse_proxy backend:3001
+        reverse_proxy backend:3001 {
+            header_up Host {host}
+            header_up X-Real-IP {remote_host}
+            header_up X-Forwarded-For {remote_host}
+            header_up X-Forwarded-Proto {scheme}
+        }
     }
 
-    # Frontend static files
     handle /* {
         root * /var/www/html
         try_files {path} /index.html
         file_server
+
+        @static {
+            path *.js *.css *.woff2 *.woff *.ttf
+        }
+        header @static Cache-Control "public, max-age=31536000, immutable"
+
+        @images {
+            path *.png *.jpg *.jpeg *.webp *.avif *.svg *.ico
+        }
+        header @images Cache-Control "public, max-age=604800, stale-while-revalidate=86400"
+
+        @html {
+            path /index.html /
+        }
+        header @html Cache-Control "no-cache"
     }
 
-    # Security headers
     header {
         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
         X-Content-Type-Options "nosniff"
@@ -34,19 +47,24 @@ emcoin.example.com {
         X-XSS-Protection "1; mode=block"
         Referrer-Policy "strict-origin-when-cross-origin"
     }
-
-    # Logging
-    log {
-        output file /var/log/caddy/access.log
-        format json
-    }
 }
 
-# For local testing without SSL (optional)
-# :80 {
-#     reverse_proxy /api/* backend:3001
-#     reverse_proxy /socket.io/* backend:3001
-#     file_server /* {
-#         root /var/www/html
-#     }
-# }
+ocr2.quocbui.dev {
+    encode zstd gzip
+
+    handle /api/* {
+        reverse_proxy misa-api2-backend-1:8000
+    }
+
+    handle /* {
+        reverse_proxy misa-api2-frontend-1:80
+    }
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+}

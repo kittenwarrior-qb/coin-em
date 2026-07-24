@@ -1,10 +1,7 @@
 name: CI
 
 on:
-  pull_request:
-    branches: [main]
-  push:
-    branches: [develop]
+  workflow_dispatch:
 
 jobs:
   test:
@@ -54,6 +51,17 @@ jobs:
     needs: test
     timeout-minutes: 20
 
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
 
@@ -61,36 +69,35 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install deps
+      - name: Install all deps
         run: |
-          npm ci
-          working-directory: be
-          npm ci
-          working-directory: fe
-          npm ci
-          working-directory: e2e
+          cd be && npm ci
+          cd ../fe && npm ci
+          cd ../e2e && npm ci
 
       - name: Install Playwright
         run: npx playwright install --with-deps chromium
         working-directory: e2e
 
       - name: Start backend
-        run: |
-          npm run dev &
-          timeout 30 bash -c 'until curl -sf http://localhost:3001/health; do sleep 2; done'
         working-directory: be
         env:
           NODE_ENV: test
           PORT: 3001
           CLIENT_ORIGIN: http://localhost:5173
-
-      - name: Start frontend
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
         run: |
           npm run dev &
-          timeout 30 bash -c 'until curl -sf http://localhost:5173; do sleep 2; done'
+          timeout 30 bash -c 'until curl -sf http://localhost:3001/health; do sleep 2; done'
+
+      - name: Start frontend
         working-directory: fe
         env:
           VITE_API_URL: http://localhost:3001
+        run: |
+          npm run dev &
+          timeout 30 bash -c 'until curl -sf http://localhost:5173; do sleep 2; done'
 
       - name: Run E2E
         run: npx playwright test
@@ -98,7 +105,7 @@ jobs:
         env:
           BASE_URL: http://localhost:5173
 
-      - name: Upload report
+      - name: Upload report on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:

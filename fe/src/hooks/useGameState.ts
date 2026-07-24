@@ -19,9 +19,10 @@ export function useGameActions() {
   const updatePlayer      = useGameStore((s) => s.updatePlayer)
   const selectCard        = useGameStore((s) => s.selectCard)
   const clearSelectedCards = useGameStore((s) => s.clearSelectedCards)
+  const clearSelectedCard = useGameStore((s) => s.clearSelectedCard)
   const canSelectCard     = useGameStore((s) => s.canSelectCard)
 
-  return { setGameStep, setPlayers, updatePlayer, selectCard, clearSelectedCards, canSelectCard }
+  return { setGameStep, setPlayers, updatePlayer, selectCard, clearSelectedCards, clearSelectedCard, canSelectCard }
 }
 
 export function useGameUI() {

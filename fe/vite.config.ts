@@ -4,7 +4,9 @@ import react from "@vitejs/plugin-react"
 import { defineConfig, loadEnv } from "vite"
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd())
+  const rootEnv = loadEnv(mode, path.resolve(process.cwd(), ".."))
+  const appEnv = loadEnv(mode, process.cwd())
+  const env = { ...rootEnv, ...appEnv }
 
   return {
     base: env.VITE_BASE_URL ?? "/",
@@ -12,6 +14,20 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
+      },
+    },
+    build: {
+      // Tăng chunk size warning threshold
+      chunkSizeWarningLimit: 1000,
+      rollupOptions: {
+        output: {
+          // Tách vendor chunks để cache hiệu quả hơn
+          manualChunks: {
+            'react-vendor': ['react', 'react-dom'],
+            'motion': ['framer-motion'],
+            'router': ['react-router'],
+          },
+        },
       },
     },
   }

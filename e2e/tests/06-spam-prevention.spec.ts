@@ -26,18 +26,25 @@ test.describe('Spam Prevention', () => {
     const narrator = await orchestrator.findNarrator()
     test.skip(!narrator, 'No narrator among human players')
 
-    // Act - click next-turn 5 times rapidly
+    // Record phase before
+    const phaseBefore = await narrator!.getCurrentPhase()
+
+    // Act - click next-turn once and record resulting phase
     const btn = narrator!.p.locator('[data-testid="btn-next-turn"]')
-    for (let i = 0; i < 5; i++) {
+    await btn.click()
+    await narrator!.p.waitForTimeout(500)
+    const phaseAfter = await narrator!.getCurrentPhase()
+
+    // Now spam click 4 more times rapidly
+    for (let i = 0; i < 4; i++) {
       await btn.click({ force: true })
     }
-
-    // Wait a moment for any socket events to settle
     await narrator!.p.waitForTimeout(1_500)
 
-    // Assert - phase is exactly 'night' (not skipped further)
-    const phase = await narrator!.getCurrentPhase()
-    expect(['night', 'role-reveal']).toContain(phase)
+    // Assert - phase should not have advanced beyond the first click's result
+    const phaseFinal = await narrator!.getCurrentPhase()
+    expect(phaseFinal).toBe(phaseAfter)
+    expect(phaseFinal).not.toBe(phaseBefore)
   })
 
   test('coin popup closes after sending coin (no duplicate popup)', async () => {
@@ -67,13 +74,18 @@ test.describe('Spam Prevention', () => {
 
     const [player1] = orchestrator.getPlayers()
 
-    // Act - click own card multiple times
+    // Act - click own card (opens role card overlay, not coin popup)
     const myCard = player1.p.locator('[data-testid^="player-card-"][data-is-me="true"]')
-    await myCard.click()
-    await myCard.click()
     await myCard.click()
 
     // Assert - coin popup never appears
+    await expect(player1.p.locator('[data-testid="coin-btn-yellow"]')).not.toBeVisible()
+
+    // Dismiss role overlay before further clicks
+    await player1.dismissOverlay()
+
+    // Click again after dismiss — still no coin popup for own card
+    await myCard.click()
     await expect(player1.p.locator('[data-testid="coin-btn-yellow"]')).not.toBeVisible()
   })
 

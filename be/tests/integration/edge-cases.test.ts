@@ -14,7 +14,7 @@ describe('Edge Cases & Race Conditions', () => {
     it('should prevent duplicate silence actions', () => {
       const room = setRoomPhase(createPlayingRoom(7), 'silencer-turn')
       const silencer = room.players.find(p => p.role === Role.SILENCER)!
-      const target = room.players.find(p => p.userId !== silencer.userId)!
+      const target = room.players.find(p => p.userId !== silencer.userId && !p.isNarrator && !p.isSender)!
 
       // First action succeeds
       const result1 = engine.executeAction(room, {
@@ -37,7 +37,7 @@ describe('Edge Cases & Race Conditions', () => {
     it('should prevent duplicate heal actions', () => {
       const room = setRoomPhase(createPlayingRoom(7), 'healer-turn')
       const healer = room.players.find(p => p.role === Role.HEALER)!
-      const target = room.players.find(p => p.userId !== healer.userId)!
+      const target = room.players.find(p => p.userId !== healer.userId && !p.isNarrator && !p.isSender)!
 
       const result1 = engine.executeAction(room, {
         type: 'HEAL',
@@ -57,7 +57,7 @@ describe('Edge Cases & Race Conditions', () => {
 
     it('should prevent duplicate votes', () => {
       const room = setRoomPhase(createPlayingRoom(7), 'guess-silencer')
-      const voter = room.players[0]
+      const voter = room.players.find(p => !p.isNarrator && p.originalRole !== Role.SILENCER && p.role !== Role.SILENCER)!
       const suspect1 = room.players[1]
       const suspect2 = room.players[2]
 
@@ -185,7 +185,7 @@ describe('Edge Cases & Race Conditions', () => {
       const silencer = room.players.find(p => p.role === Role.SILENCER)!
       const healer = room.players.find(p => p.role === Role.HEALER)!
       const target = room.players.find(p => 
-        p.userId !== silencer.userId && p.userId !== healer.userId
+        p.userId !== silencer.userId && p.userId !== healer.userId && !p.isNarrator && !p.isSender
       )!
 
       // Healer acts first (in healer-turn phase)
@@ -342,10 +342,13 @@ describe('Edge Cases & Race Conditions', () => {
     it('should auto-advance when all players vote', () => {
       const room = setRoomPhase(createPlayingRoom(7), 'guess-silencer')
       let currentRoom = room
+      const eligibleVoters = room.players.filter(
+        p => !p.isNarrator && p.originalRole !== Role.SILENCER && p.role !== Role.SILENCER
+      )
 
-      // All players vote
-      for (let i = 0; i < room.players.length; i++) {
-        const voter = room.players[i]
+      // All eligible players vote
+      for (let i = 0; i < eligibleVoters.length; i++) {
+        const voter = eligibleVoters[i]
         const suspect = room.players[(i + 1) % room.players.length]
 
         const result = engine.executeAction(currentRoom, {
@@ -358,17 +361,17 @@ describe('Edge Cases & Race Conditions', () => {
         currentRoom = result.room!
 
         // Last vote should trigger auto-advance
-        if (i === room.players.length - 1) {
+        if (i === eligibleVoters.length - 1) {
           expect(result.autoAdvance).toBe(true)
         }
       }
 
-      expect(Object.keys(currentRoom.votes).length).toBe(room.players.length)
+      expect(Object.keys(currentRoom.votes).length).toBe(eligibleVoters.length)
     })
 
     it('should not auto-advance with partial votes', () => {
       const room = setRoomPhase(createPlayingRoom(7), 'guess-silencer')
-      const voter = room.players[0]
+      const voter = room.players.find(p => !p.isNarrator && p.originalRole !== Role.SILENCER && p.role !== Role.SILENCER)!
       const suspect = room.players[1]
 
       const result = engine.executeAction(room, {

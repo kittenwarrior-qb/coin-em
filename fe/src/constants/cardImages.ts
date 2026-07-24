@@ -1,5 +1,8 @@
 // Card images from Cloudinary
-export const CARD_IMAGES = {
+// URLs are transformed at module load time via applyCardTransforms (f_auto, q_auto:best, sized per use)
+import { applyCardTransforms } from '@/utils/cdnUrl'
+
+const RAW_CARD_IMAGES = {
   // Vai trò (Role cards)
   roles: {
     back: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469092/emcoin/vai-tro/m%E1%BA%B7t%20sau.png',
@@ -101,39 +104,39 @@ export const CARD_IMAGES = {
     green2: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469200/emcoin/coin/CX2.png',
   },
   
-  // Cảm xúc cơ bản (Basic emotions) - 0 là mặt sau, 1 là mặt trước
+  // Cảm xúc cơ bản (Basic emotions) - 1 là mặt sau, 0 là mặt trước
   emotionBasic: {
     buon: {
-      back: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471275/emcoin/cam-xuc/basic/Bu%E1%BB%93n%200.png',
-      front: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471277/emcoin/cam-xuc/basic/Bu%E1%BB%93n%201.png',
+      front: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471275/emcoin/cam-xuc/basic/Bu%E1%BB%93n%200.png',
+      back: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471277/emcoin/cam-xuc/basic/Bu%E1%BB%93n%201.png',
     },
     chan: {
-      back: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471278/emcoin/cam-xuc/basic/Ch%C3%A1n%200.png',
-      front: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471279/emcoin/cam-xuc/basic/Ch%C3%A1n%201.png',
+      front: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471278/emcoin/cam-xuc/basic/Ch%C3%A1n%200.png',
+      back: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471279/emcoin/cam-xuc/basic/Ch%C3%A1n%201.png',
     },
     gian: {
-      back: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471280/emcoin/cam-xuc/basic/Gi%E1%BA%ADn%200.png',
-      front: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471281/emcoin/cam-xuc/basic/Gi%E1%BA%ADn%201.png',
+      front: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471280/emcoin/cam-xuc/basic/Gi%E1%BA%ADn%200.png',
+      back: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471281/emcoin/cam-xuc/basic/Gi%E1%BA%ADn%201.png',
     },
     mong: {
-      back: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471282/emcoin/cam-xuc/basic/Mong%200.png',
-      front: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471283/emcoin/cam-xuc/basic/Mong%201.png',
+      front: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471282/emcoin/cam-xuc/basic/Mong%200.png',
+      back: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471283/emcoin/cam-xuc/basic/Mong%201.png',
     },
     so: {
-      back: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471284/emcoin/cam-xuc/basic/S%E1%BB%A3%200.png',
-      front: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471285/emcoin/cam-xuc/basic/S%E1%BB%A3%201.png',
+      front: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471284/emcoin/cam-xuc/basic/S%E1%BB%A3%200.png',
+      back: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471285/emcoin/cam-xuc/basic/S%E1%BB%A3%201.png',
     },
     tin: {
-      back: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471286/emcoin/cam-xuc/basic/Tin%200.png',
-      front: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471287/emcoin/cam-xuc/basic/Tin%201.png',
+      front: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471286/emcoin/cam-xuc/basic/Tin%200.png',
+      back: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471287/emcoin/cam-xuc/basic/Tin%201.png',
     },
     vui: {
-      back: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471288/emcoin/cam-xuc/basic/Vui%200.png',
-      front: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471289/emcoin/cam-xuc/basic/Vui%201.png',
+      front: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471288/emcoin/cam-xuc/basic/Vui%200.png',
+      back: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471289/emcoin/cam-xuc/basic/Vui%201.png',
     },
     wow: {
-      back: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471291/emcoin/cam-xuc/basic/Wow%200.png',
-      front: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471292/emcoin/cam-xuc/basic/Wow%201.png',
+      front: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471291/emcoin/cam-xuc/basic/Wow%200.png',
+      back: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471292/emcoin/cam-xuc/basic/Wow%201.png',
     },
   },
   
@@ -244,7 +247,10 @@ export const CARD_IMAGES = {
       front: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777471398/emcoin/cam-xuc/advance/NC%208.png',
     },
   ],
-};
+}
+
+// Apply Cloudinary transforms (f_auto, q_auto:best, sized per use-case)
+export const CARD_IMAGES = applyCardTransforms(RAW_CARD_IMAGES)
 
 // Role mapping
 export const ROLE_TO_IMAGE: Record<string, string> = {
@@ -255,4 +261,4 @@ export const ROLE_TO_IMAGE: Record<string, string> = {
   'Người Gợi Mở': CARD_IMAGES.roles.VT5,
   'Người Im Lặng': CARD_IMAGES.roles.VT6,
   'Người Kết Nối': CARD_IMAGES.roles.VT7,
-};
+}

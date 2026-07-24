@@ -1,249 +1,290 @@
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
+import { motion } from 'framer-motion'
+import { CartoonButton, CartoonCircleButton, CartoonModal, CartoonScreen } from '@/components/cartoon'
+import { JoinRoomModal } from '@/components/lobby/JoinRoomModal'
+import { CreateRoomModal } from '@/components/lobby/CreateRoomModal'
+import { GameMenuModal } from '@/components/lobby/GameMenuModal'
+import { PopIn } from '@/components/PopIn'
+import type { RoomListItem } from '@/components/lobby/RoomCard'
+import type { ResumeCandidate } from '@/hooks/useSocket'
 
-type Screen = 'menu' | 'join' | 'create'
+interface SplashRect { left: number; top: number; w: number; h: number }
 
-interface RoomListItem {
-  id: string
-  playerCount: number
-  hostName: string
+function LogoFly({ splashLogoRect, ready, logoRef }: { splashLogoRect: SplashRect | null; ready: boolean; logoRef: React.RefObject<HTMLImageElement | null> }) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [flyFrom, setFlyFrom] = useState<{ x: number; y: number; scale: number } | null>(null)
+  const measured = useRef(false)
+
+  useLayoutEffect(() => {
+    if (measured.current || !ready || !splashLogoRect || !containerRef.current) return
+    measured.current = true
+    const el = containerRef.current
+    const hr = el.getBoundingClientRect()
+    const homeCX = hr.left + hr.width / 2
+    const homeCY = hr.top + hr.height / 2
+    const splashCX = splashLogoRect.left + splashLogoRect.w / 2
+    const splashCY = splashLogoRect.top + splashLogoRect.h / 2
+    const scaleFrom = splashLogoRect.h / hr.height
+    setFlyFrom({ x: splashCX - homeCX, y: splashCY - homeCY, scale: scaleFrom })
+  }, [ready, splashLogoRect])
+
+  return (
+    <div ref={containerRef} style={{ display: 'inline-block', visibility: flyFrom || !splashLogoRect ? 'visible' : 'hidden' }}>
+      <motion.img
+        ref={logoRef}
+        id="home-logo"
+        src="/emcoin_logo.png"
+        alt="EmCoin"
+        className="mx-auto"
+        initial={flyFrom ? { x: flyFrom.x, y: flyFrom.y, scale: flyFrom.scale } : false}
+        animate={{ x: 0, y: 0, scale: 1 }}
+        transition={{ duration: 0.55, ease: [0.34, 1.2, 0.64, 1] }}
+        style={{ height: 100, objectFit: 'contain', filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))', display: 'block' }}
+      />
+    </div>
+  )
 }
 
 interface LobbyProps {
   availableRooms: RoomListItem[]
   onJoinRoom: (roomId: string, userName: string) => void
-  onCreateRoom: (userName: string) => void
+  onCreateRoom: (userName: string, cardDecks?: { situation: Record<string, boolean>; emotion: Record<string, boolean> }) => void
   onRefreshRooms: () => void
+  ready?: boolean
+  splashLogoRect?: SplashRect | null
+  bgDone?: boolean
+  bgLoaded?: number
+  bgTotal?: number
+  resumeCandidates?: ResumeCandidate[]
+  onResumeRoom?: (candidate: ResumeCandidate) => void
+  onDismissResume?: (roomId: string) => void
 }
 
-export default function Lobby({ availableRooms, onJoinRoom, onCreateRoom, onRefreshRooms }: LobbyProps) {
-  const [screen, setScreen] = useState<Screen>('menu')
-  const [roomId, setRoomId] = useState('')
-  const [userName, setUserName] = useState('')
-  const [selectedRoom, setSelectedRoom] = useState<RoomListItem | null>(null)
+export default function Lobby({
+  availableRooms,
+  onJoinRoom,
+  onCreateRoom,
+  onRefreshRooms,
+  ready = true,
+  splashLogoRect,
+  bgDone = true,
+  bgLoaded = 0,
+  bgTotal = 0,
+  resumeCandidates = [],
+  onResumeRoom,
+  onDismissResume,
+}: LobbyProps) {
+  const [joinOpen, setJoinOpen] = useState(false)
+  const [createOpen, setCreateOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [resumeOpen, setResumeOpen] = useState(false)
+  const homeLogoRef = useRef<HTMLImageElement>(null)
+  const autoOpenedResumeRef = useRef(false)
+  const latestResume = resumeCandidates[0]
 
-  // Auto-refresh rooms when on join screen
   useEffect(() => {
-    if (screen === 'join') {
-      onRefreshRooms()
-      const interval = setInterval(onRefreshRooms, 3000) // Refresh every 3s
-      return () => clearInterval(interval)
-    }
-  }, [screen, onRefreshRooms])
+    if (!joinOpen) return
+    onRefreshRooms()
+    const id = setInterval(onRefreshRooms, 3000)
+    return () => clearInterval(id)
+  }, [joinOpen, onRefreshRooms])
 
-  const handleJoin = () => {
-    if (!userName.trim()) return
-    const targetRoomId = selectedRoom ? selectedRoom.id : roomId.trim()
-    if (!targetRoomId) return
-    onJoinRoom(targetRoomId, userName.trim())
-  }
-
-  const handleCreate = () => {
-    if (!userName.trim()) return
-    onCreateRoom(userName.trim())
-  }
+  useEffect(() => {
+    if (autoOpenedResumeRef.current || resumeCandidates.length === 0) return
+    autoOpenedResumeRef.current = true
+    setResumeOpen(true)
+  }, [resumeCandidates.length])
 
   return (
-    <div className="h-screen bg-[#FAFAF8] flex items-center justify-center overflow-hidden" data-testid="lobby">
-      <div className="w-full max-w-sm h-full bg-white">
-        <AnimatePresence mode="wait">
-          {screen === 'menu' && (
-            <motion.div
-              key="menu"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="h-full flex flex-col justify-center p-8 gap-4"
-              data-testid="lobby-menu"
-            >
-              <div className="text-center mb-4">
-                <div className="text-5xl mb-3">🎴</div>
-                <h1 className="text-2xl font-black text-gray-800">EmCoin</h1>
-                <p className="text-sm text-gray-500 mt-1">Hành trình cảm xúc</p>
-              </div>
+    <CartoonScreen data-testid="lobby" purpleBg>
+      <div
+        className="flex-1 flex flex-col justify-center p-8 gap-4 relative"
+        data-testid="lobby-menu"
+      >
+        {/* About button — top left */}
+        <div className="absolute top-4 left-4">
+          <PopIn delay={0.16}>
+            <CartoonCircleButton
+              color="blue"
+              size="sm"
+              iconSrc="/cartoon/icons/Question-Mark.svg"
+              iconAlt="Về dự án"
+              iconSize="42%"
+              aria-label="Về dự án"
+              style={{ height: 45, width: 45 }}
+              onClick={() => window.open('/about', '_blank')}
+            />
+          </PopIn>
+        </div>
 
-              <button
-                data-testid="btn-join-room"
-                onClick={() => setScreen('join')}
-                className="w-full py-4 rounded-2xl border-[3px] border-black bg-[#F0F5FF]
-                           text-base font-bold hover:bg-[#E0E5FF] active:scale-[0.98] transition-all"
-              >
-                Tham gia phòng
-              </button>
-
-              <button
-                data-testid="btn-create-room"
-                onClick={() => setScreen('create')}
-                className="w-full py-4 rounded-2xl border-[3px] border-black bg-[#FFF0F5]
-                           text-base font-bold hover:bg-[#FFE0E5] active:scale-[0.98] transition-all"
-              >
-                Tạo phòng mới
-              </button>
-            </motion.div>
+        <div className="absolute top-4 right-4">
+          {ready ? (
+            <PopIn delay={0.16}>
+              <CartoonCircleButton
+                color="purple"
+                size="sm"
+                iconSrc="/cartoon/icons/Settings.svg"
+                iconAlt="Cài đặt"
+                iconSize="40%"
+                aria-label="Cài đặt"
+                style={{ height: 45, width: 45 }}
+                onClick={() => setMenuOpen(true)}
+              />
+            </PopIn>
+          ) : (
+            <CartoonCircleButton
+              color="purple"
+              size="sm"
+              iconSrc="/cartoon/icons/Settings.svg"
+              iconAlt="Cài đặt"
+              iconSize="40%"
+              aria-label="Cài đặt"
+              style={{ height: 45, width: 45 }}
+              onClick={() => setMenuOpen(true)}
+            />
           )}
+        </div>
 
-          {screen === 'join' && (
-            <motion.div
-              key="join"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="h-full flex flex-col p-8 gap-5 overflow-y-auto"
-              data-testid="lobby-join"
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <button
-                  onClick={() => { setScreen('menu'); setSelectedRoom(null); setRoomId(''); setUserName('') }}
-                  className="w-8 h-8 rounded-full border-2 border-black flex items-center justify-center
-                             hover:bg-gray-100 active:scale-95 transition-all"
-                >
-                  ←
-                </button>
-                <h2 className="text-xl font-black text-gray-800">Tham gia phòng</h2>
-              </div>
+        <div className="absolute top-[66px] right-4">
+          <PopIn delay={0.22}>
+            <CartoonCircleButton
+              color="violet"
+              size="sm"
+              iconSrc="/cartoon/icons/Arrow-Simple-Right.svg"
+              iconAlt="Tiếp tục phòng"
+              iconSize="35%"
+              aria-label="Tiếp tục phòng"
+              style={{ height: 45, width: 45 }}
+              onClick={() => setResumeOpen(true)}
+              badge={latestResume ? resumeCandidates.length : undefined}
+            />
+          </PopIn>
+        </div>
 
-              {/* Available rooms list */}
-              {availableRooms.length > 0 && (
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="text-sm font-bold text-gray-600">Phòng đang chờ</label>
-                    <button
-                      onClick={onRefreshRooms}
-                      className="text-xs text-blue-600 hover:text-blue-800 font-bold"
-                    >
-                      🔄 Làm mới
-                    </button>
-                  </div>
-                  <div className="flex flex-col gap-2 max-h-48 overflow-y-auto mb-4">
-                    {availableRooms.map(room => (
-                      <button
-                        key={room.id}
-                        onClick={() => setSelectedRoom(room)}
-                        className={`p-3 rounded-xl border-2 text-left transition-all
-                          ${selectedRoom?.id === room.id 
-                            ? 'border-blue-500 bg-blue-50' 
-                            : 'border-black bg-white hover:bg-gray-50'}`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="text-sm font-bold text-gray-800">{room.id}</div>
-                            <div className="text-xs text-gray-500">Host: {room.hostName}</div>
-                          </div>
-                          <div className="text-xs font-bold text-gray-600">
-                            {room.playerCount}/11
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+        <div className="text-center" style={{ marginBottom: 32, marginTop: -40 }}>
+          <LogoFly splashLogoRect={splashLogoRect ?? null} ready={ready} logoRef={homeLogoRef} />
+        </div>
 
-              {availableRooms.length === 0 && (
-                <div className="bg-[#FFF9C4] rounded-xl p-4 border-2 border-black text-center">
-                  <p className="text-xs text-gray-600">
-                    Chưa có phòng nào đang chờ
-                  </p>
-                </div>
-              )}
+        {ready ? (
+          <PopIn delay={0}>
+            <CartoonButton color="blue" size="lg" className="w-full" onClick={() => setJoinOpen(true)} data-testid="btn-join-room">
+              Tìm phòng
+            </CartoonButton>
+          </PopIn>
+        ) : (
+          <CartoonButton color="blue" size="lg" className="w-full" onClick={() => setJoinOpen(true)} data-testid="btn-join-room">
+            Tìm phòng
+          </CartoonButton>
+        )}
 
-              {/* Manual room ID input */}
-              <div>
-                <label className="block text-sm font-bold text-gray-600 mb-2">
-                  Hoặc nhập mã phòng
-                </label>
-                <input
-                  data-testid="input-room-id"
-                  type="text"
-                  value={selectedRoom ? selectedRoom.id : roomId}
-                  onChange={e => { setRoomId(e.target.value); setSelectedRoom(null) }}
-                  placeholder="Nhập mã phòng"
-                  disabled={!!selectedRoom}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-black
-                             focus:outline-none focus:ring-2 focus:ring-blue-300
-                             disabled:bg-gray-100 disabled:cursor-not-allowed"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-gray-600 mb-2">Tên của bạn</label>
-                <input
-                  data-testid="input-username-join"
-                  type="text"
-                  value={userName}
-                  onChange={e => setUserName(e.target.value)}
-                  placeholder="Nhập tên"
-                  className="w-full px-4 py-3 rounded-xl border-2 border-black
-                             focus:outline-none focus:ring-2 focus:ring-blue-300"
-                />
-              </div>
-
-              <button
-                data-testid="btn-confirm-join"
-                onClick={handleJoin}
-                disabled={!userName.trim() || (!selectedRoom && !roomId.trim())}
-                className="w-full py-4 rounded-2xl border-[3px] border-black bg-[#6BCB77]
-                           text-base font-bold hover:bg-[#5BB767] active:scale-[0.98]
-                           disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-              >
-                Vào phòng
-              </button>
-            </motion.div>
-          )}
-
-          {screen === 'create' && (
-            <motion.div
-              key="create"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="h-full flex flex-col justify-center p-8 gap-5"
-              data-testid="lobby-create"
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <button
-                  onClick={() => setScreen('menu')}
-                  className="w-8 h-8 rounded-full border-2 border-black flex items-center justify-center
-                             hover:bg-gray-100 active:scale-95 transition-all"
-                >
-                  ←
-                </button>
-                <h2 className="text-xl font-black text-gray-800">Tạo phòng mới</h2>
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-gray-600 mb-2">Tên của bạn</label>
-                <input
-                  data-testid="input-username-create"
-                  type="text"
-                  value={userName}
-                  onChange={e => setUserName(e.target.value)}
-                  placeholder="Nhập tên"
-                  className="w-full px-4 py-3 rounded-xl border-2 border-black
-                             focus:outline-none focus:ring-2 focus:ring-blue-300"
-                />
-              </div>
-
-              <div className="bg-[#FFF9C4] rounded-xl p-4 border-2 border-black">
-                <p className="text-xs text-gray-600">
-                  💡 Mã phòng sẽ được tạo tự động sau khi bạn tạo phòng
-                </p>
-              </div>
-
-              <button
-                data-testid="btn-confirm-create"
-                onClick={handleCreate}
-                disabled={!userName.trim()}
-                className="w-full py-4 rounded-2xl border-[3px] border-black bg-[#FFD93D]
-                           text-base font-bold hover:bg-[#FFC91D] active:scale-[0.98]
-                           disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-              >
-                Tạo phòng
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {ready ? (
+          <PopIn delay={0.08}>
+            <CartoonButton color="pink" size="lg" className="w-full" onClick={() => setCreateOpen(true)} data-testid="btn-create-room">
+              Tạo phòng
+            </CartoonButton>
+          </PopIn>
+        ) : (
+          <CartoonButton color="pink" size="lg" className="w-full" onClick={() => setCreateOpen(true)} data-testid="btn-create-room">
+            Tạo phòng
+          </CartoonButton>
+        )}
       </div>
-    </div>
+
+      {!bgDone && (
+        <div className="flex items-center justify-center pb-4 gap-2">
+          <img src="/cartoon/icons/Loading-Spinner.svg" alt="" className="w-4 h-4 spin-cartoon opacity-60" />
+          <span className="font-body text-xs" style={{ color: 'var(--c-gray)' }}>
+            Downloading... {bgLoaded}/{bgTotal}
+          </span>
+        </div>
+      )}
+
+      <JoinRoomModal
+        open={joinOpen}
+        onClose={() => setJoinOpen(false)}
+        availableRooms={availableRooms}
+        onJoin={onJoinRoom}
+        onRefresh={onRefreshRooms}
+      />
+
+      <CreateRoomModal
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onCreate={onCreateRoom}
+      />
+
+      <GameMenuModal
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        onSettings={() => { setMenuOpen(false) }}
+      />
+
+      <CartoonModal open={resumeOpen} onClose={() => setResumeOpen(false)} title="Tiếp tục">
+        <div className="flex flex-col gap-3 py-2">
+          <div className="text-center font-body text-xs text-black/55">
+            Phòng còn dữ liệu khôi phục trong 2 giờ nếu bị ngắt.
+          </div>
+
+          {resumeCandidates.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 py-2">
+              <div className="rounded-2xl bg-[var(--c-sky-mist)] px-4 py-5 text-center font-display text-sm text-[var(--c-gray)]">
+                Không có phòng nào để chơi tiếp
+              </div>
+              <CartoonButton
+                color="purple"
+                size="sm"
+                className="mx-auto"
+                onClick={() => setResumeOpen(false)}
+              >
+                Bỏ qua
+              </CartoonButton>
+            </div>
+          ) : (
+            <div className="flex max-h-[52dvh] flex-col gap-2 overflow-y-auto pr-1">
+              {resumeCandidates.map((candidate) => (
+                <div key={candidate.roomId} className="grid grid-cols-[1fr_auto] items-center gap-2 rounded-2xl bg-[var(--c-sky-mist)] px-3 py-2">
+                  <div className="min-w-0">
+                    <div className="font-display text-sm text-[var(--c-black)]">{candidate.userName}</div>
+                    <div className="font-body text-[11px] leading-snug text-black/60">
+                      Phòng {candidate.roomId} · {candidate.role || 'Chưa rõ vai'}
+                    </div>
+                    <div className="font-body text-[11px] leading-snug text-black/60">
+                      Round {candidate.round ?? 0}/{candidate.totalRounds ?? '?'} · {candidate.phase || candidate.status || 'waiting'}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      className="shrink-0 flex items-center justify-center h-9 w-9 rounded-full bg-[var(--c-red)]/15 border-2 border-[var(--c-red)]/40 transition-all active:scale-95"
+                      onClick={() => onDismissResume?.(candidate.roomId)}
+                      aria-label={`Xóa phòng ${candidate.roomId}`}
+                      data-testid={`btn-dismiss-resume-${candidate.roomId}`}
+                    >
+                      <img
+                        src="/cartoon/icons/X-Icon.svg"
+                        alt=""
+                        className="h-4 w-4 object-contain opacity-70"
+                        draggable={false}
+                      />
+                    </button>
+                    <CartoonButton
+                      color="green"
+                      size="sm"
+                      className="shrink-0"
+                      onClick={() => {
+                        setResumeOpen(false)
+                        onResumeRoom?.(candidate)
+                      }}
+                    >
+                      Tham gia lại
+                    </CartoonButton>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </CartoonModal>
+    </CartoonScreen>
   )
 }

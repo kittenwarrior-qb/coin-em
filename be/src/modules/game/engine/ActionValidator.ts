@@ -70,6 +70,10 @@ export class ActionValidator {
       return { valid: false, error: 'Cannot silence self' }
     }
 
+    if (target.isNarrator || target.isSender) {
+      return { valid: false, error: 'CANNOT_TARGET_PUBLIC_ROLE' }
+    }
+
     return { valid: true }
   }
 
@@ -102,6 +106,12 @@ export class ActionValidator {
       return { valid: false, error: 'Target not found' }
     }
 
+    // Healer CAN heal self (removed self-check)
+    // Cannot heal Narrator or Sender
+    if (target.isNarrator || target.isSender) {
+      return { valid: false, error: 'CANNOT_TARGET_PUBLIC_ROLE' }
+    }
+
     return { valid: true }
   }
 
@@ -123,17 +133,13 @@ export class ActionValidator {
   }
 
   /**
-   * Validate select selfcare card action (Guide selects during selfcare-card phase)
+   * Validate select selfcare card action
+   * Actor: Người Dẫn Lối (Guide) nếu có trong round, ngược lại NTG (Sender) bốc thay
    */
   private validateSelectSelfcareCard(room: Room, actor: any, action: GameAction): { valid: boolean; error?: string } {
     // Must be selfcare-card phase
     if (room.phase !== 'selfcare-card') {
       return { valid: false, error: 'Not selfcare-card phase' }
-    }
-
-    // Actor must be guide
-    if (actor.role !== Role.GUIDE) {
-      return { valid: false, error: 'Not a guide' }
     }
 
     // Check idempotency - already selected card
@@ -146,6 +152,24 @@ export class ActionValidator {
       return { valid: false, error: 'No card data' }
     }
 
+    // Determine who is allowed to draw:
+    // Guide (originalRole) if present in this round, otherwise NTG (isSender)
+    const guideInRound = room.players.find(
+      (p) => p.originalRole === Role.GUIDE && !p.isFake
+    )
+
+    if (guideInRound) {
+      // Guide must draw
+      if (actor.originalRole !== Role.GUIDE) {
+        return { valid: false, error: 'Only Guide can draw selfcare card this round' }
+      }
+    } else {
+      // No Guide → NTG draws
+      if (!actor.isSender) {
+        return { valid: false, error: 'Only NTG can draw selfcare card when no Guide is present' }
+      }
+    }
+
     return { valid: true }
   }
 
@@ -154,8 +178,8 @@ export class ActionValidator {
    * UPDATED: Support flexible amounts, multiple recipients
    */
   private validateGiveCoin(room: Room, actor: any, action: GameAction): { valid: boolean; error?: string } {
-    // Must be give-coins phase
-    if (room.phase !== 'give-coins') {
+    // Allow giving coins during give-coins and group-response phases
+    if (room.phase !== 'give-coins' && room.phase !== 'group-response') {
       return { valid: false, error: 'Not give-coins phase' }
     }
 
@@ -180,7 +204,11 @@ export class ActionValidator {
     }
 
     const coinType = action.data.coinType
-    const amount = action.data.amount || 1
+    const amount = action.data.amount ?? 1
+
+    if (!Number.isInteger(amount) || amount <= 0) {
+      return { valid: false, error: 'Invalid coin amount' }
+    }
 
     // Cannot give green coins
     if (coinType === 'green') {
@@ -208,6 +236,10 @@ export class ActionValidator {
       return { valid: false, error: 'NOT_VOTE_PHASE' }
     }
 
+    if (actor.isNarrator || actor.originalRole === Role.SILENCER || actor.role === Role.SILENCER) {
+      return { valid: false, error: 'CANNOT_VOTE_AS_PUBLIC_ROLE' }
+    }
+
     // Check if already voted
     if (room.votes && room.votes[actor.userId]) {
       return { valid: false, error: 'ALREADY_VOTED' }
@@ -228,9 +260,21 @@ export class ActionValidator {
 
   /**
    * Check if player can advance turn
+   * Special case: In reflection-card phase, sender can also advance
    */
   canAdvanceTurn(room: Room, userId: string): boolean {
-    return room.currentNarrator === userId
+    // Narrator can always advance
+    if (room.currentNarrator === userId) {
+      return true
+    }
+    
+    // In reflection-card phase, sender can advance after selecting cards
+    if (room.phase === 'reflection-card') {
+      const sender = room.players.find(p => p.isSender)
+      return sender?.userId === userId
+    }
+    
+    return false
   }
 
   /**
@@ -282,16 +326,19 @@ export class ActionValidator {
    * Validate share reflection (NTG shares in reflection-sharing phase)
    */
   private validateShareReflection(room: Room, actor: any, action: GameAction): { valid: boolean; error?: string } {
-    // Must be reflection-sharing phase
     if (room.phase !== 'reflection-sharing') {
       return { valid: false, error: 'Not reflection-sharing phase' }
     }
-
-    // Only NTG can share
     if (!actor.isSender) {
       return { valid: false, error: 'ONLY_NTG_CAN_SHARE' }
     }
-
+    // Idempotency: prevent double reward if called twice
+    const alreadyRewarded = room.gameLog.some(
+      (entry) => entry.type === 'SHARE_REFLECTION' && entry.actorId === actor.userId
+    )
+    if (alreadyRewarded) {
+      return { valid: false, error: 'ALREADY_SHARED_REFLECTION' }
+    }
     return { valid: true }
   }
 }

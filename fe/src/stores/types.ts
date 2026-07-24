@@ -23,8 +23,9 @@ export type GameStep = GamePhase
 
 export type GameStatus = 'waiting' | 'playing' | 'ended'
 
-export type CardCategory = 'situation' | 'emotion' | 'reflection' | 'selfcare'
+export type CardCategory = 'situation' | 'emotion' | 'reflection' | 'selfcare' | 'role'
 export type EmotionSubType = 'basic' | 'light' | 'strong' | 'advanced'
+export type SituationSubType = 'light' | 'medium' | 'sensitive'
 export type CoinType = 'red' | 'yellow' | 'green'
 
 export interface Player {
@@ -36,6 +37,10 @@ export interface Player {
   isSender?: boolean
   isMuted?: boolean
   isHealed?: boolean
+  isDisconnected?: boolean
+  disconnectedAt?: number | null
+  avatarIndex?: number
+  bgIndex?: number
   coins: {
     red: number
     yellow: number
@@ -89,23 +94,22 @@ export const SENDER_PHASES: GamePhase[] = [
   'hug-action',
 ]
 
-/** Phase display labels in Vietnamese */
 export const PHASE_LABELS: Record<GamePhase, string> = {
-  'role-reveal':       'Chia vai trò',
-  'night':             'Đêm',
-  'healer-turn':       'Người Chữa Lành hành động',
-  'silencer-turn':     'Người Im Lặng hành động',
-  'situation-card':    'Bốc thẻ Tình huống',
-  'emotion-card':      'Chọn thẻ Cảm xúc',
-  'story-telling':     'Kể chuyện',
-  'group-response':    'Phản hồi nhóm',
-  'reflection-card':   'Chọn thẻ Phản tư',
-  'reflection-sharing':'Chia sẻ Phản tư',
-  'selfcare-card':     'Chọn Bí kíp ôm',
-  'hug-action':        'Hành động ôm',
-  'guess-silencer':    'Đoán Người Im Lặng',
-  'reveal-silencer':   'Tiết lộ Người Im Lặng',
-  'give-coins':        'Tặng coin',
-  'reward':            'Kết thúc lượt',
-  'ended':             'Kết thúc game',
+  'role-reveal':        'Nhận vai trò',
+  'night':              'Đêm bắt đầu',
+  'healer-turn':        'Lượt Người Chữa Lành',
+  'silencer-turn':      'Lượt Người Im Lặng',
+  'situation-card':     'Chọn thẻ Tình huống',
+  'emotion-card':       'Chọn thẻ Cảm xúc',
+  'story-telling':      'Kể chuyện',
+  'group-response':     'Phản hồi nhóm',
+  'reflection-card':    'Chọn thẻ Phản tư',
+  'reflection-sharing': 'Chia sẻ phản tư',
+  'selfcare-card':      'Bí kíp ôm',
+  'hug-action':         'Hành động ôm',
+  'guess-silencer':     'Đoán Người Im Lặng',
+  'reveal-silencer':    'Công bố vai trò',
+  'give-coins':         'Tặng coin',
+  'reward':             'Kết thúc lượt',
+  'ended':              'Kết thúc',
 }

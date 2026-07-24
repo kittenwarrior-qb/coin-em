@@ -1,118 +1,211 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Lobby from './Lobby'
 import WaitingRoom from './WaitingRoom'
 import GameBoard from './GameBoard'
 import { useSocket } from '../hooks/useSocket'
 import { getUserId } from '../utils/userId'
-
-type GameState = 'lobby' | 'waiting' | 'playing'
+import { CartoonScreen, CartoonButton } from '@/components/cartoon'
+import { useAssetPreloader } from '@/hooks/useAssetPreloader'
+import { AssetPreloaderScreen } from '@/components/AssetPreloaderScreen'
 
 export default function GameContainer() {
-  const [gameState, setGameState] = useState<GameState>('lobby')
-  const { socket, isConnected, roomState, availableRooms, error, currentSocketId, joinRoom, startGame, listRooms, clearSession, addFakePlayers } = useSocket()
+  const [forcelobby, setForceLobby] = useState(false)
+  const preloadState = useAssetPreloader()
+  const [splashGone, setSplashGone] = useState(false)
+  const [lobbyKey, setLobbyKey] = useState(0)
+  const [splashLogoRect, setSplashLogoRect] = useState<{ left: number; top: number; w: number; h: number } | null>(null)
+
+  const [preloaderMounted, setPreloaderMounted] = useState(true)
+
+  const handleSplashReady = useCallback((rect: { left: number; top: number; w: number; h: number }) => {
+    setSplashLogoRect(rect)
+    setSplashGone(true)
+    setLobbyKey(k => k + 1)
+  }, [])
+
+  const handleSplashFullyGone = useCallback(() => {
+    setPreloaderMounted(false)
+  }, [])
+
+  const {
+    socket,
+    isConnected,
+    roomState,
+    availableRooms,
+    error,
+    currentSocketId,
+    joinRoom,
+    startGame,
+    listRooms,
+    clearSession,
+    addFakePlayers,
+    updateProfile,
+    leaveRoom,
+    updateRoomSettings,
+    setDebugRolePreference,
+    resumeCandidates,
+    resumeRoom,
+    dismissResumeCandidate,
+    nextTurn,
+    prevTurn,
+    nightAction,
+    selectCard,
+    sendResponse,
+    ntgVote,
+    confirmRoleRewards,
+    shareReflection,
+    emitCardPreview,
+    emitSituationFanState,
+    situationPreviewCard,
+    situationFanState,
+    submitVote,
+    giveCoin,
+  } = useSocket()
   
   const mySocketId = currentSocketId || socket?.id || ''
   const myUserId = getUserId()
-  console.log('[GameContainer] Current socket.id:', mySocketId, 'userId:', myUserId)
 
-  const handleJoinRoom = (roomId: string, userName: string) => {
+  const handleJoinRoom = useCallback((roomId: string, userName: string) => {
+    setForceLobby(false)
     joinRoom(roomId, userName, false)
-  }
+  }, [joinRoom])
 
-  const handleCreateRoom = (userName: string) => {
+  const handleCreateRoom = useCallback((userName: string, cardDecks?: { situation: Record<string, boolean>; emotion: Record<string, boolean> }) => {
+    setForceLobby(false)
     const roomId = Math.random().toString(36).substring(2, 8).toUpperCase()
     joinRoom(roomId, userName, true)
-  }
+    // Send card deck settings after a short delay to ensure room is created
+    if (cardDecks) {
+      const situationGroups = Object.entries(cardDecks.situation).filter(([, v]) => v).map(([k]) => k)
+      const emotionGroups   = Object.entries(cardDecks.emotion).filter(([, v]) => v).map(([k]) => k)
+      // Fallback to defaults if nothing selected
+      const finalSituation = situationGroups.length > 0 ? situationGroups : ['light', 'medium']
+      const finalEmotion   = emotionGroups.length > 0 ? emotionGroups : ['basic']
+      setTimeout(() => updateRoomSettings(roomId, finalSituation, finalEmotion), 500)
+    }
+  }, [joinRoom, updateRoomSettings])
 
-  const handleStartGame = () => {
+  const handleStartGame = useCallback(() => {
     if (!roomState) return
     startGame(roomState.id)
-  }
+  }, [roomState, startGame])
 
-  const handleLeaveRoom = () => {
-    clearSession()
+  const handleLeaveRoom = useCallback(() => {
+    const keepResumeSession = roomState?.status === 'playing'
+    if (roomState) leaveRoom(roomState.id)
+    clearSession({ keepStorage: keepResumeSession })
+    setForceLobby(true)
     if (socket) {
       socket.disconnect()
       socket.connect()
     }
-    setGameState('lobby')
-  }
+  }, [clearSession, leaveRoom, roomState, socket])
 
-  const handleAddFakePlayers = () => {
+  const handleAddFakePlayers = useCallback(() => {
     if (!roomState) return
     addFakePlayers(roomState.id)
-  }
+  }, [roomState, addFakePlayers])
 
-  // Update game state based on room state
-  useEffect(() => {
+  const handleUpdateProfile = useCallback((name: string, avatarIndex: number, bgIndex: number) => {
     if (!roomState) return
+    updateProfile(roomState.id, name, avatarIndex, bgIndex)
+  }, [roomState, updateProfile])
 
-    if (roomState.status === 'waiting') {
-      setGameState('waiting')
-    } else if (roomState.status === 'playing') {
-      setGameState('playing')
-    }
-  }, [roomState])
+  // Derive game state directly from roomState to avoid race conditions
+  const gameState = !forcelobby && roomState
+    ? roomState.status === 'waiting' ? 'waiting'
+    : roomState.status === 'playing' ? 'playing'
+    : 'lobby'
+    : 'lobby'
+
+  useEffect(() => {
+    if (forcelobby && !roomState) setForceLobby(false)
+  }, [forcelobby, roomState])
 
   if (!isConnected) {
     return (
-      <div className="h-screen bg-[#FAFAF8] flex items-center justify-center overflow-hidden">
-        <div className="w-full max-w-sm h-full bg-white p-8 flex flex-col items-center justify-center text-center">
-          <div className="text-5xl mb-4 animate-bounce">🎴</div>
-          <h2 className="text-xl font-black text-gray-800 mb-2">Đang kết nối...</h2>
-          <p className="text-sm text-gray-600">Vui lòng đợi</p>
-        </div>
-      </div>
+      <>
+        {!splashGone && <AssetPreloaderScreen state={preloadState} onExited={handleSplashReady} onFullyGone={handleSplashFullyGone} />}
+        <CartoonScreen data-testid="connecting">
+          <div className="flex flex-col items-center justify-center flex-1 gap-6">
+            <img
+              src="/emcoin_logo.png"
+              alt="EmCoin"
+              className="w-44 object-contain"
+              style={{ animation: 'float-logo 2.4s ease-in-out infinite' }}
+              draggable={false}
+            />
+            <img
+              src="/cartoon/icons/Loading-Spinner.svg"
+              alt=""
+              className="w-10 h-10 spin-cartoon opacity-70"
+              draggable={false}
+            />
+            <div className="text-center">
+              <h2 className="font-display text-2xl">Đang kết nối...</h2>
+              <p className="font-body text-sm text-[var(--c-gray)] mt-1">Vui lòng đợi một chút</p>
+            </div>
+          </div>
+        </CartoonScreen>
+      </>
     )
   }
 
   if (error) {
     return (
-      <div className="h-screen bg-[#FAFAF8] flex items-center justify-center overflow-hidden">
-        <div className="w-full max-w-sm h-full bg-white p-8 flex flex-col items-center justify-center text-center">
-          <div className="text-5xl mb-4">⚠️</div>
-          <h2 className="text-xl font-black text-gray-800 mb-2">Lỗi</h2>
-          <p className="text-sm text-gray-600 mb-4">{error}</p>
-          <button
-            onClick={() => { window.location.reload() }}
-            className="px-6 py-3 rounded-2xl border-2 border-black bg-white
-                       text-sm font-bold hover:bg-gray-100 active:scale-95 transition-all"
-          >
-            Tải lại trang
-          </button>
+      <CartoonScreen purpleBg>
+        <div className="flex flex-col items-center justify-center flex-1 p-8 text-center gap-5">
+          <div className="relative">
+            <img
+              src="/cartoon/icons/Heart---Broken.svg"
+              alt=""
+              className="w-24 h-24 object-contain drop-shadow-lg"
+              draggable={false}
+            />
+            <img
+              src="/cartoon/icons/Alert.svg"
+              alt=""
+              className="absolute -bottom-2 -right-2 w-9 h-9 drop-shadow"
+              draggable={false}
+            />
+          </div>
+          <div>
+            <h2 className="font-display text-2xl text-white drop-shadow">Lỗi kết nối</h2>
+            <p className="font-body text-sm text-white/70 mt-1 max-w-[260px]">{error}</p>
+          </div>
+          <CartoonButton color="pink" onClick={() => window.location.reload()}>
+            <span className="flex items-center gap-2">
+              <img src="/cartoon/icons/Repeat.svg" alt="" className="w-5 h-5 shrink-0" draggable={false} />
+              Tải lại trang
+            </span>
+          </CartoonButton>
         </div>
-      </div>
+      </CartoonScreen>
     )
   }
 
-  if (gameState === 'lobby') {
+  if (gameState === 'waiting' && roomState && isConnected) {
     return (
-      <Lobby
-        availableRooms={availableRooms}
-        onJoinRoom={handleJoinRoom}
-        onCreateRoom={handleCreateRoom}
-        onRefreshRooms={listRooms}
-      />
+      <>
+        {!splashGone && <AssetPreloaderScreen state={preloadState} onExited={handleSplashReady} onFullyGone={handleSplashFullyGone} />}
+        <WaitingRoom
+          roomId={roomState.id}
+          players={roomState.players}
+          hostSocketId={roomState.host}
+          mySocketId={mySocketId}
+          myUserId={myUserId}
+          onStartGame={handleStartGame}
+          onLeave={handleLeaveRoom}
+          onAddFakePlayers={handleAddFakePlayers}
+          onUpdateProfile={handleUpdateProfile}
+          onSetDebugRolePreference={(targetUserId, role) => setDebugRolePreference(roomState.id, targetUserId, role)}
+          debugRolePickerEnabled={roomState.debugRolePickerEnabled}
+        />
+      </>
     )
   }
 
-  if (gameState === 'waiting' && roomState && socket) {
-    return (
-      <WaitingRoom
-        roomId={roomState.id}
-        players={roomState.players}
-        hostSocketId={roomState.host}
-        mySocketId={mySocketId}
-        myUserId={myUserId}
-        onStartGame={handleStartGame}
-        onLeave={handleLeaveRoom}
-        onAddFakePlayers={handleAddFakePlayers}
-      />
-    )
-  }
-
-  if (gameState === 'playing' && roomState && socket) {
-    console.log('[GameContainer] Rendering GameBoard with socket.id:', mySocketId, 'userId:', myUserId)
+  if (gameState === 'playing' && roomState && isConnected) {
     return (
       <GameBoard
         roomId={roomState.id}
@@ -120,9 +213,45 @@ export default function GameContainer() {
         mySocketId={mySocketId}
         myUserId={myUserId}
         onLeave={handleLeaveRoom}
+        onUpdateProfile={handleUpdateProfile}
+        nextTurn={nextTurn}
+        prevTurn={prevTurn}
+        nightAction={nightAction}
+        emitSelectCard={selectCard}
+        sendResponse={sendResponse}
+        ntgVote={ntgVote}
+        confirmRoleRewards={confirmRoleRewards}
+        shareReflection={shareReflection}
+        emitCardPreview={emitCardPreview}
+        emitSituationFanState={emitSituationFanState}
+        situationPreviewCard={situationPreviewCard}
+        situationFanState={situationFanState}
+        submitVote={submitVote}
+        giveCoin={giveCoin}
       />
     )
   }
 
-  return null
+  return (
+    <>
+      {preloaderMounted && <AssetPreloaderScreen state={preloadState} onExited={handleSplashReady} onFullyGone={handleSplashFullyGone} />}
+      <div style={splashGone ? undefined : { visibility: 'hidden', pointerEvents: 'none' }}>
+        <Lobby
+          key={lobbyKey}
+          ready={splashGone}
+          splashLogoRect={splashLogoRect}
+          bgDone={preloadState.bgDone}
+          bgLoaded={preloadState.bgLoaded}
+          bgTotal={preloadState.bgTotal}
+          availableRooms={availableRooms}
+          onJoinRoom={handleJoinRoom}
+          onCreateRoom={handleCreateRoom}
+          onRefreshRooms={listRooms}
+          resumeCandidates={resumeCandidates}
+          onResumeRoom={resumeRoom}
+          onDismissResume={dismissResumeCandidate}
+        />
+      </div>
+    </>
+  )
 }

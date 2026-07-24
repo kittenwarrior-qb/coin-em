@@ -18,10 +18,11 @@ export class SocketWaiter {
 
   /**
    * Wait until a player card with the given name appears in the grid.
+   * Works for both waiting room (waiting-player-) and game board (player-card-)
    */
   static async waitForPlayerVisible(page: Page, playerName: string, timeout = 10_000) {
     await page.waitForSelector(
-      `[data-testid="player-card-${playerName}"]`,
+      `[data-testid="waiting-player-${playerName}"], [data-testid="player-card-${playerName}"]`,
       { timeout }
     )
   }

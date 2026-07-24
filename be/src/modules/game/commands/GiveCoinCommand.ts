@@ -12,6 +12,10 @@ export class GiveCoinCommand implements ICommand {
     const { targetId, data } = action
     const { coinType, amount = 1 } = data || {}
 
+    if (!Number.isInteger(amount) || amount <= 0) {
+      return { success: false, error: 'Invalid coin amount' }
+    }
+
     if (coinType === 'green') {
       return { success: false, error: 'Cannot give green coins' }
     }

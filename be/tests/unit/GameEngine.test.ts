@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { GameEngine } from '../../src/modules/game/engine/GameEngine'
 import { createMockRoom, createPlayingRoom, setRoomPhase } from '../helpers/mockData'
 import { Room, Role } from '../../src/modules/game/types'
@@ -35,6 +35,20 @@ describe('GameEngine', () => {
 
       expect(result.success).toBe(true)
       expect(result.room?.status).toBe('playing')
+    })
+
+    it('should keep exactly one sender when host is forced to narrator', () => {
+      const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0)
+      const room = createMockRoom(7)
+
+      const result = engine.startGame(room)
+
+      randomSpy.mockRestore()
+      expect(result.success).toBe(true)
+      expect(result.room?.players.filter(p => p.isNarrator)).toHaveLength(1)
+      expect(result.room?.players.filter(p => p.isSender)).toHaveLength(1)
+      expect(result.room?.currentNarrator).toBe(room.host)
+      expect(result.room?.currentNTG).toBe(result.room?.players.find(p => p.isSender)?.userId)
     })
 
     it('should fail with less than 5 players', () => {
@@ -149,11 +163,158 @@ describe('GameEngine', () => {
     })
   })
 
+  describe('previousTurn - coin rollback', () => {
+    it('should undo NTG vote coins when rolling back to group-response', () => {
+      const room = setRoomPhase(createPlayingRoom(7), 'reflection-card')
+      const ntgId = room.currentNTG!
+      const target = room.players.find(p => p.userId !== ntgId && !p.isNarrator)!
+
+      room.players = room.players.map(p =>
+        p.userId === target.userId ? { ...p, coins: { ...p.coins, yellow: p.coins.yellow + 5 } } : p,
+      )
+      room.ntgVotes = { [ntgId]: [target.userId] }
+      room.gameLog = [
+        { type: 'ROUND_STARTED', actorId: 'system', timestamp: 1, data: { round: 1 } },
+        { type: 'NTG_VOTE', actorId: ntgId, targetId: target.userId, timestamp: 2, data: { bonus: 5 } },
+      ]
+
+      const result = engine.previousTurn(room, room.currentNarrator!)
+
+      expect(result.success).toBe(true)
+      expect(result.room?.phase).toBe('group-response')
+      expect(result.room?.players.find(p => p.userId === target.userId)?.coins.yellow).toBe(7)
+      expect(result.room?.ntgVotes).toEqual({})
+      expect(result.room?.gameLog.some(entry => entry.type === 'NTG_VOTE')).toBe(false)
+    })
+
+    it('should refund manual coin gifts when rolling back to give-coins', () => {
+      const room = setRoomPhase(createPlayingRoom(7), 'reward')
+      const giver = room.players.find(p => !p.isNarrator)!
+      const target = room.players.find(p => p.userId !== giver.userId)!
+
+      room.players = room.players.map(p => {
+        if (p.userId === giver.userId) return { ...p, coins: { ...p.coins, red: p.coins.red - 1 } }
+        if (p.userId === target.userId) return { ...p, coins: { ...p.coins, green: p.coins.green + 1 } }
+        return p
+      })
+      room.redCoinsGiven = { [giver.userId]: { [target.userId]: 1 } }
+      room.gameLog = [
+        { type: 'ROUND_STARTED', actorId: 'system', timestamp: 1, data: { round: 1 } },
+        {
+          type: 'GIVE_COIN',
+          actorId: giver.userId,
+          targetId: target.userId,
+          timestamp: 2,
+          data: { coinType: 'red', amount: 1, receiverGainsGreen: 1 },
+        },
+      ]
+
+      const result = engine.previousTurn(room, room.currentNarrator!)
+
+      expect(result.success).toBe(true)
+      expect(result.room?.phase).toBe('give-coins')
+      expect(result.room?.players.find(p => p.userId === giver.userId)?.coins.red).toBe(3)
+      expect(result.room?.players.find(p => p.userId === target.userId)?.coins.green).toBe(0)
+      expect(result.room?.redCoinsGiven).toEqual({})
+      expect(result.room?.gameLog.some(entry => entry.type === 'GIVE_COIN')).toBe(false)
+    })
+
+    it('should remove calculated reward coins when rolling back from reveal-silencer', () => {
+      const room = setRoomPhase(createPlayingRoom(7), 'reveal-silencer')
+      const silencer = room.players.find(p => p.originalRole === Role.SILENCER)!
+      const correctGuesser = room.players.find(p => p.userId !== silencer.userId && !p.isNarrator)!
+
+      room.players = room.players.map(p => {
+        if (p.userId === silencer.userId) return { ...p, coins: { ...p.coins, yellow: p.coins.yellow + 7 } }
+        if (p.userId === correctGuesser.userId) return { ...p, coins: { ...p.coins, green: p.coins.green + 4 } }
+        return p
+      })
+      room.votes = { [correctGuesser.userId]: silencer.userId }
+      room.gameLog = [
+        { type: 'ROUND_STARTED', actorId: 'system', timestamp: 1, data: { round: 1 } },
+        {
+          type: 'REWARDS_CALCULATED',
+          actorId: 'system',
+          timestamp: 2,
+          data: {
+            silencerFound: false,
+            silencerId: silencer.userId,
+            mutedPlayerId: null,
+            silencerYellowBonus: 7,
+            greenGuessBonus: 4,
+            correctGuesserIds: [correctGuesser.userId],
+          },
+        },
+      ]
+
+      const result = engine.previousTurn(room, room.currentNarrator!)
+
+      expect(result.success).toBe(true)
+      expect(result.room?.phase).toBe('guess-silencer')
+      expect(result.room?.players.find(p => p.userId === silencer.userId)?.coins.yellow).toBe(7)
+      expect(result.room?.players.find(p => p.userId === correctGuesser.userId)?.coins.green).toBe(0)
+      expect(result.room?.gameLog.some(entry => entry.type === 'REWARDS_CALCULATED')).toBe(false)
+    })
+  })
+
+  describe('previousTurn - selected card rollback', () => {
+    it('should remove situation and emotion card logs when rolling back to situation-card', () => {
+      const room = setRoomPhase(createPlayingRoom(7), 'emotion-card')
+      room.selectedCard = { id: 'emotion-vui', category: 'emotion', name: 'Vui' }
+      room.gameLog = [
+        { type: 'ROUND_STARTED', actorId: 'system', timestamp: 1, data: { round: 1 } },
+        {
+          type: 'SELECT_CARD',
+          actorId: room.currentNTG!,
+          timestamp: 2,
+          data: { card: { id: 'situation-1', category: 'situation', name: 'T\u00ecnh hu\u1ed1ng 1' } },
+        },
+        {
+          type: 'SELECT_CARD',
+          actorId: room.currentNTG!,
+          timestamp: 3,
+          data: { card: { id: 'emotion-vui', category: 'emotion', name: 'Vui' } },
+        },
+      ]
+
+      const result = engine.previousTurn(room, room.currentNarrator!)
+
+      expect(result.success).toBe(true)
+      expect(result.room?.phase).toBe('situation-card')
+      expect(result.room?.selectedCard).toBeNull()
+      expect(result.room?.gameLog.some(entry => entry.type === 'SELECT_CARD')).toBe(false)
+    })
+
+    it('should remove reflection card logs when rolling back to group-response', () => {
+      const room = setRoomPhase(createPlayingRoom(7), 'reflection-card')
+      room.selectedCard = { id: 'reflection-1', category: 'reflection', name: 'Ph\u1ea3n t\u01b0 1' }
+      room.gameLog = [
+        { type: 'ROUND_STARTED', actorId: 'system', timestamp: 1, data: { round: 1 } },
+        {
+          type: 'SELECT_CARD',
+          actorId: room.currentNTG!,
+          timestamp: 2,
+          data: { card: { id: 'reflection-1', category: 'reflection', name: 'Ph\u1ea3n t\u01b0 1' } },
+        },
+      ]
+
+      const result = engine.previousTurn(room, room.currentNarrator!)
+
+      expect(result.success).toBe(true)
+      expect(result.room?.phase).toBe('group-response')
+      expect(result.room?.selectedCard).toBeNull()
+      expect(result.room?.gameLog.some(entry => entry.type === 'SELECT_CARD')).toBe(false)
+    })
+  })
+
   describe('executeAction - SILENCE', () => {
+    const canReceiveNightAction = (player: any, actorId: string) =>
+      player.userId !== actorId && !player.isNarrator && !player.isSender
+
     it('should silence a player during silencer-turn phase', () => {
       const room = setRoomPhase(createPlayingRoom(7), 'silencer-turn')
       const silencer = room.players.find(p => p.role === Role.SILENCER)!
-      const target = room.players.find(p => p.userId !== silencer.userId)!
+      const target = room.players.find(p => canReceiveNightAction(p, silencer.userId))!
 
       const result = engine.executeAction(room, {
         type: 'SILENCE',
@@ -228,10 +389,13 @@ describe('GameEngine', () => {
   })
 
   describe('executeAction - HEAL', () => {
+    const canReceiveNightAction = (player: any, actorId: string) =>
+      player.userId !== actorId && !player.isNarrator && !player.isSender
+
     it('should heal a player during healer-turn phase', () => {
       const room = setRoomPhase(createPlayingRoom(7), 'healer-turn')
       const healer = room.players.find(p => p.role === Role.HEALER)!
-      const target = room.players.find(p => p.userId !== healer.userId)!
+      const target = room.players.find(p => canReceiveNightAction(p, healer.userId))!
 
       const result = engine.executeAction(room, {
         type: 'HEAL',
@@ -247,7 +411,7 @@ describe('GameEngine', () => {
     it('should remove mute if healing muted player', () => {
       const room = setRoomPhase(createPlayingRoom(7), 'healer-turn')
       const healer = room.players.find(p => p.role === Role.HEALER)!
-      const target = room.players.find(p => p.userId !== healer.userId)!
+      const target = room.players.find(p => canReceiveNightAction(p, healer.userId))!
       room.mutedPlayer = target.userId
 
       const result = engine.executeAction(room, {
@@ -339,6 +503,31 @@ describe('GameEngine', () => {
 
       expect(result.success).toBe(false)
       expect(result.error).toBe('Cannot give green coins')
+    })
+
+    it('should fail if coin amount is not a positive integer', () => {
+      const room = setRoomPhase(createPlayingRoom(7), 'give-coins')
+      const giver = room.players[0]
+      const receiver = room.players[1]
+
+      const negative = engine.executeAction(room, {
+        type: 'GIVE_COIN',
+        actorId: giver.userId,
+        targetId: receiver.userId,
+        data: { coinType: 'yellow', amount: -2 },
+      })
+
+      const decimal = engine.executeAction(room, {
+        type: 'GIVE_COIN',
+        actorId: giver.userId,
+        targetId: receiver.userId,
+        data: { coinType: 'yellow', amount: 1.5 },
+      })
+
+      expect(negative.success).toBe(false)
+      expect(negative.error).toBe('Invalid coin amount')
+      expect(decimal.success).toBe(false)
+      expect(decimal.error).toBe('Invalid coin amount')
     })
 
     it('should fail if giver has no yellow coins left', () => {
@@ -438,9 +627,12 @@ describe('GameEngine', () => {
   })
 
   describe('executeAction - VOTE', () => {
+    const canVoteForSilencer = (player: any) =>
+      !player.isNarrator && player.originalRole !== Role.SILENCER && player.role !== Role.SILENCER
+
     it('should record vote', () => {
       const room = setRoomPhase(createPlayingRoom(7), 'guess-silencer')
-      const voter = room.players[0]
+      const voter = room.players.find(canVoteForSilencer)!
       const suspect = room.players[1]
 
       const result = engine.executeAction(room, {
@@ -455,13 +647,14 @@ describe('GameEngine', () => {
 
     it('should auto-advance when all players voted', () => {
       const room = setRoomPhase(createPlayingRoom(7), 'guess-silencer')
+      const eligibleVoters = room.players.filter(canVoteForSilencer)
       // Pre-fill votes for all but one
       room.votes = {}
-      room.players.slice(0, -1).forEach((p, i) => {
+      eligibleVoters.slice(0, -1).forEach((p, i) => {
         room.votes[p.userId] = room.players[(i + 1) % room.players.length].userId
       })
 
-      const lastVoter = room.players[room.players.length - 1]
+      const lastVoter = eligibleVoters[eligibleVoters.length - 1]
       const suspect = room.players[0]
 
       const result = engine.executeAction(room, {
@@ -476,7 +669,7 @@ describe('GameEngine', () => {
 
     it('should fail if already voted', () => {
       const room = setRoomPhase(createPlayingRoom(7), 'guess-silencer')
-      const voter = room.players[0]
+      const voter = room.players.find(canVoteForSilencer)!
       const suspect = room.players[1]
       room.votes = { [voter.userId]: suspect.userId }
 
@@ -492,7 +685,7 @@ describe('GameEngine', () => {
 
     it('should fail if not vote phase', () => {
       const room = setRoomPhase(createPlayingRoom(7), 'night')
-      const voter = room.players[0]
+      const voter = room.players.find(canVoteForSilencer)!
       const suspect = room.players[1]
 
       const result = engine.executeAction(room, {

@@ -1,4 +1,4 @@
-.PHONY: help dev-up dev-down dev-logs dev-rebuild prod-up prod-down prod-logs prod-rebuild clean
+.PHONY: help dev-up dev-down dev-logs dev-rebuild prod-up prod-down prod-logs prod-rebuild clean check-redis redis-cli
 
 help:
 	@echo "EMCOIN Game - Docker Commands"
@@ -14,6 +14,11 @@ help:
 	@echo "  make prod-down    - Stop production"
 	@echo "  make prod-logs    - View production logs"
 	@echo "  make prod-rebuild - Rebuild production"
+	@echo ""
+	@echo "Debug:"
+	@echo "  make check-redis  - Check Redis connection and data"
+	@echo "  make redis-cli    - Open Redis CLI"
+	@echo "  make metrics      - Show backend metrics"
 	@echo ""
 	@echo "Maintenance:"
 	@echo "  make clean        - Remove all containers and volumes"
@@ -55,3 +60,13 @@ backup:
 	@mkdir -p ./backup
 	docker cp emcoin-backend-prod:/app/data ./backup/data-$$(date +%Y%m%d-%H%M%S)
 	@echo "Backup completed: ./backup/data-$$(date +%Y%m%d-%H%M%S)"
+
+# Debug
+check-redis:
+	docker exec -it emcoin-backend-prod npm run check-redis
+
+redis-cli:
+	docker exec -it emcoin-redis redis-cli
+
+metrics:
+	@curl -s http://localhost/metrics | python -m json.tool || curl -s http://localhost/metrics

@@ -38,7 +38,7 @@ export class GameEngine {
     }
 
     // Get next phase
-    const nextPhase = this.turnManager.getNextPhase(room.phase)
+    const nextPhase = this.turnManager.getNextPhase(room.phase, room)
 
     let updatedRoom: Room = {
       ...room,
@@ -87,8 +87,9 @@ export class GameEngine {
       ]
     }
 
-    // Calculate rewards when entering reward phase
-    if (nextPhase === 'reward') {
+    // Calculate end-of-round rewards as soon as roles are revealed so coin popups
+    // can appear right after the reveal overlay is dismissed.
+    if (nextPhase === 'reveal-silencer' && !this.hasCalculatedRewardsForRound(updatedRoom)) {
       updatedRoom = this.calculateRewards(updatedRoom)
     }
 
@@ -133,6 +134,218 @@ export class GameEngine {
   }
 
   /**
+   * Move back to the previous phase in the same round so the narrator can let players choose again.
+   */
+  previousTurn(room: Room, narratorId: string): GameResult {
+    if (!this.actionValidator.canAdvanceTurn(room, narratorId)) {
+      return { success: false, error: 'NOT_NARRATOR' }
+    }
+
+    const previousPhase = this.turnManager.getPreviousPhase(room.phase, room)
+    if (previousPhase === room.phase) {
+      return { success: false, error: 'NO_PREVIOUS_PHASE' }
+    }
+
+    let updatedRoom: Room = {
+      ...room,
+      phase: previousPhase,
+      lastActivity: Date.now(),
+    }
+
+    updatedRoom = this.undoRollbackCoinEffects(updatedRoom, room.phase, previousPhase)
+
+    switch (previousPhase) {
+      case 'night':
+        updatedRoom.nightActions = { silenced: false, healed: false, cardSelected: false }
+        updatedRoom.mutedPlayer = null
+        updatedRoom.healedPlayer = null
+        updatedRoom.selectedCard = null
+        break
+      case 'healer-turn':
+        updatedRoom.nightActions = { ...updatedRoom.nightActions, healed: false }
+        updatedRoom.healedPlayer = null
+        break
+      case 'silencer-turn':
+        updatedRoom.nightActions = { ...updatedRoom.nightActions, silenced: false }
+        updatedRoom.mutedPlayer = null
+        break
+      case 'situation-card':
+      case 'emotion-card':
+      case 'reflection-card':
+      case 'selfcare-card':
+        updatedRoom.selectedCard = null
+        updatedRoom.nightActions = { ...updatedRoom.nightActions, cardSelected: false }
+        break
+      case 'group-response':
+        updatedRoom.responses = {}
+        updatedRoom.ntgVotes = {}
+        updatedRoom.selectedCard = null
+        break
+      case 'guess-silencer':
+        updatedRoom.votes = {}
+        break
+      case 'give-coins':
+        updatedRoom.redCoinsGiven = {}
+        updatedRoom.yellowCoinsGiven = {}
+        break
+    }
+
+    updatedRoom.gameLog = [
+      ...updatedRoom.gameLog,
+      {
+        type: 'PHASE_CHANGED',
+        actorId: narratorId,
+        timestamp: Date.now(),
+        data: {
+          phase: previousPhase,
+          direction: 'previous',
+        },
+      },
+    ]
+
+    return { success: true, room: updatedRoom }
+  }
+
+  private undoRollbackCoinEffects(room: Room, currentPhase: string, previousPhase: string): Room {
+    const actionTypes = new Set<string>()
+    const addPhaseTypes = (phase: string) => {
+      if (phase === 'group-response') actionTypes.add('NTG_VOTE')
+      if (phase === 'reflection-sharing') {
+        actionTypes.add('SHARE_REFLECTION')
+        actionTypes.add('ROLE_REWARD')
+      }
+      if (phase === 'give-coins') actionTypes.add('GIVE_COIN')
+      if (phase === 'reveal-silencer') actionTypes.add('REWARDS_CALCULATED')
+      if (phase === 'situation-card' || phase === 'emotion-card' || phase === 'reflection-card') actionTypes.add('SELECT_CARD')
+      if (phase === 'selfcare-card') actionTypes.add('SELECT_SELFCARE_CARD')
+    }
+
+    addPhaseTypes(currentPhase)
+    addPhaseTypes(previousPhase)
+    if (actionTypes.size === 0) return room
+
+    const roundStartIndex = room.gameLog.reduce(
+      (latest, entry, index) => entry.type === 'ROUND_STARTED' && entry.data?.round === room.currentRound ? index : latest,
+      -1,
+    )
+    const firstRoundLog = roundStartIndex >= 0 ? roundStartIndex : 0
+    const logsToUndo = room.gameLog
+      .slice(firstRoundLog)
+      .filter((entry) => actionTypes.has(entry.type))
+
+    if (logsToUndo.length === 0) return room
+
+    let players = room.players
+    let redCoinsGiven = { ...room.redCoinsGiven }
+    let yellowCoinsGiven = { ...room.yellowCoinsGiven }
+    let ntgVotes: Record<string, string[]> = { ...room.ntgVotes }
+
+    const adjustCoins = (userId: string | undefined, delta: Partial<Record<'red' | 'yellow' | 'green', number>>) => {
+      if (!userId) return
+      players = players.map((player) => {
+        if (player.userId !== userId) return player
+        return {
+          ...player,
+          coins: {
+            red: Math.max(0, player.coins.red + (delta.red ?? 0)),
+            yellow: Math.max(0, player.coins.yellow + (delta.yellow ?? 0)),
+            green: Math.max(0, player.coins.green + (delta.green ?? 0)),
+          },
+        }
+      })
+    }
+
+    const subtractTrackedCoin = (
+      tracker: Record<string, Record<string, number>>,
+      actorId: string,
+      targetId: string | undefined,
+      amount: number,
+    ) => {
+      if (!targetId || !tracker[actorId]?.[targetId]) return tracker
+      const next = { ...tracker, [actorId]: { ...tracker[actorId] } }
+      next[actorId][targetId] = Math.max(0, next[actorId][targetId] - amount)
+      if (next[actorId][targetId] === 0) delete next[actorId][targetId]
+      if (Object.keys(next[actorId]).length === 0) delete next[actorId]
+      return next
+    }
+
+    for (const entry of [...logsToUndo].reverse()) {
+      if (entry.type === 'NTG_VOTE') {
+        const bonus = entry.data?.bonus ?? 5
+        adjustCoins(entry.targetId, { yellow: -bonus })
+        const existing = ntgVotes[entry.actorId] ?? []
+        ntgVotes = {
+          ...ntgVotes,
+          [entry.actorId]: existing.filter((id) => id !== entry.targetId),
+        }
+        if (ntgVotes[entry.actorId].length === 0) delete ntgVotes[entry.actorId]
+      }
+
+      if (entry.type === 'SHARE_REFLECTION') {
+        adjustCoins(entry.actorId, { yellow: -(entry.data?.bonus ?? 5) })
+      }
+
+      if (entry.type === 'ROLE_REWARD') {
+        adjustCoins(entry.targetId, { yellow: -(entry.data?.bonus ?? 2) })
+      }
+
+      if (entry.type === 'GIVE_COIN') {
+        const coinType = entry.data?.coinType as 'red' | 'yellow' | undefined
+        const amount = entry.data?.amount ?? 1
+        const greenAmount = entry.data?.receiverGainsGreen ?? amount
+        if (coinType === 'red' || coinType === 'yellow') {
+          adjustCoins(entry.actorId, { [coinType]: amount })
+          adjustCoins(entry.targetId, { green: -greenAmount })
+          if (coinType === 'red') redCoinsGiven = subtractTrackedCoin(redCoinsGiven, entry.actorId, entry.targetId, amount)
+          if (coinType === 'yellow') yellowCoinsGiven = subtractTrackedCoin(yellowCoinsGiven, entry.actorId, entry.targetId, amount)
+        }
+      }
+
+      if (entry.type === 'REWARDS_CALCULATED') {
+        const silencer = players.find((player) => player.originalRole === Role.SILENCER)
+        const mutedUserId = entry.data?.mutedPlayerId ?? room.mutedPlayer
+        const silencerFound = Boolean(entry.data?.silencerFound)
+        const greenGuessBonus = entry.data?.greenGuessBonus ?? entry.data?.ntgGreenBonus ?? (silencerFound ? room.players.length : Math.max(0, room.players.length - 3))
+        const correctGuesserIds = entry.data?.correctGuesserIds ?? Object.entries(room.votes ?? {})
+          .filter(([, targetId]) => targetId === silencer?.userId)
+          .map(([voterId]) => voterId)
+        const ntgVotedIds = new Set<string>(Object.values(ntgVotes ?? {}).flat())
+
+        for (const player of players) {
+          const isMuted = player.userId === mutedUserId
+          const wasNtgVoted = ntgVotedIds.has(player.userId)
+          let yellowBonus = 0
+
+          if ((player.originalRole === Role.CONNECTOR || player.originalRole === Role.OPENER) && !isMuted && room.responses?.[player.userId] && !wasNtgVoted) {
+            yellowBonus += 2
+          }
+          if (player.originalRole === Role.GUIDE && !isMuted && room.nightActions?.cardSelected && room.responses?.[player.userId] && !wasNtgVoted) {
+            yellowBonus += 2
+          }
+          if (player.userId === silencer?.userId) {
+            yellowBonus += silencerFound ? 2 : 7
+          }
+
+          if (yellowBonus > 0) adjustCoins(player.userId, { yellow: -yellowBonus })
+        }
+
+        for (const guesserId of correctGuesserIds) {
+          adjustCoins(guesserId, { green: -greenGuessBonus })
+        }
+      }
+    }
+
+    return {
+      ...room,
+      players,
+      ntgVotes,
+      redCoinsGiven,
+      yellowCoinsGiven,
+      gameLog: room.gameLog.filter((entry, index) => index < firstRoundLog || !actionTypes.has(entry.type)),
+    }
+  }
+
+  /**
    * Execute game action using Command Pattern
    */
   executeAction(room: Room, action: GameAction): GameResult {
@@ -159,6 +372,15 @@ export class GameEngine {
    */
   private calculateRewards(room: Room): Room {
     return this.rewardCalculator.calculateRewards(room)
+  }
+
+  private hasCalculatedRewardsForRound(room: Room): boolean {
+    const roundStartIndex = room.gameLog.reduce(
+      (latest, entry, index) => entry.type === 'ROUND_STARTED' && entry.data?.round === room.currentRound ? index : latest,
+      -1,
+    )
+    const firstRoundLog = roundStartIndex >= 0 ? roundStartIndex : 0
+    return room.gameLog.slice(firstRoundLog).some((entry) => entry.type === 'REWARDS_CALCULATED')
   }
 
   /**
@@ -202,7 +424,18 @@ export class GameEngine {
     // Assign roles
     let playersWithRoles
     try {
-      playersWithRoles = this.roleManager.assignRoles(room.players)
+      const preferredRoles = room.debugRolePickerEnabled
+        ? room.players.reduce<Record<string, Role>>((acc, player) => {
+            if (player.userId === room.host) {
+              acc[player.userId] = Role.NARRATOR
+              return acc
+            }
+            if (player.debugPreferredRole) acc[player.userId] = player.debugPreferredRole
+            return acc
+          }, {})
+        : {}
+
+      playersWithRoles = this.roleManager.assignRoles(room.players, preferredRoles)
     } catch (error: any) {
       return { success: false, error: 'ROLE_ASSIGNMENT_FAILED', message: error.message }
     }
@@ -236,7 +469,7 @@ export class GameEngine {
         playersWithRoles[narratorIndex].role = hostRole
         playersWithRoles[narratorIndex].originalRole = hostRole  // update originalRole too
         playersWithRoles[narratorIndex].isNarrator = false
-        playersWithRoles[narratorIndex].isSender = hostRole === 'Người Trao Gửi'
+        playersWithRoles[narratorIndex].isSender = hostRole === Role.SENDER
       }
     }
 
@@ -284,20 +517,16 @@ export class GameEngine {
     const player = room.players.find((p) => p.userId === playerId)
     const isNarrator = player?.isNarrator
     
-    // Night phases where narrator can see all roles
-    const nightPhases = ['night', 'healer-turn', 'silencer-turn']
-    const isNightPhase = nightPhases.includes(room.phase)
-
     return {
       ...room,
       players: room.players.map((p) => ({
         ...p,
-        // Hide role unless it's the player themselves, public role, or narrator viewing during night
+        // Hide role unless it's the player themselves, public role, or narrator viewing the round
         role:
           p.userId === playerId ||
           p.isNarrator ||
           p.isSender ||
-          (isNarrator && isNightPhase)
+          isNarrator
             ? p.role
             : undefined,
       })),

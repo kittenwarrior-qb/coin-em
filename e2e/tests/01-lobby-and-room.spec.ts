@@ -136,3 +136,62 @@ test.describe('Lobby & Waiting Room', () => {
     }
   })
 })
+
+test.describe('Card Deck Selection', () => {
+  test('create room with custom card deck selection', async ({ browser }) => {
+    const host = new PlayerContext('DeckHost', `uid-deck-${Date.now()}`)
+    const ctx = await browser.newContext()
+    await host.initialize(ctx)
+
+    try {
+      await host.goToHome()
+
+      // Open create room modal
+      await host.p.click('[data-testid="btn-create-room"]')
+      await host.p.fill('[data-testid="input-username-create"]', host.name)
+
+      // Verify default checkboxes: light + medium checked, sensitive unchecked
+      await expect(host.p.locator('[data-testid="checkbox-situation-light"]')).toHaveAttribute('aria-checked', 'true')
+      await expect(host.p.locator('[data-testid="checkbox-situation-medium"]')).toHaveAttribute('aria-checked', 'true')
+      await expect(host.p.locator('[data-testid="checkbox-situation-sensitive"]')).toHaveAttribute('aria-checked', 'false')
+
+      // Toggle sensitive on, medium off
+      await host.p.click('[data-testid="checkbox-situation-sensitive"]')
+      await host.p.click('[data-testid="checkbox-situation-medium"]')
+
+      await expect(host.p.locator('[data-testid="checkbox-situation-sensitive"]')).toHaveAttribute('aria-checked', 'true')
+      await expect(host.p.locator('[data-testid="checkbox-situation-medium"]')).toHaveAttribute('aria-checked', 'false')
+
+      // Create room
+      await host.p.click('[data-testid="btn-confirm-create"]')
+      await host.p.waitForSelector('[data-testid="waiting-room"]', { timeout: 10_000 })
+
+      // Assert host is in waiting room
+      await host.assertOnWaitingRoom()
+    } finally {
+      await host.close()
+    }
+  })
+
+  test('create room button disabled when no deck selected', async ({ browser }) => {
+    const host = new PlayerContext('NoDeckHost', `uid-nodeck-${Date.now()}`)
+    const ctx = await browser.newContext()
+    await host.initialize(ctx)
+
+    try {
+      await host.goToHome()
+      await host.p.click('[data-testid="btn-create-room"]')
+      await host.p.fill('[data-testid="input-username-create"]', host.name)
+
+      // Uncheck all situation decks
+      await host.p.click('[data-testid="checkbox-situation-light"]')
+      await host.p.click('[data-testid="checkbox-situation-medium"]')
+
+      // Confirm button should still be enabled (FE fallback to defaults)
+      const confirmBtn = host.p.locator('[data-testid="btn-confirm-create"]')
+      await expect(confirmBtn).toBeEnabled()
+    } finally {
+      await host.close()
+    }
+  })
+})

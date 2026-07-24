@@ -41,10 +41,31 @@ export class PlayerContext {
 
   // ── Lobby ───────────────────────────────────────────────────────────────────
 
-  /** Create a new room and return the generated roomId */
-  async createRoom(): Promise<string> {
+  /** Create a new room with optional card deck selection, return the generated roomId */
+  async createRoom(options?: { situationDecks?: string[]; emotionDecks?: string[] }): Promise<string> {
     await this.p.click('[data-testid="btn-create-room"]')
     await this.p.fill('[data-testid="input-username-create"]', this.name)
+
+    // Toggle card deck checkboxes if specified
+    if (options?.situationDecks) {
+      const allSituation = ['light', 'medium', 'sensitive']
+      for (const key of allSituation) {
+        const checkbox = this.p.locator(`[data-testid="checkbox-situation-${key}"]`)
+        const isChecked = await checkbox.getAttribute('aria-checked')
+        const shouldBeChecked = options.situationDecks.includes(key)
+        if ((isChecked === 'true') !== shouldBeChecked) await checkbox.click()
+      }
+    }
+    if (options?.emotionDecks) {
+      const allEmotion = ['basic', 'light', 'strong', 'advanced']
+      for (const key of allEmotion) {
+        const checkbox = this.p.locator(`[data-testid="checkbox-emotion-${key}"]`)
+        const isChecked = await checkbox.getAttribute('aria-checked')
+        const shouldBeChecked = options.emotionDecks.includes(key)
+        if ((isChecked === 'true') !== shouldBeChecked) await checkbox.click()
+      }
+    }
+
     await this.p.click('[data-testid="btn-confirm-create"]')
     await this.p.waitForSelector('[data-testid="waiting-room"]', { timeout: 10_000 })
 
@@ -83,6 +104,22 @@ export class PlayerContext {
 
   async waitForGameBoard() {
     await this.p.waitForSelector('[data-testid="game-phase"]', { timeout: 15_000 })
+    // Dismiss role card overlay if present
+    await this.dismissOverlay()
+  }
+
+  /** Dismiss any full-screen overlay (role card, etc) by clicking backdrop */
+  async dismissOverlay() {
+    try {
+      const overlay = this.p.locator('[data-testid="role-card-overlay"]')
+      if (await overlay.isVisible({ timeout: 2_000 })) {
+        await overlay.click({ position: { x: 10, y: 10 } })
+        // Wait for overlay to fully disappear (Framer Motion exit animation)
+        await overlay.waitFor({ state: 'hidden', timeout: 3_000 })
+      }
+    } catch {
+      // No overlay, continue
+    }
   }
 
   async getCurrentPhase(): Promise<string> {
@@ -115,6 +152,9 @@ export class PlayerContext {
 
   /** Narrator: advance to next phase */
   async clickNextTurn() {
+    // Wait > 800ms debounce on server/client side
+    await this.p.waitForTimeout(900)
+    await this.p.waitForSelector('[data-testid="btn-next-turn"]', { timeout: 10_000 })
     await this.p.click('[data-testid="btn-next-turn"]')
   }
 
@@ -193,8 +233,11 @@ export class PlayerContext {
 
   async reload() {
     await this.p.reload()
-    // Wait for reconnect
-    await this.p.waitForTimeout(2_000)
+    // Wait for reconnect — either waiting room or game board
+    await this.p.waitForSelector(
+      '[data-testid="waiting-room"], [data-testid="game-phase"]',
+      { timeout: 10_000 }
+    )
   }
 
   async close() {

@@ -3,11 +3,10 @@ import { GamePhase } from './types'
 /**
  * Phase timeout configuration (in milliseconds)
  * Phases not listed here have no timeout (manual advance only)
+ * All auto-advance disabled — narrator controls all phase transitions.
  */
 const PHASE_TIMEOUTS: Partial<Record<GamePhase, number>> = {
-  'guess-silencer': 120_000, // 2 minutes for voting
-  'give-coins': 90_000,      // 90 seconds to give coins
-  'group-response': 120_000, // 2 minutes for responses
+  // All timeouts removed — game is fully manual
 }
 
 export class PhaseTimer {

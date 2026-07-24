@@ -1,6 +1,6 @@
 import { Server, Socket } from 'socket.io'
 import { roomRepository, roomService } from '../../modules/room'
-import { gameService } from '../../modules/game'
+import { gameService, Role } from '../../modules/game'
 import { rateLimitAction } from '../middleware/rateLimiter'
 import { phaseTimer } from '../../modules/game/PhaseTimer'
 
@@ -10,7 +10,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
    */
   socket.on('start_game', async ({ roomId }, callback) => {
     try {
-      const room = roomRepository.findById(roomId)
+      const room = await roomRepository.findByIdFresh(roomId)
       if (!room) {
         const error = { success: false, error: 'ROOM_NOT_FOUND', message: 'Phòng không tồn tại.' }
         if (callback) callback(error)
@@ -47,8 +47,8 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         return
       }
 
-      // Save room
-      roomRepository.save(result.room!)
+      // Save room and wait for Redis to complete
+      await roomRepository.saveAndWait(result.room!)
 
       // Broadcast
       console.log(`[start_game] Phòng ${roomId} bắt đầu - Roles assigned`)
@@ -61,7 +61,9 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         if (room && room.currentNarrator) {
           gameService.advanceTurn(room, room.currentNarrator).then((advanceResult) => {
             if (advanceResult.success && advanceResult.room) {
-              roomRepository.save(advanceResult.room)
+              roomRepository.saveAndWait(advanceResult.room).catch(err =>
+                console.error(`[phase_timer] Failed to save room ${roomId}:`, err)
+              )
               io.to(roomId).emit('turn_changed', gameService.getPublicState(advanceResult.room))
               // Start timer for next phase
               phaseTimer.startTimer(roomId, advanceResult.room.phase, () => {
@@ -84,9 +86,9 @@ export function registerGameHandlers(io: Server, socket: Socket) {
   /**
    * Advance turn
    */
-  socket.on('next_turn', async ({ roomId }, callback) => {
+  socket.on('next_turn', async ({ roomId, userId, deviceId }, callback) => {
     try {
-      const room = roomRepository.findById(roomId)
+      const room = await roomRepository.findByIdFresh(roomId)
       if (!room) {
         const error = { success: false, error: 'ROOM_NOT_FOUND', message: 'Phòng không tồn tại.' }
         if (callback) callback(error)
@@ -94,13 +96,40 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         return
       }
 
-      // Find narrator by socket ID
-      const narratorPlayer = room.players.find((p) => p.socketId === socket.id)
+      // Find narrator by current socket first, then stable browser identity after reload/reconnect.
+      let narratorPlayer = room.players.find((p) => p.socketId === socket.id)
+      if (!narratorPlayer) {
+        narratorPlayer = room.players.find((p) =>
+          (!!userId && p.userId === userId) || (!!deviceId && p.deviceId === deviceId)
+        )
+      }
       if (!narratorPlayer) {
         const error = { success: false, error: 'PLAYER_NOT_FOUND', message: 'Người chơi không tồn tại.' }
         if (callback) callback(error)
         else socket.emit('error', error)
         return
+      }
+
+      if (narratorPlayer.socketId !== socket.id || narratorPlayer.isDisconnected) {
+        const updatedRoom = roomRepository.update(roomId, {
+          players: room.players.map((p) =>
+            p.userId === narratorPlayer!.userId
+              ? {
+                  ...p,
+                  socketId: socket.id,
+                  deviceId: deviceId ?? p.deviceId,
+                  isDisconnected: false,
+                  disconnectedAt: null,
+                  lastSeenAt: Date.now(),
+                }
+              : p
+          ),
+        })
+        if (updatedRoom) {
+          socket.join(roomId)
+          Object.assign(room, updatedRoom)
+          narratorPlayer = updatedRoom.players.find((p) => p.userId === narratorPlayer!.userId) ?? narratorPlayer
+        }
       }
 
       // Advance turn via engine
@@ -120,8 +149,8 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         return
       }
 
-      // Save room
-      roomRepository.save(result.room!)
+      // Save room and wait for Redis
+      await roomRepository.saveAndWait(result.room!)
 
       // Broadcast
       if (result.message === 'GAME_ENDED') {
@@ -139,7 +168,9 @@ export function registerGameHandlers(io: Server, socket: Socket) {
           if (room && room.currentNarrator) {
             gameService.advanceTurn(room, room.currentNarrator).then((advanceResult) => {
               if (advanceResult.success && advanceResult.room) {
-                roomRepository.save(advanceResult.room)
+                roomRepository.saveAndWait(advanceResult.room).catch(err =>
+                  console.error(`[phase_timer] Failed to save room ${roomId}:`, err)
+                )
                 if (advanceResult.message === 'GAME_ENDED') {
                   phaseTimer.clearTimer(roomId)
                   io.to(roomId).emit('game_ended', gameService.getPublicState(advanceResult.room))
@@ -159,6 +190,110 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       if (callback) callback({ success: true, data: gameService.getPublicState(result.room!) })
     } catch (error: any) {
       console.error('[next_turn] Error:', error)
+      const err = { success: false, error: 'INTERNAL_ERROR', message: error.message }
+      if (callback) callback(err)
+      else socket.emit('error', err)
+    }
+  })
+
+  /**
+   * Move back one phase
+   */
+  socket.on('prev_turn', async ({ roomId, userId, deviceId }, callback) => {
+    try {
+      console.log('[prev_turn] Received:', {
+        roomId,
+        socketId: socket.id,
+        userId,
+        deviceId,
+      })
+      const room = await roomRepository.findByIdFresh(roomId)
+      if (!room) {
+        const error = { success: false, error: 'ROOM_NOT_FOUND', message: 'PhÃ²ng khÃ´ng tá»“n táº¡i.' }
+        if (callback) callback(error)
+        else socket.emit('error', error)
+        return
+      }
+
+      let narratorPlayer = room.players.find((p) => p.socketId === socket.id)
+      if (!narratorPlayer) {
+        narratorPlayer = room.players.find((p) =>
+          (!!userId && p.userId === userId) || (!!deviceId && p.deviceId === deviceId)
+        )
+      }
+      if (!narratorPlayer) {
+        const error = { success: false, error: 'PLAYER_NOT_FOUND', message: 'NgÆ°á»i chÆ¡i khÃ´ng tá»“n táº¡i.' }
+        if (callback) callback(error)
+        else socket.emit('error', error)
+        return
+      }
+
+      if (narratorPlayer.socketId !== socket.id || narratorPlayer.isDisconnected) {
+        const updatedRoom = roomRepository.update(roomId, {
+          players: room.players.map((p) =>
+            p.userId === narratorPlayer!.userId
+              ? {
+                  ...p,
+                  socketId: socket.id,
+                  deviceId: deviceId ?? p.deviceId,
+                  isDisconnected: false,
+                  disconnectedAt: null,
+                  lastSeenAt: Date.now(),
+                }
+              : p
+          ),
+        })
+        if (updatedRoom) {
+          socket.join(roomId)
+          Object.assign(room, updatedRoom)
+          narratorPlayer = updatedRoom.players.find((p) => p.userId === narratorPlayer!.userId) ?? narratorPlayer
+        }
+      }
+
+      const phaseBefore = room.phase
+      console.log('[prev_turn] Before:', {
+        roomId,
+        turn: room.turn,
+        phase: phaseBefore,
+        currentNarrator: room.currentNarrator,
+        actorUserId: narratorPlayer.userId,
+        actorSocketId: narratorPlayer.socketId,
+      })
+
+      const result = await gameService.previousTurn(room, narratorPlayer.userId)
+
+      if (!result.success) {
+        console.warn('[prev_turn] Failed:', {
+          roomId,
+          reason: result.error,
+          phase: room.phase,
+          currentNarrator: room.currentNarrator,
+          actorUserId: narratorPlayer.userId,
+        })
+        const messages = {
+          NOT_NARRATOR: 'Chỉ Quản trò mới có thể chuyển lượt.',
+          NO_PREVIOUS_PHASE: 'Không thể quay lại phase trước.',
+        }
+        const error = {
+          success: false,
+          error: result.error,
+          message: messages[result.error as keyof typeof messages] || 'Không thể quay lại phase trước',
+        }
+        if (callback) callback(error)
+        else socket.emit('error', error)
+        return
+      }
+
+      await roomRepository.saveAndWait(result.room!)
+      phaseTimer.clearTimer(roomId)
+      socket.join(roomId)
+      const publicState = gameService.getPublicState(result.room!)
+      console.log(`[prev_turn] Room ${roomId}: ${phaseBefore} -> ${result.room!.phase} (turn ${result.room!.turn})`)
+      io.to(roomId).emit('turn_changed', publicState)
+
+      if (callback) callback({ success: true, data: publicState, previousPhase: phaseBefore, phase: result.room!.phase })
+    } catch (error: any) {
+      console.error('[prev_turn] Error:', error)
       const err = { success: false, error: 'INTERNAL_ERROR', message: error.message }
       if (callback) callback(err)
       else socket.emit('error', err)
@@ -212,6 +347,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
           NOT_NIGHT_PHASE: 'Không phải giai đoạn ban đêm.',
           'Not a silencer': 'Bạn không phải Người Im Lặng.',
           'Not a healer': 'Bạn không phải Người Chữa Lành.',
+          CANNOT_TARGET_PUBLIC_ROLE: 'Không thể chọn Quản trò hoặc Người Trao Gửi.',
         }
         const error = {
           success: false,
@@ -223,17 +359,41 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         return
       }
 
-      // Save room
-      roomRepository.save(result.room!)
+      // Save room before broadcasting
+      await roomRepository.saveAndWait(result.room!)
 
-      // Broadcast
+      // Broadcast night action to all clients
       console.log(`[night_action] ${action} by ${socket.id} in room ${roomId}`)
       io.to(roomId).emit('night_action_completed', {
         action,
+        actorId: actor.userId,
+        targetId: target.userId,
+        actorSocketId: actor.socketId,
+        targetSocketId: target.socketId,
         room: gameService.getPublicState(result.room!),
       })
 
       if (callback) callback({ success: true })
+
+      // Auto-advance after healer/silencer acts — narrator doesn't need to tap through these
+      const autoPhase = result.room!.phase
+      const narratorId = result.room!.currentNarrator
+      if (narratorId && (autoPhase === 'healer-turn' || autoPhase === 'silencer-turn')) {
+        setTimeout(async () => {
+          try {
+            const freshRoom = await roomRepository.findByIdFresh(roomId)
+            if (!freshRoom || freshRoom.phase !== autoPhase) return
+            const advResult = await gameService.advanceTurn(freshRoom, narratorId)
+            if (advResult.success && advResult.room) {
+              await roomRepository.saveAndWait(advResult.room)
+              io.to(roomId).emit('turn_changed', gameService.getPublicState(advResult.room))
+              console.log(`[night_action] Auto-advanced ${autoPhase} → ${advResult.room.phase} in room ${roomId}`)
+            }
+          } catch (e) {
+            console.error('[night_action] Auto-advance error:', e)
+          }
+        }, 1200)
+      }
     } catch (error: any) {
       console.error('[night_action] Error:', error)
       const err = { success: false, error: 'INTERNAL_ERROR', message: error.message }
@@ -245,7 +405,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
   /**
    * Give coin
    */
-  socket.on('give_coin', async ({ roomId, receiverSocketId, coinType }, callback) => {
+  socket.on('give_coin', async ({ roomId, receiverSocketId, coinType, amount = 1 }, callback) => {
     // Rate limit: 1 coin per second
     if (!rateLimitAction(socket, 'give_coin', 1000)) {
       const error = { success: false, error: 'RATE_LIMITED', message: 'Vui lòng chờ trước khi tặng coin tiếp theo.' }
@@ -279,7 +439,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         type: 'GIVE_COIN' as const,
         actorId: giver.userId,
         targetId: receiver.userId,
-        data: { coinType },
+        data: { coinType, amount },
       }
 
       // Execute via engine
@@ -359,6 +519,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         const messages = {
           NOT_VOTE_PHASE: 'Không phải giai đoạn bình chọn.',
           ALREADY_VOTED: 'Bạn đã bình chọn rồi.',
+          CANNOT_VOTE_AS_PUBLIC_ROLE: 'Quản trò và Người Im Lặng không tham gia bình chọn.',
         }
         const error = {
           success: false,
@@ -374,7 +535,8 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       roomRepository.save(result.room!)
 
       console.log(`[vote] ${socket.id} votes ${suspectSocketId}`)
-      socket.emit('vote_submitted', { success: true })
+      socket.emit('vote_submitted', { success: true, room: gameService.getPublicState(result.room!) })
+      io.to(roomId).emit('vote_updated', { room: gameService.getPublicState(result.room!) })
 
       // Check if all voted
       if (result.autoAdvance) {
@@ -436,7 +598,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         return
       }
 
-      roomRepository.save(result.room!)
+      await roomRepository.saveAndWait(result.room!)
       console.log(`[select_card] ${actionType} by ${socket.id} in room ${roomId}`)
       io.to(roomId).emit('card_selected', {
         actorId: actor.userId,
@@ -444,6 +606,28 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         type: actionType,
         room: gameService.getPublicState(result.room!),
       })
+
+      // Auto-advance after card selection (situation, emotion, selfcare)
+      const shouldAutoAdvance =
+        (actionType === 'SELECT_CARD' && (result.room!.phase === 'situation-card' || result.room!.phase === 'emotion-card')) ||
+        (actionType === 'SELECT_SELFCARE_CARD' && result.room!.phase === 'selfcare-card')
+
+      if (shouldAutoAdvance) {
+        const selectedPhase = result.room!.phase
+        const delayMs = selectedPhase === 'situation-card' ? 2000 : 350
+        
+        setTimeout(async () => {
+          const currentRoom = roomRepository.findById(roomId)
+          if (!currentRoom || currentRoom.phase !== selectedPhase) return
+          if (!currentRoom.currentNarrator) return
+          
+          const advanceResult = await gameService.advanceTurn(currentRoom, currentRoom.currentNarrator)
+          if (advanceResult.success && advanceResult.room) {
+            await roomRepository.saveAndWait(advanceResult.room)
+            io.to(roomId).emit('turn_changed', gameService.getPublicState(advanceResult.room))
+          }
+        }, delayMs)
+      }
 
       if (callback) callback({ success: true })
     } catch (error: any) {
@@ -519,10 +703,11 @@ export function registerGameHandlers(io: Server, socket: Socket) {
   })
 
   /**
-   * NTG votes for best responder in group-response phase
-   * Awards +5 yellow coins to the voted player
+   * NTG votes for best responder(s) in group-response phase
+   * Awards +5 yellow coins to each voted player
+   * Accepts single targetSocketId or array of targetSocketIds
    */
-  socket.on('ntg_vote', async ({ roomId, targetSocketId }, callback) => {
+  socket.on('ntg_vote', async ({ roomId, targetSocketId, targetSocketIds }, callback) => {
     if (!rateLimitAction(socket, 'ntg_vote', 2000)) {
       const error = { success: false, error: 'RATE_LIMITED', message: 'Vui lòng chờ trước khi vote.' }
       if (callback) callback(error)
@@ -540,9 +725,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       }
 
       const actor = room.players.find((p) => p.socketId === socket.id)
-      const target = room.players.find((p) => p.socketId === targetSocketId)
-
-      if (!actor || !target) {
+      if (!actor) {
         const error = { success: false, error: 'PLAYER_NOT_FOUND', message: 'Người chơi không tồn tại.' }
         if (callback) callback(error)
         else socket.emit('error', error)
@@ -565,39 +748,82 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         return
       }
 
-      const gameAction = {
-        type: 'NTG_VOTE' as const,
-        actorId: actor.userId,
-        targetId: target.userId,
-      }
-
-      const result = await gameService.executeAction(room, gameAction)
-
-      if (!result.success) {
-        const error = { success: false, error: result.error, message: result.error || 'Không thể vote.' }
+      // Support both single and multiple targets
+      const targets = targetSocketIds || (targetSocketId ? [targetSocketId] : [])
+      if (targets.length === 0) {
+        const error = { success: false, error: 'NO_TARGET', message: 'Chưa chọn người chơi nào.' }
         if (callback) callback(error)
         else socket.emit('error', error)
         return
       }
 
-      roomRepository.save(result.room!)
-      console.log(`[ntg_vote] NTG ${socket.id} voted ${targetSocketId} in room ${roomId}`)
+      let updatedRoom = room
+      const votedPlayers: Array<{ userId: string; name: string }> = []
 
-      io.to(roomId).emit('ntg_vote_cast', {
-        ntgId: actor.userId,
-        votedId: target.userId,
-        votedName: target.name,
-        bonus: 5,
-        room: gameService.getPublicState(result.room!),
-      })
+      // Execute vote for each target
+      for (const targetId of targets) {
+        // Find target by socketId first, then try matching by index position
+        const target = updatedRoom.players.find((p) => p.socketId === targetId) 
+          || updatedRoom.players.find((p) => p.userId === targetId)
+        if (!target) {
+          console.warn(`[ntg_vote] Target ${targetId} not found, skipping`)
+          continue
+        }
 
-      if (callback) callback({ success: true })
+        const gameAction = {
+          type: 'NTG_VOTE' as const,
+          actorId: actor.userId,
+          targetId: target.userId,
+        }
+
+        const result = await gameService.executeAction(updatedRoom, gameAction)
+        if (!result.success) {
+          console.warn(`[ntg_vote] Failed to vote for ${targetId}: ${result.error}`)
+          continue
+        }
+
+        updatedRoom = result.room!
+        votedPlayers.push({ userId: target.userId, name: target.name })
+      }
+
+      if (votedPlayers.length === 0) {
+        const error = { success: false, error: 'NO_VOTES_PROCESSED', message: 'Không thể vote cho người chơi nào.' }
+        if (callback) callback(error)
+        else socket.emit('error', error)
+        return
+      }
+
+      roomRepository.save(updatedRoom)
+      console.log(`[ntg_vote] NTG ${socket.id} voted for ${votedPlayers.length} player(s) in room ${roomId}`)
+
+      // Emit event for each voted player
+      for (const voted of votedPlayers) {
+        io.to(roomId).emit('ntg_vote_cast', {
+          ntgId: actor.userId,
+          votedId: voted.userId,
+          votedName: voted.name,
+          bonus: 5,
+          room: gameService.getPublicState(updatedRoom),
+        })
+      }
+
+      if (callback) callback({ success: true, votedCount: votedPlayers.length })
     } catch (error: any) {
       console.error('[ntg_vote] Error:', error)
       const err = { success: false, error: 'INTERNAL_ERROR', message: error.message }
       if (callback) callback(err)
       else socket.emit('error', err)
     }
+  })
+
+  // Relay: NTG is browsing situation cards — broadcast current card to others (read-only)
+  socket.on('card_preview', ({ roomId, card }: { roomId: string; card: object | null }) => {
+    socket.to(roomId).emit('card_preview', { card })
+  })
+
+  // Relay: NTG fan state for spectators (only position changes + initial cards)
+  socket.on('situation_fan_state', ({ roomId, cards, activePosition }: { roomId: string; cards?: object[]; activePosition: number }) => {
+    socket.to(roomId).emit('situation_fan_state', { cards, activePosition })
   })
 
   /**
@@ -629,9 +855,19 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         return
       }
 
-      // Must be NTG
-      if (!actor.isSender) {
-        const error = { success: false, error: 'ONLY_NTG_CAN_SHARE', message: 'Chỉ NTG mới có thể chia sẻ.' }
+      // Must be NTG or Narrator (narrator can confirm reward for NTG)
+      const isNarrator = room.players.find(p => p.isNarrator)?.socketId === socket.id
+      if (!actor.isSender && !isNarrator) {
+        const error = { success: false, error: 'ONLY_NTG_OR_NARRATOR', message: 'Chỉ NTG hoặc Quản trò mới có thể xác nhận.' }
+        if (callback) callback(error)
+        else socket.emit('error', error)
+        return
+      }
+
+      // If narrator is confirming, find the actual NTG
+      const ntgPlayer = actor.isSender ? actor : room.players.find(p => p.isSender)
+      if (!ntgPlayer) {
+        const error = { success: false, error: 'NTG_NOT_FOUND', message: 'Không tìm thấy Người Trao Gửi.' }
         if (callback) callback(error)
         else socket.emit('error', error)
         return
@@ -647,7 +883,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
 
       const gameAction = {
         type: 'SHARE_REFLECTION' as const,
-        actorId: actor.userId,
+        actorId: ntgPlayer.userId, // Use NTG's userId, not narrator's
         data: { message },
       }
 
@@ -661,11 +897,11 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       }
 
       roomRepository.save(result.room!)
-      console.log(`[share_reflection] NTG ${socket.id} shared reflection in room ${roomId}`)
+      console.log(`[share_reflection] ${isNarrator ? 'Narrator confirmed reward for' : ''} NTG ${ntgPlayer.socketId} in room ${roomId}`)
 
       io.to(roomId).emit('reflection_shared', {
-        ntgId: actor.userId,
-        ntgName: actor.name,
+        ntgId: ntgPlayer.userId,
+        ntgName: ntgPlayer.name,
         message,
         bonus: 5,
         room: gameService.getPublicState(result.room!),
@@ -674,6 +910,124 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       if (callback) callback({ success: true })
     } catch (error: any) {
       console.error('[share_reflection] Error:', error)
+      const err = { success: false, error: 'INTERNAL_ERROR', message: error.message }
+      if (callback) callback(err)
+      else socket.emit('error', err)
+    }
+  })
+
+  /**
+   * Narrator confirms role completion rewards for Connector, Opener, and Guide.
+   * A player gets +5 yellow if NTG already rewarded them, otherwise +2 yellow.
+   */
+  socket.on('confirm_role_rewards', async ({ roomId, targetSocketIds }, callback) => {
+    if (!rateLimitAction(socket, 'confirm_role_rewards', 2000)) {
+      const error = { success: false, error: 'RATE_LIMITED', message: 'Vui lòng chờ.' }
+      if (callback) callback(error)
+      else socket.emit('error', error)
+      return
+    }
+
+    try {
+      const room = roomRepository.findById(roomId)
+      if (!room) {
+        const error = { success: false, error: 'ROOM_NOT_FOUND', message: 'Phòng không tồn tại.' }
+        if (callback) callback(error)
+        else socket.emit('error', error)
+        return
+      }
+
+      const actor = room.players.find((p) => p.socketId === socket.id)
+      if (!actor) {
+        const error = { success: false, error: 'PLAYER_NOT_FOUND', message: 'Người chơi không tồn tại.' }
+        if (callback) callback(error)
+        else socket.emit('error', error)
+        return
+      }
+
+      if (!actor.isNarrator) {
+        const error = { success: false, error: 'NOT_NARRATOR', message: 'Chỉ Quản trò mới có thể xác nhận phần thưởng vai trò.' }
+        if (callback) callback(error)
+        else socket.emit('error', error)
+        return
+      }
+
+      if (room.phase !== 'reflection-sharing') {
+        const error = { success: false, error: 'WRONG_PHASE', message: 'Không phải giai đoạn xác nhận phần thưởng vai trò.' }
+        if (callback) callback(error)
+        else socket.emit('error', error)
+        return
+      }
+
+      const targets: string[] = Array.isArray(targetSocketIds) ? targetSocketIds : []
+      if (targets.length === 0) {
+        const error = { success: false, error: 'NO_TARGET', message: 'Chưa chọn người chơi nào.' }
+        if (callback) callback(error)
+        else socket.emit('error', error)
+        return
+      }
+
+      const eligibleRoles = new Set([Role.CONNECTOR, Role.OPENER, Role.GUIDE])
+      const ntgVotedIds = new Set<string>(Object.values(room.ntgVotes ?? {}).flat())
+      const alreadyRewardedIds = new Set(
+        room.gameLog
+          .filter((entry) => entry.type === 'ROLE_REWARD' && entry.targetId)
+          .map((entry) => entry.targetId as string),
+      )
+      const now = Date.now()
+      const rewards: Array<{ userId: string; socketId: string; name: string; bonus: number }> = []
+
+      const updatedPlayers = room.players.map((player) => {
+        if (!targets.includes(player.socketId) && !targets.includes(player.userId)) return player
+        if (!player.originalRole || !eligibleRoles.has(player.originalRole)) return player
+        if (alreadyRewardedIds.has(player.userId)) return player
+
+        const bonus = ntgVotedIds.has(player.userId) ? 5 : 2
+        rewards.push({ userId: player.userId, socketId: player.socketId, name: player.name, bonus })
+        alreadyRewardedIds.add(player.userId)
+
+        return {
+          ...player,
+          coins: {
+            ...player.coins,
+            yellow: player.coins.yellow + bonus,
+          },
+        }
+      })
+
+      if (rewards.length === 0) {
+        const error = { success: false, error: 'NO_REWARDS_PROCESSED', message: 'Không có phần thưởng nào được áp dụng.' }
+        if (callback) callback(error)
+        else socket.emit('error', error)
+        return
+      }
+
+      const updatedRoom = {
+        ...room,
+        players: updatedPlayers,
+        lastActivity: now,
+        gameLog: [
+          ...room.gameLog,
+          ...rewards.map((reward, index) => ({
+            type: 'ROLE_REWARD',
+            actorId: actor.userId,
+            targetId: reward.userId,
+            timestamp: now + index,
+            data: { bonus: reward.bonus },
+          })),
+        ],
+      }
+
+      roomRepository.save(updatedRoom)
+
+      io.to(roomId).emit('role_rewards_confirmed', {
+        rewards,
+        room: gameService.getPublicState(updatedRoom),
+      })
+
+      if (callback) callback({ success: true, rewards })
+    } catch (error: any) {
+      console.error('[confirm_role_rewards] Error:', error)
       const err = { success: false, error: 'INTERNAL_ERROR', message: error.message }
       if (callback) callback(err)
       else socket.emit('error', err)
@@ -706,7 +1060,11 @@ export function registerGameHandlers(io: Server, socket: Socket) {
           },
         }))
 
-      roomRepository.update(roomId, { status: 'ended', phase: 'ended' })
+      const updatedRoom = roomRepository.update(roomId, { status: 'ended', phase: 'ended' })
+      if (updatedRoom) {
+        // Ensure Redis save completes for ended game
+        await roomRepository.saveAndWait(updatedRoom)
+      }
       phaseTimer.clearTimer(roomId)
 
       console.log(`[end_game] Room ${roomId} ended`)

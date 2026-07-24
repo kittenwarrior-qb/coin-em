@@ -8,6 +8,8 @@ export interface OrchestratorConfig {
   roomId: string
   botCount: number
   logger?: TestLogger
+  situationGroups?: string[]
+  emotionGroups?: string[]
 }
 
 export type PhaseHandler = (bots: BotPlayer[], roomState: any) => Promise<void>
@@ -73,7 +75,20 @@ export class BotOrchestrator {
     bot.on('room_state', (state: any) => {
       if (isHost && !hasStartedGame && state.players.length === this.config.botCount && state.status === 'waiting') {
         hasStartedGame = true
-        this.logger.info('ORCHESTRATOR', `Starting game with ${state.players.length} players`)
+        this.logger.info('ORCHESTRATOR', `All ${state.players.length} players joined`)
+
+        const situationGroups = this.config.situationGroups ?? ['light', 'medium', 'sensitive']
+        const emotionGroups = this.config.emotionGroups ?? ['basic', 'light', 'strong', 'advanced']
+
+        this.logger.info('ORCHESTRATOR', `Applying settings — situation: [${situationGroups.join(', ')}] | emotion: [${emotionGroups.join(', ')}]`)
+        bot.updateRoomSettings(this.config.roomId, { situationGroups, emotionGroups })
+        // startGame is called after room_settings_updated is confirmed (see handler below)
+      }
+    })
+
+    bot.on('room_settings_updated', (_settings: any) => {
+      if (isHost && hasStartedGame) {
+        this.logger.info('ORCHESTRATOR', `Settings confirmed — starting game`)
         bot.startGame(this.config.roomId)
       }
     })

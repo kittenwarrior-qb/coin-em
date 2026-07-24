@@ -30,3 +30,26 @@ dist-ssr
 
 # OS files
 Thumbs.db
+
+# Room data files (runtime state, not source code)
+be/data/
+be/test-data/
+
+/images_raw
+
+/glb
+
+/gui-pack
+
+/background
+
+/.codex-home
+
+tmp/
+
+start-codex.bat
+
+EMCOIN/
+
+# Bản gốc .riv ở root (bản dùng thật nằm trong fe/public/rive/)
+/handshake-conffeti.riv

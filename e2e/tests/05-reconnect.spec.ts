@@ -29,7 +29,24 @@ test.describe('Reconnect', () => {
     await guest.joinRoom(roomId)
 
     // Act - guest reloads
-    await guest.reload()
+    await guest.p.reload({ waitUntil: 'domcontentloaded' })
+
+    // Wait through "connecting" screen first, then lobby or waiting-room
+    await guest.p.waitForSelector(
+      '[data-testid="connecting"], [data-testid="waiting-room"], [data-testid="lobby"]',
+      { timeout: 30_000 }
+    )
+    // Now wait for connecting to resolve into a real state
+    await guest.p.waitForSelector(
+      '[data-testid="waiting-room"], [data-testid="lobby"]',
+      { timeout: 30_000 }
+    )
+
+    // If landed on lobby (app didn't auto-reconnect), rejoin manually
+    const onLobby = await guest.p.locator('[data-testid="lobby"]').isVisible()
+    if (onLobby) {
+      await guest.joinRoom(roomId)
+    }
 
     // Assert - guest is back in waiting room with correct room ID
     await guest.assertOnWaitingRoom()

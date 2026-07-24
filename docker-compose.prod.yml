@@ -1,7 +1,19 @@
-version: '3.8'
-
 services:
-  # Backend - Node.js production
+  redis:
+    image: redis:7-alpine
+    container_name: emcoin-redis
+    restart: always
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - emcoin-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   backend:
     build:
       context: ./be
@@ -12,11 +24,17 @@ services:
     volumes:
       - backend-data:/app/data
     environment:
-      - NODE_ENV=production
-      - PORT=3001
-      - CLIENT_ORIGIN=https://emcoin.example.com
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-3001}
+      CLIENT_ORIGIN: ${CLIENT_ORIGIN:-https://emcoin.cloud}
+      DEBUG_ROLE_PICKER: "true"
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
     networks:
       - emcoin-network
+    depends_on:
+      redis:
+        condition: service_healthy
     restart: always
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001/health"]
@@ -25,7 +43,24 @@ services:
       retries: 3
       start_period: 40s
 
-  # Caddy - Reverse proxy with auto HTTPS
+  frontend:
+    build:
+      context: ./fe
+      dockerfile: Dockerfile.prod
+      args:
+        VITE_API_URL: ${VITE_API_URL:-https://emcoin.cloud}
+        VITE_DEBUG_ROLE_PICKER: ${VITE_DEBUG_ROLE_PICKER:-false}
+    container_name: emcoin-frontend-prod
+    command: >
+      sh -c "rm -rf /var/www/html/* &&
+             cp -a /app/dist-source/. /var/www/html/ &&
+             echo 'Frontend dist copied to shared volume' &&
+             tail -f /dev/null"
+    volumes:
+      - fe-dist:/var/www/html
+    networks:
+      - emcoin-network
+
   caddy:
     image: caddy:2-alpine
     container_name: emcoin-caddy
@@ -35,13 +70,14 @@ services:
       - "443:443/udp"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./fe/dist:/var/www/html:ro
+      - fe-dist:/var/www/html:ro
       - caddy-data:/data
       - caddy-config:/config
     networks:
       - emcoin-network
     depends_on:
       - backend
+      - frontend
     restart: always
 
 networks:
@@ -49,6 +85,8 @@ networks:
     driver: bridge
 
 volumes:
+  redis-data:
   backend-data:
+  fe-dist:
   caddy-data:
   caddy-config:

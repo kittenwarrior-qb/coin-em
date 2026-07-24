@@ -1,24 +1,21 @@
-# Build stage
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Install dependencies
 COPY package*.json ./
 RUN npm ci
 
-# Copy source code
 COPY . .
 
-# Build for production
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+ARG VITE_DEBUG_ROLE_PICKER
+ENV VITE_DEBUG_ROLE_PICKER=$VITE_DEBUG_ROLE_PICKER
+
 RUN npm run build
 
-# Production stage - minimal image
 FROM alpine:latest
 
-WORKDIR /var/www/html
+WORKDIR /app/dist-source
 
-# Copy built files
 COPY --from=builder /app/dist .
-
-# No server needed, Caddy will serve the static files

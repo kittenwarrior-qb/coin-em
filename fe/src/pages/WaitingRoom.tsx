@@ -1,20 +1,39 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
+import {
+  CartoonAvatar,
+  CartoonButton,
+  CartoonCircleButton,
+  CartoonDropdown,
+  CartoonScreen,
+  CartoonScrollArea,
+  ProfileModal,
+  QuitConfirmModal,
+} from '@/components/cartoon'
+import { ROLE_TO_IMAGE } from '@/constants/cardImages'
 
 interface Player {
   socketId: string
   userId?: string
   name: string
+  avatarIndex?: number
+  bgIndex?: number
+  isFake?: boolean
+  debugPreferredRole?: string
 }
 
 interface WaitingRoomProps {
   roomId: string
   players: Player[]
-  hostSocketId: string // Actually hostUserId from backend
+  hostSocketId: string
   mySocketId: string
   myUserId?: string
   onStartGame: () => void
   onLeave: () => void
   onAddFakePlayers?: () => void
+  onUpdateProfile?: (name: string, avatarIndex: number, bgIndex: number) => void
+  onSetDebugRolePreference?: (targetUserId: string, role: string) => void
+  debugRolePickerEnabled?: boolean
 }
 
 export default function WaitingRoom({
@@ -25,116 +44,274 @@ export default function WaitingRoom({
   onStartGame,
   onLeave,
   onAddFakePlayers,
+  onUpdateProfile,
+  onSetDebugRolePreference,
+  debugRolePickerEnabled: serverDebugRolePickerEnabled,
 }: WaitingRoomProps) {
-  // hostSocketId is actually hostUserId now (backend sends room.host which is userId)
+  const [showQuit, setShowQuit] = useState(false)
+  const [showProfile, setShowProfile] = useState(false)
+  const [myDisplayName, setMyDisplayName] = useState('')
+
+  const myPlayer = players.find(p => p.userId === myUserId)
+  const [myAvatarIndex, setMyAvatarIndex] = useState(() => myPlayer?.avatarIndex ?? 0)
+  const [myBgIndex, setMyBgIndex] = useState(() => myPlayer?.bgIndex ?? 0)
+
   const hostUserId = hostSocketId
-  
-  // Find host player by userId
-  const hostPlayer = players.find(p => p.userId === hostUserId)
-  
-  // Check if I'm the host
   const isHost = myUserId === hostUserId
-  const canStart = players.length >= 7
-  
-  console.log('[WaitingRoom] hostUserId:', hostUserId, 'myUserId:', myUserId, 'isHost:', isHost, 'hostPlayer:', hostPlayer)
+  const canStart = players.length >= 5
+  const MAX_PLAYERS = 10
+  const canHostPickRoles = serverDebugRolePickerEnabled === true && isHost
+
+  const [
+    ROLE_NARRATOR,
+    ROLE_SENDER,
+    ROLE_HEALER,
+    ROLE_GUIDE,
+    ROLE_OPENER,
+    ROLE_SILENCER,
+    ROLE_CONNECTOR,
+  ] = Object.keys(ROLE_TO_IMAGE)
+
+  const getRoleDeck = (count: number) => {
+    if (count >= 10) return [ROLE_NARRATOR, ROLE_SENDER, ROLE_SILENCER, ROLE_SILENCER, ROLE_CONNECTOR, ROLE_CONNECTOR, ROLE_OPENER, ROLE_OPENER, ROLE_GUIDE, ROLE_HEALER]
+    if (count === 9) return [ROLE_NARRATOR, ROLE_SENDER, ROLE_SILENCER, ROLE_SILENCER, ROLE_CONNECTOR, ROLE_CONNECTOR, ROLE_OPENER, ROLE_GUIDE, ROLE_HEALER]
+    if (count === 8) return [ROLE_NARRATOR, ROLE_SENDER, ROLE_SILENCER, ROLE_SILENCER, ROLE_CONNECTOR, ROLE_OPENER, ROLE_GUIDE, ROLE_HEALER]
+    if (count === 7) return [ROLE_NARRATOR, ROLE_SENDER, ROLE_SILENCER, ROLE_CONNECTOR, ROLE_OPENER, ROLE_GUIDE, ROLE_HEALER]
+    if (count === 6) return [ROLE_NARRATOR, ROLE_SENDER, ROLE_SILENCER, ROLE_CONNECTOR, ROLE_OPENER, ROLE_GUIDE]
+    return [ROLE_NARRATOR, ROLE_SENDER, ROLE_SILENCER, ROLE_CONNECTOR, ROLE_OPENER]
+  }
+
+  const countRoles = (roles: string[]) =>
+    roles.reduce<Record<string, number>>((acc, role) => {
+      acc[role] = (acc[role] ?? 0) + 1
+      return acc
+    }, {})
+
+  const roleDeck = getRoleDeck(players.length)
+  const roleCapacity = countRoles(roleDeck)
+  const selectedRoleCounts = countRoles([
+    ROLE_NARRATOR,
+    ...(players
+      .filter(p => p.userId !== hostUserId)
+      .map(p => p.debugPreferredRole)
+      .filter(Boolean) as string[]),
+  ])
+
+  const getRoleOptionsForPlayer = (player: Player) =>
+    roleDeck
+      .filter(role => role !== ROLE_NARRATOR)
+      .filter((role, index, arr) => arr.indexOf(role) === index)
+      .filter(role => role === player.debugPreferredRole || (selectedRoleCounts[role] ?? 0) < (roleCapacity[role] ?? 0))
+      .map(role => ({ value: role, label: role }))
+
+  const assignDebugRole = (player: Player, role: string) => {
+    if (!player.userId || !roleDeck.includes(role)) return
+    onSetDebugRolePreference?.(player.userId, role)
+  }
+
+  const slots = [
+    ...players,
+    ...Array(Math.max(0, MAX_PLAYERS - players.length)).fill(null),
+  ]
 
   return (
-    <div className="h-screen bg-[#FAFAF8] flex items-center justify-center overflow-hidden" data-testid="waiting-room">
-      <div className="w-full max-w-sm h-full bg-white p-6 flex flex-col gap-5">
-        {/* Header */}
-        <div className="text-center pt-8">
-          <div className="text-4xl mb-2">🎴</div>
-          <h2 className="text-xl font-black text-gray-800 mb-1">Phòng chờ</h2>
-          <div className="inline-flex items-center gap-2 bg-[#F0F5FF] px-4 py-2 rounded-full border-2 border-black">
-            <span className="text-xs font-bold text-gray-500">Room ID:</span>
-            <span data-testid="room-id" className="text-sm font-black text-gray-800">{roomId}</span>
+    <CartoonScreen data-testid="waiting-room" panel={false}>
+      <div
+        className="screen-panel flex flex-col items-center justify-center"
+        style={{
+          height: '100dvh',
+          backgroundImage: 'linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url(/capybara_wallpaper.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        <div className="absolute top-4 left-0 right-0 flex justify-center">
+          <img src="/emcoin_logo.png" alt="EmCoin" style={{ height: 52, objectFit: 'contain', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))' }} />
+        </div>
+
+        <div
+          className="w-full mx-4 rounded-3xl flex flex-col gap-3 px-4 py-5"
+          style={{
+            maxWidth: '22rem',
+            background: 'rgba(220, 252, 231, 0.82)',
+            backdropFilter: 'blur(100px)',
+          }}
+        >
+          <div className="flex justify-center">
+            <div className="inline-flex flex-col items-center gap-1 px-5 py-2 rounded-2xl bg-white/80">
+              <h2 className="font-display text-2xl leading-tight" style={{ color: '#ff6993' }}>Phòng chờ</h2>
+              <div className="inline-flex items-center gap-1.5">
+                <span className="font-body text-xs text-[var(--c-gray)]">Room:</span>
+                <span data-testid="room-id" className="font-display text-xs tracking-wider">{roomId}</span>
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Member count */}
-        <div className="bg-[#FFF9C4] rounded-xl p-3 border-2 border-black text-center">
-          <span data-testid="player-count" className="text-sm font-bold text-gray-700">
-            Thành viên: {players.length} / 11
-          </span>
-        </div>
+          <div className="flex items-center justify-between px-1">
+            <span className="font-body text-xs text-[var(--c-gray)]">Người chơi</span>
+            <span data-testid="player-count" className="font-display text-xs">{players.length} / {MAX_PLAYERS}</span>
+          </div>
 
-        {/* Player list */}
-        <div className="flex flex-col gap-2 flex-1 overflow-y-auto" data-testid="player-list">
-          {players.map((player, idx) => {
-            const isMe = player.userId === myUserId
-            const isPlayerHost = player.userId === hostUserId
-            return (
-              <motion.div
-                key={player.socketId}
-                data-testid={`waiting-player-${player.name}`}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: idx * 0.05 }}
-                className="flex items-center gap-3 p-3 rounded-xl border-2 border-black bg-white"
-              >
-                <div className="w-10 h-10 rounded-full border-2 border-black bg-[#F0FFF4]
-                                flex items-center justify-center text-base font-black">
-                  {player.name[0]}
-                </div>
-                <div className="flex-1">
-                  <div className="text-sm font-bold text-gray-800">
-                    {player.name}
-                    {isMe && <span className="text-xs text-gray-500 ml-1">(Bạn)</span>}
-                  </div>
-                </div>
-                {isPlayerHost && (
-                  <div data-testid="host-badge" className="bg-black text-white text-[10px] font-bold px-2 py-1 rounded-full">
-                    HOST
-                  </div>
-                )}
-              </motion.div>
-            )
-          })}
-        </div>
-
-        {/* Actions */}
-        <div className="flex flex-col gap-2 pb-6">
-          {isHost ? (
-            <>
-              <button
-                data-testid="btn-start-game"
-                onClick={onStartGame}
-                disabled={!canStart}
-                className="w-full py-4 rounded-2xl border-[3px] border-black bg-[#6BCB77]
-                           text-base font-bold hover:bg-[#5BB767] active:scale-[0.98]
-                           disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-              >
-                {canStart ? 'Bắt đầu chơi' : 'Cần ít nhất 7 người'}
-              </button>
-              
-              {onAddFakePlayers && players.length < 11 && (
-                <button
-                  data-testid="btn-add-bots"
-                  onClick={onAddFakePlayers}
-                  className="w-full py-3 rounded-2xl border-2 border-black bg-[#FFE5B4]
-                             text-sm font-bold hover:bg-[#FFD89B] active:scale-[0.98] transition-all"
-                >
-                  🤖 Thêm Bot +1 (Debug)
-                </button>
-              )}
-            </>
-          ) : (
-            <div data-testid="waiting-for-host" className="w-full py-4 rounded-2xl border-[3px] border-black bg-[#F0F5FF]
-                            text-base font-bold text-center text-gray-600">
-              Đang chờ host bắt đầu...
+          {canHostPickRoles && !canStart && (
+            <div data-testid="role-pick-hint" className="text-center font-body text-[11px] text-black/50 px-1">
+              Cần đủ 5 người mới chọn role được
             </div>
           )}
 
-          <button
-            data-testid="btn-leave-room"
-            onClick={onLeave}
-            className="w-full py-3 rounded-2xl border-2 border-black bg-white
-                       text-sm font-bold hover:bg-gray-100 active:scale-[0.98] transition-all"
+          <CartoonScrollArea
+            className="flex-shrink-0"
+            style={{ height: canHostPickRoles ? 260 : 220 }}
+            alwaysShowScrollbar
+            data-testid="player-list"
           >
-            Rời phòng
-          </button>
+            <div className="grid grid-cols-1 gap-2 pb-2 pt-1">
+              {slots.map((player, idx) => {
+                if (!player) {
+                  return (
+                    <div
+                      key={`empty-${idx}`}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-2xl border border-dashed border-black/15 bg-white/30"
+                    >
+                      <div className="w-9 h-9 rounded-full bg-black/8 flex items-center justify-center flex-shrink-0">
+                        <span className="text-black/25 text-lg">+</span>
+                      </div>
+                      <span className="font-body text-xs text-black/30">Đang chờ người chơi...</span>
+                    </div>
+                  )
+                }
+
+                const isMe = player.userId === myUserId
+                const isPlayerHost = player.userId === hostUserId
+                const displayName = isMe && myDisplayName ? myDisplayName : player.name
+
+                return (
+                  <motion.div
+                    key={player.socketId}
+                    data-testid={`waiting-player-${player.name}`}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.04 }}
+                    className="flex items-center gap-3 px-3 py-3 rounded-2xl border border-black/8 cursor-pointer"
+                    style={{ background: isMe ? 'rgba(254,240,138,0.85)' : 'rgba(255,255,255,0.7)' }}
+                    onClick={isMe ? () => setShowProfile(true) : undefined}
+                  >
+                    <div className="relative flex-shrink-0">
+                      <CartoonAvatar
+                        name={player.name}
+                        avatarIndex={isMe ? myAvatarIndex : (player.avatarIndex ?? idx)}
+                        bgIndex={isMe ? myBgIndex : (player.bgIndex ?? idx)}
+                        size="lg"
+                      />
+                      {isMe && (
+                        <div className="absolute pointer-events-none" style={{ bottom: -24, right: -8 }}>
+                          <CartoonCircleButton
+                            color="purple"
+                            iconSrc="/cartoon/icons/white/Photo.png"
+                            iconSize="50%"
+                            style={{ height: 24, width: 24 }}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="font-display text-base truncate leading-tight">{displayName}</div>
+                      {canHostPickRoles && (
+                        <div className="font-body text-[10px] text-black/45 truncate">
+                          {isPlayerHost ? ROLE_NARRATOR : (player.debugPreferredRole ?? 'Chưa chọn role')}
+                        </div>
+                      )}
+                    </div>
+
+                    {!canHostPickRoles && isMe && (
+                      <span className="font-display text-sm" style={{ color: '#f59e0b' }}>Bạn</span>
+                    )}
+
+                    {!canHostPickRoles && isPlayerHost && (
+                      <div className="flex-shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 border border-amber-300">
+                        <img src="/cartoon/icons/Crown.svg" alt="" className="w-4 h-4" />
+                        <span className="font-display text-sm text-amber-700">Host</span>
+                      </div>
+                    )}
+
+                    {canHostPickRoles && (
+                      <div className="w-32 flex-shrink-0" onClick={e => e.stopPropagation()}>
+                        {isPlayerHost ? (
+                          <div className="flex items-center justify-center gap-1 px-2 py-1 rounded-full bg-amber-100 border border-amber-300">
+                            <img src="/cartoon/icons/Crown.svg" alt="" className="w-4 h-4" />
+                            <span className="font-display text-[10px] text-amber-700 truncate">Quản trò</span>
+                          </div>
+                        ) : (
+                          <CartoonDropdown
+                            options={getRoleOptionsForPlayer(player)}
+                            value={player.debugPreferredRole}
+                            placeholder="Chọn role"
+                            disabled={roleDeck.length === 0 || !canStart}
+                            onChange={(role) => assignDebugRole(player, role)}
+                          />
+                        )}
+                      </div>
+                    )}
+                  </motion.div>
+                )
+              })}
+            </div>
+          </CartoonScrollArea>
+
+          <div className="flex flex-col gap-2">
+            {isHost ? (
+              <>
+                <CartoonButton
+                  color={canStart ? 'green' : 'gray'}
+                  size="lg"
+                  className="w-full"
+                  disabled={!canStart}
+                  onClick={onStartGame}
+                  data-testid="btn-start-game"
+                >
+                  {canStart ? 'Bắt đầu' : `Bắt đầu (${players.length}/5)`}
+                </CartoonButton>
+                {onAddFakePlayers && players.length < MAX_PLAYERS && (
+                  <CartoonButton color="orange" className="w-full" onClick={onAddFakePlayers} data-testid="btn-add-bots">
+                    Thêm Bot
+                  </CartoonButton>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-2 font-display text-sm" data-testid="waiting-for-host">
+                Đang chờ host bắt đầu...
+              </div>
+            )}
+            <CartoonButton color="white" className="w-full" onClick={() => setShowQuit(true)} data-testid="btn-leave-room">
+              Rời phòng
+            </CartoonButton>
+          </div>
         </div>
       </div>
-    </div>
+
+      <QuitConfirmModal
+        open={showQuit}
+        onConfirm={() => { setShowQuit(false); onLeave() }}
+        onCancel={() => setShowQuit(false)}
+        message="Bạn có muốn rời phòng không?"
+        subMessage="Bạn sẽ mất chỗ trong phòng!"
+        confirmLabel="Rời"
+        cancelLabel="Ở lại"
+      />
+
+      <ProfileModal
+        open={showProfile}
+        onClose={() => setShowProfile(false)}
+        currentName={myDisplayName || (players.find(p => p.userId === myUserId)?.name ?? '')}
+        currentAvatarIndex={myAvatarIndex}
+        currentBgIndex={myBgIndex}
+        onSave={(name, avatarIdx, bgIdx) => {
+          setMyDisplayName(name)
+          setMyAvatarIndex(avatarIdx)
+          setMyBgIndex(bgIdx)
+          onUpdateProfile?.(name, avatarIdx, bgIdx)
+        }}
+      />
+    </CartoonScreen>
   )
 }

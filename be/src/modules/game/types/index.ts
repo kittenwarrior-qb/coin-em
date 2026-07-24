@@ -32,7 +32,11 @@ export enum Role {
 export interface Player {
   socketId: string
   userId: string
+  deviceId?: string
   name: string
+  colorIndex?: number
+  avatarIndex?: number
+  bgIndex?: number
   role?: Role
   originalRole?: Role // Role gốc ban đầu (không thay đổi khi rotate)
   isNarrator?: boolean
@@ -40,6 +44,10 @@ export interface Player {
   isMuted?: boolean
   isHealed?: boolean
   isFake?: boolean
+  isDisconnected?: boolean
+  disconnectedAt?: number | null
+  lastSeenAt?: number
+  debugPreferredRole?: Role
   coins: {
     red: number
     yellow: number
@@ -71,6 +79,7 @@ export interface Room {
   lastActivity: number
   // Room settings (card groups)
   settings: RoomSettings
+  debugRolePickerEnabled?: boolean
   // Phase 1 additions
   votes: Record<string, string> // voterId → targetId (silencer guess)
   ntgVotes: Record<string, string[]> // NTG votes: ntgId → [targetId, ...] (best responders, multiple allowed)
