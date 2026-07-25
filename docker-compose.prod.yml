@@ -78,7 +78,47 @@ services:
     depends_on:
       - backend
       - frontend
+      - umami
     restart: always
+
+  umami-db:
+    image: postgres:15-alpine
+    container_name: emcoin-umami-db
+    restart: always
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: ${UMAMI_DB_PASSWORD:?UMAMI_DB_PASSWORD is required}
+    volumes:
+      - umami-db-data:/var/lib/postgresql/data
+    networks:
+      - emcoin-network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "umami"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-latest
+    container_name: emcoin-umami
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://umami:${UMAMI_DB_PASSWORD:?UMAMI_DB_PASSWORD is required}@umami-db:5432/umami
+      APP_SECRET: ${UMAMI_APP_SECRET:?UMAMI_APP_SECRET is required}
+      BASE_PATH: /admin
+      DISABLE_TELEMETRY: "1"
+    depends_on:
+      umami-db:
+        condition: service_healthy
+    networks:
+      - emcoin-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/admin/api/heartbeat"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
 networks:
   emcoin-network:
@@ -90,3 +130,4 @@ volumes:
   fe-dist:
   caddy-data:
   caddy-config:
+  umami-db-data:
