@@ -19,15 +19,6 @@ emcoin.cloud {
         }
     }
 
-    handle /admin* {
-        reverse_proxy umami:3000 {
-            header_up Host {host}
-            header_up X-Real-IP {remote_host}
-            header_up X-Forwarded-For {remote_host}
-            header_up X-Forwarded-Proto {scheme}
-        }
-    }
-
     handle /* {
         root * /var/www/html
         try_files {path} /index.html
@@ -47,6 +38,23 @@ emcoin.cloud {
             path /index.html /
         }
         header @html Cache-Control "no-cache"
+    }
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+}
+
+admin.emcoin.cloud {
+    reverse_proxy umami:3000 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
     }
 
     header {

@@ -106,7 +106,6 @@ services:
     environment:
       DATABASE_URL: postgresql://umami:${UMAMI_DB_PASSWORD:?UMAMI_DB_PASSWORD is required}@umami-db:5432/umami
       APP_SECRET: ${UMAMI_APP_SECRET:?UMAMI_APP_SECRET is required}
-      BASE_PATH: /admin
       DISABLE_TELEMETRY: "1"
     depends_on:
       umami-db:
@@ -114,7 +113,7 @@ services:
     networks:
       - emcoin-network
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/admin/api/heartbeat"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/heartbeat"]
       interval: 30s
       timeout: 10s
       retries: 3
