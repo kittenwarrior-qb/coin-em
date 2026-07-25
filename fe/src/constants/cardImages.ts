@@ -6,10 +6,14 @@ const RAW_CARD_IMAGES = {
   // Vai trò (Role cards)
   roles: {
     back: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469092/emcoin/vai-tro/m%E1%BA%B7t%20sau.png',
-    VT1: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469093/emcoin/vai-tro/VT1.png',
+    // VT1 and VT4 (Quản Trò / Dẫn Lối) are served locally instead of Cloudinary —
+    // updated 2026-07 with new artwork, no Cloudinary access to overwrite the
+    // hosted originals. cdnUrl() below no-ops on non-Cloudinary URLs, so these
+    // pass through untouched.
+    VT1: '/cards/vai-tro/VT1.webp',
     VT2: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469094/emcoin/vai-tro/VT2.png',
     VT3: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469095/emcoin/vai-tro/VT3.png',
-    VT4: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469097/emcoin/vai-tro/VT4.png',
+    VT4: '/cards/vai-tro/VT4.webp',
     VT5: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469097/emcoin/vai-tro/VT5.png',
     VT6: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469098/emcoin/vai-tro/VT6.png',
     VT7: 'https://res.cloudinary.com/djuksxdrw/image/upload/v1777469099/emcoin/vai-tro/VT7.png',
