@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react'
-import { ArrowLeft, Box, Eye, X } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { ArrowLeft, Box, ChevronLeft, ChevronRight, Eye, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import SiteHeader from '@/components/site/SiteHeader'
@@ -67,7 +67,13 @@ function buildDecks(): Deck[] {
   const situation = recordCards('situation', 'Tình huống', CARD_IMAGES.situation as Record<string, string>, 'Tình huống')
   const reflection = recordCards('reflection', 'Phản tư', CARD_IMAGES.reflection as Record<string, string>, 'Phản tư')
   const selfcare = recordCards('selfcare', 'Bí kíp tự ôm', CARD_IMAGES.selfcare as Record<string, string>, 'Bí kíp')
-  const coins = recordCards('coins', 'Coin', CARD_IMAGES.coins as Record<string, string>, 'Coin')
+  // Only 3 physical coins exist (Đỏ, Vàng, Xanh); each key pair (red1/red2, ...)
+  // is the two faces of the same coin, not 2 separate coins — show one card per color.
+  const coins: CardItem[] = [
+    { code: 'coins-red', title: 'Coin Đỏ', image: CARD_IMAGES.coins.red1, deckId: 'coins', deckLabel: 'Coin' },
+    { code: 'coins-yellow', title: 'Coin Vàng', image: CARD_IMAGES.coins.yellow1, deckId: 'coins', deckLabel: 'Coin' },
+    { code: 'coins-green', title: 'Coin Xanh', image: CARD_IMAGES.coins.green1, deckId: 'coins', deckLabel: 'Coin' },
+  ]
 
   const basicEmotions = Object.entries(CARD_IMAGES.emotionBasic).map(([code, images]) => ({
     code,
@@ -133,10 +139,84 @@ function buildDecks(): Deck[] {
 export default function AboutCards2D() {
   const decks = useMemo(buildDecks, [])
   const [activeDeck, setActiveDeck] = useState('all')
-  const [preview, setPreview] = useState<CardItem | null>(null)
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null)
+  const [dragX, setDragX] = useState(0)
+  const dragStartRef = useRef<number | null>(null)
+  const draggingRef = useRef(false)
 
-  const visibleDecks = activeDeck === 'all' ? decks : decks.filter((deck) => deck.id === activeDeck)
+  const visibleDecks = useMemo(
+    () => (activeDeck === 'all' ? decks : decks.filter((deck) => deck.id === activeDeck)),
+    [decks, activeDeck],
+  )
   const totalCards = decks.reduce((sum, deck) => sum + deck.cards.length, 0)
+  // Flat, on-screen order of the currently filtered cards — lets preview
+  // next/prev/swipe move through exactly what the reader sees, tab included.
+  const flatCards = useMemo(() => visibleDecks.flatMap((deck) => deck.cards), [visibleDecks])
+  const preview = previewIndex !== null ? flatCards[previewIndex] ?? null : null
+
+  const openPreview = (card: CardItem) => {
+    const index = flatCards.indexOf(card)
+    setDragX(0)
+    setPreviewIndex(index === -1 ? null : index)
+  }
+  const closePreview = () => setPreviewIndex(null)
+  const showPrev = () => {
+    setDragX(0)
+    setPreviewIndex((i) => (i === null || flatCards.length === 0 ? i : (i - 1 + flatCards.length) % flatCards.length))
+  }
+  const showNext = () => {
+    setDragX(0)
+    setPreviewIndex((i) => (i === null || flatCards.length === 0 ? i : (i + 1) % flatCards.length))
+  }
+
+  // Keyboard nav (←/→/Esc) + lock background scroll while the preview is open.
+  useEffect(() => {
+    if (previewIndex === null) return
+    document.body.style.overflow = 'hidden'
+    const total = flatCards.length
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setPreviewIndex(null)
+      } else if (event.key === 'ArrowRight') {
+        setDragX(0)
+        setPreviewIndex((i) => (i === null || total === 0 ? i : (i + 1) % total))
+      } else if (event.key === 'ArrowLeft') {
+        setDragX(0)
+        setPreviewIndex((i) => (i === null || total === 0 ? i : (i - 1 + total) % total))
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = ''
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [previewIndex, flatCards.length])
+
+  const onImageTouchStart = (event: React.TouchEvent) => {
+    dragStartRef.current = event.touches[0].clientX
+    draggingRef.current = true
+  }
+  const onImageTouchMove = (event: React.TouchEvent) => {
+    if (!draggingRef.current || dragStartRef.current === null) return
+    setDragX(event.touches[0].clientX - dragStartRef.current)
+  }
+  const onImageTouchEnd = () => {
+    if (!draggingRef.current) return
+    draggingRef.current = false
+    dragStartRef.current = null
+    const threshold = 48
+    if (dragX > threshold) showPrev()
+    else if (dragX < -threshold) showNext()
+    else setDragX(0)
+  }
+
+  // Switching tabs re-filters the grid above the fold — scroll back to the top
+  // so the reader lands on the new deck instead of wherever they'd scrolled to.
+  const isFirstDeckRender = useRef(true)
+  useEffect(() => {
+    if (isFirstDeckRender.current) { isFirstDeckRender.current = false; return }
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [activeDeck])
 
   useEffect(() => {
     document.title = 'EmCoin - Bộ thẻ'
@@ -212,7 +292,7 @@ export default function AboutCards2D() {
 
               <div className="catalog-grid">
                 {deck.cards.map((card) => (
-                  <button className="catalog-card" key={`${deck.id}-${card.code}`} type="button" onClick={() => setPreview(card)}>
+                  <button className="catalog-card" key={`${deck.id}-${card.code}`} type="button" onClick={() => openPreview(card)}>
                     <img src={card.image} alt={card.title} loading="lazy" decoding="async" />
                     <span>{card.title}</span>
                   </button>
@@ -235,14 +315,43 @@ export default function AboutCards2D() {
       </div>
 
       {preview && (
-        <div className="preview-layer" role="dialog" aria-modal="true" aria-label={preview.title} onClick={() => setPreview(null)}>
+        <div className="preview-layer" role="dialog" aria-modal="true" aria-label={preview.title} onClick={closePreview}>
           <div className="preview-card" onClick={(event) => event.stopPropagation()}>
-            <button className="preview-close" type="button" aria-label="Đóng xem trước" onClick={() => setPreview(null)}>
+            <button className="preview-close" type="button" aria-label="Đóng xem trước" onClick={closePreview}>
               <X aria-hidden="true" />
             </button>
-            <img src={preview.image} alt={preview.title} />
+
+            <div
+              className="preview-image-wrap"
+              onTouchStart={onImageTouchStart}
+              onTouchMove={onImageTouchMove}
+              onTouchEnd={onImageTouchEnd}
+            >
+              {flatCards.length > 1 && (
+                <button className="preview-nav prev" type="button" aria-label="Thẻ trước" onClick={showPrev}>
+                  <ChevronLeft aria-hidden="true" />
+                </button>
+              )}
+              <img
+                src={preview.image}
+                alt={preview.title}
+                style={{
+                  transform: `translateX(${dragX}px)`,
+                  transition: draggingRef.current ? 'none' : 'transform .25s ease',
+                }}
+              />
+              {flatCards.length > 1 && (
+                <button className="preview-nav next" type="button" aria-label="Thẻ tiếp theo" onClick={showNext}>
+                  <ChevronRight aria-hidden="true" />
+                </button>
+              )}
+            </div>
+
             <div>
-              <span>{preview.deckLabel}</span>
+              <span>
+                {preview.deckLabel}
+                {flatCards.length > 1 && ` · ${(previewIndex ?? 0) + 1}/${flatCards.length}`}
+              </span>
               <h2>{preview.title}</h2>
             </div>
           </div>
@@ -561,13 +670,56 @@ export default function AboutCards2D() {
           animation: previewPop .2s ease both;
         }
 
-        .preview-card img {
+        .preview-image-wrap {
+          position: relative;
+          touch-action: pan-y;
+        }
+
+        .preview-image-wrap img {
           width: 100%;
           max-height: 72dvh;
           display: block;
           object-fit: contain;
           border-radius: 18px;
           background: rgba(210,248,255,.32);
+          user-select: none;
+          -webkit-user-drag: none;
+        }
+
+        .preview-nav {
+          position: absolute;
+          top: 50%;
+          z-index: 1;
+          width: 40px;
+          height: 40px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid rgba(35, 95, 148, .12);
+          border-radius: 999px;
+          background: rgba(255,255,255,.88);
+          color: var(--blue);
+          cursor: pointer;
+          box-shadow: 0 10px 22px rgba(35, 95, 148, .16);
+          transform: translateY(-50%);
+          transition: transform .15s ease, background .15s ease;
+        }
+
+        .preview-nav:hover {
+          background: white;
+          transform: translateY(-50%) scale(1.06);
+        }
+
+        .preview-nav:active {
+          transform: translateY(-50%) scale(.94);
+        }
+
+        .preview-nav.prev { left: 10px; }
+        .preview-nav.next { right: 10px; }
+
+        .preview-nav svg {
+          width: 20px;
+          height: 20px;
         }
 
         .preview-card span {

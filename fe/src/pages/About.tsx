@@ -1,8 +1,9 @@
 import { useEffect } from 'react'
-import { ArrowDown, Globe2, Mail } from 'lucide-react'
+import { ArrowDown, ChevronsRight, Globe2, Mail } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import SiteHeader from '@/components/site/SiteHeader'
+import AboutFlowPath from '@/components/site/AboutFlowPath'
 
 const quickStats = [
   ['10-15', 'độ tuổi trọng tâm'],
@@ -64,23 +65,54 @@ export default function About() {
 
   useEffect(() => {
     const root = document.querySelector('.about-page')
-    const targets = document.querySelectorAll('.hero-copy, .stats, .section, .footer-card')
-    root?.classList.add('motion-ready')
-    targets.forEach((target) => target.classList.add('reveal-target'))
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return
-          entry.target.classList.add('is-visible')
-          observer.unobserve(entry.target)
-        })
-      },
-      { rootMargin: '0px 0px -12% 0px', threshold: 0.12 },
+    // Section-level blocks fade up as one piece; the individual cards inside
+    // grid-y sections (steps, roles, team, stats) each get their own slide-in
+    // with a per-item stagger driven by CSS nth-child delays. The deck-card
+    // grid is deliberately excluded: on mobile it becomes a horizontal
+    // scroll-snap carousel, and cards past the first sit way outside the
+    // viewport's x-range, so the viewport-rooted IntersectionObserver never
+    // sees enough of them to cross the reveal threshold — they'd stay stuck
+    // mid-transition (faded out, scaled down) no matter how far the user
+    // swipes. The whole #cards section still fades in via `.section` above.
+    const sectionTargets = document.querySelectorAll('.hero-copy, .section, .footer-card')
+    const cardTargets = document.querySelectorAll(
+      '.problem-grid article, .steps article, .role-list article, .team-strip article, .stats article',
     )
+    // `motion-priming` forces transitions off while we first apply the
+    // hidden (opacity:0) state. Without it, going from "no rule" (opacity 1,
+    // the element's first-ever painted state) to `.reveal-target` (opacity 0)
+    // is itself a transition — an unwanted fade-out — and for anything
+    // already in view on load, `is-visible` gets added a moment later,
+    // reversing that fade-out before it's even perceptible. Net effect: the
+    // element just sits at opacity 1 the whole time, no visible animation.
+    // Priming snaps straight to hidden with no animation, then we re-enable
+    // transitions before the observer can ever add `is-visible`, so the only
+    // transition that ever plays is the real fade/slide-in.
+    root?.classList.add('motion-ready', 'motion-priming')
+    sectionTargets.forEach((target) => target.classList.add('reveal-target'))
+    cardTargets.forEach((target) => target.classList.add('reveal-card'))
 
-    targets.forEach((target) => observer.observe(target))
-    return () => observer.disconnect()
+    let observer: IntersectionObserver | undefined
+    const raf = requestAnimationFrame(() => {
+      root?.classList.remove('motion-priming')
+      observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return
+            entry.target.classList.add('is-visible')
+            observer!.unobserve(entry.target)
+          })
+        },
+        { rootMargin: '0px 0px -12% 0px', threshold: 0.12 },
+      )
+      sectionTargets.forEach((target) => observer!.observe(target))
+      cardTargets.forEach((target) => observer!.observe(target))
+    })
+
+    return () => {
+      cancelAnimationFrame(raf)
+      observer?.disconnect()
+    }
   }, [])
 
   return (
@@ -107,6 +139,9 @@ export default function About() {
         </div>
       </section>
 
+      <div className="about-flow-zone">
+        <AboutFlowPath />
+        <div className="about-flow-content">
       <section className="stats" aria-label="Thông tin nhanh">
         {quickStats.map(([value, label]) => (
           <article key={label}>
@@ -136,6 +171,9 @@ export default function About() {
             </Link>
           ))}
         </div>
+        <p className="card-grid-hint" aria-hidden="true">
+          Vuốt sang để xem đủ 4 bộ thẻ <ChevronsRight size={16} />
+        </p>
       </section>
 
       <section className="section image-section">
@@ -151,6 +189,8 @@ export default function About() {
           </p>
         </div>
       </section>
+        </div>
+      </div>
 
       <section id="gallery" className="section gallery-section">
         <div className="section-heading">
@@ -359,15 +399,53 @@ export default function About() {
             transform 720ms cubic-bezier(.2,.7,.2,1);
         }
 
+        .motion-ready.motion-priming .reveal-target,
+        .motion-ready.motion-priming .reveal-card {
+          transition: none !important;
+        }
+
         .motion-ready .reveal-target.is-visible {
           opacity: 1;
           transform: translateY(0);
         }
 
-        .section {
-          content-visibility: auto;
-          contain-intrinsic-size: 1px 760px;
+        /* Individual cards inside a grid slide in from alternating sides
+           (odd items from the left, even from the right) with a per-item
+           stagger, so a row cascades in with some left/right variety instead
+           of every card just rising from the bottom in a monotonous line. */
+        .motion-ready .reveal-card {
+          opacity: 0;
+          transform: translateY(20px) translateX(-38px) scale(.96);
+          transition:
+            opacity 640ms cubic-bezier(.2,.7,.2,1),
+            transform 640ms cubic-bezier(.2,.7,.2,1);
         }
+
+        .motion-ready .reveal-card:nth-child(even) {
+          transform: translateY(20px) translateX(38px) scale(.96);
+        }
+
+        .motion-ready .reveal-card.is-visible {
+          opacity: 1;
+          transform: none;
+        }
+
+        .reveal-card:nth-child(1) { transition-delay: 0ms; }
+        .reveal-card:nth-child(2) { transition-delay: 90ms; }
+        .reveal-card:nth-child(3) { transition-delay: 180ms; }
+        .reveal-card:nth-child(4) { transition-delay: 270ms; }
+        .reveal-card:nth-child(5) { transition-delay: 360ms; }
+        .reveal-card:nth-child(6) { transition-delay: 450ms; }
+        .reveal-card:nth-child(7) { transition-delay: 540ms; }
+
+        /* content-visibility:auto previously let the browser skip layout for
+           off-screen sections using a guessed placeholder height, but with
+           the reveal-card stagger animations changing each section's real
+           height dynamically, the guess drifts and the browser has to snap
+           to the true size mid-scroll — visible as content briefly jumping
+           and overlapping the section above it. Full, always-laid-out
+           sections are more predictable and this page isn't long enough for
+           the render-skipping to matter for performance. */
 
         .about-nav {
           position: fixed;
@@ -601,7 +679,7 @@ export default function About() {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           gap: 14px;
-          margin-top: -44px;
+          margin-top: 32px;
         }
 
         .stats article,
@@ -638,7 +716,7 @@ export default function About() {
         }
 
         .section {
-          padding-top: 90px;
+          padding-top: 122px;
         }
 
         .split,
@@ -806,6 +884,10 @@ export default function About() {
           gap: 16px;
           margin-top: 32px;
           perspective: 1200px;
+        }
+
+        .card-grid-hint {
+          display: none;
         }
 
         .deck-card-link {
@@ -1037,7 +1119,7 @@ export default function About() {
         }
 
         .about-footer {
-          margin-top: 92px;
+          margin-top: 118px;
           padding: 42px 0 48px;
           color: var(--muted);
           font-size: 15px;
@@ -1320,20 +1402,40 @@ export default function About() {
           }
 
           .card-grid article {
-            min-width: min(82vw, 340px);
+            min-width: min(78vw, 320px);
             grid-template-columns: 88px minmax(0, 1fr);
             gap: 14px;
             padding: 12px;
           }
 
           .deck-card-link {
-            min-width: min(82vw, 340px);
+            min-width: min(78vw, 320px);
             scroll-snap-align: center;
           }
 
           .card-grid::-webkit-scrollbar,
           .trial-gallery::-webkit-scrollbar {
             display: none;
+          }
+
+          .card-grid-hint {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            margin: 10px 0 0;
+            color: var(--muted);
+            font-size: 12.5px;
+            font-weight: 700;
+          }
+
+          .card-grid-hint svg {
+            animation: card-grid-hint-nudge 1.4s ease-in-out infinite;
+          }
+
+          @keyframes card-grid-hint-nudge {
+            0%, 100% { transform: translateX(0); opacity: .7; }
+            50% { transform: translateX(5px); opacity: 1; }
           }
 
           .card-grid img {
@@ -1363,7 +1465,7 @@ export default function About() {
           }
 
           .section {
-            padding-top: 64px;
+            padding-top: 80px;
           }
 
           .section h2 {
@@ -1471,10 +1573,15 @@ export default function About() {
             animation: none;
           }
 
-          .motion-ready .reveal-target {
+          .motion-ready .reveal-target,
+          .motion-ready .reveal-card {
             opacity: 1;
             transform: none;
             transition: none;
+          }
+
+          .card-grid-hint svg {
+            animation: none;
           }
         }
       `}</style>

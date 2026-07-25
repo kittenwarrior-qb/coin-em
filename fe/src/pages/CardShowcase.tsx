@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { RotateCcw, RotateCw } from 'lucide-react'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js'
@@ -29,15 +30,14 @@ const DEFAULT_ZOOM = 0.92
 // character model loads so it starts front-facing instead of edge-on.
 const CHARACTER_FRONT_YAW = -0.9
 
+// Only 3 physical coins exist (Đỏ, Vàng, Xanh); each is double-sided, so every
+// coin is a single flip card showing its two faces — not 2 separate cards.
 const coinDeck: ShowcaseDeck = {
-  id: 'coin', label: 'Coin', count: 6,
+  id: 'coin', label: 'Coin', count: 3,
   cards: [
-    { title: 'Đỏ 1', group: 'coin', front: CARD_IMAGES.coins.red1, back: CARD_IMAGES.coins.red2 },
-    { title: 'Đỏ 2', group: 'coin', front: CARD_IMAGES.coins.red2, back: CARD_IMAGES.coins.red1 },
-    { title: 'Vàng 1', group: 'coin', front: CARD_IMAGES.coins.yellow1, back: CARD_IMAGES.coins.yellow2 },
-    { title: 'Vàng 2', group: 'coin', front: CARD_IMAGES.coins.yellow2, back: CARD_IMAGES.coins.yellow1 },
-    { title: 'Xanh 1', group: 'coin', front: CARD_IMAGES.coins.green1, back: CARD_IMAGES.coins.green2 },
-    { title: 'Xanh 2', group: 'coin', front: CARD_IMAGES.coins.green2, back: CARD_IMAGES.coins.green1 },
+    { title: 'Đỏ', group: 'coin', front: CARD_IMAGES.coins.red1, back: CARD_IMAGES.coins.red2 },
+    { title: 'Vàng', group: 'coin', front: CARD_IMAGES.coins.yellow1, back: CARD_IMAGES.coins.yellow2 },
+    { title: 'Xanh', group: 'coin', front: CARD_IMAGES.coins.green1, back: CARD_IMAGES.coins.green2 },
   ],
 }
 
@@ -116,7 +116,6 @@ export default function CardShowcase() {
   const [autoRotate, setAutoRotate] = useState(false)
   const [leftOpen, setLeftOpen] = useState(false)
   const [rightOpen, setRightOpen] = useState(false)
-  const [flipSignal, setFlipSignal] = useState(0)
   const [cardLoading, setCardLoading] = useState(true)
   const hostRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -132,7 +131,12 @@ export default function CardShowcase() {
   const slideControllerRef = useRef<{ setInitial: (front: THREE.Texture, back: THREE.Texture) => void; transition: (front: THREE.Texture, back: THREE.Texture, direction: number) => void } | null>(null)
   const cardDirectionRef = useRef(1)
   const dragRef = useRef({ active: false, lastX: 0, lastY: 0 })
-  const swipeStartRef = useRef<{ x: number; y: number; t: number } | null>(null)
+  const tapStartRef = useRef<{ x: number; y: number; t: number } | null>(null)
+  // Tracks the yaw the current flip started/ends at so the scale-pulse can be
+  // driven by actual rotation progress instead of a guessed fixed duration —
+  // it reaches full size again exactly when the 180° turn visually finishes.
+  const flipPulseRef = useRef<{ startYaw: number; targetYaw: number } | null>(null)
+  const triggerFlipRef = useRef<(() => void) | null>(null)
   const groupRef = useRef<THREE.Group | null>(null)
   const incomingGroupRef = useRef<THREE.Group | null>(null)
   const characterGroupRef = useRef<THREE.Group | null>(null)
@@ -155,15 +159,16 @@ export default function CardShowcase() {
     rotationRef.current = isCharacterDeck ? CHARACTER_FRONT_YAW : 0
     verticalRotationRef.current = 0
     flipTargetRef.current = 0
+    flipPulseRef.current = null
   }, [activeDeck?.id, isCharacterDeck])
   useEffect(() => { autoRotateRef.current = autoRotate }, [autoRotate])
   useEffect(() => { isCharacterModeRef.current = isCharacterDeck }, [isCharacterDeck])
-  useEffect(() => { flipTargetRef.current += Math.PI }, [flipSignal])
 
   const resetView = (preserveZoom = false) => {
     rotationRef.current = isCharacterModeRef.current ? CHARACTER_FRONT_YAW : 0
     verticalRotationRef.current = 0
     flipTargetRef.current = 0
+    flipPulseRef.current = null
     if (!preserveZoom) zoomRef.current = DEFAULT_ZOOM
   }
 
@@ -175,11 +180,6 @@ export default function CardShowcase() {
     setCardIndex((current) => (current + offset + count) % count)
     setRightOpen(false)
   }
-  // The canvas swipe-to-change-card gesture lives inside the mount-once Three.js
-  // effect below, so it reaches moveCard through a ref that's always current
-  // instead of closing over the first render's stale version.
-  const moveCardRef = useRef(moveCard)
-  useEffect(() => { moveCardRef.current = moveCard })
   useEffect(() => {
     if (!activeCard) return
     resetView(true)
@@ -204,6 +204,12 @@ export default function CardShowcase() {
     const group = new THREE.Group(); const incomingGroup = new THREE.Group(); scene.add(group, incomingGroup); incomingGroup.visible = false
     const characterGroup = new THREE.Group(); characterGroup.visible = false; scene.add(characterGroup)
     groupRef.current = group; incomingGroupRef.current = incomingGroup; characterGroupRef.current = characterGroup
+    const triggerFlip = () => {
+      const activeGroup = isCharacterModeRef.current ? characterGroup : group
+      flipTargetRef.current += Math.PI
+      flipPulseRef.current = { startYaw: activeGroup.rotation.y, targetYaw: activeGroup.rotation.y + Math.PI }
+    }
+    triggerFlipRef.current = triggerFlip
     const faceGeometry = cardFace(CARD_WIDTH, CARD_HEIGHT, CARD_RADIUS)
     const backGeometry = cardFace(CARD_WIDTH, CARD_HEIGHT, CARD_RADIUS)
     const sideGeometry = new THREE.ExtrudeGeometry(roundedShape(CARD_WIDTH, CARD_HEIGHT, CARD_RADIUS), { depth: CARD_DEPTH, bevelEnabled: false, curveSegments: 24 })
@@ -293,11 +299,10 @@ export default function CardShowcase() {
       canvas.setPointerCapture?.(event.pointerId)
       if (activePointers.size === 1) {
         dragRef.current = { active: true, lastX: event.clientX, lastY: event.clientY }
-        swipeStartRef.current = { x: event.clientX, y: event.clientY, t: performance.now() }
-        setAutoRotate(false)
+        tapStartRef.current = { x: event.clientX, y: event.clientY, t: performance.now() }
       } else if (activePointers.size === 2) {
         dragRef.current.active = false
-        swipeStartRef.current = null
+        tapStartRef.current = null
         const [a, b] = Array.from(activePointers.values())
         pinchStartDist = Math.hypot(a.x - b.x, a.y - b.y)
         pinchStartZoom = zoomRef.current
@@ -319,19 +324,19 @@ export default function CardShowcase() {
       verticalRotationRef.current = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, verticalRotationRef.current + deltaY * 0.012))
     }
     const up = (event: PointerEvent) => {
-      const wasSoloDrag = activePointers.size === 1 && swipeStartRef.current
+      const wasSoloDrag = activePointers.size === 1 && tapStartRef.current
       if (wasSoloDrag) {
-        const start = swipeStartRef.current!
+        const start = tapStartRef.current!
         const dx = event.clientX - start.x
         const dy = event.clientY - start.y
         const elapsed = performance.now() - start.t
-        // A quick, mostly-horizontal flick changes the card; a slower or more
-        // vertical drag was just rotating the object and shouldn't also swipe.
-        if (elapsed < 650 && Math.abs(dx) > 44 && Math.abs(dx) > Math.abs(dy) * 1.4) {
-          moveCardRef.current(dx < 0 ? 1 : -1)
+        // A quick tap with barely any movement flips the card; anything that
+        // moved further was a rotate-drag and shouldn't also trigger a flip.
+        if (elapsed < 320 && Math.hypot(dx, dy) < 12) {
+          triggerFlip()
         }
       }
-      swipeStartRef.current = null
+      tapStartRef.current = null
       activePointers.delete(event.pointerId)
       if (activePointers.size < 2) pinchStartDist = 0
       if (activePointers.size === 0) dragRef.current.active = false
@@ -357,6 +362,22 @@ export default function CardShowcase() {
       const baseRoll = idleTilt
       const floatY = Math.sin(now / 1900) * 0.045
 
+      // A tap-to-flip (or the Lật button) pulses the scale up and back down —
+      // driven by how far the rotation itself has actually turned rather than
+      // a guessed fixed duration, so full size lands exactly when the 180°
+      // turn visually finishes (works regardless of frame rate or auto-rotate
+      // speed changes mid-flip).
+      let flipPulse = 1
+      if (flipPulseRef.current) {
+        const activeGroup = isCharacterModeRef.current ? characterGroup : group
+        const { startYaw, targetYaw } = flipPulseRef.current
+        const total = targetYaw - startYaw
+        const remaining = targetYaw - activeGroup.rotation.y
+        const progress = total !== 0 ? Math.min(1, Math.max(0, 1 - Math.abs(remaining / total))) : 1
+        if (progress >= 0.99) flipPulseRef.current = null
+        else flipPulse = 1 + Math.sin(progress * Math.PI) * 0.1
+      }
+
       if (isCharacterModeRef.current) {
         camera.position.set(0, 0.05, characterDistanceRef.current / zoomRef.current)
         camera.lookAt(0, 0, 0)
@@ -365,7 +386,7 @@ export default function CardShowcase() {
         characterGroup.rotation.z += (baseRoll - characterGroup.rotation.z) * 0.1
         characterGroup.position.y += (floatY - characterGroup.position.y) * 0.06
         characterIntroRef.current += (1 - characterIntroRef.current) * 0.2
-        characterGroup.scale.setScalar(0.9 + characterIntroRef.current * 0.1)
+        characterGroup.scale.setScalar((0.9 + characterIntroRef.current * 0.1) * flipPulse)
       } else {
         camera.position.set(0, 0.08, 6.75 / zoomRef.current)
         camera.lookAt(0, 0, 0)
@@ -374,7 +395,7 @@ export default function CardShowcase() {
       group.rotation.y += (baseYaw - group.rotation.y) * 0.12
       group.rotation.x += (basePitch - group.rotation.x) * 0.12
       group.rotation.z += (baseRoll - group.rotation.z) * 0.1
-      group.scale.setScalar(1)
+      group.scale.setScalar(flipPulse)
       group.position.z += (group.position.z * -1) * 0.12
       group.position.y += (floatY - group.position.y) * 0.06
       if (slide) {
@@ -406,7 +427,7 @@ export default function CardShowcase() {
     }
     animate()
     return () => {
-      slideControllerRef.current = null; regenerateEnvironmentRef.current = null; cancelAnimationFrame(frame)
+      slideControllerRef.current = null; regenerateEnvironmentRef.current = null; triggerFlipRef.current = null; cancelAnimationFrame(frame)
       canvas.removeEventListener('pointerdown', down); window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('resize', resize); canvas.removeEventListener('wheel', onWheel)
       canvas.removeEventListener('webglcontextlost', onContextLost); canvas.removeEventListener('webglcontextrestored', onContextRestored)
       frontMaterial.dispose(); backMaterial.dispose(); sideMaterial.dispose(); incomingFrontMaterial.dispose(); incomingBackMaterial.dispose(); incomingSideMaterial.dispose(); faceGeometry.dispose(); backGeometry.dispose(); sideGeometry.dispose()
@@ -534,10 +555,13 @@ export default function CardShowcase() {
       .side-nav-button { display:grid; place-items:center; width:46px; height:46px; border:1px solid rgba(255,255,255,.9); border-radius:50%; background:rgba(255,255,255,.88); color:var(--ink); box-shadow:0 12px 26px rgba(22,77,120,.18); font:900 28px/1 var(--font-body); cursor:pointer; pointer-events:auto; transition:transform 160ms ease,background 160ms ease; }
       .side-nav-button:hover { background:#fff; transform:scale(1.06); }
       .side-nav-button:active { transform:scale(.94); }
+      .right-actions { position:absolute; top:66px; right:12px; z-index:4; display:flex; flex-direction:column; gap:10px; }
+      .right-action-btn { display:grid; place-items:center; width:38px; height:38px; border:1px solid rgba(22,77,120,.12); border-radius:50%; background:rgba(255,255,255,.82); backdrop-filter:blur(10px); color:var(--ink); box-shadow:0 8px 18px rgba(22,77,120,.14); cursor:pointer; transition:transform 160ms ease; }
+      .right-action-btn:active { transform:scale(.92); }
       .canvas-loading-hint { position:fixed; inset:0; z-index:30; display:grid; place-items:center; padding:24px; color:var(--ink); font:900 13px var(--font-body); text-align:center; pointer-events:none; }
       .deck-row,.card-row { display:flex; gap:8px; overflow-x:auto; padding:2px 2px 8px; scrollbar-width:none; } .deck-row::-webkit-scrollbar,.card-row::-webkit-scrollbar { display:none; }
-      .deck-chip,.card-chip { border:1px solid rgba(22,77,120,.12); border-radius:999px; background:#fff; color:var(--ink); font:800 14px var(--font-body); white-space:nowrap; cursor:pointer; transition:transform 160ms ease,background 160ms ease; } .deck-chip:active,.card-chip:active,.action-row button:active { transform:scale(.97); } .deck-chip { min-height:38px; padding:8px 12px; } .card-chip { min-height:32px; padding:6px 10px; font-size:12px; } .deck-chip.active { border-color:transparent; color:#fff; background:var(--accent); } .card-chip.active { border-color:var(--accent); color:var(--accent); }
-      .action-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px; } .action-row button { min-height:48px; border:0; border-radius:12px; color:#fff; background:var(--accent); box-shadow:0 9px 18px rgba(22,77,120,.14); font:900 14px var(--font-body); cursor:pointer; } .report-link { display:block; margin:12px 0 0; color:var(--muted); text-align:center; font-size:12px; font-weight:800; text-decoration:none; }
+      .deck-chip,.card-chip { border:1px solid rgba(22,77,120,.12); border-radius:999px; background:#fff; color:var(--ink); font:800 14px var(--font-body); white-space:nowrap; cursor:pointer; transition:transform 160ms ease,background 160ms ease; } .deck-chip:active,.card-chip:active { transform:scale(.97); } .deck-chip { min-height:38px; padding:8px 12px; } .card-chip { min-height:32px; padding:6px 10px; font-size:12px; } .deck-chip.active { border-color:transparent; color:#fff; background:var(--accent); } .card-chip.active { border-color:var(--accent); color:var(--accent); }
+      .report-link { display:block; margin:12px 0 0; color:var(--muted); text-align:center; font-size:12px; font-weight:800; text-decoration:none; }
       .showcase-loading { position:fixed; inset:0; z-index:40; display:grid; place-items:center; padding:24px; color:var(--ink); background:radial-gradient(circle at 50% 38%,rgba(255,255,255,.96) 0,rgba(255,255,255,.72) 42%,rgba(255,239,247,.94) 100%); font-size:20px; font-weight:900; text-align:center; pointer-events:none; }
       .panel-backdrop { position:absolute; inset:0; z-index:3; background:transparent; }
       .bottom-bar { position:absolute; left:50%; bottom:calc(16px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:4; display:flex; align-items:center; gap:10px; }
@@ -548,7 +572,6 @@ export default function CardShowcase() {
       .bottom-panel::-webkit-scrollbar { display:none; }
       .bottom-panel .deck-row,.bottom-panel .card-row { display:grid; grid-template-columns:1fr; max-height:38dvh; overflow:auto; padding:0; }
       .bottom-panel .deck-chip,.bottom-panel .card-chip { min-height:36px; padding:6px 10px; overflow:hidden; text-overflow:ellipsis; }
-      .bottom-panel .action-row { grid-template-columns:1fr 1fr; margin-top:8px; }
       .bottom-panel .report-link { display:block; margin-top:10px; }
       @media (max-width:360px) { .bottom-panel { width:min(190px,66vw); } .showcase-title span { font-size:10px; } }
     `}</style>
@@ -568,6 +591,10 @@ export default function CardShowcase() {
         <button className="side-nav-button" type="button" onClick={() => moveCard(-1)} aria-label="Card trước">‹</button>
         <button className="side-nav-button" type="button" onClick={() => moveCard(1)} aria-label="Card kế tiếp">›</button>
       </div>
+      <div className="right-actions">
+        <button className="right-action-btn" type="button" onClick={() => triggerFlipRef.current?.()} aria-label="Lật 180°"><RotateCw size={18} /></button>
+        <button className="right-action-btn" type="button" onClick={() => resetView()} aria-label="Về vị trí cũ"><RotateCcw size={18} /></button>
+      </div>
       <div className="bottom-bar">
         <div className="bottom-trigger-wrap">
           <button className="bottom-trigger" type="button" onClick={() => { setLeftOpen((value) => !value); setRightOpen(false) }} aria-expanded={leftOpen}>Bộ thẻ</button>
@@ -576,7 +603,7 @@ export default function CardShowcase() {
         <span className="bottom-counter">{activeDeck ? `${cardIndex + 1}/${activeDeck.cards.length}` : '0/0'}</span>
         <div className="bottom-trigger-wrap">
           <button className="bottom-trigger" type="button" onClick={() => { setRightOpen((value) => !value); setLeftOpen(false) }} aria-expanded={rightOpen}>Điều khiển</button>
-          {rightOpen && <div className="bottom-panel"><div className="card-row" aria-label="Chọn lá thẻ">{activeDeck?.cards.map((card, index) => <button className={`card-chip ${index === cardIndex ? 'active' : ''}`} key={`${activeDeck.id}-${card.front}`} type="button" onClick={() => { resetView(true); cardDirectionRef.current = index >= cardIndex ? 1 : -1; setCardIndex(index); setRightOpen(false) }}>{card.title}</button>)}</div><div className="action-row"><button type="button" onClick={() => setFlipSignal((value) => value + 1)}>Lật 180°</button><button type="button" onClick={() => resetView()}>Về vị trí cũ</button></div>{!isCharacterDeck && <a className="report-link" href="/report">Đọc báo cáo →</a>}</div>}
+          {rightOpen && <div className="bottom-panel"><div className="card-row" aria-label="Chọn lá thẻ">{activeDeck?.cards.map((card, index) => <button className={`card-chip ${index === cardIndex ? 'active' : ''}`} key={`${activeDeck.id}-${card.front}`} type="button" onClick={() => { resetView(true); cardDirectionRef.current = index >= cardIndex ? 1 : -1; setCardIndex(index); setRightOpen(false) }}>{card.title}</button>)}</div>{!isCharacterDeck && <a className="report-link" href="/report">Đọc báo cáo →</a>}</div>}
         </div>
       </div>
     </div>
