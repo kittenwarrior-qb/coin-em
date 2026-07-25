@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+/* Global safety net: nothing on any page should ever be able to create a
+   real horizontal page scrollbar (decorative bleeds, pre-reveal animation
+   transforms, or anything rendered via a portal straight into <body> that a
+   page-scoped `overflow-x:hidden` container can't reach). Nested horizontal
+   carousels keep their own overflow-x:auto and scroll independently of this. */
+html, body {
+  overflow-x: hidden;
+}
+
 /* ─── Cartoon GUI Pack Fonts ─────────────────────────────────────────────── */
 @font-face {
   font-family: 'LilitaOne';

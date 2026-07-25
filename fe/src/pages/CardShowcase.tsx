@@ -8,14 +8,15 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
 import { CARD_IMAGES } from '@/constants/cardImages'
 import { characters3D } from './characterModels'
 
-type ShowcaseCard = { title: string; group: string; front: string; back: string; kind?: 'model' }
+type ShowcaseCard = { title: string; group: string; front: string; back: string; kind?: 'model' | 'sticker' }
+type StickerOutline = { label: string; aspect: number; points: [number, number][] }
 type ShowcaseDeck = { id: string; label: string; count: number; cards: ShowcaseCard[] }
 
 const deckColors: Record<string, string> = {
-  role: '#f5b700', situation: '#2f76ac', emotion: '#ed5b87', reflection: '#49a923', selfcare: '#ef7d3d', characters3d: '#7b4fd4',
+  role: '#f5b700', situation: '#2f76ac', emotion: '#ed5b87', reflection: '#49a923', selfcare: '#ef7d3d', characters3d: '#7b4fd4', sticker: '#f2789f',
 }
 const deckLabels: Record<string, string> = {
-  role: 'Vai trò', situation: 'Tình huống', emotion: 'Cảm xúc', reflection: 'Phản tư', selfcare: 'Bí kíp ôm', coin: 'Coin', characters3d: 'Nhân vật 3D',
+  role: 'Vai trò', situation: 'Tình huống', emotion: 'Cảm xúc', reflection: 'Phản tư', selfcare: 'Bí kíp ôm', coin: 'Coin', characters3d: 'Nhân vật 3D', sticker: 'Sticker',
 }
 
 const CARD_HEIGHT = 2.38
@@ -63,6 +64,40 @@ const charactersDeck: ShowcaseDeck = {
   cards: characters3D.map((character) => ({ title: character.label, group: 'character', front: character.file, back: character.file, kind: 'model' as const })),
 }
 
+// Die-cut 3D stickers: each is an extruded slice of the sticker's PNG silhouette
+// (a thin white body) with the artwork printed on the front face. Outlines +
+// aspect ratios live in /stickers/outlines.json (generated offline from the PNGs).
+const STICKER_HEIGHT = 2.0   // world units (a touch smaller than a card)
+const STICKER_DEPTH = 0.08   // thickness — "dày 1 xíu" like a real sticker
+const STICKER_BEVEL = 0.03   // rounded die-cut edge
+const stickerModels = [
+  { slug: 'gian-du', label: 'Giận dữ' },
+  { slug: 'mong-doi', label: 'Mong đợi' },
+  { slug: 'vui-ve', label: 'Vui vẻ' },
+  { slug: 'tin-tuong', label: 'Tin tưởng' },
+  { slug: 'so-hai', label: 'Sợ hãi' },
+  { slug: 'bat-ngo', label: 'Bất ngờ' },
+  { slug: 'buon-ba', label: 'Buồn bã' },
+  { slug: 'chan-ghet', label: 'Chán ghét' },
+  // Thú cưng (thêm vào cuối)
+  { slug: 'pet-bear', label: 'Gấu' },
+  { slug: 'pet-bird-blue', label: 'Chim xanh' },
+  { slug: 'pet-bird', label: 'Chim' },
+  { slug: 'pet-cat2', label: 'Mèo 1' },
+  { slug: 'pet-cathead', label: 'Mèo 2' },
+  { slug: 'pet-cat', label: 'Mèo 3' },
+  { slug: 'pet-bunny2', label: 'Thỏ 1' },
+  { slug: 'pet-bunny', label: 'Thỏ 2' },
+  { slug: 'pet-rabbithead', label: 'Thỏ 3' },
+  { slug: 'pet-fish2', label: 'Hải cẩu' },
+  { slug: 'pet-fish', label: 'Cá' },
+]
+const stickerDeck: ShowcaseDeck = {
+  id: 'sticker', label: 'Sticker', count: stickerModels.length,
+  // `back` stashes the slug so the builder can look up its outline in outlines.json
+  cards: stickerModels.map((s) => ({ title: s.label, group: 'sticker', front: `/stickers/${s.slug}.webp`, back: s.slug, kind: 'sticker' as const })),
+}
+
 function roundedShape(width: number, height: number, radius: number) {
   const x = -width / 2; const y = -height / 2
   const shape = new THREE.Shape()
@@ -88,6 +123,55 @@ function cardFace(width: number, height: number, radius: number) {
   return geometry
 }
 
+// Build a die-cut sticker: a white extruded body in the PNG's silhouette shape,
+// with the artwork drawn on the front face. `points` are normalized [0,1] image
+// coords (y-down); the texture is the same trimmed PNG so UVs line up 1:1.
+function buildStickerMesh(points: [number, number][], aspect: number, texture: THREE.Texture) {
+  const height = STICKER_HEIGHT
+  const width = height * aspect
+  const shape = new THREE.Shape()
+  points.forEach(([x, y], index) => {
+    const sx = (x - 0.5) * width
+    const sy = (0.5 - y) * height
+    if (index === 0) shape.moveTo(sx, sy)
+    else shape.lineTo(sx, sy)
+  })
+  shape.closePath()
+
+  const bodyGeometry = new THREE.ExtrudeGeometry(shape, {
+    depth: STICKER_DEPTH, bevelEnabled: true,
+    bevelThickness: STICKER_BEVEL, bevelSize: STICKER_BEVEL, bevelSegments: 5, curveSegments: 1,
+  })
+  bodyGeometry.computeBoundingBox()
+  const bb = bodyGeometry.boundingBox!
+  const halfDepth = (bb.max.z - bb.min.z) / 2
+  bodyGeometry.center()
+  // Paper body, two materials: ExtrudeGeometry puts the flat front/back caps in
+  // material group 0 and the extruded rim (side walls + bevel) in group 1. The
+  // caps stay soft off-white paper; the rim is a touch greyer so the thickness
+  // reads clearly and front vs back are easy to tell apart while rotating.
+  // (toneMapped:false because the scene's low exposure would otherwise grey these
+  // out.) Nudge the two hex values lighter/darker to taste.
+  const capMaterial = new THREE.MeshStandardMaterial({ color: '#e7e9ec', roughness: 0.8, metalness: 0, toneMapped: false })
+  const edgeMaterial = new THREE.MeshStandardMaterial({ color: '#c2c6cd', roughness: 0.82, metalness: 0, toneMapped: false })
+  const body = new THREE.Mesh(bodyGeometry, [capMaterial, edgeMaterial])
+
+  const faceGeometry = new THREE.ShapeGeometry(shape, 14)
+  const positions = faceGeometry.attributes.position
+  const uvs: number[] = []
+  for (let index = 0; index < positions.count; index += 1) {
+    uvs.push(positions.getX(index) / width + 0.5, positions.getY(index) / height + 0.5)
+  }
+  faceGeometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2))
+  const faceMaterial = new THREE.MeshBasicMaterial({ map: texture, transparent: true, alphaTest: 0.5, toneMapped: false })
+  const face = new THREE.Mesh(faceGeometry, faceMaterial)
+  face.position.z = halfDepth + 0.004
+
+  const group = new THREE.Group()
+  group.add(body, face)
+  return group
+}
+
 function useCardManifest() {
   const [decks, setDecks] = useState<ShowcaseDeck[]>([])
   const [loading, setLoading] = useState(true)
@@ -101,7 +185,7 @@ function useCardManifest() {
           if (deck.id === 'emotion') return emotionDeck
           return deck
         })
-        setDecks([...normalized, coinDeck, charactersDeck]); setLoading(false)
+        setDecks([...normalized, coinDeck, stickerDeck, charactersDeck]); setLoading(false)
       })
       .catch(() => { if (mounted) setLoading(false) })
     return () => { mounted = false }
@@ -144,6 +228,11 @@ export default function CardShowcase() {
   const characterDistanceRef = useRef(6.75)
   const modelCacheRef = useRef(new Map<string, { scene: THREE.Object3D; distance: number }>())
   const isCharacterModeRef = useRef(false)
+  const stickerGroupRef = useRef<THREE.Group | null>(null)
+  const isStickerModeRef = useRef(false)
+  const stickerIntroRef = useRef(1)
+  const stickerCacheRef = useRef(new Map<string, THREE.Group>())
+  const outlinesRef = useRef<Record<string, StickerOutline> | null>(null)
   const regenerateEnvironmentRef = useRef<(() => void) | null>(null)
   const zoomRef = useRef(DEFAULT_ZOOM)
 
@@ -152,6 +241,7 @@ export default function CardShowcase() {
   const accent = deckColors[activeDeck?.id ?? 'role'] ?? '#2f76ac'
   const activeDeckLabel = deckLabels[activeDeck?.id ?? ''] ?? activeDeck?.label ?? 'Bộ thẻ'
   const isCharacterDeck = activeDeck?.id === 'characters3d'
+  const isStickerDeck = activeDeck?.id === 'sticker'
 
   useEffect(() => { document.title = 'EmCoin - Khám phá thẻ 3D' }, [])
   useEffect(() => {
@@ -163,6 +253,7 @@ export default function CardShowcase() {
   }, [activeDeck?.id, isCharacterDeck])
   useEffect(() => { autoRotateRef.current = autoRotate }, [autoRotate])
   useEffect(() => { isCharacterModeRef.current = isCharacterDeck }, [isCharacterDeck])
+  useEffect(() => { isStickerModeRef.current = isStickerDeck }, [isStickerDeck])
 
   const resetView = (preserveZoom = false) => {
     rotationRef.current = isCharacterModeRef.current ? CHARACTER_FRONT_YAW : 0
@@ -203,9 +294,10 @@ export default function CardShowcase() {
     regenerateEnvironmentRef.current = applyEnvironment
     const group = new THREE.Group(); const incomingGroup = new THREE.Group(); scene.add(group, incomingGroup); incomingGroup.visible = false
     const characterGroup = new THREE.Group(); characterGroup.visible = false; scene.add(characterGroup)
-    groupRef.current = group; incomingGroupRef.current = incomingGroup; characterGroupRef.current = characterGroup
+    const stickerGroup = new THREE.Group(); stickerGroup.visible = false; scene.add(stickerGroup)
+    groupRef.current = group; incomingGroupRef.current = incomingGroup; characterGroupRef.current = characterGroup; stickerGroupRef.current = stickerGroup
     const triggerFlip = () => {
-      const activeGroup = isCharacterModeRef.current ? characterGroup : group
+      const activeGroup = isCharacterModeRef.current ? characterGroup : isStickerModeRef.current ? stickerGroup : group
       flipTargetRef.current += Math.PI
       flipPulseRef.current = { startYaw: activeGroup.rotation.y, targetYaw: activeGroup.rotation.y + Math.PI }
     }
@@ -369,7 +461,7 @@ export default function CardShowcase() {
       // speed changes mid-flip).
       let flipPulse = 1
       if (flipPulseRef.current) {
-        const activeGroup = isCharacterModeRef.current ? characterGroup : group
+        const activeGroup = isCharacterModeRef.current ? characterGroup : isStickerModeRef.current ? stickerGroup : group
         const { startYaw, targetYaw } = flipPulseRef.current
         const total = targetYaw - startYaw
         const remaining = targetYaw - activeGroup.rotation.y
@@ -390,6 +482,15 @@ export default function CardShowcase() {
       } else {
         camera.position.set(0, 0.08, 6.75 / zoomRef.current)
         camera.lookAt(0, 0, 0)
+      }
+
+      if (isStickerModeRef.current) {
+        stickerGroup.rotation.y += (baseYaw - stickerGroup.rotation.y) * 0.12
+        stickerGroup.rotation.x += (basePitch - stickerGroup.rotation.x) * 0.12
+        stickerGroup.rotation.z += (baseRoll - stickerGroup.rotation.z) * 0.1
+        stickerGroup.position.y += (floatY - stickerGroup.position.y) * 0.06
+        stickerIntroRef.current += (1 - stickerIntroRef.current) * 0.2
+        stickerGroup.scale.setScalar((0.9 + stickerIntroRef.current * 0.1) * flipPulse)
       }
 
       group.rotation.y += (baseYaw - group.rotation.y) * 0.12
@@ -440,19 +541,68 @@ export default function CardShowcase() {
         }
       }))
       modelCacheRef.current.clear()
+      stickerCacheRef.current.forEach((built) => built.traverse((node) => {
+        if (node instanceof THREE.Mesh) {
+          node.geometry.dispose()
+          const mats = (Array.isArray(node.material) ? node.material : [node.material]) as THREE.MeshBasicMaterial[]
+          mats.forEach((m) => { m.map?.dispose(); m.dispose() })
+        }
+      }))
+      stickerCacheRef.current.clear()
       pmrem.dispose()
       renderer.dispose(); frontMaterialRef.current = null; backMaterialRef.current = null; materialsInUseRef.current = []
-      groupRef.current = null; incomingGroupRef.current = null; characterGroupRef.current = null
+      groupRef.current = null; incomingGroupRef.current = null; characterGroupRef.current = null; stickerGroupRef.current = null
     }
   }, [])
 
   useEffect(() => {
     if (!activeCard) return
     const group = groupRef.current; const incomingGroup = incomingGroupRef.current; const characterGroup = characterGroupRef.current
-    if (!group || !incomingGroup || !characterGroup) return
+    const stickerGroup = stickerGroupRef.current
+    if (!group || !incomingGroup || !characterGroup || !stickerGroup) return
+
+    if (activeCard.kind === 'sticker') {
+      group.visible = false; incomingGroup.visible = false; characterGroup.visible = false; stickerGroup.visible = true
+      let cancelled = false
+      const slug = activeCard.back
+      const apply = (built: THREE.Group) => {
+        while (stickerGroup.children.length) stickerGroup.remove(stickerGroup.children[0])
+        stickerGroup.add(built)
+        rotationRef.current = 0
+        stickerIntroRef.current = 0
+        stickerGroup.scale.setScalar(0.9)
+        setCardLoading(false)
+      }
+      const cached = stickerCacheRef.current.get(slug)
+      if (cached) {
+        apply(cached)
+      } else {
+        setCardLoading(true)
+        const build = (data: Record<string, StickerOutline>) => {
+          const meta = data[slug]
+          if (!meta) { setCardLoading(false); return }
+          new THREE.TextureLoader().load(activeCard.front, (texture) => {
+            if (cancelled) { texture.dispose(); return }
+            texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = 8
+            const built = buildStickerMesh(meta.points, meta.aspect, texture)
+            stickerCacheRef.current.set(slug, built)
+            apply(built)
+          }, undefined, () => { if (!cancelled) setCardLoading(false) })
+        }
+        if (outlinesRef.current) {
+          build(outlinesRef.current)
+        } else {
+          fetch('/stickers/outlines.json')
+            .then((res) => res.json() as Promise<Record<string, StickerOutline>>)
+            .then((data) => { if (cancelled) return; outlinesRef.current = data; build(data) })
+            .catch(() => { if (!cancelled) setCardLoading(false) })
+        }
+      }
+      return () => { cancelled = true }
+    }
 
     if (activeCard.kind === 'model') {
-      group.visible = false; incomingGroup.visible = false; characterGroup.visible = true
+      group.visible = false; incomingGroup.visible = false; characterGroup.visible = true; stickerGroup.visible = false
       let cancelled = false
       const applyModel = (scene: THREE.Object3D, distance: number) => {
         while (characterGroup.children.length) characterGroup.remove(characterGroup.children[0])
@@ -485,7 +635,7 @@ export default function CardShowcase() {
       return () => { cancelled = true }
     }
 
-    group.visible = true; characterGroup.visible = false
+    group.visible = true; characterGroup.visible = false; stickerGroup.visible = false
     if (!frontMaterialRef.current || !backMaterialRef.current) return
     // Textures accumulate across every deck a curious visitor browses in one session;
     // without a cap the GPU-memory footprint grows unbounded and mobile GPUs can hit
@@ -568,9 +718,11 @@ export default function CardShowcase() {
       .bottom-trigger-wrap { position:relative; }
       .bottom-trigger { min-height:42px; padding:0 16px; border:1px solid rgba(255,255,255,.82); border-radius:999px; background:rgba(255,255,255,.82); backdrop-filter:blur(10px); color:var(--ink); box-shadow:0 12px 26px rgba(22,77,120,.16); font:900 12px var(--font-body); cursor:pointer; }
       .bottom-counter { min-width:34px; padding:7px 10px; border-radius:999px; background:rgba(255,255,255,.72); backdrop-filter:blur(8px); color:var(--ink); text-align:center; font:900 12px var(--font-body); box-shadow:0 8px 18px rgba(22,77,120,.1); }
-      .bottom-panel { position:absolute; bottom:calc(100% + 10px); left:50%; transform:translateX(-50%); width:min(230px,68vw); max-height:56dvh; overflow:auto; padding:10px; border:1px solid rgba(255,255,255,.75); border-radius:20px; background:rgba(255,255,255,.94); box-shadow:0 16px 34px rgba(22,77,120,.2); scrollbar-width:none; }
+      .bottom-panel { position:absolute; bottom:calc(100% + 10px); left:50%; transform:translateX(-50%); width:min(230px,68vw); max-height:80dvh; overflow:auto; padding:10px; border:1px solid rgba(255,255,255,.75); border-radius:20px; background:rgba(255,255,255,.94); box-shadow:0 16px 34px rgba(22,77,120,.2); scrollbar-width:none; }
       .bottom-panel::-webkit-scrollbar { display:none; }
-      .bottom-panel .deck-row,.bottom-panel .card-row { display:grid; grid-template-columns:1fr; max-height:38dvh; overflow:auto; padding:0; }
+      .bottom-panel .deck-row,.bottom-panel .card-row { display:grid; grid-template-columns:1fr; padding:0; }
+      .bottom-panel .card-row { grid-template-columns:1fr 1fr; gap:6px; max-height:54dvh; overflow:auto; }
+      .bottom-panel .deck-row { max-height:none; overflow:visible; }
       .bottom-panel .deck-chip,.bottom-panel .card-chip { min-height:36px; padding:6px 10px; overflow:hidden; text-overflow:ellipsis; }
       .bottom-panel .report-link { display:block; margin-top:10px; }
       @media (max-width:360px) { .bottom-panel { width:min(190px,66vw); } .showcase-title span { font-size:10px; } }
@@ -578,12 +730,12 @@ export default function CardShowcase() {
     <div className="showcase-panel" ref={hostRef}>
       <div className="showcase-top">
         <a className="circle-link" href="/about" aria-label="Quay lại landing"><span>←</span></a>
-        <div className="showcase-title"><b>{activeDeckLabel}</b><span>{activeCard ? `${activeCard.title} · ${activeDeck?.count ?? 0} ${isCharacterDeck ? 'nhân vật' : 'thẻ mẫu'}` : 'Đang tải bộ thẻ'}</span></div>
+        <div className="showcase-title"><b>{activeDeckLabel}</b><span>{activeCard ? `${activeCard.title} · ${activeDeck?.count ?? 0} ${isCharacterDeck ? 'nhân vật' : isStickerDeck ? 'sticker' : 'thẻ mẫu'}` : 'Đang tải bộ thẻ'}</span></div>
         <button className="circle-link" type="button" onClick={() => setAutoRotate((value) => !value)} aria-label="Bật tắt xoay tự động"><span>{autoRotate ? 'Dừng' : 'Tự động'}</span></button>
       </div>
       <div className="showcase-canvas">
         <canvas ref={canvasRef} data-testid="card-showcase-canvas" />
-        {cardLoading && <div className="canvas-loading-hint">{isCharacterDeck ? 'Đang tải nhân vật...' : 'Đang tải thẻ...'}</div>}
+        {cardLoading && <div className="canvas-loading-hint">{isCharacterDeck ? 'Đang tải nhân vật...' : isStickerDeck ? 'Đang tải sticker...' : 'Đang tải thẻ...'}</div>}
       </div>
       {loading && <div className="showcase-loading">Đang mở bộ thẻ...</div>}
       {(leftOpen || rightOpen) && <div className="panel-backdrop" onClick={() => { setLeftOpen(false); setRightOpen(false) }} />}
@@ -603,7 +755,7 @@ export default function CardShowcase() {
         <span className="bottom-counter">{activeDeck ? `${cardIndex + 1}/${activeDeck.cards.length}` : '0/0'}</span>
         <div className="bottom-trigger-wrap">
           <button className="bottom-trigger" type="button" onClick={() => { setRightOpen((value) => !value); setLeftOpen(false) }} aria-expanded={rightOpen}>Điều khiển</button>
-          {rightOpen && <div className="bottom-panel"><div className="card-row" aria-label="Chọn lá thẻ">{activeDeck?.cards.map((card, index) => <button className={`card-chip ${index === cardIndex ? 'active' : ''}`} key={`${activeDeck.id}-${card.front}`} type="button" onClick={() => { resetView(true); cardDirectionRef.current = index >= cardIndex ? 1 : -1; setCardIndex(index); setRightOpen(false) }}>{card.title}</button>)}</div>{!isCharacterDeck && <a className="report-link" href="/report">Đọc báo cáo →</a>}</div>}
+          {rightOpen && <div className="bottom-panel"><div className="card-row" aria-label="Chọn lá thẻ">{activeDeck?.cards.map((card, index) => <button className={`card-chip ${index === cardIndex ? 'active' : ''}`} key={`${activeDeck.id}-${card.front}`} type="button" onClick={() => { resetView(true); cardDirectionRef.current = index >= cardIndex ? 1 : -1; setCardIndex(index); setRightOpen(false) }}>{card.title}</button>)}</div></div>}
         </div>
       </div>
     </div>

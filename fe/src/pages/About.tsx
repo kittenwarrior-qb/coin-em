@@ -49,7 +49,7 @@ const teamMembers = [
   ['Huỳnh Hồng Như', 'Đồng đội lý trí', '2006', '/cartoon/icons/avatars/Girl.png'],
 ]
 
-const trialImages = Array.from({ length: 12 }, (_, index) => {
+const trialImages = Array.from({ length: 20 }, (_, index) => {
   const number = String(index + 1).padStart(2, '0')
   return {
     src: `/landing/trial-${number}.webp`,
@@ -373,6 +373,15 @@ export default function About() {
           --terracotta: #ff8a32;
           --sage: #76c8b7;
           min-height: 100dvh;
+          /* Off-screen .reveal-card items sit translateX(±38px) before their
+             scroll-reveal fires — that's a paint-only transform, but sections
+             further down the page (role-list, team-strip, ...) still count
+             toward the page's real scrollable width even while below the
+             fold, nudging the WHOLE page a few px wider than the viewport.
+             Clip it here so it can never create real horizontal page scroll;
+             nested carousels (.card-grid, .trial-gallery) keep their own
+             overflow-x:auto and scroll independently of this. */
+          overflow-x: hidden;
           background:
             radial-gradient(circle at 14% 0%, rgba(139,157,131,.22), transparent 30%),
             radial-gradient(circle at 86% 8%, rgba(198,107,61,.14), transparent 32%),
@@ -897,6 +906,12 @@ export default function About() {
 
         .card-grid article {
           position: relative;
+          /* .card-grid stretches each .deck-card-link to the row's tallest
+             card (grid/flex default align-items:stretch), but that stretch
+             stops at the <a> — without height:100% here, the visible article
+             surface stays sized to its own text and shorter descriptions
+             render as noticeably smaller cards in the same row. */
+          height: 100%;
           display: grid;
           grid-template-columns: 112px minmax(0, 1fr);
           align-items: center;

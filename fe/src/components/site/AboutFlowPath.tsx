@@ -19,13 +19,7 @@ const BASE_H = 2000
 const RAW_D =
   'M-24.5 101C285 315 5.86278 448.291 144.223 631.238C239.404 757.091 559.515 782.846 608.808 617.456C658.101 452.067 497.627 367.073 406.298 426.797C314.968 486.521 263.347 612.858 322.909 865.537C384.086 1125.06 79.3992 1007.94 100 1261.99C144.222 1807.35 819 1325 513 1142.5C152.717 927.625 -45 1916.5 1191.5 1852'
 
-// Flat (x, y) point list parsed out of the M/C path above. Mobile stacks the
-// wrapped sections into a much taller, narrower box than the 1:2 design ratio —
-// stretching that via SVG's own viewBox→viewport transform (preserveAspectRatio
-//="none") combined with vector-effect:non-scaling-stroke renders a broken,
-// jagged stroke on several mobile browsers. So instead we bake the rescale into
-// the path's own coordinates and size the viewBox to match real pixels 1:1,
-// which keeps the browser's transform uniform and the stroke crisp everywhere.
+// Flat (x, y) point list parsed out of the M/C path above.
 const BASE_POINTS: Array<[number, number]> = (() => {
   const nums = RAW_D.match(/-?\d*\.?\d+/g)!.map(Number)
   const pts: Array<[number, number]> = []
@@ -125,7 +119,12 @@ export default function AboutFlowPath() {
         strokeLinejoin="round"
       />
       <style>{`
-        .about-flow-zone { position: relative; overflow-x: hidden; }
+        /* Both axes, not just overflow-x: mixing overflow-x:hidden with the
+           default overflow-y:visible forces the engine to compute overflow-y
+           as 'auto' per spec — an extra scroll-container edge case this
+           sidesteps entirely. The zone's own height is plain content flow
+           (nothing here relies on vertical overflow), so clipping both is safe. */
+        .about-flow-zone { position: relative; overflow: hidden; }
         .about-flow-content { position: relative; z-index: 1; }
         .about-flow-svg {
           position: absolute; inset: 0;
@@ -133,6 +132,11 @@ export default function AboutFlowPath() {
           z-index: 0; pointer-events: none;
           opacity: 0.5;
           filter: drop-shadow(0 0 8px rgba(241, 95, 141, 0.25));
+          /* Explicit, not relying on the UA default (svg:not(:root){overflow:hidden}) —
+             belt-and-suspenders so the path's out-of-box coordinates (it's an
+             organic squiggle, not neatly bounded to its own viewBox) can never
+             leak into the page's scrollable area regardless of the filter above. */
+          overflow: hidden;
         }
         .about-flow-svg path { stroke-width: 15px; }
         @media (max-width: 720px) {
