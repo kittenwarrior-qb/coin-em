@@ -1,18 +1,19 @@
 name: Deploy
 
 on:
-  push:
-    branches: [main]
-  workflow_dispatch:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
 
 jobs:
   deploy:
     name: Deploy to VPS
     runs-on: ubuntu-latest
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main'
 
     steps:
-      - uses: actions/checkout@v4
-
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -23,10 +24,6 @@ jobs:
             set -e
             cd ${{ secrets.APP_PATH }}
             git pull origin main
-            export DEBUG_ROLE_PICKER=true
-            export VITE_DEBUG_ROLE_PICKER=true
-            docker compose -f docker-compose.prod.yml down
-            docker volume rm coin-em_fe-dist || true
             docker compose -f docker-compose.prod.yml build --no-cache backend frontend
             docker compose -f docker-compose.prod.yml up -d --force-recreate
             echo "✅ Deploy done — containers started"

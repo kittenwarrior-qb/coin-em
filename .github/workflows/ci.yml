@@ -1,6 +1,9 @@
 name: CI
 
 on:
+  pull_request:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -22,7 +25,11 @@ jobs:
         working-directory: be
 
       - name: Backend lint
-        run: npm run lint --if-present
+        run: npm run lint
+        working-directory: be
+
+      - name: Backend build check
+        run: npm run build
         working-directory: be
 
       - name: Backend tests
@@ -68,6 +75,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            be/package-lock.json
+            fe/package-lock.json
+            e2e/package-lock.json
 
       - name: Install all deps
         run: |
@@ -88,7 +100,8 @@ jobs:
           REDIS_HOST: localhost
           REDIS_PORT: 6379
         run: |
-          npm run dev &
+          npm run build
+          npm start &
           timeout 30 bash -c 'until curl -sf http://localhost:3001/health; do sleep 2; done'
 
       - name: Start frontend

@@ -72,6 +72,11 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 Caddy tự xử lý TLS. Đảm bảo domain đã trỏ về IP VPS trước khi deploy.
 
+R00 baseline, backup inventory và restore drill fixture được ghi trong
+[`docs/ops/r00-baseline.md`](docs/ops/r00-baseline.md) và
+[`docs/ops/backup-restore-inventory.md`](docs/ops/backup-restore-inventory.md).
+Không chạy các target `prod-*`, `clean` hoặc backup production khi kiểm thử local.
+
 ---
 
 ## Gameplay

@@ -5,6 +5,7 @@
     "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
+    "lint": "tsc --noEmit",
     "check-redis": "tsx scripts/check-redis.ts",
     "test": "vitest run",
     "test:watch": "vitest",
