@@ -260,7 +260,9 @@ test(`${pdf ? 'PDF' : 'legacy'} ${size} UI guests finish ${size} rounds with ${s
                 }
                 await page.getByRole('button', { name: 'Kiểm tra lượt trao', exact: true }).click()
                 await expectUI(page.getByRole('button', { name: 'Kiểm tra lượt trao', exact: true })).toHaveCount(0)
-                expect(await page.evaluate(() => JSON.parse(localStorage.getItem('emcoin_session') ?? '{}').pendingCoin === undefined)).toBe(true)
+                // The retry button disappears as soon as its pending label is
+                // shown, before ACK. Wait for the actual durable journal clear.
+                await expectUI.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('emcoin_session') ?? '{}').pendingCoin === undefined)).toBe(true)
                 expect(fault.sameRequestEmissions).toBe(wireRetry ? 2 : 1)
                 expect(fault.identicalPayloads).toBe(true)
                 expect(fault.droppedAcks).toBe(1)

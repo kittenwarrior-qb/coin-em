@@ -63,6 +63,12 @@ Blocked by OQ-06/OQ-10 for release authority, RPO/RTO and host ownership.
 
 ## Implementation plan
 
+### Follow-up 2026-10-12 — observed CI/runtime boundaries
+
+Downloaded failed Linux artifacts show SwiftShader: models17/100 switches, stickers100 then timeout during cached revisits. Longer deadline alone is not a product fix. Admit renderer reduced-motion path plus unit tests: no decorative wobble/slide/intro and no repeated idle GPU draws under OS reduced-motion preference; redraw real selection/textures/flip/resize/context restore, preserve geometry/materials/palette/default full-motion path and explicit auto-rotate. Asset QA records reducedMotion:true and retains all120 switches/request/restore assertions. frontend-design skill used to preserve owner-approved theme direction, no new anchor/palette/reskin.
+
+PWA source-copy build passes optimizer, but adding Express catalog routing earlier made the old second HTTP request listener race Express's404. Attach static middleware to the owned Express app after API routes instead; two PWA cases now pass locally. PDF5 terminal test failed an immediate journal check because retry button vanishes on entering pending, before ACK: poll the same persisted-journal-clear invariant, preserving exact same request/receipt/ledger conditions. Existing synchronous client journal clear stays unchanged. Retain original failed CI evidence; no failed cases removed or runtime Coin logic weakened.
+
 ### CI environment revision 2026-10-12
 
 Exact c382861 CI passes BE669/FE738/lint/build/assets but short matrix fails4/11: PWA optimizer rejects arbitrary external output and two model/sticker cases hit170s watchdog on hosted Linux. Keep those failed runs. PWA now builds an owned frontend source copy with linked dependencies and its own root/dist, then copies only built artifacts; optimizer/source guards unchanged, no .env copied/shared checkout build overwritten. Source-copy recursive cleanup verifies allocated temp prefix/parent. Model/sticker functional tests retain100switches+20cached+actual requests/context restore; Linux-only bounded290s watchdog/300s outer budget reflects runner graphics, Windows170/180 unchanged. This is not an improved product latency/FPS or device acceptance claim; do not remove cases, force clicks, omit failed modes or change runtime art/renderer to fabricate green. Admit these adjacent fixtures/guard tests only.

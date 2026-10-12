@@ -43,7 +43,7 @@ test.each(['/', '/emcoin/'])('production PWA %s caches only public guide and def
       child.once('exit', code => { clearTimeout(timeout); code === 0 ? resolve() : reject(new Error(`Owned PWA build failed ${code}: ${logs.slice(-1500)}`)) })
     })
     await cp(path.join(frontendRoot, 'dist'), buildRoot, { recursive: true })
-    server.httpServer.on('request', async (req, res) => {
+    server.app.use(async (req, res) => {
       const url = new URL(req.url ?? '/', server.url)
       if (url.pathname.startsWith('/socket.io')) return
       // Chromium's offline emulation may not cover a restarted worker target.

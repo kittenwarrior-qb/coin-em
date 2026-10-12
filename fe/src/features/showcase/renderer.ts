@@ -156,6 +156,12 @@ export function createShowcaseRenderer(options: {
   incomingGroup.add(incomingSide, incomingFront, incomingBack)
   scene.add(new THREE.AmbientLight(0xffffff, 1.25)); const key = new THREE.DirectionalLight(0xffffff, 1.2); key.position.set(2.5, 4, 5); scene.add(key)
   materialsInUseRef.current = [frontMaterial, backMaterial, incomingFrontMaterial, incomingBackMaterial]
+  const motionPreference = typeof window.matchMedia === 'function' ? window.matchMedia('(prefers-reduced-motion: reduce)') : null
+  let reducedMotion = motionPreference?.matches ?? false
+  let renderInvalidated = true
+  let lastReducedSignature = ''
+  const onMotionPreference = (event: MediaQueryListEvent) => { reducedMotion = event.matches; renderInvalidated = true }
+  motionPreference?.addEventListener?.('change', onMotionPreference)
   const slideDistance = 2.45
   let slide: { direction: number; front: THREE.Texture; back: THREE.Texture; oldX: number; incomingX: number; oldScale: number; incomingScale: number } | null = null
   const setMaps = (frontMap: THREE.Texture, backMap: THREE.Texture) => {
@@ -183,6 +189,7 @@ export function createShowcaseRenderer(options: {
   }
   const onContextLost = (event: Event) => { event.preventDefault(); setGraphicsUnavailable(true); setCardLoading(false) }
   const onContextRestored = () => {
+    renderInvalidated = true
     completeSlide()
     try { applyEnvironment() } catch { setGraphicsUnavailable(true); return }
     setGraphicsUnavailable(false)
@@ -202,7 +209,7 @@ export function createShowcaseRenderer(options: {
   }
   canvas.addEventListener('webglcontextlost', onContextLost, false)
   canvas.addEventListener('webglcontextrestored', onContextRestored, false)
-  const resize = () => { const rect = host.getBoundingClientRect(); renderer.setSize(Math.max(1, Math.floor(rect.width)), Math.max(1, Math.floor(rect.height)), false); camera.aspect = rect.width / rect.height; camera.updateProjectionMatrix() }
+  const resize = () => { const rect = host.getBoundingClientRect(); renderer.setSize(Math.max(1, Math.floor(rect.width)), Math.max(1, Math.floor(rect.height)), false); camera.aspect = rect.width / rect.height; camera.updateProjectionMatrix(); renderInvalidated = true }
   const detachInteraction = attachShowcaseInteraction({ canvas, drag: dragRef, yaw: rotationRef, pitch: verticalRotationRef, zoom: zoomRef, flip: triggerFlip })
   window.addEventListener('resize', resize); resize()
   let frame = 0
@@ -210,14 +217,33 @@ export function createShowcaseRenderer(options: {
     if (generation.disposed) return
     frame = requestAnimationFrame(animate)
     if (renderer.getContext().isContextLost()) return
+    if (reducedMotion) {
+      completeSlide()
+      flipPulseRef.current = null
+      const signature = [isCharacterModeRef.current, isStickerModeRef.current, rotationRef.current,
+        verticalRotationRef.current, flipTargetRef.current, zoomRef.current, characterDistanceRef.current,
+        group.visible, characterGroup.visible, stickerGroup.visible, characterGroup.children[0]?.uuid,
+        stickerGroup.children[0]?.uuid, frontMaterial.map?.uuid, backMaterial.map?.uuid].join('|')
+      if (!renderInvalidated && !dragRef.current.active && !autoRotateRef.current && signature === lastReducedSignature) return
+      lastReducedSignature = signature
+      renderInvalidated = false
+    }
     const now = performance.now()
-    const idleYaw = Math.sin(now / 4200) * 0.018
-    const idleTilt = Math.sin(now / 2800) * 0.009
+    const idleYaw = reducedMotion ? 0 : Math.sin(now / 4200) * 0.018
+    const idleTilt = reducedMotion ? 0 : Math.sin(now / 2800) * 0.009
     if (!dragRef.current.active && autoRotateRef.current) rotationRef.current += 0.0025
     const baseYaw = rotationRef.current + flipTargetRef.current + idleYaw
-    const basePitch = verticalRotationRef.current + Math.sin(now / 3200) * 0.014
+    const basePitch = verticalRotationRef.current + (reducedMotion ? 0 : Math.sin(now / 3200) * 0.014)
     const baseRoll = idleTilt
-    const floatY = Math.sin(now / 1900) * 0.045
+    const floatY = reducedMotion ? 0 : Math.sin(now / 1900) * 0.045
+    if (reducedMotion) {
+      for (const activeGroup of [group, characterGroup, stickerGroup]) {
+        activeGroup.rotation.set(basePitch, baseYaw, baseRoll)
+        activeGroup.position.y = 0
+      }
+      characterIntroRef.current = 1
+      stickerIntroRef.current = 1
+    }
 
     // A tap-to-flip (or the Lật button) pulses the scale up and back down —
     // driven by how far the rotation itself has actually turned rather than
@@ -297,6 +323,7 @@ export function createShowcaseRenderer(options: {
     generation.disposed = true
     slideControllerRef.current = null; regenerateEnvironmentRef.current = null; triggerFlipRef.current = null; cancelAnimationFrame(frame)
     detachInteraction(); window.removeEventListener('resize', resize)
+    motionPreference?.removeEventListener?.('change', onMotionPreference)
     canvas.removeEventListener('webglcontextlost', onContextLost); canvas.removeEventListener('webglcontextrestored', onContextRestored)
     frontMaterial.dispose(); backMaterial.dispose(); sideMaterial.dispose(); incomingFrontMaterial.dispose(); incomingBackMaterial.dispose(); incomingSideMaterial.dispose(); faceGeometry.dispose(); backGeometry.dispose(); sideGeometry.dispose()
     textureOwner.close(); textureOwnerRef.current = null; texturesRef.current = []

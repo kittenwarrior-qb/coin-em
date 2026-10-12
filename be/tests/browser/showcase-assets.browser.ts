@@ -25,7 +25,7 @@ test.each(['models', 'stickers'] as const)('original showcase assets: %s', async
   const report = async () => {
     await writeFile(path.join(output, 'report.json'), JSON.stringify({ version: 'showcase-assets-qa/v2', scenario, stage, result,
       completedSwitches, browserChannel: 'chromium-new-headless', inputMode: 'pointer', renderer, browser: browser?.version(), assetRequests: Object.fromEntries(requests), errors,
-      backendConnected: false, catalogApiConnected: true, physicalDevice: false, limitations: 'Actual reported desktop renderer, simulated viewport; not mobile device, FPS or memory-budget acceptance' }, null, 2))
+      backendConnected: false, catalogApiConnected: true, reducedMotion: true, physicalDevice: false, limitations: 'Actual reported desktop renderer, simulated viewport; not mobile device, FPS or memory-budget acceptance' }, null, 2))
     reportWritten = true
   }
   const watchdog = setTimeout(() => { errors.push(`Owned${assetsTimeoutMs / 1000}s watchdog expired`); void browser?.close().catch(() => {}); vite.kill() }, assetsTimeoutMs)
@@ -44,7 +44,7 @@ test.each(['models', 'stickers'] as const)('original showcase assets: %s', async
       vite.once('exit', code => { clearTimeout(timeout); reject(new Error(`Owned Vite exited ${code}`)) })
     })
     browser = await chromium.launch({ headless: true, channel: 'chromium' })
-    const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' })
     await context.tracing.start({ screenshots: false, snapshots: true, sources: false })
     await context.route('**/*', route => [new URL(base).origin, new URL(catalogApi.url).origin].includes(new URL(route.request().url()).origin) ? route.continue() : route.abort())
     const page = await context.newPage()

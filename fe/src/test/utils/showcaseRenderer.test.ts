@@ -56,6 +56,28 @@ describe('showcase renderer lifecycle boundary', () => {
     expect(f.bindings.textureOwnerRef.current).toBeNull(); expect(f.bindings.assetLoadersRef.current).toBeNull()
     expect(f.bindings.groupRef.current).toBeNull(); expect(f.bindings.triggerFlipRef.current).toBeNull()
   })
+  it('honors reduced motion without idle GPU draws and redraws selection/flip/resize/restore', () => {
+    const addEventListener = vi.fn(), removeEventListener = vi.fn()
+    vi.stubGlobal('matchMedia', vi.fn(() => ({ matches: true, addEventListener, removeEventListener })))
+    const f = fixture(), cleanup = f.create()!
+    const tick = () => vi.mocked(requestAnimationFrame).mock.calls.at(-1)![0](1)
+    expect(renderer.render).toHaveBeenCalledTimes(1)
+    tick(); tick(); expect(renderer.render).toHaveBeenCalledTimes(1)
+    f.bindings.isCharacterModeRef.current = true
+    f.bindings.characterGroupRef.current!.visible = true
+    f.bindings.characterGroupRef.current!.add(new THREE.Group())
+    tick(); expect(renderer.render).toHaveBeenCalledTimes(2)
+    tick(); expect(renderer.render).toHaveBeenCalledTimes(2)
+    f.bindings.triggerFlipRef.current!(); tick()
+    expect(renderer.render).toHaveBeenCalledTimes(3)
+    expect(f.bindings.characterGroupRef.current!.rotation.y).toBe(Math.PI)
+    window.dispatchEvent(new Event('resize')); tick()
+    expect(renderer.render).toHaveBeenCalledTimes(4)
+    f.canvas.dispatchEvent(new Event('webglcontextrestored')); tick()
+    expect(renderer.render).toHaveBeenCalledTimes(5)
+    cleanup()
+    expect(removeEventListener).toHaveBeenCalledWith('change', addEventListener.mock.calls[0][1])
+  })
   it('context loss reports fallback, restoration replaces environment and cleanup removes listeners', () => {
     const f = fixture(), cleanup = f.create()!
     const loss = new Event('webglcontextlost', { cancelable: true }); f.canvas.dispatchEvent(loss)

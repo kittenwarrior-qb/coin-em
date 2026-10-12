@@ -26,7 +26,7 @@ export async function createIsolatedServer(options: { pingInterval?: number; pin
   })
   const url = `http://127.0.0.1:${(httpServer.address() as AddressInfo).port}`
   return {
-    io, httpServer, url,
+    io, httpServer, app, url,
     async close() {
       await new Promise<void>((resolve) => io.close(() => resolve()))
       await disposeHandlers()
