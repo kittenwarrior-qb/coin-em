@@ -1,0 +1,67 @@
+name: emcoin
+
+services:
+  redis:
+    image: redis:7-alpine
+    command: [redis-server, --appendonly, "yes", --appendfsync, always]
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    logging: &logging
+      driver: json-file
+      options: {max-size: 10m, max-file: "3"}
+
+  backend:
+    build:
+      context: ../../be
+      dockerfile: Dockerfile.prod
+    environment:
+      NODE_ENV: production
+      PORT: "3001"
+      CLIENT_ORIGIN: https://${EMCOIN_DOMAIN:?Set the approved domain}
+      DEBUG_ROLE_PICKER: "false"
+      ROOM_STORAGE_MODE: redis-required
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      EMCOIN_CATALOG_DB: /app/data/catalog.sqlite
+      EMCOIN_ADMIN_ORIGIN: https://${EMCOIN_DOMAIN:?Set the approved domain}
+      EMCOIN_ADMIN_PASSWORD_HASH: ${EMCOIN_ADMIN_PASSWORD_HASH:?Provision a separate EmCoin admin password hash}
+    volumes:
+      - backend-data:/app/data
+    depends_on:
+      redis: {condition: service_healthy}
+    restart: unless-stopped
+    logging: *logging
+
+  web:
+    build:
+      context: ../../fe
+      dockerfile: ../deploy/emcoin/web.Dockerfile
+      args:
+        VITE_API_URL: https://${EMCOIN_DOMAIN:?Set the approved domain}
+    environment:
+      EMCOIN_DOMAIN: ${EMCOIN_DOMAIN:?Set the approved domain}
+      ACME_EMAIL: emcoincloud@gmail.com
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      backend: {condition: service_healthy}
+    restart: unless-stopped
+    logging: *logging
+
+volumes:
+  redis-data:
+  backend-data:
+  caddy-data:
+  caddy-config:

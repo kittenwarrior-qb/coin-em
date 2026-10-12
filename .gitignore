@@ -51,7 +51,7 @@ tmp/
 
 start-codex.bat
 
-EMCOIN/
+/EMCOIN/
 
 # Bản gốc .riv ở root (bản dùng thật nằm trong fe/public/rive/)
 /handshake-conffeti.riv
