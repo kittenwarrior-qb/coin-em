@@ -37,6 +37,7 @@ it('gates GitHub release by exact successful main CI and strict SSH without rebu
   expect(runtime).not.toContain('build:')
   expect(runtime).toContain('EMCOIN_BACKEND_IMAGE:?')
   expect(runtime).toContain('EMCOIN_WEB_IMAGE:?')
+  expect(deploy.indexOf('initializeFreshCatalog')).toBeLessThan(deploy.indexOf('up -d --no-build'))
 })
 
 it('embeds frontend files in the web image and routes only EmCoin with no private logs', () => {

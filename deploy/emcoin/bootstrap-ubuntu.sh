@@ -10,7 +10,7 @@ if command -v docker >/dev/null && test -n "$(docker ps -aq)"; then
 fi
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
-apt-get -y upgrade
+apt-get -y --with-new-pkgs upgrade
 apt-get install -y --no-install-recommends ca-certificates curl ufw
 install -d -m 0755 /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc

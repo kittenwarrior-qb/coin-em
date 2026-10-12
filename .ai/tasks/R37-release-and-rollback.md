@@ -63,6 +63,10 @@ Blocked by OQ-06/OQ-10 for release authority, RPO/RTO and host ownership.
 
 ## Implementation plan
 
+### Plan revision 2026-10-12 — fresh host bootstrap / before-admission publication
+
+Owner completed Ubuntu24.04 reinstall, confirmed another legitimate host-key change and installed the local EmCoin public key. Matching explicitly accepted RSA fingerprint pinned; root key login succeeds. Fresh host contains no Mendez/source/Docker; no agent deletion required. Admit bootstrap-ubuntu.sh for official Docker apt repo/security package installation/firewall/new EmCoin directories, no old-resource wipe. Owner approves strong generated separate admin credential, encrypted with Windows DPAPI; host gets hash only. GitHub secrets use existing authorized key without printing it. Initial release must publish canonical PDF catalog **before** backend/web admission via explicit empty-store-only initializer; never auto-approve existing edited data. Add tests for fresh100-card publication/no-overwrite and release order. CI failures from omitted ignored deploy/artwork files are corrected by root-only `/EMCOIN/` exclusion and complete runtime asset staging, not weakened checks.
+
 ### Plan revision 2026-10-12 — corrected host / GitHub / fresh OS
 
 Owner corrects target to103.74.102.24; wrong host180.93.54.160 had no mutation. Correct-host read-only inventory: Ubuntu18.04/kernel4.15, Docker24.0.2/Compose2.18.1,3GB RAM/20GB disk, only Mendez3containers/5labelled volumes and `/opt/mendez` source. DNS app.emcoin.cloud now resolves to103.74.102.24. Owner approves fresh Ubuntu24.04 via provider console, not a risky in-place multi-hop upgrade. Provider-console execution still requires user action/access; no remote wipe performed.
