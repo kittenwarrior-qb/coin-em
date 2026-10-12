@@ -5,6 +5,12 @@ import { RoleManager } from './RoleManager'
 import { ActionValidator } from './ActionValidator'
 import { CommandFactory } from '../commands/CommandFactory'
 import { RewardCalculator } from '../services/RewardCalculator'
+import { allocateCoinRound, collectCoinRound } from '../services/CoinCycle'
+import { MIN_PLAYERS, MAX_PLAYERS } from './RoleDeck'
+import { randomUUID } from 'crypto'
+import { roomView } from '../services/RoomView'
+import { plannedRounds } from '../services/RoundLimit'
+import { runtimeCatalog } from '../../../catalog/runtimeCatalog'
 
 export class GameEngine {
   private stateMachine: StateMachine
@@ -27,6 +33,8 @@ export class GameEngine {
    * Advance to next turn
    */
   advanceTurn(room: Room, narratorId: string): GameResult {
+    if (room.status !== 'playing' || room.phase === 'ended') return { success: false, error: 'GAME_NOT_PLAYING' }
+    if (!this.stateMachine.canTransition(room.phase, 'NEXT')) return { success: false, error: 'INVALID_PHASE' }
     // Validate narrator
     if (!this.actionValidator.canAdvanceTurn(room, narratorId)) {
       return { success: false, error: 'NOT_NARRATOR' }
@@ -34,15 +42,17 @@ export class GameEngine {
 
     // Check if game should end
     if (this.turnManager.shouldEndGame(room)) {
-      return this.endGame(room)
+      return this.endGame(room, narratorId)
     }
 
     // Get next phase
-    const nextPhase = this.turnManager.getNextPhase(room.phase, room)
+    const nextPhase = this.stateMachine.transition(room.phase, 'NEXT', room)
 
     let updatedRoom: Room = {
       ...room,
       phase: nextPhase,
+      phaseInstance: randomUUID(),
+      pendingAutoAdvance: null,
       lastActivity: Date.now(),
     }
 
@@ -75,6 +85,7 @@ export class GameEngine {
           green: p.coins.green,    // keep — accumulates across all rounds
         },
       }))
+      if (room.coinCycle) updatedRoom = allocateCoinRound(updatedRoom)
 
       updatedRoom.gameLog = [
         ...updatedRoom.gameLog,
@@ -89,7 +100,7 @@ export class GameEngine {
 
     // Calculate end-of-round rewards as soon as roles are revealed so coin popups
     // can appear right after the reveal overlay is dismissed.
-    if (nextPhase === 'reveal-silencer' && !this.hasCalculatedRewardsForRound(updatedRoom)) {
+    if (!room.coinCycle && nextPhase === 'reveal-silencer' && !this.hasCalculatedRewardsForRound(updatedRoom)) {
       updatedRoom = this.calculateRewards(updatedRoom)
     }
 
@@ -116,6 +127,7 @@ export class GameEngine {
       updatedRoom.redCoinsGiven = {}
       updatedRoom.yellowCoinsGiven = {}
     }
+    if (nextPhase === 'reward' && updatedRoom.coinCycle) updatedRoom = collectCoinRound(updatedRoom)
 
     // Log phase change
     updatedRoom.gameLog = [
@@ -137,6 +149,11 @@ export class GameEngine {
    * Move back to the previous phase in the same round so the narrator can let players choose again.
    */
   previousTurn(room: Room, narratorId: string): GameResult {
+    if (room.status !== 'playing' || room.phase === 'ended') return { success: false, error: 'GAME_NOT_PLAYING' }
+    if (!this.stateMachine.canTransition(room.phase, 'NEXT')) return { success: false, error: 'INVALID_PHASE' }
+    if (room.coinCycle && (room.coinCycle.closed || room.coinCycle.transfers.length > 0)) {
+      return { success: false, error: 'COIN_CHECKPOINT_LOCKED' }
+    }
     if (!this.actionValidator.canAdvanceTurn(room, narratorId)) {
       return { success: false, error: 'NOT_NARRATOR' }
     }
@@ -149,6 +166,8 @@ export class GameEngine {
     let updatedRoom: Room = {
       ...room,
       phase: previousPhase,
+      phaseInstance: randomUUID(),
+      pendingAutoAdvance: null,
       lastActivity: Date.now(),
     }
 
@@ -207,6 +226,9 @@ export class GameEngine {
   }
 
   private undoRollbackCoinEffects(room: Room, currentPhase: string, previousPhase: string): Room {
+    // The finite cycle never mints role bonuses; gift rollback is rejected at its
+    // checkpoint above. Legacy bonus arithmetic must not touch the new allocation.
+    if (room.coinCycle) return room
     const actionTypes = new Set<string>()
     const addPhaseTypes = (phase: string) => {
       if (phase === 'group-response') actionTypes.add('NTG_VOTE')
@@ -386,11 +408,15 @@ export class GameEngine {
   /**
    * End game
    */
-  private endGame(room: Room): GameResult {
+  endGame(room: Room, narratorId: string): GameResult {
+    if (room.status !== 'playing' || room.phase === 'ended') return { success: false, error: 'GAME_NOT_PLAYING' }
+    if (!this.actionValidator.canAdvanceTurn(room, narratorId)) return { success: false, error: 'NOT_NARRATOR' }
     const updatedRoom: Room = {
       ...room,
       status: 'ended',
-      phase: 'ended',
+      phase: this.stateMachine.transition(room.phase, 'END', room),
+      phaseInstance: randomUUID(),
+      pendingAutoAdvance: null,
       lastActivity: Date.now(),
       gameLog: [
         ...room.gameLog,
@@ -402,29 +428,35 @@ export class GameEngine {
       ],
     }
 
-    return { success: true, room: updatedRoom, message: 'GAME_ENDED' }
+    return { success: true, room: collectCoinRound(updatedRoom), message: 'GAME_ENDED' }
   }
 
   /**
    * Start game
    */
   startGame(room: Room): GameResult {
+    if (room.catalogVersion && room.catalogVersion !== 'web-card-baseline/v1' && !runtimeCatalog(room.catalogVersion)) {
+      return { success: false, error: 'CATALOG_UNAVAILABLE' }
+    }
     if (room.status !== 'waiting') {
       return { success: false, error: 'GAME_ALREADY_STARTED' }
     }
 
-    if (room.players.length < 5) {
+    if (room.players.length < MIN_PLAYERS) {
       return { success: false, error: 'NOT_ENOUGH_PLAYERS' }
     }
 
-    if (room.players.length > 10) {
+    if (room.players.length > MAX_PLAYERS) {
       return { success: false, error: 'TOO_MANY_PLAYERS' }
     }
+
+    const rounds = plannedRounds(room)
+    if (rounds === null) return { success: false, error: 'INVALID_ROUND_LIMIT' }
 
     // Assign roles
     let playersWithRoles
     try {
-      const preferredRoles = room.debugRolePickerEnabled
+      const preferredRoles = process.env.NODE_ENV !== 'production' && room.debugRolePickerEnabled
         ? room.players.reduce<Record<string, Role>>((acc, player) => {
             if (player.userId === room.host) {
               acc[player.userId] = Role.NARRATOR
@@ -482,9 +514,11 @@ export class GameEngine {
       players: playersWithRoles,
       status: 'playing',
       phase: 'role-reveal',
+      phaseInstance: randomUUID(),
+      pendingAutoAdvance: null,
       turn: 1,
       currentRound: 1,
-      totalRounds: room.players.length,
+      totalRounds: rounds,
       currentNarrator: narrator?.userId || room.host,
       currentNTG: sender?.userId || null,
       mutedPlayer: null,
@@ -507,29 +541,13 @@ export class GameEngine {
       lastActivity: Date.now(),
     }
 
-    return { success: true, room: updatedRoom }
+    return { success: true, room: room.rulesVersion === 'legacy/v0' ? updatedRoom : allocateCoinRound(updatedRoom) }
   }
 
   /**
    * Get game state for specific player (hide sensitive info)
    */
   getPlayerView(room: Room, playerId: string): any {
-    const player = room.players.find((p) => p.userId === playerId)
-    const isNarrator = player?.isNarrator
-    
-    return {
-      ...room,
-      players: room.players.map((p) => ({
-        ...p,
-        // Hide role unless it's the player themselves, public role, or narrator viewing the round
-        role:
-          p.userId === playerId ||
-          p.isNarrator ||
-          p.isSender ||
-          isNarrator
-            ? p.role
-            : undefined,
-      })),
-    }
+    return roomView(room, playerId)
   }
 }

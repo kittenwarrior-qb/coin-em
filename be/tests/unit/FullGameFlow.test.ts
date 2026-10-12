@@ -1,7 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { GameEngine } from '../../src/modules/game/engine/GameEngine'
-import { createMockRoom } from '../helpers/mockData'
+import { createMockRoom as createRoomFixture } from '../helpers/mockData'
 import { Role, Room } from '../../src/modules/game/types'
+
+// Explicit compatibility fixtures; the approved coin60 rules have their own golden suite.
+const createMockRoom = (count: number) => createRoomFixture(count, { rulesVersion: 'legacy/v0' })
 
 /**
  * Full game flow simulation — 7 players, 7 rounds

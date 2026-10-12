@@ -1,9 +1,13 @@
-import { motion } from 'framer-motion'
+import { EmcoinImage } from '@/components/cartoon/EmcoinImage'
+import { motion, useIsPresent } from 'framer-motion'
+import { useRef } from 'react'
+import { usePopupLifecycle } from '@/features/overlays/usePopupLifecycle'
 import { CartoonButton } from '@/components/cartoon'
 import { AVATAR_BG_COLORS, AVATAR_ICONS } from '@/components/cartoon/avatarConfig'
 import type { Player } from './types'
 
 interface NtgRewardPickerProps {
+  pending?: boolean
   players: Player[]
   rewardedIds: Set<string>
   pendingIds: Set<string>
@@ -13,6 +17,7 @@ interface NtgRewardPickerProps {
 }
 
 export function NtgRewardPicker({
+  pending,
   players,
   rewardedIds,
   pendingIds,
@@ -20,17 +25,23 @@ export function NtgRewardPicker({
   onConfirm,
   onClose,
 }: NtgRewardPickerProps) {
+  const present = useIsPresent()
+  const dialogRef = useRef<HTMLDivElement>(null)
+  usePopupLifecycle(dialogRef, present, { onClose, persistent: pending })
+  const blocked = pending || !present
   return (
     <motion.div
+      data-testid="ntg-reward-picker"
       className="absolute inset-0 z-[72] flex items-end justify-center overflow-hidden bg-black/55 px-4 pb-4"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.15 }}
-      onClick={onClose}
+      onClick={blocked ? undefined : onClose}
     >
       <motion.div
-        className="w-full max-w-sm overflow-hidden rounded-t-[28px] border-t-[3px] border-[var(--c-black)] bg-white p-4 shadow-[0_-5px_0_rgba(0,0,0,0.16)]"
+        ref={dialogRef} role="dialog" data-ui-panel="a1" aria-label="Tặng Coin theo phản hồi" tabIndex={-1} aria-busy={pending || undefined}
+        className="flex flex-col max-h-[calc(100%-16px)] w-full max-w-sm overflow-hidden rounded-t-[28px] border-t-[3px] border-[var(--c-black)] bg-white p-4 shadow-[0_-5px_0_rgba(0,0,0,0.16)] [&>*]:shrink-0"
         initial={{ y: 80 }}
         animate={{ y: 0 }}
         exit={{ y: 80 }}
@@ -38,13 +49,13 @@ export function NtgRewardPicker({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="text-center">
-          <div className="font-display text-base text-[var(--c-pink)]">Tặng coin</div>
+          <div data-ui-ink="primary" className="font-display text-base text-[var(--c-pink)]">Tặng coin</div>
           <div className="mt-0.5 font-body text-[11px] text-black/45">
             Chọn người phản hồi hay nhất · +5 🪙
           </div>
         </div>
 
-        <div className="mt-4 grid max-h-[58dvh] grid-cols-2 gap-2 overflow-x-hidden overflow-y-auto pr-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div className="mt-4 min-h-0 !shrink grid max-h-[58dvh] grid-cols-2 gap-2 overflow-x-hidden overflow-y-auto overscroll-contain pr-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {players.filter((player) => !player.isMe).map((player) => {
             const rewarded = rewardedIds.has(player.id)
             const selected = pendingIds.has(player.id)
@@ -56,7 +67,9 @@ export function NtgRewardPicker({
               <button
                 key={player.id}
                 type="button"
-                disabled={rewarded}
+                data-ui-chrome="reward-choice"
+                aria-pressed={selected || rewarded}
+                disabled={rewarded || blocked}
                 onClick={() => onTogglePending(player.id)}
                 className={[
                   'relative min-w-0 overflow-hidden flex items-center gap-2 rounded-2xl border-2 p-2 text-left transition-all',
@@ -75,7 +88,7 @@ export function NtgRewardPicker({
                   ].join(' ')}
                   style={{ background: AVATAR_BG_COLORS[Math.abs(bgIndex) % AVATAR_BG_COLORS.length] }}
                 >
-                  <img 
+                  <EmcoinImage
                     src={AVATAR_ICONS[Math.abs(avatarIndex) % AVATAR_ICONS.length]} 
                     alt="" 
                     className={[
@@ -98,7 +111,7 @@ export function NtgRewardPicker({
                 </div>
                 {(rewarded || selected) && (
                   <motion.img
-                    src={rewarded ? '/cartoon/icons/Coin.svg' : '/cartoon/icons/Checkmark-Cartoon.svg'}
+                    src={rewarded ? '/emcoin/icons/orbit/coin.svg' : '/emcoin/icons/orbit/check.svg'}
                     alt=""
                     className="absolute right-1 top-1 h-6 w-6 object-contain drop-shadow"
                     initial={{ scale: 0, rotate: -18 }}
@@ -122,7 +135,9 @@ export function NtgRewardPicker({
             color={pendingIds.size > 0 ? 'orange' : 'white'}
             size="md"
             className="mt-4 w-full"
-            onClick={onConfirm}
+            pending={pending}
+            disabled={!present}
+            onClick={() => { if (!blocked) onConfirm() }}
           >
             {pendingIds.size > 0 ? 'Chọn' : 'Đóng'}
           </CartoonButton>

@@ -1,0 +1,104 @@
+{
+  "version": "room-ui-browser-qa/v1",
+  "count": 10,
+  "result": "passed",
+  "backend": "production handlers on isolated loopback",
+  "storage": "temp root / mocked Redis",
+  "realGuestContexts": 10,
+  "browser": "147.0.7727.15",
+  "stage": "completed",
+  "traceFrameScreenshots": false,
+  "explicitScreenshots": true,
+  "offlineCDN": true,
+  "physicalDevice": false,
+  "rateLimiterDisabled": true,
+  "tabReplacement": true,
+  "intentionalLeaveResume": true,
+  "countdownDisplay": {
+    "before": 28,
+    "after": 27
+  },
+  "records": [
+    {
+      "seat": 0,
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "phase": "night"
+    },
+    {
+      "seat": 1,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "phase": "night"
+    },
+    {
+      "seat": 2,
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "phase": "night"
+    },
+    {
+      "seat": 3,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "phase": "night"
+    },
+    {
+      "seat": 4,
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "phase": "night"
+    },
+    {
+      "seat": 5,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "phase": "night"
+    },
+    {
+      "seat": 6,
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "phase": "night"
+    },
+    {
+      "seat": 7,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "phase": "night"
+    },
+    {
+      "seat": 8,
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "phase": "night"
+    },
+    {
+      "seat": 9,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "phase": "night"
+    }
+  ],
+  "errors": []
+}

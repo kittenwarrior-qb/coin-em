@@ -20,6 +20,18 @@ export interface Player {
 }
 
 export interface RoomState {
+  catalogVersion?: string
+  revision?: number
+  phaseInstance?: string
+  phaseView?: PhaseView | null
+  selfcareActor?: string | null
+  rulesVersion?: string
+  coinCycle?: {
+    version: string
+    closed: boolean
+    received: Record<string, Record<CoinType, number>>
+    history: Array<{ round: number; received: Record<string, Record<CoinType, number>> }>
+  }
   id: string
   host: string
   players: Array<{
@@ -63,17 +75,41 @@ export interface RoomState {
   debugRolePickerEnabled?: boolean
 }
 
+export interface PhaseView {
+  version: 'phase-view/v1'
+  phase: GamePhase
+  position: number | null
+  total: number
+  next: GamePhase | null
+  previous: GamePhase | null
+  capabilities: {
+    advance: boolean
+    rollback: boolean
+    heal: boolean
+    silence: boolean
+    selectSituation: boolean
+    selectEmotion: boolean
+    selectReflection: boolean
+    selectSelfcare: boolean
+    guessSilencer: boolean
+    isHealer: boolean
+    isSilencer: boolean
+  }
+}
+
 export interface GameLogEntry {
   type: string
   actorId: string
   targetId?: string
   data?: {
     phase?: GamePhase
+    direction?: 'previous' | 'next'
     round?: number
     card?: CardData
     message?: string
     bonus?: number
     amount?: number
+    requestId?: string
     receiverGainsGreen?: number
     coinType?: CoinType | string
     silencerFound?: boolean

@@ -1,0 +1,407 @@
+{
+  "scope": "loopback production Vite preview; Chromium 150ms latency/1.6Mbps down; cold cache; public home with empty-room Socket.IO bootstrap stub; no production handler/gameplay/backend outage/handset proof",
+  "results": [
+    {
+      "width": 390,
+      "height": 844,
+      "result": "passed",
+      "lcpMs": 5256,
+      "overflowX": false,
+      "brokenLocalImages": [],
+      "errors": [],
+      "totalTransferredBytes": 893620,
+      "uniqueStartupBytes": 407386,
+      "allThemeTransferredBytes": 508252,
+      "unusedPortraitRequests": 0,
+      "legacyPngRequests": 0,
+      "transfers": [
+        {
+          "path": "/",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Document",
+          "bytes": 1131
+        },
+        {
+          "path": "/assets/index-D0bHKQrN.css",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Stylesheet",
+          "bytes": 26072
+        },
+        {
+          "path": "/assets/react-vendor-B7dugd9r.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 1888
+        },
+        {
+          "path": "/assets/router-BKAORkvU.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 17000
+        },
+        {
+          "path": "/assets/motion-EQm1AUQB.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 43062
+        },
+        {
+          "path": "/assets/index-CGyK5wiy.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 59967
+        },
+        {
+          "path": "/assets/EmcoinImage-2wfbLsTu.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 497
+        },
+        {
+          "path": "/assets/arrow-right-D2NgnemA.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 669
+        },
+        {
+          "path": "/assets/createLucideIcon-DnCXt1qt.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 1031
+        },
+        {
+          "path": "/assets/CartoonModal-Cg2iSoo-.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 6434
+        },
+        {
+          "path": "/assets/chevron-down-Dy0kKFN0.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 8004
+        },
+        {
+          "path": "/assets/arrow-left-BfBqJ0vx.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 669
+        },
+        {
+          "path": "/assets/x-DVuHgxsc.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 659
+        },
+        {
+          "path": "/assets/CoinRulesGuide-CNk87jcG.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 1296
+        },
+        {
+          "path": "/assets/cardImages-DGRwzd7C.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 2322
+        },
+        {
+          "path": "/assets/approvedGameInfo-B-LNjbIp.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 455
+        },
+        {
+          "path": "/assets/eye-DGK9eXOY.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 1190
+        },
+        {
+          "path": "/fonts/Quicksand/Quicksand-Bold.ttf",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Font",
+          "bytes": 78914
+        },
+        {
+          "path": "/assets/GameContainer-2yB2wpQQ.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 133121
+        },
+        {
+          "path": "/cartoon/ui/themes/emotion-orbit/logo-v2.webp",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Image",
+          "bytes": 108568
+        },
+        {
+          "path": "/emcoin/icons/orbit/spinner.svg",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Image",
+          "bytes": 463
+        },
+        {
+          "path": "/cartoon/ui/themes/emotion-orbit/backdrop-v3.webp",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Image",
+          "bytes": 83590
+        },
+        {
+          "path": "/cartoon/ui/themes/emotion-orbit/primary-v3.webp",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Image",
+          "bytes": 92166
+        },
+        {
+          "path": "/cartoon/ui/themes/emotion-orbit/secondary-v3.webp",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Image",
+          "bytes": 123062
+        },
+        {
+          "path": "/cartoon/ui/themes/emotion-orbit/circle.svg",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Image",
+          "bytes": 524
+        },
+        {
+          "path": "/cartoon/ui/themes/emotion-orbit/quiet-v3.webp",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Image",
+          "bytes": 100866
+        }
+      ]
+    },
+    {
+      "width": 1280,
+      "height": 900,
+      "result": "passed",
+      "lcpMs": 4848,
+      "overflowX": false,
+      "brokenLocalImages": [],
+      "errors": [],
+      "totalTransferredBytes": 893620,
+      "uniqueStartupBytes": 407386,
+      "allThemeTransferredBytes": 508252,
+      "unusedPortraitRequests": 0,
+      "legacyPngRequests": 0,
+      "transfers": [
+        {
+          "path": "/",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Document",
+          "bytes": 1131
+        },
+        {
+          "path": "/assets/index-D0bHKQrN.css",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Stylesheet",
+          "bytes": 26072
+        },
+        {
+          "path": "/assets/react-vendor-B7dugd9r.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 1888
+        },
+        {
+          "path": "/assets/router-BKAORkvU.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 17000
+        },
+        {
+          "path": "/assets/motion-EQm1AUQB.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 43062
+        },
+        {
+          "path": "/assets/index-CGyK5wiy.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 59967
+        },
+        {
+          "path": "/assets/EmcoinImage-2wfbLsTu.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 497
+        },
+        {
+          "path": "/assets/arrow-right-D2NgnemA.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 669
+        },
+        {
+          "path": "/assets/createLucideIcon-DnCXt1qt.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 1031
+        },
+        {
+          "path": "/assets/CartoonModal-Cg2iSoo-.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 6434
+        },
+        {
+          "path": "/assets/chevron-down-Dy0kKFN0.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 8004
+        },
+        {
+          "path": "/assets/arrow-left-BfBqJ0vx.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 669
+        },
+        {
+          "path": "/assets/x-DVuHgxsc.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 659
+        },
+        {
+          "path": "/assets/CoinRulesGuide-CNk87jcG.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 1296
+        },
+        {
+          "path": "/assets/cardImages-DGRwzd7C.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 2322
+        },
+        {
+          "path": "/assets/approvedGameInfo-B-LNjbIp.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 455
+        },
+        {
+          "path": "/assets/eye-DGK9eXOY.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 1190
+        },
+        {
+          "path": "/fonts/Quicksand/Quicksand-Bold.ttf",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Font",
+          "bytes": 78914
+        },
+        {
+          "path": "/assets/GameContainer-2yB2wpQQ.js",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Script",
+          "bytes": 133121
+        },
+        {
+          "path": "/cartoon/ui/themes/emotion-orbit/logo-v2.webp",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Image",
+          "bytes": 108568
+        },
+        {
+          "path": "/emcoin/icons/orbit/spinner.svg",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Image",
+          "bytes": 463
+        },
+        {
+          "path": "/cartoon/ui/themes/emotion-orbit/primary-v3.webp",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Image",
+          "bytes": 92166
+        },
+        {
+          "path": "/cartoon/ui/themes/emotion-orbit/backdrop-v3.webp",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Image",
+          "bytes": 83590
+        },
+        {
+          "path": "/cartoon/ui/themes/emotion-orbit/secondary-v3.webp",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Image",
+          "bytes": 123062
+        },
+        {
+          "path": "/cartoon/ui/themes/emotion-orbit/circle.svg",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Image",
+          "bytes": 524
+        },
+        {
+          "path": "/cartoon/ui/themes/emotion-orbit/quiet-v3.webp",
+          "host": "127.0.0.1",
+          "status": 200,
+          "type": "Image",
+          "bytes": 100866
+        }
+      ]
+    },
+    {
+      "case": "initial-backend-unavailable",
+      "result": "passed",
+      "overflowX": false,
+      "guideLink": "/about/story"
+    }
+  ]
+}

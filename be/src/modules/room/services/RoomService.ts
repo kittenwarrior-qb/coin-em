@@ -1,15 +1,19 @@
 import { Room, Player } from '../../game/types'
+import { operationDiagnostic } from '../../../telemetry/operationalDiagnostics'
 import { roomRepository } from '../repository/RoomRepository'
-
-const ROOM_DISCONNECT_TTL_MS = 2 * 60 * 60 * 1000
+import { MAX_PLAYERS } from '../../game/engine/RoleDeck'
+import { roomView } from '../../game/services/RoomView'
+import { cleanupRooms } from '../../../persistence'
+import { newRoomCatalogVersion } from '../../../catalog/runtimeCatalog'
 
 export class RoomService {
   /**
    * Create new room
    */
-  createRoom(roomId: string, host: Player): Room {
+  createRoom(roomId: string, host: Player, persist = true): Room {
     const room: Room = {
       id: roomId,
+      catalogVersion: newRoomCatalogVersion(),
       host: host.userId,
       players: [host],
       status: 'waiting',
@@ -37,10 +41,10 @@ export class RoomService {
         situationGroups: ['light', 'medium', 'sensitive'],
         emotionGroups: ['basic', 'light', 'strong', 'advanced'],
       },
-      debugRolePickerEnabled: process.env.DEBUG_ROLE_PICKER === 'true',
+      debugRolePickerEnabled: process.env.NODE_ENV !== 'production' && process.env.DEBUG_ROLE_PICKER === 'true',
     }
 
-    roomRepository.save(room)
+    if (persist) roomRepository.save(room)
     return room
   }
 
@@ -50,7 +54,6 @@ export class RoomService {
   addPlayer(roomId: string, player: Player): Room | null {
     const room = roomRepository.findById(roomId)
     if (!room) return null
-    if (room.players.length >= 11) return null
 
     // Check if player already exists
     const existingPlayer = room.players.find((p) => p.userId === player.userId)
@@ -72,6 +75,8 @@ export class RoomService {
       return roomRepository.update(roomId, { players: updatedPlayers })
     }
 
+    // Reconnecting a seated player is allowed even when the room is full.
+    if (room.players.length >= MAX_PLAYERS || room.status !== 'waiting') return null
     // Add new player
     const updatedPlayers = [...room.players, player]
     return roomRepository.update(roomId, { players: updatedPlayers })
@@ -80,7 +85,7 @@ export class RoomService {
   /**
    * Remove player from room
    */
-  removePlayer(roomId: string, socketId: string): Room | null {
+  async removePlayer(roomId: string, socketId: string): Promise<Room | null> {
     const room = roomRepository.findById(roomId)
     if (!room) return null
 
@@ -89,7 +94,7 @@ export class RoomService {
 
     // If no players left, delete room
     if (updatedPlayers.length === 0) {
-      roomRepository.delete(roomId)
+      if (!await roomRepository.deleteAndWait(roomId)) throw new Error('ROOM_DELETE_CONFLICT')
       return null
     }
 
@@ -97,14 +102,14 @@ export class RoomService {
     // Keep room if game is playing to allow reconnection
     const hasRealPlayer = updatedPlayers.some((p) => !p.isFake)
     if (!hasRealPlayer && room.status !== 'playing') {
-      console.log(`[removePlayer] Deleting room ${roomId} - only bots remain in ${room.status} room`)
-      roomRepository.delete(roomId)
+      operationDiagnostic('room_delete', 'ok')
+      if (!await roomRepository.deleteAndWait(roomId)) throw new Error('ROOM_DELETE_CONFLICT')
       return null
     }
 
     // If only bots remain but game is playing, keep room for potential reconnection
     if (!hasRealPlayer && room.status === 'playing') {
-      console.log(`[removePlayer] Keeping room ${roomId} - only bots remain but game is playing`)
+      operationDiagnostic('room_cleanup', 'ok')
     }
 
     // If host left, promote next real player (or first player if none)
@@ -114,10 +119,13 @@ export class RoomService {
       newHost = (nextReal ?? updatedPlayers[0]).userId
     }
 
-    return roomRepository.update(roomId, {
+    const updated = { ...room,
       players: updatedPlayers,
       host: newHost,
-    })
+      lastActivity: Date.now(),
+    }
+    await roomRepository.saveAndWait(updated)
+    return updated
   }
 
   /**
@@ -142,9 +150,9 @@ export class RoomService {
     ]
 
     const currentPlayerCount = room.players.length
-    if (currentPlayerCount >= 11) return { error: 'room_full' }
+    if (currentPlayerCount >= MAX_PLAYERS) return { error: 'room_full' }
 
-    const maxToAdd = Math.min(count, 11 - currentPlayerCount, fakeNames.length)
+    const maxToAdd = Math.min(count, MAX_PLAYERS - currentPlayerCount, fakeNames.length)
 
     // Find which bot names are already used
     const usedNames = new Set(room.players.map((p) => p.name))
@@ -174,7 +182,7 @@ export class RoomService {
   getAvailableRooms(): Array<{ id: string; playerCount: number; hostName: string }> {
     const allRooms = roomRepository.findAll()
     return allRooms
-      .filter((room) => room.status === 'waiting' && room.players.length < 8)
+      .filter((room) => room.status === 'waiting' && room.players.length < MAX_PLAYERS)
       .map((room) => ({
         id: room.id,
         playerCount: room.players.length,
@@ -186,25 +194,7 @@ export class RoomService {
    * Get public room state
    */
   getPublicState(room: Room): any {
-    return {
-      id: room.id,
-      host: room.host,
-      players: room.players,
-      status: room.status,
-      phase: room.phase,
-      turn: room.turn,
-      currentRound: room.currentRound,
-      totalRounds: room.totalRounds,
-      currentNTG: room.currentNTG,
-      currentNarrator: room.currentNarrator,
-      mutedPlayer: room.mutedPlayer,
-      selectedCard: room.selectedCard,
-      settings: room.settings,
-      resumeExpiresAt: this.getResumeExpiresAt(room),
-      gameLog: room.gameLog,
-      nightActions: room.nightActions,
-      debugRolePickerEnabled: room.debugRolePickerEnabled,
-    }
+    return roomView(room)
   }
 
   markPlayerDisconnected(roomId: string, socketId: string): Room | null {
@@ -247,40 +237,8 @@ export class RoomService {
     return roomRepository.update(roomId, { players: updatedPlayers })
   }
 
-  cleanupDisconnectedRooms(now = Date.now()): string[] {
-    const deleted: string[] = []
-
-    for (const room of roomRepository.findAll()) {
-      if (room.status === 'ended') continue
-
-      const realPlayers = room.players.filter(p => !p.isFake)
-      if (realPlayers.length === 0) {
-        roomRepository.delete(room.id)
-        deleted.push(room.id)
-        continue
-      }
-
-      const allDisconnected = realPlayers.every(p => p.isDisconnected && p.disconnectedAt)
-      if (!allDisconnected) continue
-
-      const latestDisconnect = Math.max(...realPlayers.map(p => p.disconnectedAt ?? 0))
-      if (latestDisconnect > 0 && now - latestDisconnect >= ROOM_DISCONNECT_TTL_MS) {
-        roomRepository.delete(room.id)
-        deleted.push(room.id)
-      }
-    }
-
-    return deleted
-  }
-
-  private getResumeExpiresAt(room: Room): number | null {
-    const realPlayers = room.players.filter(p => !p.isFake)
-    if (realPlayers.length === 0) return Date.now() + ROOM_DISCONNECT_TTL_MS
-
-    const allDisconnected = realPlayers.every(p => p.isDisconnected && p.disconnectedAt)
-    if (!allDisconnected) return null
-
-    return Math.max(...realPlayers.map(p => p.disconnectedAt ?? 0)) + ROOM_DISCONNECT_TTL_MS
+  cleanupDisconnectedRooms(now = Date.now()): Promise<string[]> {
+    return cleanupRooms(roomRepository, now)
   }
 }
 

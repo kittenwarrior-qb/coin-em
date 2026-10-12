@@ -1,0 +1,122 @@
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import Admin from '@/pages/Admin'
+import { AdminRequestError } from '@/features/admin/client'
+
+const mocks = vi.hoisted(() => ({ overview: vi.fn(), login: vi.fn(), logout: vi.fn(), closeRoom: vi.fn() }))
+vi.mock('@/features/admin/client', async importOriginal => ({
+  ...await importOriginal<typeof import('@/features/admin/client')>(), adminClient: mocks,
+}))
+const fixture = { rooms: [{ id: 'fixture-room', status: 'playing', seats: 5, revision: 3 }],
+  analytics: { http: { completed: 17, clientErrors: 2, serverErrors: 1 } } }
+beforeEach(() => { vi.resetAllMocks(); localStorage.clear(); sessionStorage.clear() })
+afterEach(() => { cleanup(); vi.restoreAllMocks() })
+
+describe('admin page', () => {
+  it('starts with a cookie-session check, then offers EmCoin password login for 401', async () => {
+    mocks.overview.mockRejectedValue(new AdminRequestError(401))
+    render(<Admin />)
+    expect(await screen.findByRole('heading', { name: 'Đăng nhập' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Mật khẩu EmCoin')).toHaveAttribute('type', 'password')
+    expect(screen.queryByText('fixture-room')).not.toBeInTheDocument()
+  })
+  it('does not pretend that unconfigured admin is a login failure', async () => {
+    mocks.overview.mockRejectedValue(new AdminRequestError(503))
+    render(<Admin />)
+    expect(await screen.findByRole('alert')).toHaveTextContent('chưa được cấu hình')
+    expect(screen.queryByRole('heading', { name: 'Đăng nhập' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Thử lại' })).toBeEnabled()
+  })
+  it('shows genuine process totals, metadata only, and no mutation controls', async () => {
+    mocks.overview.mockResolvedValue(fixture)
+    render(<Admin />)
+    expect(await screen.findByText('Phòng fixture-room')).toBeInTheDocument()
+    expect(screen.getByText('Đang chơi · 5 người')).toBeInTheDocument()
+    expect(screen.getByText('17')).toBeInTheDocument()
+    expect(screen.getByText(/Không phải số người truy cập/)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /coin|vai trò/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Đóng phòng fixture-room' })).toBeEnabled()
+  })
+  it('admits only one login, clears entered password immediately and checks overview after confirmation', async () => {
+    mocks.overview.mockRejectedValueOnce(new AdminRequestError(401)).mockResolvedValue(fixture)
+    let resolveLogin!: () => void
+    mocks.login.mockReturnValue(new Promise<void>(resolve => { resolveLogin = resolve }))
+    render(<Admin />)
+    await screen.findByRole('heading', { name: 'Đăng nhập' })
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'fixture@example.invalid' } })
+    const password = screen.getByLabelText('Mật khẩu EmCoin')
+    fireEvent.change(password, { target: { value: 'synthetic-password' } })
+    const submit = screen.getByRole('button', { name: 'Đăng nhập' })
+    fireEvent.click(submit); fireEvent.click(submit)
+    expect(mocks.login).toHaveBeenCalledTimes(1)
+    expect(password).toHaveValue('')
+    expect(submit).toBeDisabled()
+    await act(async () => { resolveLogin() })
+    expect(await screen.findByText('Phòng fixture-room')).toBeInTheDocument()
+    expect(mocks.overview).toHaveBeenCalledTimes(2)
+    expect(localStorage.length).toBe(0); expect(sessionStorage.length).toBe(0)
+  })
+  it('clears the privileged view before refreshing and goes back to login on expiry', async () => {
+    mocks.overview.mockResolvedValueOnce(fixture).mockRejectedValueOnce(new AdminRequestError(401))
+    render(<Admin />)
+    await screen.findByText('Phòng fixture-room')
+    fireEvent.click(screen.getByRole('button', { name: 'Làm mới' }))
+    expect(screen.queryByText('Phòng fixture-room')).not.toBeInTheDocument()
+    await screen.findByRole('heading', { name: 'Đăng nhập' })
+    expect(screen.getByRole('alert')).toHaveTextContent('hết hạn')
+  })
+  it('logs out through the server without persisting credentials or room metadata', async () => {
+    mocks.overview.mockResolvedValue(fixture); mocks.logout.mockResolvedValue(undefined)
+    render(<Admin />)
+    await screen.findByText('Phòng fixture-room')
+    fireEvent.click(screen.getByRole('button', { name: 'Đăng xuất' }))
+    await screen.findByRole('heading', { name: 'Đăng nhập' })
+    expect(mocks.logout).toHaveBeenCalledTimes(1)
+    expect(screen.queryByText('Phòng fixture-room')).not.toBeInTheDocument()
+  })
+  it('aborts request ownership on unmount and never renders a late response', async () => {
+    let resolve!: (value: unknown) => void
+    mocks.overview.mockReturnValue(new Promise(result => { resolve = result }))
+    const view = render(<Admin />)
+    await waitFor(() => expect(mocks.overview).toHaveBeenCalledTimes(1))
+    const signal = mocks.overview.mock.calls[0][0] as AbortSignal
+    view.unmount()
+    expect(signal.aborted).toBe(true)
+    await act(async () => { resolve(fixture) })
+    expect(screen.queryByText('Phòng fixture-room')).not.toBeInTheDocument()
+  })
+  it('requires explicit confirmation and never deletes on cancel', async () => {
+    mocks.overview.mockResolvedValue(fixture)
+    render(<Admin />)
+    await screen.findByText('Phòng fixture-room')
+    fireEvent.click(screen.getByRole('button', { name: 'Đóng phòng fixture-room' }))
+    expect(await screen.findByRole('dialog')).toHaveTextContent('không có bản lưu nội dung')
+    expect(mocks.closeRoom).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: 'Hủy' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    expect(mocks.closeRoom).not.toHaveBeenCalled()
+  })
+  it('blocks dismiss while pending and reuses the identical command only on explicit uncertain retry', async () => {
+    mocks.overview.mockResolvedValueOnce(fixture).mockResolvedValueOnce({ ...fixture, rooms: [] })
+    let reject!: (error: Error) => void
+    mocks.closeRoom.mockReturnValueOnce(new Promise((_resolve, rejectPromise) => { reject = rejectPromise }))
+      .mockResolvedValueOnce({ success: true, replayed: true })
+    render(<Admin />)
+    await screen.findByText('Phòng fixture-room')
+    fireEvent.click(screen.getByRole('button', { name: 'Đóng phòng fixture-room' }))
+    await screen.findByRole('dialog')
+    fireEvent.click(screen.getByRole('button', { name: 'Xác nhận đóng' }))
+    expect(screen.getByRole('button', { name: 'Hủy' })).toBeDisabled()
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    await act(async () => { reject(new Error('synthetic network uncertainty')) })
+    expect(screen.getByRole('alert')).toHaveTextContent('Không thể xác nhận')
+    expect(screen.getByLabelText('Lý do đóng phòng')).toBeDisabled()
+    expect(mocks.closeRoom).toHaveBeenCalledTimes(1)
+    const first = mocks.closeRoom.mock.calls[0][0]
+    fireEvent.click(screen.getByRole('button', { name: 'Xác nhận đóng' }))
+    expect(await screen.findByText('Không có phòng đang được lưu.')).toBeInTheDocument()
+    expect(mocks.closeRoom.mock.calls[1][0]).toEqual(first)
+    expect(first).toMatchObject({ roomId: 'fixture-room', expectedRevision: 3, reason: 'operator-request' })
+  })
+})

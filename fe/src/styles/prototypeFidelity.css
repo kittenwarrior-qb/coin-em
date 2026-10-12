@@ -1,0 +1,212 @@
+/* Separated artwork from the approved B/C prototypes. Real text and actions
+   remain in the DOM; card illustrations and semantic Coin colors are untouched. */
+html[data-ui-theme="emotion-orbit"] {
+  --prototype-primary: url('/cartoon/ui/themes/emotion-orbit/primary-v3.webp');
+  --prototype-secondary: url('/cartoon/ui/themes/emotion-orbit/secondary-v3.webp');
+  --prototype-quiet: url('/cartoon/ui/themes/emotion-orbit/quiet-v3.webp');
+  --prototype-menu: url('/cartoon/ui/themes/emotion-orbit/menu-panel-v3.webp');
+  --prototype-table: url('/cartoon/ui/themes/emotion-orbit/table-v3.webp');
+  --brand-backdrop: url('/cartoon/ui/themes/emotion-orbit/backdrop-v3.webp');
+}
+html[data-ui-theme="kindness-workshop"] {
+  --prototype-primary: url('/cartoon/ui/themes/kindness-workshop/primary-v3.webp');
+  --prototype-secondary: url('/cartoon/ui/themes/kindness-workshop/secondary-v3.webp');
+  --prototype-quiet: url('/cartoon/ui/themes/kindness-workshop/quiet-v3.webp');
+  --prototype-menu: url('/cartoon/ui/themes/kindness-workshop/menu-panel-v4.webp');
+  --prototype-table: url('/cartoon/ui/themes/kindness-workshop/table-v3.webp');
+  --brand-backdrop: url('/cartoon/ui/themes/kindness-workshop/backdrop-v3.webp');
+  --brand-ink: #123e59;
+  --brand-primary: #205777;
+  --brand-blush: #df7465;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .font-display {
+  font-family: 'Quicksand', sans-serif;
+  font-weight: 700;
+}
+.screen-panel:has(.brand-home) { background-image: none !important; overflow: visible; }
+.screen-cartoon:has(.brand-home) { overflow: visible; align-items: flex-start; }
+.brand-home {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 853 / 1845;
+  flex: none;
+  background: var(--brand-backdrop) center / 100% 100% no-repeat;
+  container-type: inline-size;
+}
+.brand-home-help, .brand-home-settings { position: absolute; top: 2.9%; width: 10%; aspect-ratio: 1; }
+.brand-home-help { left: 5.4%; }
+.brand-home-settings { right: 5.4%; }
+.brand-home :is(.brand-home-help, .brand-home-settings) > button { width: 100%; height: 100%; }
+.brand-home :is(.brand-home-help, .brand-home-settings) > button > img { width: 100%; height: 100%; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .brand-home [data-ui-chrome="home-logo"] {
+  position: absolute; padding: 0; margin: 0 !important;
+  left: 13%; top: 22.1%; width: 74%; height: 11%;
+  display: flex; align-items: center; justify-content: center;
+}
+.brand-home [data-ui-chrome="home-logo"]::before { display: none !important; }
+.brand-home [data-ui-chrome="home-logo"] > div { width: 100%; }
+html[data-ui-theme="emotion-orbit"] .brand-home #home-logo { width: 122%; max-width: none; margin-left: -11%; }
+html[data-ui-theme="kindness-workshop"] .brand-home [data-ui-chrome="home-logo"] { left: 7%; top: 21.9%; width: 86%; height: 20%; }
+html[data-ui-theme="kindness-workshop"] .brand-home #home-logo { width: 116%; max-width: none; margin-left: -8%; }
+.brand-home-action {
+  position: absolute; left: 10.5%; width: 79%; top: 45.4%; height: 8.5%;
+  display: flex; align-items: center; justify-content: center;
+  gap: 3%; border: 0; padding: 0 9%; background: none;
+  color: #fbf9fe; cursor: pointer; isolation: isolate;
+  font: 700 6cqw / 1 'Quicksand', sans-serif;
+}
+.brand-home-action::before {
+  content: ''; position: absolute; inset: -29% -7%; z-index: -1;
+  background: var(--prototype-primary) center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+.brand-home-action > svg:first-child { width: 23%; height: 54%; flex: none; padding-right: 5%; border-right: 1px solid currentColor; }
+.brand-home-action > span { flex: 1; white-space: nowrap; }
+.brand-home-action > svg:last-child { width: 7%; height: 34%; flex: none; stroke-width: 3; }
+.brand-home-create { top: 55.5%; height: 8.2%; }
+.brand-home-create::before { background-image: var(--prototype-secondary); }
+.brand-home-guide { top: 65.8%; left: 27.4%; width: 45.7%; height: 5.4%; padding-inline: 4%; color: var(--brand-ink); font-size: 4.5cqw; }
+.brand-home-guide::before { background-image: var(--prototype-quiet); }
+.brand-home-guide > svg:first-child { width: 19%; }
+html[data-ui-theme="kindness-workshop"] .brand-home-action { left: 9%; width: 82%; top: 47.4%; height: 11.5%; font-size: 6.3cqw; }
+html[data-ui-theme="kindness-workshop"] .brand-home-create { top: 60.6%; height: 10%; }
+html[data-ui-theme="kindness-workshop"] .brand-home-guide { top: 74%; left: 24%; width: 51%; height: 6%; font-size: 4.6cqw; }
+.brand-home-action:hover { filter: brightness(1.04); }
+.brand-home-action:active { transform: translateY(2px); }
+.brand-home-resume { position: absolute; top: 82%; left: 12%; width: 76%; padding: 12px; color: var(--brand-ink); background: var(--brand-ivory); border: 1px solid var(--brand-edge); border-radius: 16px; }
+
+/* Shared action material, including compact pills, never the old flat backing. */
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-cartoon-surface="pill"] {
+  --control-material: var(--prototype-primary);
+  background: none !important; border: 0 !important; box-shadow: none !important;
+  isolation: isolate; min-width: 0;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-cartoon-surface="pill"]::before {
+  content: ''; position: absolute; inset: -27% -7%; z-index: -1;
+  background: var(--control-material) center / 100% 100% no-repeat;
+  pointer-events: none;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-cartoon-surface="pill"]:has(img[src$="secondary-v3.webp"]) { --control-material: var(--prototype-secondary); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-cartoon-surface="pill"]:has(img[src$="quiet-v3.webp"]) { --control-material: var(--prototype-quiet); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-cartoon-surface="pill"] > span:not([data-cartoon-badge]) {
+  white-space: normal; line-height: 1.2; overflow-wrap: anywhere;
+  font-size: 14px; padding-inline: 12px; text-align: center;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu {
+  max-width: 414px !important; width: 98%;
+  height: min(560px, calc(100dvh - 80px)); isolation: isolate;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu::before {
+  content: ''; position: absolute; inset: 0; z-index: -1;
+  background: var(--prototype-menu) center / 100% 100% no-repeat; pointer-events: none;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-panel {
+  background: transparent !important;
+  border: 0; border-radius: 0; box-shadow: none;
+  flex: 1; min-height: 0; margin: 112px 32px 58px;
+  scrollbar-gutter: stable;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-heading {
+  top: 4%; height: 60px; left: 12%; right: 12%; background: none; pointer-events: none;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-heading .theme-a-headline span { font-size: 36px; }
+html[data-ui-theme="emotion-orbit"] .theme-a-menu-heading .theme-a-headline { border: 0; border-radius: 0; }
+html[data-ui-theme="emotion-orbit"] .theme-a-menu-heading .theme-a-headline::after { content: ''; position: absolute; width: 32px; height: 4px; border-radius: 4px; background: var(--brand-blush); bottom: -6px; left: calc(50% - 16px); }
+html[data-ui-theme="emotion-orbit"] .theme-a-menu-heading .theme-a-headline span { font-family: 'Cookii', sans-serif; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-content { padding: 12px 12px 18px; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-actions { gap: 16px; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-actions [data-cartoon-surface="pill"] > img { height: 68px; width: 100%; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-actions [data-cartoon-surface="pill"] > span:not([data-cartoon-badge]) { font-size: 20px; padding-inline: 14px; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-actions [data-cartoon-surface="pill"] { --control-material: var(--prototype-quiet); }
+html[data-ui-theme="emotion-orbit"] .theme-a-menu-actions [data-cartoon-surface="pill"]:has(img) { --control-material: var(--prototype-quiet) !important; }
+html[data-ui-theme="emotion-orbit"] .theme-a-menu-actions > button:nth-child(2) [data-cartoon-surface="pill"] { --control-material: var(--prototype-quiet); background-color: #e8d8e5 !important; border-radius: 45px; }
+html[data-ui-theme="emotion-orbit"] .theme-a-menu-actions > button:nth-child(2) [data-cartoon-surface="pill"]::before { opacity: .55; }
+html[data-ui-theme="kindness-workshop"] .theme-a-menu-actions [data-cartoon-surface="pill"] { --control-material: var(--prototype-primary) !important; }
+html[data-ui-theme="kindness-workshop"] .theme-a-menu-actions > button:nth-child(even) [data-cartoon-surface="pill"] { --control-material: var(--prototype-secondary) !important; }
+html[data-ui-theme="kindness-workshop"] .theme-a-menu-actions [data-cartoon-surface="pill"]:has(img) { --control-material: var(--prototype-primary) !important; }
+html[data-ui-theme="kindness-workshop"] .theme-a-menu-actions > button:nth-child(even) [data-cartoon-surface="pill"]:has(img) { --control-material: var(--prototype-secondary) !important; }
+html[data-ui-theme="kindness-workshop"] .theme-a-menu-actions [data-cartoon-surface="pill"] > img { height: 80px; }
+html[data-ui-theme="kindness-workshop"] .theme-a-menu-heading .theme-a-headline span { font-family: 'Cookii', sans-serif; font-size: 44px; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-close { top: 30px; right: 24px; }
+.brand-menu-label { gap: 10px; }
+.brand-menu-label > .brand-menu-icon { display: flex; align-items: center; width: 62px; flex: none; border-right: 1px solid currentColor; }
+.brand-menu-icon > svg { width: 38px; height: 38px; margin-right: 12px; flex: none; }
+.brand-menu-label > svg:last-child { width: 16px; flex: none; }
+html[data-ui-theme="emotion-orbit"] .brand-menu-icon > svg { background: #d5d2f0; border-radius: 50%; padding: 8px; width: 44px; height: 44px; }
+.screen-panel:has(.brand-home) > [data-testid="cartoon-modal-overlay"] {
+  position: fixed; width: min(100%, 430px); left: 50%; right: auto;
+  transform: translateX(-50%); height: 100dvh; padding-inline: 0;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .game-table-surface {
+  background: none !important; overflow: visible !important;
+  border: none; box-shadow: none; border-radius: 0 !important; isolation: isolate;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .game-table-surface::before {
+  content: ''; position: absolute; left: 50%; top: 50%;
+  width: calc(100% + 110px); aspect-ratio: 1; transform: translate(-50%, -50%);
+  background: var(--prototype-table) center / contain no-repeat; z-index: -1; pointer-events: none;
+}
+html[data-ui-theme="kindness-workshop"] .game-table-surface::before { width: calc(100% + 40px); aspect-ratio: .72; }
+.game-player-side { position: relative; z-index: 20; }
+.brand-board-heading { text-align: center; color: var(--brand-ink); padding: 10px 0 24px; font-family: 'Quicksand', sans-serif; }
+.brand-board-heading p { font-size: 14px; color: var(--brand-muted); margin-bottom: 4px; }
+.brand-board-heading h1 { font-size: 30px; line-height: 1.15; font-weight: 700; color: var(--brand-ink); }
+html[data-ui-theme="kindness-workshop"] .brand-board-heading h1 { display: inline-block; position: relative; isolation: isolate; padding: 12px 24px; color: #fff6df; background: none; }
+html[data-ui-theme="kindness-workshop"] .brand-board-heading h1::before { content: ''; position: absolute; inset: -28% -7%; z-index: -1; background: var(--prototype-secondary) center / 100% 100% no-repeat; pointer-events: none; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .game-player-layout { min-height: 680px; height: auto; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .game-player-layout:is([data-player-count="5"], [data-player-count="6"]) { min-height: 540px; }
+/* Extend each material system to live chrome outside the prototype Home/Menu. */
+html[data-ui-theme="kindness-workshop"] :is([data-ui-surface="modal"]:not(.theme-a-menu-panel), [data-ui-panel="a1"], [data-ui-surface="game-popup"], [data-ui-chrome="waiting-panel"], .site-card, .footer-card) {
+  background-image: url('/cartoon/ui/themes/kindness-workshop/paper-grain.svg');
+  border-color: #d6c6a3; border-radius: 18px 12px 20px 14px;
+  box-shadow: 0 5px 14px #193c4e1f;
+}
+html[data-ui-theme="emotion-orbit"] :is([data-ui-panel="a1"], [data-ui-surface="game-popup"], [data-ui-chrome="waiting-panel"]) { box-shadow: 0 8px 28px #30356824; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is([data-slot="button"]:not([data-ui-variant="ghost"]):not([data-ui-variant="link"]), .primary-action, .site-button, .site-header-play, .about-cta) {
+  background-color: transparent; background-image: var(--prototype-primary);
+  background-position: center; background-repeat: no-repeat; background-size: 113% 160%;
+  border: 0; box-shadow: none; color: var(--brand-on-primary);
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is([data-slot="button"][data-ui-variant="secondary"], [data-slot="button"][data-ui-variant="outline"], .secondary-action) { background-image: var(--prototype-quiet); color: var(--brand-ink); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is([data-ui-chrome="circle"], .guide-chrome-close, .preview-close) { border: 1px solid var(--brand-edge); box-shadow: 0 3px 8px var(--brand-shadow); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="header"] > button { background: var(--brand-ivory); color: var(--brand-ink); border: 1px solid var(--brand-edge); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is([data-ui-pill], .badge-cartoon[data-ui-badge], .deck-chip, .card-chip) { border-radius: 999px; font-family: 'Quicksand', sans-serif; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="phase-nav"] > button { background: transparent; border: 0; box-shadow: none; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="preview"] > button { background: var(--brand-ivory); color: var(--brand-ink); border: 1px solid var(--brand-edge); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-testid="random-situation-fan"] { max-height: calc(100% - 80px); overflow-y: auto; overscroll-behavior-y: contain; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-testid="random-situation-fan"] > div:first-child { background: var(--brand-ivory); color: var(--brand-ink); border: 1px solid var(--brand-edge); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .own-role-panel { padding: 16px; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .own-role-panel [data-ui-chrome="header"] { padding: 12px 8px; border-radius: 14px; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="circle"][aria-label="Đóng"] { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-testid="coin-rules-guide"] { background: var(--brand-ivory); color: var(--brand-ink); }
+@media (max-width: 360px) {
+  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-testid="btn-give-coin-to-ntg"] [data-cartoon-surface="pill"] { min-height: 84px; }
+  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-panel { margin-inline: 24px; }
+  .brand-menu-label { gap: 6px; }
+  .brand-menu-label > .brand-menu-icon { width: 44px; }
+  .brand-menu-icon > svg { width: 30px !important; height: 30px !important; margin-right: 8px; }
+  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-actions [data-cartoon-surface="pill"] > span:not([data-cartoon-badge]) { font-size: 16px; padding-inline: 12px; }
+}
+@media (max-height: 600px) {
+  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-panel { margin-top: 88px; margin-bottom: 44px; }
+  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-content { padding: 12px 12px 18px; }
+}
+
+/* Dialogs must remain usable with a short viewport or the virtual keyboard open. */
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [role="dialog"][data-ui-surface="game-popup"] {
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  overflow-wrap: anywhere;
+  scrollbar-gutter: stable;
+  color: var(--brand-ink);
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [role="dialog"][data-ui-surface="game-popup"] .text-black\/65 { color: var(--brand-muted); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [role="dialog"][data-ui-surface="game-popup"] .text-black\/45 { color: var(--brand-muted); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [role="dialog"][data-ui-surface="game-popup"] :is(.grid-cols-2, .flex.gap-2) { gap: 16px; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [role="dialog"][data-ui-surface="game-popup"] [data-cartoon-surface="pill"]::before { inset-inline: -3%; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="success-toast"] {
+  background: var(--brand-primary); color: var(--brand-on-primary); overflow-wrap: anywhere;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="success-toast"] > div { min-width: 0; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="success-toast"] .text-white\/75 { color: var(--brand-on-primary); }

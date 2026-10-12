@@ -1,0 +1,2209 @@
+[
+  {
+    "id": "pdf-v1-role-1",
+    "code": "VT-001",
+    "name": "Người Quản trò",
+    "sortOrder": 0,
+    "category": "role",
+    "group": "",
+    "definition": "Quyền năng \"Điều phối\"\nĐọc kỹ Sổ Tay Hướng Dẫn\nBạn sẽ trở thành người hỗ trợ Người Trao Gửi khám phá hành trình cảm xúc của họ",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-008.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-007.webp",
+    "sourcePages": [
+      8,
+      7
+    ],
+    "reviewed": false,
+    "archived": false,
+    "roleKey": "narrator",
+    "faceText": {
+      "front": "Quyền năng \"Điều phối\"\nĐọc kỹ Sổ Tay Hướng Dẫn\nBạn sẽ trở thành người hỗ trợ Người Trao Gửi khám phá hành trình cảm xúc của họ",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-role-2",
+    "code": "VT-002",
+    "name": "Người Trao Gửi",
+    "sortOrder": 1,
+    "category": "role",
+    "group": "",
+    "definition": "Bạn có thể thử nói...\n\"Khi gặp tình huống này, mình cảm thấy ...\"\n\"Khi gặp tình huống này, mình cảm thấy ... vì ...\"\n\"Khi gặp tình huống này, mình cảm thấy ... vì ... và lúc đó mình muốn ...\"",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-009.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-007.webp",
+    "sourcePages": [
+      9,
+      7
+    ],
+    "reviewed": false,
+    "archived": false,
+    "roleKey": "sender",
+    "faceText": {
+      "front": "Bạn có thể thử nói...\n\"Khi gặp tình huống này, mình cảm thấy ...\"\n\"Khi gặp tình huống này, mình cảm thấy ... vì ...\"\n\"Khi gặp tình huống này, mình cảm thấy ... vì ... và lúc đó mình muốn ...\"",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-role-3",
+    "code": "VT-003",
+    "name": "Người Im Lặng",
+    "sortOrder": 2,
+    "category": "role",
+    "group": "",
+    "definition": "Quyền năng \"Cấm chat\"\nChọn 1 người bất kỳ\nNgười được chọn sẽ không thể nói điều gì trong lượt chơi đó",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-010.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-007.webp",
+    "sourcePages": [
+      10,
+      7
+    ],
+    "reviewed": false,
+    "archived": false,
+    "roleKey": "silencer",
+    "faceText": {
+      "front": "Quyền năng \"Cấm chat\"\nChọn 1 người bất kỳ\nNgười được chọn sẽ không thể nói điều gì trong lượt chơi đó",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-role-4",
+    "code": "VT-004",
+    "name": "Người Kết Nối",
+    "sortOrder": 3,
+    "category": "role",
+    "group": "",
+    "definition": "Trao lời chia sẻ với cảm xúc của Người Trao Gửi.\nBạn có thể thử nói...\n\"Nghe bạn kể, mình đoán lúc đó, bạn cảm thấy (cảm xúc)...\"\n\"Nếu mình hiểu đúng, điều đó có vẻ quan trọng với bạn vì ...\"\n\"Mình nghe được là bạn rất cần ...\"",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-012.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-007.webp",
+    "sourcePages": [
+      12,
+      7
+    ],
+    "reviewed": false,
+    "archived": false,
+    "roleKey": "connector",
+    "faceText": {
+      "front": "Trao lời chia sẻ với cảm xúc của Người Trao Gửi.\nBạn có thể thử nói...\n\"Nghe bạn kể, mình đoán lúc đó, bạn cảm thấy (cảm xúc)...\"\n\"Nếu mình hiểu đúng, điều đó có vẻ quan trọng với bạn vì ...\"\n\"Mình nghe được là bạn rất cần ...\"",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-role-5",
+    "code": "VT-005",
+    "name": "Người Gợi Mở",
+    "sortOrder": 4,
+    "category": "role",
+    "group": "",
+    "definition": "Trao lời chia sẻ một góc nhìn mới đến Người Trao Gửi.\nBạn có thể thử nói...\n\"Mình có thể chưa hiểu hết, nhưng thử nhìn thêm một góc khác như ...\"\n\"Có khả năng người còn lại lúc đó cũng đang thấy (cảm xúc)...\"\n\"Một cách nhìn khác có thể là... bạn nghĩ sao về điều này?\"",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-014.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-007.webp",
+    "sourcePages": [
+      14,
+      7
+    ],
+    "reviewed": false,
+    "archived": false,
+    "roleKey": "opener",
+    "faceText": {
+      "front": "Trao lời chia sẻ một góc nhìn mới đến Người Trao Gửi.\nBạn có thể thử nói...\n\"Mình có thể chưa hiểu hết, nhưng thử nhìn thêm một góc khác như ...\"\n\"Có khả năng người còn lại lúc đó cũng đang thấy (cảm xúc)...\"\n\"Một cách nhìn khác có thể là... bạn nghĩ sao về điều này?\"",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-role-6",
+    "code": "VT-006",
+    "name": "Người Dẫn Lối",
+    "sortOrder": 5,
+    "category": "role",
+    "group": "",
+    "definition": "Quyền năng \"Chia sẻ\"\nChọn 1 Thẻ Bí kíp tự ôm\nThẻ được chọn cần phù hợp với tình huống và bí mật đưa cho Quản trò",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-016.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-007.webp",
+    "sourcePages": [
+      16,
+      7
+    ],
+    "reviewed": false,
+    "archived": false,
+    "roleKey": "guide",
+    "faceText": {
+      "front": "Quyền năng \"Chia sẻ\"\nChọn 1 Thẻ Bí kíp tự ôm\nThẻ được chọn cần phù hợp với tình huống và bí mật đưa cho Quản trò",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-role-7",
+    "code": "VT-007",
+    "name": "Người Chữa Lành",
+    "sortOrder": 6,
+    "category": "role",
+    "group": "",
+    "definition": "Quyền năng \"Chữa trị\"\nChọn 1 người bất kỳ\nNếu chọn đúng, người đó được nói lại\nNếu chọn sai, người đó vẫn bị \"cấm chat\"",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-017.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-007.webp",
+    "sourcePages": [
+      17,
+      7
+    ],
+    "reviewed": false,
+    "archived": false,
+    "roleKey": "healer",
+    "faceText": {
+      "front": "Quyền năng \"Chữa trị\"\nChọn 1 người bất kỳ\nNếu chọn đúng, người đó được nói lại\nNếu chọn sai, người đó vẫn bị \"cấm chat\"",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-1",
+    "code": "TH-001",
+    "name": "Tình huống 1",
+    "sortOrder": 7,
+    "category": "situation",
+    "group": "light",
+    "definition": "",
+    "prompt": "Bạn gặp lại người bạn cũ của mình.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-019.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      19,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn gặp lại người bạn cũ của mình.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-2",
+    "code": "TH-002",
+    "name": "Tình huống 2",
+    "sortOrder": 8,
+    "category": "situation",
+    "group": "light",
+    "definition": "",
+    "prompt": "Chờ đợi được biết kết quả bài kiểm tra của môn học bạn yêu thích.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-020.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      20,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Chờ đợi được biết kết quả bài kiểm tra của môn học bạn yêu thích.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-3",
+    "code": "TH-003",
+    "name": "Tình huống 3",
+    "sortOrder": 9,
+    "category": "situation",
+    "group": "light",
+    "definition": "",
+    "prompt": "Bạn vừa hoàn thành một bài kiểm tra quan trọng.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-021.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      21,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn vừa hoàn thành một bài kiểm tra quan trọng.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-4",
+    "code": "TH-004",
+    "name": "Tình huống 4",
+    "sortOrder": 10,
+    "category": "situation",
+    "group": "light",
+    "definition": "",
+    "prompt": "Bạn nhắn tin cho người bạn thích và chờ đợi họ trả lời.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-022.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      22,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn nhắn tin cho người bạn thích và chờ đợi họ trả lời.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-5",
+    "code": "TH-005",
+    "name": "Tình huống 5",
+    "sortOrder": 11,
+    "category": "situation",
+    "group": "light",
+    "definition": "",
+    "prompt": "Bạn đang tham gia một hoạt động hoặc tiết học mà bạn yêu thích.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-023.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      23,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn đang tham gia một hoạt động hoặc tiết học mà bạn yêu thích.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-6",
+    "code": "TH-006",
+    "name": "Tình huống 6",
+    "sortOrder": 12,
+    "category": "situation",
+    "group": "light",
+    "definition": "",
+    "prompt": "Bạn được khen ngợi vì làm việc tốt.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-024.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      24,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn được khen ngợi vì làm việc tốt.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-7",
+    "code": "TH-007",
+    "name": "Tình huống 7",
+    "sortOrder": 13,
+    "category": "situation",
+    "group": "light",
+    "definition": "",
+    "prompt": "Bạn nhận được sự ủng hộ từ ai đó.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-025.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      25,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn nhận được sự ủng hộ từ ai đó.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-8",
+    "code": "TH-008",
+    "name": "Tình huống 8",
+    "sortOrder": 14,
+    "category": "situation",
+    "group": "light",
+    "definition": "",
+    "prompt": "Bạn vừa hoàn thành xong bài tập về nhà của cả tuần.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-026.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      26,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn vừa hoàn thành xong bài tập về nhà của cả tuần.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-9",
+    "code": "TH-009",
+    "name": "Tình huống 9",
+    "sortOrder": 15,
+    "category": "situation",
+    "group": "light",
+    "definition": "",
+    "prompt": "Bạn khi được tâm sự cùng người bạn thân thiết của mình.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-027.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      27,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn khi được tâm sự cùng người bạn thân thiết của mình.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-10",
+    "code": "TH-010",
+    "name": "Tình huống 10",
+    "sortOrder": 16,
+    "category": "situation",
+    "group": "light",
+    "definition": "",
+    "prompt": "Bạn được gọi lên bảng giải bài cho cả lớp cùng xem.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-028.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      28,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn được gọi lên bảng giải bài cho cả lớp cùng xem.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-11",
+    "code": "TH-011",
+    "name": "Tình huống 11",
+    "sortOrder": 17,
+    "category": "situation",
+    "group": "light",
+    "definition": "",
+    "prompt": "Bạn khi nghe \"Chỉ còn 5 phút là hết giờ làm bài\"",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-029.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      29,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn khi nghe \"Chỉ còn 5 phút là hết giờ làm bài\"",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-12",
+    "code": "TH-012",
+    "name": "Tình huống 12",
+    "sortOrder": 18,
+    "category": "situation",
+    "group": "light",
+    "definition": "",
+    "prompt": "Bạn tự tay làm ra một sản phẩm trong môn học nào đó.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-030.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      30,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn tự tay làm ra một sản phẩm trong môn học nào đó.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-13",
+    "code": "TH-013",
+    "name": "Tình huống 13",
+    "sortOrder": 19,
+    "category": "situation",
+    "group": "light",
+    "definition": "",
+    "prompt": "Một bạn học của bạn đạt điểm cao bất ngờ.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-031.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      31,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Một bạn học của bạn đạt điểm cao bất ngờ.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-14",
+    "code": "TH-014",
+    "name": "Tình huống 14",
+    "sortOrder": 20,
+    "category": "situation",
+    "group": "medium",
+    "definition": "",
+    "prompt": "Người khác sử dụng đồ dùng cá nhân của bạn nhưng chưa có sự đồng ý từ bạn.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-032.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      32,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Người khác sử dụng đồ dùng cá nhân của bạn nhưng chưa có sự đồng ý từ bạn.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-15",
+    "code": "TH-015",
+    "name": "Tình huống 15",
+    "sortOrder": 21,
+    "category": "situation",
+    "group": "medium",
+    "definition": "",
+    "prompt": "Khi làm việc nhóm, ý kiến của bạn không được nhóm ghi nhận.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-033.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      33,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Khi làm việc nhóm, ý kiến của bạn không được nhóm ghi nhận.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-16",
+    "code": "TH-016",
+    "name": "Tình huống 16",
+    "sortOrder": 22,
+    "category": "situation",
+    "group": "medium",
+    "definition": "",
+    "prompt": "Khi bạn chưa làm quen được bạn học nào trong lớp.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-034.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      34,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Khi bạn chưa làm quen được bạn học nào trong lớp.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-17",
+    "code": "TH-017",
+    "name": "Tình huống 17",
+    "sortOrder": 23,
+    "category": "situation",
+    "group": "medium",
+    "definition": "",
+    "prompt": "Khi bạn có lựa chọn khác với ý kiến của số đông.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-035.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      35,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Khi bạn có lựa chọn khác với ý kiến của số đông.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-18",
+    "code": "TH-018",
+    "name": "Tình huống 18",
+    "sortOrder": 24,
+    "category": "situation",
+    "group": "medium",
+    "definition": "",
+    "prompt": "Bạn cùng lớp của bạn đang rất tức giận vì chuyện gì đó.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-036.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      36,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn cùng lớp của bạn đang rất tức giận vì chuyện gì đó.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-19",
+    "code": "TH-019",
+    "name": "Tình huống 19",
+    "sortOrder": 25,
+    "category": "situation",
+    "group": "medium",
+    "definition": "",
+    "prompt": "Khi bạn trò chuyện cùng Thầy/Cô của mình.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-037.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      37,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Khi bạn trò chuyện cùng Thầy/Cô của mình.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-20",
+    "code": "TH-020",
+    "name": "Tình huống 20",
+    "sortOrder": 26,
+    "category": "situation",
+    "group": "medium",
+    "definition": "",
+    "prompt": "Lần đầu tiên bạn đứng trước rất nhiều bạn học khác.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-038.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      38,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Lần đầu tiên bạn đứng trước rất nhiều bạn học khác.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-21",
+    "code": "TH-021",
+    "name": "Tình huống 21",
+    "sortOrder": 27,
+    "category": "situation",
+    "group": "medium",
+    "definition": "",
+    "prompt": "Bạn cùng bạn bè so sánh điểm kiểm tra.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-039.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      39,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn cùng bạn bè so sánh điểm kiểm tra.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-22",
+    "code": "TH-022",
+    "name": "Tình huống 22",
+    "sortOrder": 28,
+    "category": "situation",
+    "group": "medium",
+    "definition": "",
+    "prompt": "Các bạn trong lớp/nhóm của bạn bất đồng ý kiến.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-040.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      40,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Các bạn trong lớp/nhóm của bạn bất đồng ý kiến.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-23",
+    "code": "TH-023",
+    "name": "Tình huống 23",
+    "sortOrder": 29,
+    "category": "situation",
+    "group": "medium",
+    "definition": "",
+    "prompt": "Bạn bè không chủ động bắt chuyện với bạn.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-041.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      41,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn bè không chủ động bắt chuyện với bạn.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-24",
+    "code": "TH-024",
+    "name": "Tình huống 24",
+    "sortOrder": 30,
+    "category": "situation",
+    "group": "medium",
+    "definition": "",
+    "prompt": "Một bạn trong lớp thường xuyên khiến bạn mất tập trung.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-042.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      42,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Một bạn trong lớp thường xuyên khiến bạn mất tập trung.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-25",
+    "code": "TH-025",
+    "name": "Tình huống 25",
+    "sortOrder": 31,
+    "category": "situation",
+    "group": "sensitive",
+    "definition": "",
+    "prompt": "Một bạn học trêu chọc bạn nhiều lần.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-043.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      43,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Một bạn học trêu chọc bạn nhiều lần.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-26",
+    "code": "TH-026",
+    "name": "Tình huống 26",
+    "sortOrder": 32,
+    "category": "situation",
+    "group": "sensitive",
+    "definition": "",
+    "prompt": "Ai đó đứng ra bảo vệ bạn khi bạn bị hiểu lầm hoặc bị đối xử chưa công bằng.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-044.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      44,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Ai đó đứng ra bảo vệ bạn khi bạn bị hiểu lầm hoặc bị đối xử chưa công bằng.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-27",
+    "code": "TH-027",
+    "name": "Tình huống 27",
+    "sortOrder": 33,
+    "category": "situation",
+    "group": "sensitive",
+    "definition": "",
+    "prompt": "Kết quả bài kiểm tra không được như mong đợi của bạn.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-045.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      45,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Kết quả bài kiểm tra không được như mong đợi của bạn.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-28",
+    "code": "TH-028",
+    "name": "Tình huống 28",
+    "sortOrder": 34,
+    "category": "situation",
+    "group": "sensitive",
+    "definition": "",
+    "prompt": "Một người bạn đi đến và lớn tiếng với bạn.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-046.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      46,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Một người bạn đi đến và lớn tiếng với bạn.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-29",
+    "code": "TH-029",
+    "name": "Tình huống 29",
+    "sortOrder": 35,
+    "category": "situation",
+    "group": "sensitive",
+    "definition": "",
+    "prompt": "Bạn lỡ nói lời không hay về người khác.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-047.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      47,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn lỡ nói lời không hay về người khác.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-30",
+    "code": "TH-030",
+    "name": "Tình huống 30",
+    "sortOrder": 36,
+    "category": "situation",
+    "group": "sensitive",
+    "definition": "",
+    "prompt": "Bạn làm việc nhóm với người từng có mâu thuẫn với bạn.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-048.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      48,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn làm việc nhóm với người từng có mâu thuẫn với bạn.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-31",
+    "code": "TH-031",
+    "name": "Tình huống 31",
+    "sortOrder": 37,
+    "category": "situation",
+    "group": "sensitive",
+    "definition": "",
+    "prompt": "Bạn cùng bàn thường xuyên vứt rác sang chỗ của bạn.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-049.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      49,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn cùng bàn thường xuyên vứt rác sang chỗ của bạn.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-situation-32",
+    "code": "TH-032",
+    "name": "Tình huống 32",
+    "sortOrder": 38,
+    "category": "situation",
+    "group": "sensitive",
+    "definition": "",
+    "prompt": "Bạn phát hiện ra người bạn tin tưởng nhất nói dối bạn.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-050.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-018.webp",
+    "sourcePages": [
+      50,
+      18
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn phát hiện ra người bạn tin tưởng nhất nói dối bạn.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-1",
+    "code": "CX-001",
+    "name": "Giận dữ",
+    "sortOrder": 39,
+    "category": "emotion",
+    "group": "basic",
+    "definition": "Giận dữ là cảm xúc khi bạn cảm thấy bị tổn thương, bất mãn hoặc thất vọng.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-051.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-052.webp",
+    "sourcePages": [
+      51,
+      52
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Giận dữ là cảm xúc khi bạn cảm thấy bị tổn thương, bất mãn hoặc thất vọng.",
+      "back": "Điều gì có thể khiến bạn có cảm xúc này?"
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-2",
+    "code": "CX-002",
+    "name": "Mong đợi",
+    "sortOrder": 40,
+    "category": "emotion",
+    "group": "basic",
+    "definition": "Mong đợi là hi vọng điều gì đó tích cực sẽ đến với bạn.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-053.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-054.webp",
+    "sourcePages": [
+      53,
+      54
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Mong đợi là hi vọng điều gì đó tích cực sẽ đến với bạn.",
+      "back": "Điều gì có thể khiến bạn có cảm xúc này?"
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-3",
+    "code": "CX-003",
+    "name": "Vui vẻ",
+    "sortOrder": 41,
+    "category": "emotion",
+    "group": "basic",
+    "definition": "Vui vẻ là khi bạn cảm thấy thoải mái, hào hứng.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-055.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-056.webp",
+    "sourcePages": [
+      55,
+      56
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Vui vẻ là khi bạn cảm thấy thoải mái, hào hứng.",
+      "back": "Điều gì có thể khiến bạn có cảm xúc này?"
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-4",
+    "code": "CX-004",
+    "name": "Tin tưởng",
+    "sortOrder": 42,
+    "category": "emotion",
+    "group": "basic",
+    "definition": "Tin tưởng là cảm xúc an tâm khi đặt niềm tin vào ai đó.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-057.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-058.webp",
+    "sourcePages": [
+      57,
+      58
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Tin tưởng là cảm xúc an tâm khi đặt niềm tin vào ai đó.",
+      "back": "Điều gì có thể khiến bạn có cảm xúc này?"
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-5",
+    "code": "CX-005",
+    "name": "Sợ hãi",
+    "sortOrder": 43,
+    "category": "emotion",
+    "group": "basic",
+    "definition": "Sợ hãi là khi bạn thấy có điều gì đó nguy hiểm hoặc có thể làm bạn tổn thương.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-059.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-060.webp",
+    "sourcePages": [
+      59,
+      60
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Sợ hãi là khi bạn thấy có điều gì đó nguy hiểm hoặc có thể làm bạn tổn thương.",
+      "back": "Điều gì có thể khiến bạn có cảm xúc này?"
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-6",
+    "code": "CX-006",
+    "name": "Bất ngờ",
+    "sortOrder": 44,
+    "category": "emotion",
+    "group": "basic",
+    "definition": "Bất ngờ là khi có chuyện xảy ra mà bạn không hề nghĩ đến trước đó.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-061.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-062.webp",
+    "sourcePages": [
+      61,
+      62
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bất ngờ là khi có chuyện xảy ra mà bạn không hề nghĩ đến trước đó.",
+      "back": "Điều gì có thể khiến bạn có cảm xúc này?"
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-7",
+    "code": "CX-007",
+    "name": "Buồn bã",
+    "sortOrder": 45,
+    "category": "emotion",
+    "group": "basic",
+    "definition": "Buồn bã là khi bạn thấy không vui, vì điều gì đó không như mong muốn.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-063.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-064.webp",
+    "sourcePages": [
+      63,
+      64
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Buồn bã là khi bạn thấy không vui, vì điều gì đó không như mong muốn.",
+      "back": "Điều gì có thể khiến bạn có cảm xúc này?"
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-8",
+    "code": "CX-008",
+    "name": "Chán ghét",
+    "sortOrder": 46,
+    "category": "emotion",
+    "group": "basic",
+    "definition": "Chán ghét là khi bạn cảm thấy không thích, muốn tránh ai hoặc điều gì đó.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-065.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-066.webp",
+    "sourcePages": [
+      65,
+      66
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Chán ghét là khi bạn cảm thấy không thích, muốn tránh ai hoặc điều gì đó.",
+      "back": "Điều gì có thể khiến bạn có cảm xúc này?"
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-9",
+    "code": "CX-009",
+    "name": "Bực bội",
+    "sortOrder": 47,
+    "category": "emotion",
+    "group": "light",
+    "definition": "Bực bội là khi bạn cảm thấy khó chịu vì chuyện gì đó mà không làm gì được.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-067.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-068.webp",
+    "sourcePages": [
+      67,
+      68
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bực bội là khi bạn cảm thấy khó chịu vì chuyện gì đó mà không làm gì được.",
+      "back": "Điều gì có thể khiến bạn có cảm xúc này?"
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-10",
+    "code": "CX-010",
+    "name": "Thịnh nộ",
+    "sortOrder": 48,
+    "category": "emotion",
+    "group": "strong",
+    "definition": "Thịnh nộ là sự giận dữ tột độ, bạn cảm thấy khó kiểm soát được.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-069.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-070.webp",
+    "sourcePages": [
+      69,
+      70
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Thịnh nộ là sự giận dữ tột độ, bạn cảm thấy khó kiểm soát được.",
+      "back": "Điều gì có thể khiến bạn có cảm xúc này?"
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-11",
+    "code": "CX-011",
+    "name": "Hung hăng",
+    "sortOrder": 49,
+    "category": "emotion",
+    "group": "advanced",
+    "definition": "Hung hăng là cơn tức giận có sự chuẩn bị trước để sẵn sàng tấn công.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-071.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-072.webp",
+    "sourcePages": [
+      71,
+      72
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Hung hăng là cơn tức giận có sự chuẩn bị trước để sẵn sàng tấn công.",
+      "back": "Hung hăng là một cảm xúc phức hợp giữa Giận Dữ và Mong Đợi."
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-12",
+    "code": "CX-012",
+    "name": "Hứng thú",
+    "sortOrder": 50,
+    "category": "emotion",
+    "group": "light",
+    "definition": "Hứng thú là khi bạn cảm thấy hào hứng, thích thú và muốn khám phá.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-073.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-074.webp",
+    "sourcePages": [
+      73,
+      74
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Hứng thú là khi bạn cảm thấy hào hứng, thích thú và muốn khám phá.",
+      "back": "Điều gì có thể khiến bạn có cảm xúc này?"
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-13",
+    "code": "CX-013",
+    "name": "Cảnh giác",
+    "sortOrder": 51,
+    "category": "emotion",
+    "group": "strong",
+    "definition": "Cảnh giác là khi bạn tập trung, đề phòng vì có thể có gì đó bất ngờ xảy ra.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-075.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-076.webp",
+    "sourcePages": [
+      75,
+      76
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Cảnh giác là khi bạn tập trung, đề phòng vì có thể có gì đó bất ngờ xảy ra.",
+      "back": "Điều gì có thể khiến bạn có cảm xúc này?"
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-14",
+    "code": "CX-014",
+    "name": "Lạc quan",
+    "sortOrder": 52,
+    "category": "emotion",
+    "group": "advanced",
+    "definition": "Lạc quan là thái độ sống tích cực, tin vào tương lai tốt đẹp và xem khó khăn là cơ hội để học hỏi.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-077.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-078.webp",
+    "sourcePages": [
+      77,
+      78
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Lạc quan là thái độ sống tích cực, tin vào tương lai tốt đẹp và xem khó khăn là cơ hội để học hỏi.",
+      "back": "Lạc quan là một cảm xúc phức hợp giữa Vui Vẻ và Mong Đợi"
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-15",
+    "code": "CX-015",
+    "name": "Thư thái",
+    "sortOrder": 53,
+    "category": "emotion",
+    "group": "light",
+    "definition": "Thư thái là khi bạn cảm thấy bình yên, không bị gò bó.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-079.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-080.webp",
+    "sourcePages": [
+      79,
+      80
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Thư thái là khi bạn cảm thấy bình yên, không bị gò bó.",
+      "back": "Điều gì có thể khiến bạn có cảm xúc này?"
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-16",
+    "code": "CX-016",
+    "name": "Ngất ngây",
+    "sortOrder": 54,
+    "category": "emotion",
+    "group": "strong",
+    "definition": "Ngất ngây là khi bạn cảm thấy vui sướng khó tả trong lòng.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-081.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-082.webp",
+    "sourcePages": [
+      81,
+      82
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Ngất ngây là khi bạn cảm thấy vui sướng khó tả trong lòng.",
+      "back": "Điều gì có thể khiến bạn có cảm xúc này?"
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-17",
+    "code": "CX-017",
+    "name": "Yêu mến",
+    "sortOrder": 55,
+    "category": "emotion",
+    "group": "advanced",
+    "definition": "Yêu mến là một cảm xúc phức hợp giữa Vui Vẻ + Tin Tưởng",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-083.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-084.webp",
+    "sourcePages": [
+      83,
+      84
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Yêu mến là một cảm xúc phức hợp giữa Vui Vẻ + Tin Tưởng",
+      "back": "Yêu mến là cảm xúc bạn dành cho ai đó hoặc điều gì đó tốt đẹp mà bạn muốn gắn bó."
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-18",
+    "code": "CX-018",
+    "name": "Chấp nhận",
+    "sortOrder": 56,
+    "category": "emotion",
+    "group": "light",
+    "definition": "Chấp nhận là cảm xúc mở lòng đón nhận sự khác biệt, chưa vội phán xét điều gì hoặc ai đó.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-085.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-086.webp",
+    "sourcePages": [
+      85,
+      86
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Chấp nhận là cảm xúc mở lòng đón nhận sự khác biệt, chưa vội phán xét điều gì hoặc ai đó.",
+      "back": "Điều gì có thể khiến bạn có cảm xúc này?"
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-19",
+    "code": "CX-019",
+    "name": "Ngưỡng mộ",
+    "sortOrder": 57,
+    "category": "emotion",
+    "group": "strong",
+    "definition": "Ngưỡng mộ là cảm xúc tôn trọng, mến phục ai đó vì phẩm chất, tài năng hoặc thành tích của họ.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-087.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-088.webp",
+    "sourcePages": [
+      87,
+      88
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Ngưỡng mộ là cảm xúc tôn trọng, mến phục ai đó vì phẩm chất, tài năng hoặc thành tích của họ.",
+      "back": "Điều gì có thể khiến bạn có cảm xúc này?"
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-20",
+    "code": "CX-020",
+    "name": "Khuất phục",
+    "sortOrder": 58,
+    "category": "emotion",
+    "group": "advanced",
+    "definition": "Khuất phục là một cảm xúc phức hợp giữa Tin Tưởng và Sợ Hãi.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-089.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-090.webp",
+    "sourcePages": [
+      89,
+      90
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Khuất phục là một cảm xúc phức hợp giữa Tin Tưởng và Sợ Hãi.",
+      "back": "Khuất phục là khi chấp nhận nghe lời và làm theo điều gì hay ai đó vì e sợ rủi ro."
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-21",
+    "code": "CX-021",
+    "name": "E sợ",
+    "sortOrder": 59,
+    "category": "emotion",
+    "group": "light",
+    "definition": "E sợ là cảm giác khi bạn lo sợ, đắn đo làm điều gì đó hoặc gặp ai đó.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-091.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-092.webp",
+    "sourcePages": [
+      91,
+      92
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "E sợ là cảm giác khi bạn lo sợ, đắn đo làm điều gì đó hoặc gặp ai đó.",
+      "back": "Điều gì có thể khiến bạn có cảm xúc này?"
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-22",
+    "code": "CX-022",
+    "name": "Khiếp sợ",
+    "sortOrder": 60,
+    "category": "emotion",
+    "group": "strong",
+    "definition": "Khiếp sợ là khi bạn rất sợ hãi, hoảng sợ đến mức run rẩy hoặc mất bình tĩnh.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-093.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-094.webp",
+    "sourcePages": [
+      93,
+      94
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Khiếp sợ là khi bạn rất sợ hãi, hoảng sợ đến mức run rẩy hoặc mất bình tĩnh.",
+      "back": "Điều gì có thể khiến bạn có cảm xúc này?"
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-23",
+    "code": "CX-023",
+    "name": "Kính sợ",
+    "sortOrder": 61,
+    "category": "emotion",
+    "group": "advanced",
+    "definition": "Kính sợ là khi bạn cảm thấy choáng ngợp, rùng mình với ai đó hoặc điều gì đó.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-095.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-096.webp",
+    "sourcePages": [
+      95,
+      96
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Kính sợ là khi bạn cảm thấy choáng ngợp, rùng mình với ai đó hoặc điều gì đó.",
+      "back": "Kính sợ là một cảm xúc phức hợp giữa Sợ Hãi và Bất Ngờ."
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-24",
+    "code": "CX-024",
+    "name": "Xao nhãng",
+    "sortOrder": 62,
+    "category": "emotion",
+    "group": "light",
+    "definition": "Xao nhãng là khi một điều gì đó lạ lẫm đột ngột làm bạn phân tâm.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-097.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-098.webp",
+    "sourcePages": [
+      97,
+      98
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Xao nhãng là khi một điều gì đó lạ lẫm đột ngột làm bạn phân tâm.",
+      "back": "Điều gì có thể khiến bạn có cảm xúc này?"
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-25",
+    "code": "CX-025",
+    "name": "Kinh ngạc",
+    "sortOrder": 63,
+    "category": "emotion",
+    "group": "strong",
+    "definition": "Kinh ngạc là khi bạn đối mặt với điều bất ngờ, lạ lùng hoặc không thể tin vào mắt mình.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-099.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-100.webp",
+    "sourcePages": [
+      99,
+      100
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Kinh ngạc là khi bạn đối mặt với điều bất ngờ, lạ lùng hoặc không thể tin vào mắt mình.",
+      "back": "Điều gì có thể khiến bạn có cảm xúc này?"
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-26",
+    "code": "CX-026",
+    "name": "Chối bỏ",
+    "sortOrder": 64,
+    "category": "emotion",
+    "group": "advanced",
+    "definition": "Chối bỏ là khi chưa muốn tin hay chưa muốn đối diện với điều đột ngột xảy ra gây hụt hẫng, buồn bã.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-101.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-102.webp",
+    "sourcePages": [
+      101,
+      102
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Chối bỏ là khi chưa muốn tin hay chưa muốn đối diện với điều đột ngột xảy ra gây hụt hẫng, buồn bã.",
+      "back": "Chối bỏ là một cảm xúc phức hợp giữa Buồn Bã và Bất Ngờ."
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-27",
+    "code": "CX-027",
+    "name": "Trầm ngâm",
+    "sortOrder": 65,
+    "category": "emotion",
+    "group": "light",
+    "definition": "Trầm ngâm là khi bạn im lặng, suy nghĩ nhiều về một chuyện đã hoặc đang xảy ra.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-103.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-104.webp",
+    "sourcePages": [
+      103,
+      104
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Trầm ngâm là khi bạn im lặng, suy nghĩ nhiều về một chuyện đã hoặc đang xảy ra.",
+      "back": "Điều gì có thể khiến bạn có cảm xúc này?"
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-28",
+    "code": "CX-028",
+    "name": "Đau buồn",
+    "sortOrder": 66,
+    "category": "emotion",
+    "group": "strong",
+    "definition": "Đau buồn là khi cảm thấy khó chịu, buồn bực, sợ hãi nhưng chưa thể giải quyết được nó.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-105.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-106.webp",
+    "sourcePages": [
+      105,
+      106
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Đau buồn là khi cảm thấy khó chịu, buồn bực, sợ hãi nhưng chưa thể giải quyết được nó.",
+      "back": "Điều gì có thể khiến bạn có cảm xúc này?"
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-29",
+    "code": "CX-029",
+    "name": "Hối hận",
+    "sortOrder": 67,
+    "category": "emotion",
+    "group": "advanced",
+    "definition": "Hối hận là khi bạn cảm thấy buồn và tiếc nuối về một lỗi lầm đã gây ra.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-107.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-108.webp",
+    "sourcePages": [
+      107,
+      108
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Hối hận là khi bạn cảm thấy buồn và tiếc nuối về một lỗi lầm đã gây ra.",
+      "back": "Hối hận là một cảm xúc phức hợp giữa Buồn Bã và Chán Ghét."
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-30",
+    "code": "CX-030",
+    "name": "Chán nản",
+    "sortOrder": 68,
+    "category": "emotion",
+    "group": "light",
+    "definition": "Chán nản là khi bạn cảm thấy mệt mỏi, mất hứng thú với việc đang làm.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-109.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-110.webp",
+    "sourcePages": [
+      109,
+      110
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Chán nản là khi bạn cảm thấy mệt mỏi, mất hứng thú với việc đang làm.",
+      "back": "Điều gì có thể khiến bạn có cảm xúc này?"
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-31",
+    "code": "CX-031",
+    "name": "Ghê tởm",
+    "sortOrder": 69,
+    "category": "emotion",
+    "group": "strong",
+    "definition": "Ghê tởm là khi bạn cảm thấy rất khó chịu khi nhìn, nghe hay tiếp xúc với điều gì đó.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-111.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-112.webp",
+    "sourcePages": [
+      111,
+      112
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Ghê tởm là khi bạn cảm thấy rất khó chịu khi nhìn, nghe hay tiếp xúc với điều gì đó.",
+      "back": "Điều gì có thể khiến bạn có cảm xúc này?"
+    }
+  },
+  {
+    "id": "pdf-v1-emotion-32",
+    "code": "CX-032",
+    "name": "Khinh thường",
+    "sortOrder": 70,
+    "category": "emotion",
+    "group": "advanced",
+    "definition": "Khinh thường là khi bạn xem nhẹ, đánh giá thấp giá trị, khả năng của người khác hoặc một sự việc.",
+    "prompt": "",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-113.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-114.webp",
+    "sourcePages": [
+      113,
+      114
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Khinh thường là khi bạn xem nhẹ, đánh giá thấp giá trị, khả năng của người khác hoặc một sự việc.",
+      "back": "Khinh thường là một cảm xúc phức hợp giữa Giận Dữ và Chán Ghét."
+    }
+  },
+  {
+    "id": "pdf-v1-reflection-1",
+    "code": "PT-001",
+    "name": "Phản tư 1",
+    "sortOrder": 71,
+    "category": "reflection",
+    "group": "self",
+    "definition": "",
+    "prompt": "Bạn đã học được điều gì từ tình huống đó?",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-116.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-115.webp",
+    "sourcePages": [
+      116,
+      115
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn đã học được điều gì từ tình huống đó?",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-reflection-2",
+    "code": "PT-002",
+    "name": "Phản tư 2",
+    "sortOrder": 72,
+    "category": "reflection",
+    "group": "self",
+    "definition": "",
+    "prompt": "Điều gì quan trọng đối với bạn trong tình huống đó? Vì sao?",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-117.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-115.webp",
+    "sourcePages": [
+      117,
+      115
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Điều gì quan trọng đối với bạn trong tình huống đó? Vì sao?",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-reflection-3",
+    "code": "PT-003",
+    "name": "Phản tư 3",
+    "sortOrder": 73,
+    "category": "reflection",
+    "group": "self",
+    "definition": "",
+    "prompt": "Bạn nghĩ điều gì làm tình huống trở nên đặc biệt?",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-118.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-115.webp",
+    "sourcePages": [
+      118,
+      115
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn nghĩ điều gì làm tình huống trở nên đặc biệt?",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-reflection-4",
+    "code": "PT-004",
+    "name": "Phản tư 4",
+    "sortOrder": 74,
+    "category": "reflection",
+    "group": "self",
+    "definition": "",
+    "prompt": "Bạn có những cảm xúc nào khác bên trong bạn lúc đó?",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-119.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-115.webp",
+    "sourcePages": [
+      119,
+      115
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn có những cảm xúc nào khác bên trong bạn lúc đó?",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-reflection-5",
+    "code": "PT-005",
+    "name": "Phản tư 5",
+    "sortOrder": 75,
+    "category": "reflection",
+    "group": "self",
+    "definition": "",
+    "prompt": "Điều gì khiến bạn vẫn nhớ về tình huống đó?",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-120.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-115.webp",
+    "sourcePages": [
+      120,
+      115
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Điều gì khiến bạn vẫn nhớ về tình huống đó?",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-reflection-6",
+    "code": "PT-006",
+    "name": "Phản tư 6",
+    "sortOrder": 76,
+    "category": "reflection",
+    "group": "self",
+    "definition": "",
+    "prompt": "Bạn có thể tìm đến ai để hỗ trợ bạn trong tình huống đó?",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-121.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-115.webp",
+    "sourcePages": [
+      121,
+      115
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn có thể tìm đến ai để hỗ trợ bạn trong tình huống đó?",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-reflection-7",
+    "code": "PT-007",
+    "name": "Phản tư 7",
+    "sortOrder": 77,
+    "category": "reflection",
+    "group": "self",
+    "definition": "",
+    "prompt": "Bạn đã làm thế nào để giúp bạn cảm thấy tốt hơn sau đó?",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-122.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-115.webp",
+    "sourcePages": [
+      122,
+      115
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn đã làm thế nào để giúp bạn cảm thấy tốt hơn sau đó?",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-reflection-8",
+    "code": "PT-008",
+    "name": "Phản tư 8",
+    "sortOrder": 78,
+    "category": "reflection",
+    "group": "self",
+    "definition": "",
+    "prompt": "Bạn muốn nói gì với chính mình lúc ấy?",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-123.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-115.webp",
+    "sourcePages": [
+      123,
+      115
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn muốn nói gì với chính mình lúc ấy?",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-reflection-9",
+    "code": "PT-009",
+    "name": "Phản tư 9",
+    "sortOrder": 79,
+    "category": "reflection",
+    "group": "others",
+    "definition": "",
+    "prompt": "Bạn nghĩ rằng những người khác đang cảm thấy như thế nào?",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-124.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-115.webp",
+    "sourcePages": [
+      124,
+      115
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn nghĩ rằng những người khác đang cảm thấy như thế nào?",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-reflection-10",
+    "code": "PT-010",
+    "name": "Phản tư 10",
+    "sortOrder": 80,
+    "category": "reflection",
+    "group": "others",
+    "definition": "",
+    "prompt": "Nếu bạn là người khác trong tình huống đó, bạn sẽ làm gì?",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-125.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-115.webp",
+    "sourcePages": [
+      125,
+      115
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Nếu bạn là người khác trong tình huống đó, bạn sẽ làm gì?",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-reflection-11",
+    "code": "PT-011",
+    "name": "Phản tư 11",
+    "sortOrder": 81,
+    "category": "reflection",
+    "group": "others",
+    "definition": "",
+    "prompt": "Bạn nghĩ người khác có cảm thấy điều tương tự bạn trong tình huống đó không?",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-126.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-115.webp",
+    "sourcePages": [
+      126,
+      115
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn nghĩ người khác có cảm thấy điều tương tự bạn trong tình huống đó không?",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-reflection-12",
+    "code": "PT-012",
+    "name": "Phản tư 12",
+    "sortOrder": 82,
+    "category": "reflection",
+    "group": "others",
+    "definition": "",
+    "prompt": "Điều gì có thể khiến họ hành động như vậy?",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-127.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-115.webp",
+    "sourcePages": [
+      127,
+      115
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Điều gì có thể khiến họ hành động như vậy?",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-reflection-13",
+    "code": "PT-013",
+    "name": "Phản tư 13",
+    "sortOrder": 83,
+    "category": "reflection",
+    "group": "change",
+    "definition": "",
+    "prompt": "Bạn sẽ làm điều gì khác đi trong tình huống đó?",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-128.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-115.webp",
+    "sourcePages": [
+      128,
+      115
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn sẽ làm điều gì khác đi trong tình huống đó?",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-reflection-14",
+    "code": "PT-014",
+    "name": "Phản tư 14",
+    "sortOrder": 84,
+    "category": "reflection",
+    "group": "change",
+    "definition": "",
+    "prompt": "Bạn đã từng thử suy nghĩ theo một hướng khác về tình huống đó? Nếu có, đó sẽ là gì?",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-129.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-115.webp",
+    "sourcePages": [
+      129,
+      115
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Bạn đã từng thử suy nghĩ theo một hướng khác về tình huống đó? Nếu có, đó sẽ là gì?",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-selfcare-1",
+    "code": "BK-001",
+    "name": "Thở 4-7-8",
+    "sortOrder": 85,
+    "category": "selfcare",
+    "group": "calm",
+    "definition": "",
+    "prompt": "Cả nhóm cùng hít thở:\n4 giây - Hít vào\n7 giây - Giữ hơi\n8 giây - Thở ra",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-131.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-130.webp",
+    "sourcePages": [
+      131,
+      130
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Cả nhóm cùng hít thở:\n4 giây - Hít vào\n7 giây - Giữ hơi\n8 giây - Thở ra",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-selfcare-2",
+    "code": "BK-002",
+    "name": "Thư giãn",
+    "sortOrder": 86,
+    "category": "selfcare",
+    "group": "calm",
+    "definition": "",
+    "prompt": "Nằm thẳng, duỗi tay chân như một chú sao biển. Hít sâu và tận hưởng khoảnh khắc.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-132.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-130.webp",
+    "sourcePages": [
+      132,
+      130
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Nằm thẳng, duỗi tay chân như một chú sao biển. Hít sâu và tận hưởng khoảnh khắc.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-selfcare-3",
+    "code": "BK-003",
+    "name": "Giải phóng",
+    "sortOrder": 87,
+    "category": "selfcare",
+    "group": "calm",
+    "definition": "",
+    "prompt": "Đứng lên, dang tay, hít sâu và hô thật TO:\n\"Tui làm được!\nBạn cũng làm được!\"",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-133.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-130.webp",
+    "sourcePages": [
+      133,
+      130
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Đứng lên, dang tay, hít sâu và hô thật TO:\n\"Tui làm được!\nBạn cũng làm được!\"",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-selfcare-4",
+    "code": "BK-004",
+    "name": "Chu chu",
+    "sortOrder": 88,
+    "category": "selfcare",
+    "group": "calm",
+    "definition": "",
+    "prompt": "Hãy cùng nhau chu nhẹ môi, thở sâu 5 lần",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-134.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-130.webp",
+    "sourcePages": [
+      134,
+      130
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Hãy cùng nhau chu nhẹ môi, thở sâu 5 lần",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-selfcare-5",
+    "code": "BK-005",
+    "name": "Bàn tay biết nghỉ ngơi",
+    "sortOrder": 89,
+    "category": "selfcare",
+    "group": "calm",
+    "definition": "",
+    "prompt": "Hãy nắm chặt các ngón tay lại với nhau. Sau đó, từ từ thả nhẹ ngón tay ra.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-135.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-130.webp",
+    "sourcePages": [
+      135,
+      130
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Hãy nắm chặt các ngón tay lại với nhau. Sau đó, từ từ thả nhẹ ngón tay ra.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-selfcare-6",
+    "code": "BK-006",
+    "name": "Ôm mình",
+    "sortOrder": 90,
+    "category": "selfcare",
+    "group": "connection",
+    "definition": "",
+    "prompt": "Tự ôm mình, vỗ vai, nói thầm:\n\"Sẽ ổn thôi, mình cũng có thể tự ôm lấy mình.\"",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-136.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-130.webp",
+    "sourcePages": [
+      136,
+      130
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Tự ôm mình, vỗ vai, nói thầm:\n\"Sẽ ổn thôi, mình cũng có thể tự ôm lấy mình.\"",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-selfcare-7",
+    "code": "BK-007",
+    "name": "Lời cảm ơn",
+    "sortOrder": 91,
+    "category": "selfcare",
+    "group": "connection",
+    "definition": "",
+    "prompt": "Hãy gửi lời đến 1 người bạn:\n\"Cảm ơn bạn đã lắng nghe mình.\"",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-137.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-130.webp",
+    "sourcePages": [
+      137,
+      130
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Hãy gửi lời đến 1 người bạn:\n\"Cảm ơn bạn đã lắng nghe mình.\"",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-selfcare-8",
+    "code": "BK-008",
+    "name": "Hộp thư yêu thương",
+    "sortOrder": 92,
+    "category": "selfcare",
+    "group": "connection",
+    "definition": "",
+    "prompt": "Viết/nói thầm một lời yêu thương gửi đến một người bạn.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-138.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-130.webp",
+    "sourcePages": [
+      138,
+      130
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Viết/nói thầm một lời yêu thương gửi đến một người bạn.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-selfcare-9",
+    "code": "BK-009",
+    "name": "Nơi an toàn",
+    "sortOrder": 93,
+    "category": "selfcare",
+    "group": "connection",
+    "definition": "",
+    "prompt": "Hãy tưởng tượng một nơi bạn cảm thấy thoải mái nhất... Ở lại đó một lúc nhé!",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-139.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-130.webp",
+    "sourcePages": [
+      139,
+      130
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Hãy tưởng tượng một nơi bạn cảm thấy thoải mái nhất... Ở lại đó một lúc nhé!",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-selfcare-10",
+    "code": "BK-010",
+    "name": "Bản nhạc vỗ tay",
+    "sortOrder": 94,
+    "category": "selfcare",
+    "group": "connection",
+    "definition": "",
+    "prompt": "Vỗ tay theo một bản nhạc bất kỳ và cùng hát.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-140.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-130.webp",
+    "sourcePages": [
+      140,
+      130
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Vỗ tay theo một bản nhạc bất kỳ và cùng hát.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-selfcare-11",
+    "code": "BK-011",
+    "name": "Nụ cười tỏa nắng",
+    "sortOrder": 95,
+    "category": "selfcare",
+    "group": "connection",
+    "definition": "",
+    "prompt": "Lần lượt nhìn vào mắt nhau 5 giây, một nụ cười sẽ xuất hiện.",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-141.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-130.webp",
+    "sourcePages": [
+      141,
+      130
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Lần lượt nhìn vào mắt nhau 5 giây, một nụ cười sẽ xuất hiện.",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-selfcare-12",
+    "code": "BK-012",
+    "name": "Bức tranh toàn cảnh",
+    "sortOrder": 96,
+    "category": "selfcare",
+    "group": "emotion",
+    "definition": "",
+    "prompt": "Hãy nghĩ về một kỷ niệm vui mà bạn có cùng ai đó",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-142.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-130.webp",
+    "sourcePages": [
+      142,
+      130
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Hãy nghĩ về một kỷ niệm vui mà bạn có cùng ai đó",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-selfcare-13",
+    "code": "BK-013",
+    "name": "Dũng cảm",
+    "sortOrder": 97,
+    "category": "selfcare",
+    "group": "emotion",
+    "definition": "",
+    "prompt": "Nghĩ về điều khiến bạn lo sợ. Đọc thầm chú:\n\"Sợ là điều bình thường, mình mạnh hơn nỗi sợ!\"",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-143.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-130.webp",
+    "sourcePages": [
+      143,
+      130
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Nghĩ về điều khiến bạn lo sợ. Đọc thầm chú:\n\"Sợ là điều bình thường, mình mạnh hơn nỗi sợ!\"",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-selfcare-14",
+    "code": "BK-014",
+    "name": "Chọn màu, hiểu mình",
+    "sortOrder": 98,
+    "category": "selfcare",
+    "group": "emotion",
+    "definition": "",
+    "prompt": "Chọn 1 màu cho cảm xúc hiện tại",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-144.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-130.webp",
+    "sourcePages": [
+      144,
+      130
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Chọn 1 màu cho cảm xúc hiện tại",
+      "back": ""
+    }
+  },
+  {
+    "id": "pdf-v1-selfcare-15",
+    "code": "BK-015",
+    "name": "Bản tin thời tiết",
+    "sortOrder": 99,
+    "category": "selfcare",
+    "group": "emotion",
+    "definition": "",
+    "prompt": "Thời tiết bên trong bạn hiện tại là thời tiết nào?",
+    "frontImageUrl": "/emcoin/decks/pdf-v1/page-145.webp",
+    "backImageUrl": "/emcoin/decks/pdf-v1/page-130.webp",
+    "sourcePages": [
+      145,
+      130
+    ],
+    "reviewed": false,
+    "archived": false,
+    "faceText": {
+      "front": "Thời tiết bên trong bạn hiện tại là thời tiết nào?",
+      "back": ""
+    }
+  }
+]

@@ -1,3 +1,4 @@
+import { EmcoinImage } from '@/components/cartoon/EmcoinImage'
 /**
  * CartoonDropdown — replicates Unity Dropdown prefab
  *
@@ -9,6 +10,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { useControlTheme } from './controlThemeContext'
 
 export interface DropdownOption {
   value: string
@@ -28,6 +30,7 @@ interface CartoonDropdownProps {
 export function CartoonDropdown({
   options, value, onChange, placeholder = 'Select...', className, disabled,
 }: CartoonDropdownProps) {
+  const theme = useControlTheme()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -43,7 +46,7 @@ export function CartoonDropdown({
   }, [])
 
   return (
-    <div ref={ref} className={cn('relative', className)}>
+    <div ref={ref} data-ui-surface={theme !== 'legacy' ? 'dropdown' : undefined} className={cn('relative', className)}>
       {/* Trigger */}
       <button
         type="button"
@@ -59,16 +62,16 @@ export function CartoonDropdown({
           'shadow-[0_4px_0_rgba(0,0,0,0.12)]',
           open && 'shadow-none translate-y-1',
         )}
-        style={{ border: 'none', outline: 'none' }}
+        style={{ border: 'none', outline: 'none', ...(theme !== 'legacy' ? { background: 'var(--brand-mint-soft)', color: 'var(--brand-ink)' } : {}) }}
       >
         <span className="flex items-center gap-2 min-w-0">
           {selected?.iconSrc && (
-            <img src={selected.iconSrc} alt="" className="w-5 h-5 object-contain flex-shrink-0" />
+            <EmcoinImage src={selected.iconSrc} alt="" className="w-5 h-5 object-contain flex-shrink-0" />
           )}
           <span className="truncate">{selected?.label ?? placeholder}</span>
         </span>
-        <img
-          src="/cartoon/icons/Arrow---Down.svg"
+        <EmcoinImage
+          src="/emcoin/icons/orbit/down.svg"
           alt=""
           className={cn('w-4 h-4 flex-shrink-0 transition-transform duration-200', open && 'rotate-180')}
         />
@@ -82,13 +85,14 @@ export function CartoonDropdown({
             animate={{ opacity: 1, y: 0, scaleY: 1 }}
             exit={{ opacity: 0, y: -8, scaleY: 0.9 }}
             transition={{ duration: 0.15 }}
-            style={{ transformOrigin: 'top' }}
+            style={{ transformOrigin: 'top', ...(theme !== 'legacy' ? { background: 'var(--brand-ivory)', color: 'var(--brand-ink)', border: '2px solid #9BC7E3' } : {}) }}
             className="absolute top-full left-0 right-0 mt-2 z-50 bg-white rounded-2xl overflow-hidden shadow-[0_6px_0_rgba(0,0,0,0.12),0_2px_12px_rgba(0,0,0,0.08)]"
           >
             {options.map(opt => (
               <button
                 key={opt.value}
                 type="button"
+                aria-pressed={opt.value === value}
                 onClick={() => { onChange?.(opt.value); setOpen(false) }}
                 className={cn(
                   'w-full flex items-center gap-3 px-4 py-3 text-left',
@@ -99,11 +103,11 @@ export function CartoonDropdown({
                 )}
               >
                 {opt.iconSrc && (
-                  <img src={opt.iconSrc} alt="" className="w-5 h-5 object-contain flex-shrink-0" />
+                  <EmcoinImage src={opt.iconSrc} alt="" className="w-5 h-5 object-contain flex-shrink-0" />
                 )}
                 <span className="flex-1 truncate">{opt.label}</span>
                 {opt.value === value && (
-                  <img src="/cartoon/icons/Checkmark-Cartoon.svg" alt="selected" className="w-4 h-4 flex-shrink-0" />
+                  <EmcoinImage src="/emcoin/icons/orbit/check.svg" alt="selected" className="w-4 h-4 flex-shrink-0" />
                 )}
               </button>
             ))}

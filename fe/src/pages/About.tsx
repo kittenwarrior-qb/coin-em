@@ -1,13 +1,17 @@
+import { EmcoinImage } from '@/components/cartoon/EmcoinImage'
 import { useEffect } from 'react'
 import { ArrowDown, ChevronsRight, Globe2, Mail } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import SiteHeader from '@/components/site/SiteHeader'
 import AboutFlowPath from '@/components/site/AboutFlowPath'
+import { APPROVED_GAME_INFO } from '@/content/approvedGameInfo'
+import { PublicCatalogBoundary } from '@/features/game/catalog/PublicCatalog'
+import { useRoomCatalog } from '@/features/game/catalog/roomCatalogClient'
 
 const quickStats = [
-  ['10-15', 'độ tuổi trọng tâm'],
-  ['4-8', 'người chơi mỗi bàn'],
+  [APPROVED_GAME_INFO.audience, 'độ tuổi sử dụng'],
+  [APPROVED_GAME_INFO.playerCount, 'người chơi trên web'],
   ['60-90 phút', 'thời lượng một buổi'],
   ['4 bộ thẻ', 'tình huống, cảm xúc, phản tư, tự ôm'],
 ]
@@ -26,6 +30,22 @@ const cards = [
   ['Thẻ phản tư', '14 thẻ', 'Gợi câu hỏi để người chơi nhìn lại hành vi, nhu cầu và cách mình phản ứng.', '/landing/reflection-card.webp'],
   ['Bí kíp tự ôm', '15 thẻ', 'Đề xuất hành động chăm sóc bản thân hoặc kết nối lại với nhóm.', '/landing/selfcare-card.webp'],
 ]
+function PublishedCardTeasers() {
+  const catalog = useRoomCatalog()
+  return cards.map(([title, count, text, image], index) => {
+    const category = (['situation', 'emotion', 'reflection', 'selfcare'] as const)[index]
+    const source = catalog.metadata?.filter(card => card.category === category)
+    const first = source?.[0]
+    if (source && !first) return null
+    return <Link className="deck-card-link" key={title} to="/about/cards" aria-label={`Xem bộ thẻ 2D: ${title}`}>
+      <article>
+        <EmcoinImage src={first?.frontImageUrl ?? image} alt={title} decoding="async" loading="lazy" />
+        <div><span className="card-count">{source ? `${source.length} thẻ` : count}</span><h3>{title}</h3><p>{text}</p></div>
+        <span className="card-index">{String(index + 1).padStart(2, '0')}</span>
+      </article>
+    </Link>
+  })
+}
 
 const roles = [
   ['Quản Trò', 'Điều phối nhịp chơi và giữ không gian an toàn cho cả bàn.'],
@@ -44,9 +64,9 @@ const principles = [
 ]
 
 const teamMembers = [
-  ['Lê Trương Mỹ Ngọc', 'Trưởng nhóm', '2005', '/cartoon/icons/avatars/Girl 1.png'],
-  ['Nguyễn Trần Bảo Nhi', 'Đồng đội đáng tin cậy', '2005', '/cartoon/icons/avatars/Girl 3.png'],
-  ['Huỳnh Hồng Như', 'Đồng đội lý trí', '2006', '/cartoon/icons/avatars/Girl.png'],
+  ['Lê Trương Mỹ Ngọc', 'Trưởng nhóm', '2005', '/emcoin/avatars/orbit/01.webp'],
+  ['Nguyễn Trần Bảo Nhi', 'Đồng đội đáng tin cậy', '2005', '/emcoin/avatars/orbit/05.webp'],
+  ['Huỳnh Hồng Như', 'Đồng đội lý trí', '2006', '/emcoin/avatars/orbit/10.webp'],
 ]
 
 const trialImages = Array.from({ length: 20 }, (_, index) => {
@@ -59,6 +79,7 @@ const trialImages = Array.from({ length: 20 }, (_, index) => {
 })
 
 export default function About() {
+  const navigate = useNavigate()
   useEffect(() => {
     document.title = 'EmCoin - Về dự án'
   }, [])
@@ -122,7 +143,7 @@ export default function About() {
       <section className="hero">
         <picture className="hero-photo">
           <source media="(max-width: 640px)" srcSet="/landing/trial-08-thumb.webp" />
-          <img src="/landing/trial-08-thumb.webp" alt="Nhóm học sinh trải nghiệm EmCoin" />
+          <EmcoinImage src="/landing/trial-08-thumb.webp" alt="Nhóm học sinh trải nghiệm EmCoin" />
         </picture>
 
         <div className="hero-copy">
@@ -130,7 +151,7 @@ export default function About() {
           <h1>Đồng tiền tử tế</h1>
           <p className="tagline">Bộ thẻ bài giáo dục cảm xúc cho học sinh.</p>
           <p className="lead">
-            EmCoin kết hợp thẻ bài và web app để học sinh nhận diện, gọi tên và chia sẻ cảm xúc trong một vòng chơi offline cùng bạn bè.
+            EmCoin kết hợp thẻ bài và web app để học sinh nhận diện, gọi tên và chia sẻ cảm xúc trong một vòng chơi trực tiếp cùng bạn bè. Web app cần Internet để chơi; phần offline chỉ hỗ trợ hướng dẫn công khai.
           </p>
           <div className="hero-actions">
             <Link to="/game" className="primary-action">Chơi thử app</Link>
@@ -157,19 +178,9 @@ export default function About() {
           <h2>Bốn nhóm thẻ giữ cho cuộc trò chuyện có mở đầu, chiều sâu và điểm kết.</h2>
         </div>
         <div className="card-grid">
-          {cards.map(([title, count, text, image], index) => (
-            <Link className="deck-card-link" key={title} to="/about/cards" aria-label={`Xem bộ thẻ 2D: ${title}`}>
-              <article>
-                <img src={image} alt={title} decoding="async" />
-                <div>
-                  <span className="card-count">{count}</span>
-                  <h3>{title}</h3>
-                  <p>{text}</p>
-                </div>
-                <span className="card-index">{String(index + 1).padStart(2, '0')}</span>
-              </article>
-            </Link>
-          ))}
+          <PublicCatalogBoundary presentation="inline" onClose={() => navigate('/about/cards')} closeLabel="Xem bộ thẻ">
+            <PublishedCardTeasers />
+          </PublicCatalogBoundary>
         </div>
         <p className="card-grid-hint" aria-hidden="true">
           Vuốt sang để xem đủ 4 bộ thẻ <ChevronsRight size={16} />
@@ -179,7 +190,7 @@ export default function About() {
       <section className="section image-section">
         <picture>
           <source media="(max-width: 640px)" srcSet="/landing/trial-12-thumb.webp" />
-          <img src="/landing/trial-12.webp" alt="Buổi thử nghiệm EmCoin với học sinh" loading="lazy" />
+          <EmcoinImage src="/landing/trial-12.webp" alt="Buổi thử nghiệm EmCoin với học sinh" loading="lazy" />
         </picture>
         <div>
           <p className="section-label">Trải nghiệm thử nghiệm</p>
@@ -208,7 +219,7 @@ export default function About() {
             >
               <picture>
                 <source media="(max-width: 640px)" srcSet={image.thumb} />
-                <img src={image.src} alt={image.alt} loading="lazy" />
+                <EmcoinImage src={image.src} alt={image.alt} loading="lazy" />
               </picture>
             </figure>
           ))}
@@ -321,7 +332,7 @@ export default function About() {
       <footer className="about-footer">
         <div className="footer-card">
           <div className="footer-heading">
-            <img src="/logo.svg" alt="EmCoin" />
+            <EmcoinImage src="/logo.svg" alt="EmCoin" />
             <div>
               <strong>Liên hệ chi tiết</strong>
               <span>Nhóm dự án Đồng Tiền Tử Tế - UPSHIFT 2025</span>
@@ -329,11 +340,11 @@ export default function About() {
           </div>
 
           <div className="contact-grid">
-            <a href="mailto:emcoin.nnn@gmail.com" className="contact-item">
+            <a href={`mailto:${APPROVED_GAME_INFO.supportEmail}`} className="contact-item">
               <Mail aria-hidden="true" />
               <span>
                 <b>Email</b>
-                emcoin.nnn@gmail.com
+                {APPROVED_GAME_INFO.supportEmail}
               </span>
             </a>
             <a href="mailto:ngocltm.sw@gmail.com" className="contact-item">
@@ -354,7 +365,7 @@ export default function About() {
 
           <div className="qr-panel">
             <p>Web app thẻ bài <ArrowDown aria-hidden="true" /></p>
-            <img src="/landing/emcoin-qr.svg" alt="QR truy cập web app EmCoin" />
+            <EmcoinImage src="/landing/emcoin-qr.svg" alt="QR truy cập web app EmCoin" />
           </div>
         </div>
       </footer>

@@ -1,0 +1,110 @@
+/* Dev-only approval studies. No production import or global palette migration. */
+/* Single opt-in whole-menu study; production menus keep their current styling. */
+.menu-study-screen.menu-study-sky-pink {
+  min-height: 0;
+  background: #E9F5FD url('/cartoon/ui/themes/sky-pink-a1/backdrop.webp') center / cover;
+}
+.menu-study-sky-pink .menu-study-caption,
+.menu-study-sky-pink .menu-study-caption h1,
+.menu-study-sky-pink .menu-study-notice { color: #20557F; }
+.menu-study-screen.menu-study-sky-pink [data-testid="cartoon-modal-overlay"] {
+  background: #24466028 !important;
+  padding-top: 88px !important;
+  padding-bottom: 44px !important;
+}
+.theme-a-menu--harmonized .theme-a-menu-panel {
+  border: 0 solid transparent;
+  border-image: url('/cartoon/ui/themes/sky-pink-a1/table.webp') 90 fill / 24px / 0 stretch;
+  background: transparent;
+  box-shadow: 0 8px 18px #20557F1A;
+  max-height: calc(100dvh - 160px);
+}
+.theme-a-menu--harmonized .theme-a-menu-heading {
+  top: 16px;
+  height: 56px;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+}
+.theme-a-menu--harmonized .theme-a-menu-heading .theme-a-headline {
+  height: 54px !important;
+  width: 148px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: url('/cartoon/buttons/themes/mint-blush-v2/pill-blush.png') center / 100% 100% no-repeat;
+  box-shadow: none;
+}
+.theme-a-menu--harmonized .theme-a-menu-heading .theme-a-headline span { font-size: 26px; }
+.theme-a-menu--harmonized .theme-a-menu-content { padding: 90px 26px 28px; }
+.theme-a-menu--harmonized .theme-a-menu-actions { gap: 16px; }
+.theme-a-menu--harmonized .theme-a-menu-actions > .cartoon-control { width: 220px; }
+.theme-a-menu--harmonized .theme-a-menu-actions [data-cartoon-surface="pill"] > span:not([data-cartoon-badge]) { font-size: 18px; }
+.theme-a-menu--harmonized .theme-a-menu-close { top: 17px; right: 14px; }
+.theme-a-menu--harmonized:focus { outline: none; }
+.theme-a-menu--harmonized .theme-a-menu-exit { border-color: #A4C7DF; padding-top: 16px; margin-top: 2px; }
+@media (max-height: 650px) {
+  .theme-a-menu--harmonized .theme-a-menu-content { padding: 80px 24px 24px; }
+  .theme-a-menu--harmonized .theme-a-menu-actions { gap: 12px; }
+  .theme-a-menu--harmonized .theme-a-menu-actions > .cartoon-control { width: 176px; }
+  .theme-a-menu--harmonized .theme-a-menu-actions [data-cartoon-surface="pill"] > span:not([data-cartoon-badge]) { font-size: 16px; }
+  html[data-ui-theme="mint-blush"] .theme-a-menu--harmonized .theme-a-menu-quit { width: 160px; }
+  .theme-a-menu--harmonized .theme-a-menu-exit { padding-top: 12px; margin-top: 0; }
+  .theme-a-menu--harmonized .theme-a-menu-quit-label { font-size: 14px; gap: 8px; }
+}
+html[data-ui-theme="mint-blush"] .theme-a-menu--harmonized [data-cartoon-badge="pill"].cartoon-pill-badge {
+  border: 1.5px solid #BE7895 !important;
+  border-image: none !important;
+  background: #FFF8FC !important;
+  border-radius: 10px 12px 9px 11px;
+  box-shadow: inset 0 2px 0 #FFFFFF, 0 2px 0 #D5A5BA !important;
+  color: #873D5A !important;
+  padding: 4px 8px;
+  font-size: 10px;
+  line-height: 1.15;
+  transform: translate(8%, -8%) rotate(-4deg);
+}
+.menu-study-screen { position: relative; width: min(100%, 430px); height: 100dvh; min-height: 380px; margin: auto; overflow: hidden; background: #EDF5EE url('/cartoon/ui/themes/mint-blush-v2/backdrop.webp') center/cover; }
+.menu-study-caption { position: absolute; top: 16px; inset-inline: 16px; text-align: center; z-index: 1; color: #294D43; }
+.menu-study-caption h1 { margin: 0; font-family: var(--font-display); font-size: 20px; }
+.menu-study-caption h1, .study-gallery h1 { color: #294D43; }
+.menu-study-caption p { margin: 6px 0 0; font-family: var(--font-body); font-size: 12px; }
+.menu-study-screen [data-testid="cartoon-modal-overlay"] { background: #294D4314 !important; }
+.menu-study-notice { position: absolute; bottom: 12px; inset-inline: 20px; text-align: center; font: 12px var(--font-body); color: #294D43; }
+.study-label { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.menu-study .study-guide [data-cartoon-surface="pill"] > img { opacity: 0; }
+.menu-study .study-guide [data-cartoon-surface="pill"]::before { content: ''; position: absolute; inset: 3px 0 4px; border: 2px solid #B7C5AD; border-bottom-width: 6px; border-radius: 46% 45% 43% 44% / 92% 88% 84% 90%; background: linear-gradient(175deg, #FFF9E8, #F3E9D2); box-shadow: inset 0 4px 0 #FFFFFFBF, 0 3px 4px #294D4314; }
+.menu-study .study-guide [data-cartoon-surface="pill"]::after { content: ''; position: absolute; top: 13%; left: 9%; width: 16%; height: 10%; border-radius: 100%; background: #FFFFFF9C; transform: rotate(-20deg); pointer-events: none; }
+.menu-study--a1 .theme-a-menu-heading .theme-a-headline { border: 1px solid #D6B8C3; border-bottom-width: 3px; border-radius: 15px 18px 16px 14px; background: #FAE5EC; padding: 0 16px; }
+.menu-study--a1 .theme-a-menu-panel { border-width: 3px; border-bottom-width: 6px; }
+/* Unselected historical studies retain their CSS exit treatment. A1 now uses the real menu. */
+.menu-study .theme-a-menu-quit:not(.cartoon-control) { display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 210px; max-width: 100%; min-height: 52px; padding: 10px 18px; font: 16px var(--font-display); color: #805166; background: linear-gradient(#FFF5F8, #FAE5EC); border: 1.5px solid #DBB6C4; border-bottom-width: 3px; border-radius: 28px 25px 27px 24px; box-shadow: inset 0 2px 0 #FFFFFFA0; cursor: pointer; }
+/* A2: a softer sage frame, centered named plaque and warmer help capsule. */
+.menu-study--a2 { --menu-edge: #91B59E; }
+.menu-study--a2 .theme-a-menu-panel { background: #FFF8EB; border-width: 5px; border-bottom-width: 9px; border-radius: 36px 30px 38px 31px; box-shadow: inset 0 3px 0 #FFFFFF, 0 5px 0 #73998038, 0 12px 20px #294D4321; }
+.menu-study--a2 .theme-a-menu-heading { top: 5px; left: 5px; right: 5px; background: #FFF8EB; height: 66px; justify-content: center; border-radius: 30px 25px 0 0; }
+.menu-study--a2 .theme-a-menu-heading .theme-a-headline { height: 43px !important; padding: 0 24px; border: 2px solid #B78294; border-bottom-width: 4px; border-radius: 18px 22px 17px 20px; background: linear-gradient(#FAE5EC, #EDC2CE); box-shadow: inset 0 3px 0 #FFFFFF8C; }
+.menu-study--a2 .theme-a-menu-content { padding-top: 80px; }
+.menu-study--a2 .theme-a-menu-actions { gap: 17px; }
+.menu-study--a2 .study-guide [data-cartoon-surface="pill"]::before { border-color: #C8AE83; background: linear-gradient(#FFF2D8, #F2DDB5); }
+.menu-study--a2 .theme-a-menu-close { right: 13px; top: 15px; }
+/* A3: low rounded relief tiles; same function labels with real vector icons. */
+.menu-study--a3 .theme-a-menu-heading .theme-a-headline { padding-left: 12px; border-left: 5px solid #D594AA; border-radius: 3px; }
+.menu-study--a3 .theme-a-menu-panel { border-radius: 26px 28px 24px 30px; }
+.menu-study--a3 .theme-a-menu-actions > .cartoon-control { width: 244px; }
+.menu-study--a3 [data-cartoon-surface="pill"] > img { opacity: 0; }
+.menu-study--a3 [data-cartoon-surface="pill"]::before { content: ''; position: absolute; inset: 6px 0; border: 2px solid #83B39E; border-bottom-width: 5px; border-radius: 23px 25px 22px 24px; background: linear-gradient(175deg, #DEF3E9, #BCE4D2); box-shadow: inset 0 3px 0 #FFFFFFA0; }
+.menu-study--a3 .study-3d [data-cartoon-surface="pill"]::before { border-color: #C18BA0; background: linear-gradient(175deg, #FCE8EF, #F0C8D5); }
+.menu-study--a3 .study-guide [data-cartoon-surface="pill"]::before { inset: 6px 0; border-color: #B7C5AD; border-bottom-width: 5px; border-radius: 23px 25px 22px 24px; }
+.menu-study--a3 .study-guide [data-cartoon-surface="pill"]::after { display: none; }
+.menu-study--a3 .study-label { justify-content: flex-start; width: 100%; padding: 0 12px; }
+.menu-study--a3 .theme-a-menu-quit { width: 244px !important; }
+.study-reopen { position: absolute; top: 40%; left: 50%; transform: translateX(-50%); padding: 12px 24px; background: #D8F0E5; border-radius: 20px; color: #294D43; }
+.study-gallery { padding: 24px; background: #FFFBF6; min-height: 100dvh; color: #294D43; }
+.study-gallery > header { max-width: 1100px; margin: 0 auto 20px; }
+.study-gallery h1 { font: 28px var(--font-display); margin: 0 0 8px; }
+.study-gallery p { font: 15px var(--font-body); }
+.study-gallery-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; max-width: 1320px; margin: auto; }
+.study-gallery iframe { width: 100%; height: 720px; border: 1px solid #B5D4C5; border-radius: 24px; background: #EDF5EE; }
+@media (max-width: 1050px) { .study-gallery-grid { grid-template-columns: 1fr; max-width: 430px; } }

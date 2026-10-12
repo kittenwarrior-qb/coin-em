@@ -33,7 +33,7 @@ export class HealCommand implements ICommand {
     }
 
     // Give healer +5 yellow bonus if they healed the silenced player
-    if (wasSilenced && !room.bonusesGiven.healerBonus) {
+    if (!room.coinCycle && wasSilenced && !room.bonusesGiven.healerBonus) {
       updatedRoom.players = updatedRoom.players.map((p) => {
         if (p.userId === action.actorId) {
           return {

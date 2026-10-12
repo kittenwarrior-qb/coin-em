@@ -1,4 +1,7 @@
 import { CARD_IMAGES } from '@/constants/cardImages'
+import { useControlTheme } from '@/components/cartoon/controlThemeContext'
+import { isBrandTheme } from '@/components/cartoon/controlThemes'
+import { BrandCoinIcon } from './BrandCoinIcon'
 
 interface CoinDisplayProps {
   coins: { red: number; yellow: number; green: number }
@@ -12,15 +15,19 @@ const COINS = [
 ]
 
 export function CoinDisplay({ coins, onCoinClick }: CoinDisplayProps) {
+  const theme = useControlTheme()
+  const branded = isBrandTheme(theme)
   return (
-    <div className="flex flex-col gap-1">
+    <div className={branded ? 'brand-coin-wallet' : 'flex flex-col gap-1'} aria-label="Coin của bạn">
       {COINS.map(coin => (
         <button
           key={coin.key}
+          type="button"
+          aria-label={`Xem Coin ${coin.key === 'green' ? 'Xanh' : coin.key === 'yellow' ? 'Vàng' : 'Đỏ'}`}
           onClick={() => onCoinClick(coin.front, coin.back, coin.key)}
           className="flex items-center gap-1.5 transition-transform active:scale-95"
         >
-          <img src={coin.icon} alt={coin.key} style={{ width: 25, height: 25, objectFit: 'contain' }} draggable={false} />
+          {branded ? <BrandCoinIcon type={coin.key} workshop={theme === 'kindness-workshop'} /> : <img src={coin.icon} alt={coin.key} style={{ width: 25, height: 25, objectFit: 'contain' }} draggable={false} />}
           <span className="font-display leading-none" style={{ fontSize: 13, color: 'var(--c-pink)' }}>
             {coins[coin.key]}
           </span>

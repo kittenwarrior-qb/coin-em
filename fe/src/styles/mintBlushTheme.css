@@ -1,0 +1,466 @@
+/* A's non-card chrome only. Legacy palette, Coin and protected imagery stay intact. */
+/* Menu-only hierarchy: quiet frame/title, tactile content actions, subdued exit. */
+.theme-a-menu {
+  --menu-edge: #B5D8ED;
+  --menu-quit-ink: #805166;
+}
+.theme-a-menu-panel {
+  background: var(--brand-ivory);
+  border: 3px solid var(--menu-edge);
+  border-bottom-width: 6px;
+  border-radius: 30px 28px 32px 27px;
+  box-shadow: inset 0 2px 0 #FFFFFF, 0 8px 20px #245F8F1A;
+}
+.theme-a-menu-heading {
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  height: 60px;
+  padding: 0 22px;
+  justify-content: flex-start;
+  align-items: center;
+  background: var(--brand-ivory);
+  border-radius: 27px 25px 0 0;
+}
+.theme-a-menu-heading .theme-a-headline {
+  height: 34px !important;
+  min-width: 0;
+  border: 1px solid #D6B8C3;
+  border-bottom-width: 3px;
+  border-radius: 15px 18px 16px 14px;
+  background: var(--brand-blush-soft);
+  padding: 0 16px;
+  box-shadow: none;
+}
+.theme-a-menu-heading .theme-a-headline span { padding: 0; font-size: 23px; }
+.theme-a-menu-close { top: 12px; right: 12px; }
+.theme-a-menu-content { padding: 70px 24px 24px; }
+.theme-a-menu-actions { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.theme-a-menu-actions > .cartoon-control { width: 210px; max-width: 100%; }
+.theme-a-menu-actions [data-cartoon-surface="pill"] { width: 100%; }
+.theme-a-menu-actions [data-cartoon-surface="pill"] > img { width: 100%; height: auto; }
+.theme-a-menu-actions [data-cartoon-surface="pill"] > span:not([data-cartoon-badge]) { font-size: 17px; }
+.theme-a-menu-actions .cartoon-pill-badge { transform: translate(8%, -20%) rotate(3deg); }
+.theme-a-menu-exit { width: 100%; margin-top: 4px; padding-top: 18px; border-top: 1px solid var(--menu-edge); display: flex; justify-content: center; }
+html[data-ui-theme="mint-blush"] .theme-a-menu .theme-a-menu-quit {
+  width: 190px; max-width: 100%;
+}
+.theme-a-menu-quit-label { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 16px; }
+
+html[data-ui-theme="mint-blush"] {
+  --background: var(--brand-ivory);
+  --foreground: var(--brand-ink);
+  --primary: var(--brand-sky);
+  --primary-foreground: var(--brand-ink);
+  --secondary: var(--brand-blush);
+  --secondary-foreground: var(--brand-ink);
+  --muted: var(--brand-sky-soft);
+  --muted-foreground: #5D8DB2;
+  --accent: var(--brand-blush-soft);
+  --accent-foreground: var(--brand-ink);
+  --border: #9BC7E3;
+  --ring: var(--brand-focus);
+  --input: #FFFFFF;
+}
+html[data-ui-theme="mint-blush"] body,
+html[data-ui-theme="mint-blush"] .screen-cartoon {
+  background: var(--brand-ivory);
+  color: var(--brand-ink);
+}
+html[data-ui-theme="mint-blush"] .screen-panel { background-color: var(--brand-ivory); }
+html[data-ui-theme="mint-blush"] .game-bg { background: #D9F7FB; }
+html[data-ui-theme="mint-blush"] .game-bg::after {
+  background-image: url('/cartoon/ui/themes/sky-pink-a1/backdrop.webp');
+  opacity: 1;
+}
+.theme-a-headline {
+  min-width: 180px;
+  border: 2px solid #B97F94;
+  border-bottom-width: 6px;
+  border-radius: 34px 30px 32px 28px;
+  background: linear-gradient(175deg, #FAE5EC, #F0BCCB 58%, #DEA0B7);
+  box-shadow: inset 0 5px 0 #FFFFFF80, 0 5px 8px #245F8F14;
+}
+html[data-ui-theme="mint-blush"] :is(.input-cartoon, textarea, select, input:not([type="range"]):not([type="checkbox"]):not([type="radio"])) {
+  background: #F0F9FF;
+  color: var(--brand-ink);
+  border-color: #9BC7E3;
+  border-radius: 18px;
+  box-shadow: inset 0 2px 3px #245F8F0A;
+}
+html[data-ui-theme="mint-blush"] :is(input, textarea)::placeholder { color: #5D8DB2; opacity: 1; }
+html[data-ui-theme="mint-blush"] :is(input, textarea, select, button, a):focus-visible {
+  outline: 3px solid var(--brand-focus) !important;
+  outline-offset: 4px;
+}
+/* Native actions are not forced to a new height/width: card selectors and avatar hitboxes retain geometry. */
+html[data-ui-theme="mint-blush"] button:not(.cartoon-control):not([data-player-avatar-id]):not(:has(.coin-cartoon)):not(:has(img[src*="/cards/"])) {
+  border-color: #9BC7E3;
+}
+html[data-ui-theme="mint-blush"] button:not(.cartoon-control):is([class*="bg-blue"], [class*="bg-[var(--c-"], [class*="bg-[#"], [class*="bg-white"]),
+html[data-ui-theme="mint-blush"] :is(.site-nav a, .site-header-play, .about-cta, .site-button) {
+  background-color: var(--brand-sky-soft) !important;
+  color: var(--brand-ink) !important;
+  border-color: #91BCDA;
+  box-shadow: inset 0 2px 0 #FFFFFFA0, 0 3px 0 #9BC7E380;
+}
+html[data-ui-theme="mint-blush"] button[aria-pressed="true"]:not(.cartoon-control),
+html[data-ui-theme="mint-blush"] button[aria-selected="true"] {
+  background-color: var(--brand-blush-soft) !important;
+  color: var(--brand-ink) !important;
+  border-color: #CB87A0;
+}
+html[data-ui-theme="mint-blush"] :is(.card-cartoon, .bubble-cartoon, .modal-cartoon, .toast-cartoon, .tooltip-cartoon) {
+  background: #F7FCFF;
+  color: var(--brand-ink);
+  border-color: #9BC7E3;
+  border-radius: 24px 22px 26px 20px;
+  box-shadow: inset 0 3px 0 #FFFFFF, 0 4px 0 #D9F7FB80;
+}
+html[data-ui-theme="mint-blush"] .badge-cartoon {
+  background: var(--brand-blush-soft);
+  color: var(--brand-ink);
+  border-color: #CB87A0;
+}
+html[data-ui-theme="mint-blush"] [class~="text-[var(--c-black)]"],
+html[data-ui-theme="mint-blush"] [class~="text-[var(--c-blue-dark)]"] { color: var(--brand-ink); }
+html[data-ui-theme="mint-blush"] .scroll-cartoon {
+  scrollbar-color: #BFEAF1 #F0F9FF;
+}
+html[data-ui-theme="mint-blush"] .scroll-cartoon::-webkit-scrollbar-thumb {
+  background: linear-gradient(#D9F7FB, #BFEAF1);
+  border-color: #F7FCFF;
+}
+/* Pure navigation/decorative UI symbols only; never role, Coin or card icons. */
+html[data-ui-theme="mint-blush"] img:is([src$="Settings.svg"], [src$="Book.svg"], [src$="X-Icon-Rounded.svg"], [src$="Arrow---Right.svg"], [src$="Arrow---Left.svg"], [src$="Arrow---Down.svg"], [src$="Sound-On.svg"], [src$="Sound-Off.svg"], [src$="Music.svg"], [src$="Checkmark-Cartoon.svg"]) {
+  filter: brightness(0) saturate(100%) invert(32%) sepia(42%) saturate(905%) hue-rotate(166deg) brightness(91%) contrast(90%) !important;
+}
+html[data-ui-theme="mint-blush"] :is(.about-page, .site-page, .cards-page, .deck-page, .game-intro-page, .site-header) {
+  --sand: #D9F7FB;
+  --oat: #D9F7FB;
+  --surface: #F7FCFF;
+  --ink: #245F8F;
+  --muted: #5D8DB2;
+  --line: #9BC7E340;
+  --accent: #F15F8D;
+  --terracotta: #A15C75;
+  --sage: #BFEAF1;
+  --pink: #C87E99;
+  --sky: #D9F7FB;
+  --blue: #245F8F;
+  --header-ink: #245F8F;
+  --header-accent: #F15F8D;
+}
+html[data-ui-theme="mint-blush"] :is(.about-page, .site-page, .cards-page, .deck-page, .game-intro-page) { background-color: var(--brand-ivory); }
+html[data-ui-theme="mint-blush"] .divider-cartoon { background: #9BC7E3; }
+html[data-ui-theme="mint-blush"] .showcase-root {
+  --ink: #245F8F;
+  --muted: #5D8DB2;
+  --accent: #F15F8D !important;
+  background: radial-gradient(ellipse at top left, #D9F7FB, transparent 55%), linear-gradient(#F7FCFF, #FAE5EC);
+}
+html[data-ui-theme="mint-blush"] .showcase-canvas {
+  background: radial-gradient(ellipse at center, #F7FCFF, #D9F7FB 70%, #FAE5EC);
+}
+html[data-ui-theme="mint-blush"] :is(.deck-chip, .card-chip, .bottom-trigger, .circle-link, .side-nav-button, .right-action-btn) {
+  background: linear-gradient(#F0F9FF, #D9F7FB);
+  color: #245F8F;
+  border-color: #91BCDA;
+  box-shadow: inset 0 2px 0 #FFFFFF, 0 3px 0 #9BC7E380;
+}
+html[data-ui-theme="mint-blush"] :is(.deck-chip.active, .card-chip.active) {
+  background: linear-gradient(#FAE5EC, #F0BCCB);
+  color: #245F8F;
+  border-color: #CB87A0;
+}
+html[data-ui-theme="mint-blush"] [class~="bg-[var(--c-sky-mist)]"] { background-color: #F0F9FF; }
+@media (prefers-reduced-motion: reduce) {
+  html[data-ui-theme="mint-blush"] :is(button, input, .theme-a-headline) { transition-duration: 0s; }
+}
+
+/* A1 shared chrome: reuse the selected puffy artwork, never the rejected bean experiment.
+   Explicit UI hooks keep card artwork, role colors, Coin and avatar identities out of scope. */
+html[data-ui-theme="mint-blush"] {
+  --ui-pill-mint: url('/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png');
+  --ui-pill-blush: url('/cartoon/buttons/themes/mint-blush-v2/pill-blush.png');
+  --ui-pill-cream: url('/cartoon/buttons/themes/sky-pink-a1/pill-cream-v2.png');
+  --ui-circle-mint: url('/cartoon/buttons/themes/sky-pink-a1/circle-sky.png');
+}
+html[data-ui-theme="mint-blush"] :where(.primary-action, .secondary-action, .site-button, .site-header-play, .about-cta, .bottom-trigger, .deck-chip, .card-chip, .deck-tabs button, [data-slot="button"]:not([data-ui-size="icon"]):not([data-ui-variant="ghost"]):not([data-ui-variant="link"])) {
+  background: var(--ui-pill-mint) center / 100% 100% no-repeat !important;
+  color: var(--brand-ink) !important;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  filter: drop-shadow(0 3px 2px #245F8F1A);
+  text-shadow: none;
+}
+html[data-ui-theme="mint-blush"] :is(.secondary-action, .deck-chip.active, .card-chip.active, .deck-tabs button.is-active, [data-slot="button"][data-ui-variant="secondary"], [data-slot="button"][data-ui-variant="destructive"]) {
+  background-image: var(--ui-pill-blush) !important;
+}
+html[data-ui-theme="mint-blush"] [data-slot="button"][data-ui-variant="outline"] {
+  background-image: var(--ui-pill-cream) !important;
+}
+html[data-ui-theme="mint-blush"] :is(.circle-link, .side-nav-button, .right-action-btn, .preview-close, .preview-nav, [data-slot="button"][data-ui-size="icon"]) {
+  background: var(--ui-circle-mint) center / 100% 100% no-repeat !important;
+  color: var(--brand-ink) !important;
+  border: 0;
+  box-shadow: none;
+}
+html[data-ui-theme="mint-blush"] :is(.primary-action, .secondary-action, .site-button, .site-header-play, .about-cta) { padding: 14px 28px; }
+html[data-ui-theme="mint-blush"] :is(.deck-chip, .card-chip, .deck-tabs button, .bottom-trigger) { padding: 10px 20px; }
+html[data-ui-theme="mint-blush"] :is(.site-nav a, .back-link) {
+  color: var(--brand-ink);
+  background: transparent !important;
+  box-shadow: none;
+}
+html[data-ui-theme="mint-blush"] :is(.bottom-panel, .preview-card, .site-card, .footer-card, .admin-page section, .admin-page form, .admin-page [role="alert"], [data-ui-surface="game-popup"]) {
+  background: var(--brand-ivory);
+  color: var(--brand-ink);
+  border-color: #9BC7E3;
+  box-shadow: inset 0 3px 0 #FFFFFF, 0 5px 0 #B5D8ED66, 0 8px 18px #245F8F12;
+}
+html[data-ui-theme="mint-blush"] [data-ui-surface="game-popup"] :is(.text-\[\#2F76AC\], .text-\[var\(--c-pink\)\]) { color: var(--brand-ink); }
+html[data-ui-theme="mint-blush"] [data-ui-surface="dropdown"] > button {
+  box-shadow: inset 0 2px 0 #FFFFFF, 0 3px 0 #9BC7E3;
+}
+html[data-ui-theme="mint-blush"] [data-ui-surface="dropdown"] button[aria-pressed="true"] { color: var(--brand-ink); }
+html[data-ui-theme="mint-blush"] .badge-cartoon[data-ui-badge="mint"] { background: linear-gradient(#F0F9FF,#D9F7FB); border-color: #91BCDA; }
+html[data-ui-theme="mint-blush"] .badge-cartoon[data-ui-badge="cream"] { background: linear-gradient(#FFF9E8,#F3E9D2); border-color: #A6C7DD; }
+html[data-ui-theme="mint-blush"] .badge-cartoon[data-ui-badge="blush"] { background: linear-gradient(#FAE5EC,#F0BCCB); border-color: #CB87A0; }
+html[data-ui-theme="mint-blush"] .admin-page { background: var(--brand-ivory); color: var(--brand-ink); }
+html[data-ui-theme="mint-blush"] :is(.guide-chrome-tabs button, .guide-chrome-close) {
+  background: var(--ui-pill-cream) center / 100% 100% no-repeat;
+  color: var(--brand-ink) !important;
+  border: 0;
+  box-shadow: none;
+}
+html[data-ui-theme="mint-blush"] .guide-chrome-tabs button[aria-pressed="true"] { background-image: var(--ui-pill-blush) !important; }
+html[data-ui-theme="mint-blush"] .guide-chrome-close { background-image: var(--ui-circle-mint); }
+html[data-ui-theme="mint-blush"] :is(.site-nav-link, .site-menu-btn) {
+  background: var(--ui-pill-cream) center / 100% 100% no-repeat !important;
+  border: 0;
+  box-shadow: none;
+  color: var(--brand-ink);
+}
+html[data-ui-theme="mint-blush"] .site-nav-link[aria-current="page"] { background-image: var(--ui-pill-blush) !important; }
+html[data-ui-theme="mint-blush"] :is(.site-menu-content, [data-slot="dropdown-menu-content"]) {
+  background: var(--brand-ivory);
+  color: var(--brand-ink);
+  border-color: #9BC7E3;
+}
+html[data-ui-theme="mint-blush"] :is(.site-menu-content, [data-slot="dropdown-menu-content"]) [data-highlighted] { background: var(--brand-blush-soft); color: var(--brand-ink); }
+html[data-ui-theme="mint-blush"] .new-badge {
+  background: var(--brand-blush-soft);
+  color: var(--brand-ink);
+  border: 1px solid #CB87A0;
+  box-shadow: 0 2px 0 #DAB9C7;
+}
+html[data-ui-theme="mint-blush"] .admin-page [class~="text-[var(--c-blue)]"] { color: var(--brand-ink); }
+html[data-ui-theme="mint-blush"] .admin-page :is(h1, h2) { color: var(--brand-ink); }
+html[data-ui-theme="mint-blush"] .deck-page { background: linear-gradient(160deg,var(--brand-ivory),var(--brand-sky-soft)); }
+html[data-ui-theme="mint-blush"] [data-slot="button"]:is([data-ui-variant="link"], [data-ui-variant="ghost"]) { color: var(--brand-ink); }
+html[data-ui-theme="mint-blush"] .bottom-panel :is(.deck-chip, .card-chip) { padding: 8px 10px; }
+html[data-ui-theme="mint-blush"] .bottom-trigger { min-width: 100px; min-height: 44px; white-space: nowrap; }
+html[data-ui-theme="mint-blush"] :is(.primary-action, .secondary-action, .bottom-trigger, .circle-link, .side-nav-button, .right-action-btn, .preview-close, .preview-nav) { backdrop-filter: none; }
+
+/* Explicit screen hooks, not broad descendant recoloring of Coin/role/card surfaces. */
+html[data-ui-theme="mint-blush"] [data-ui-panel="a1"] {
+  background-color: var(--brand-ivory);
+  color: var(--brand-ink);
+  border-color: #9BC7E3;
+  box-shadow: inset 0 3px 0 #FFFFFF, 0 5px 0 #B5D8ED66, 0 8px 20px #245F8F1A;
+}
+html[data-ui-theme="mint-blush"] [data-ui-panel="a1"] [data-ui-chrome="header"] {
+  background: linear-gradient(175deg,var(--brand-blush-soft),var(--brand-blush));
+  border-color: #CB87A0;
+  color: var(--brand-ink);
+}
+html[data-ui-theme="mint-blush"] [data-ui-chrome="header"] :is(.text-white, .text-white\/80) { color: var(--brand-ink); }
+html[data-ui-theme="mint-blush"] [data-ui-panel="a1"] :is([class~="text-[#2F76AC]"], [class~="text-[var(--c-blue-dark)]"], [class~="text-[var(--c-gray)]"]) { color: var(--brand-ink); }
+html[data-ui-theme="mint-blush"] :is([data-ui-chrome="phase-nav"], [data-ui-chrome="preview"]) > button,
+html[data-ui-theme="mint-blush"] [data-ui-chrome="header"] > button {
+  background: var(--ui-circle-mint) center / 100% 100% no-repeat !important;
+  color: var(--brand-ink) !important;
+  border: 0;
+  box-shadow: none;
+  min-width: 40px;
+  min-height: 40px;
+}
+html[data-ui-theme="mint-blush"] [data-ui-chrome="countdown"] {
+  background: var(--brand-blush-soft);
+  color: var(--brand-ink);
+  border-color: #CB87A0;
+  box-shadow: inset 0 2px 0 #FFFFFF, 0 3px 0 #DAB9C7;
+}
+html[data-ui-theme="mint-blush"] [aria-label="Cập nhật ứng dụng"] > button {
+  background: var(--ui-pill-mint) center / 100% 100% no-repeat;
+  color: var(--brand-ink);
+  border: 0;
+  padding: 12px 24px;
+}
+html[data-ui-theme="mint-blush"] :is([data-ui-chrome="role-label"], [data-ui-chrome="header"] .text-white\/70) { color: var(--brand-ink); }
+html[data-ui-theme="mint-blush"] [data-ui-screen="route-loading"] { background: var(--brand-sky-soft); color: var(--brand-ink); }
+html[data-ui-theme="mint-blush"] [aria-label="Vai trò của bạn"][data-ui-panel="a1"] { border: 2px solid #9BC7E3; border-radius: 28px; padding: 12px; overflow-y: auto; }
+html[data-ui-theme="mint-blush"] [data-ui-chrome="transport"] { background: var(--brand-blush-soft); color: var(--brand-ink); border-bottom: 2px solid #CB87A0; }
+html[data-ui-theme="mint-blush"] [data-ui-chrome="transport"] > button { background: var(--ui-pill-cream) center / 100% 100% no-repeat; color: var(--brand-ink); border: 0; padding: 12px 24px; }
+html[data-ui-theme="mint-blush"] [data-slot="card"] { background: var(--brand-ivory); color: var(--brand-ink); border-color: #9BC7E3; box-shadow: inset 0 2px 0 #FFFFFF, 0 4px 0 #B5D8ED44; }
+html[data-ui-theme="mint-blush"] button[data-ui-chrome="circle"] {
+  background: var(--ui-circle-mint) center / 100% 100% no-repeat !important;
+  border: 0;
+  box-shadow: none;
+  color: var(--brand-ink);
+}
+html[data-ui-theme="mint-blush"] [data-ui-chrome="inventory-tabs"] { background: var(--brand-sky-soft); }
+html[data-ui-theme="mint-blush"] [data-ui-chrome="inventory-tabs"] > button { color: var(--brand-ink); background: transparent; border-color: #9BC7E3; }
+html[data-ui-theme="mint-blush"] [data-ui-chrome="inventory-tabs"] > button[aria-pressed="true"] { background: var(--brand-blush-soft) !important; color: var(--brand-ink) !important; border-color: #CB87A0; }
+
+/* End-to-end A1 finishing pass. Explicit chrome hooks keep selected avatar colors,
+   role ribbons, Coin colors and protected card faces out of this palette. */
+html[data-ui-theme="mint-blush"] [data-ui-ink="primary"] { color: var(--brand-ink) !important; }
+html[data-ui-theme="mint-blush"] [data-ui-ink="accent"] { color: #A15C75 !important; }
+html[data-ui-theme="mint-blush"] [data-ui-chrome="home-logo"] {
+  background: linear-gradient(160deg, #659DC4, #BFEAF1 58%, #FAE5EC);
+  border-radius: 32px;
+  box-shadow: inset 0 3px 0 #FFFFFFAA, 0 4px 0 #9BC7E350;
+  filter: none;
+}
+html[data-ui-theme="mint-blush"] [data-ui-chrome="waiting-panel"] {
+  box-shadow: inset 0 3px 0 #FFFFFF, inset 0 -5px 0 #D9F7FB80, 0 6px 18px #245F8F1A;
+  outline: 2px solid #B5D8ED;
+  outline-offset: -2px;
+}
+html[data-ui-theme="mint-blush"] :is([data-ui-chrome="phase-status"], [data-ui-chrome="countdown"]) {
+  background: var(--ui-pill-cream) center / 100% 100% no-repeat !important;
+  color: var(--brand-ink);
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none !important;
+}
+html[data-ui-theme="mint-blush"] [data-ui-chrome="phase-status"] > div { color: var(--brand-ink); }
+html[data-ui-theme="mint-blush"] [data-ui-chrome="turn-status"] {
+  background: linear-gradient(170deg,#F7FCFFF0,#FAE5ECE0);
+  box-shadow: inset 0 2px 0 #FFFFFF, 0 3px 0 #CB87A030;
+  color: var(--brand-ink);
+}
+html[data-ui-theme="mint-blush"] [data-ui-chrome="turn-status"] > div { color: var(--brand-ink); }
+html[data-ui-theme="mint-blush"] .badge-cartoon[data-ui-badge] {
+  background: var(--ui-pill-mint) center / 100% 100% no-repeat;
+  color: var(--brand-ink);
+  border-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+html[data-ui-theme="mint-blush"] .badge-cartoon[data-ui-badge="blush"] { background-image: var(--ui-pill-blush); }
+html[data-ui-theme="mint-blush"] .badge-cartoon[data-ui-badge="cream"] { background-image: var(--ui-pill-cream); }
+html[data-ui-theme="mint-blush"] [data-ui-surface="room"] {
+  background: var(--ui-pill-mint) center / 100% 100% no-repeat !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  filter: drop-shadow(0 3px 2px #245F8F1A);
+}
+html[data-ui-theme="mint-blush"] [data-ui-surface="room"][aria-pressed="true"] { background-image: var(--ui-pill-blush) !important; }
+html[data-ui-theme="mint-blush"] [data-ui-surface="dropdown"] > button {
+  background: var(--ui-pill-cream) center / 100% 100% no-repeat !important;
+  box-shadow: none;
+}
+html[data-ui-theme="mint-blush"] [data-ui-chrome="inventory-tabs"] {
+  background: transparent;
+  border-radius: 0;
+}
+html[data-ui-theme="mint-blush"] [data-ui-chrome="inventory-tabs"] > button {
+  background: var(--ui-pill-cream) center / 100% 100% no-repeat !important;
+  border-color: transparent;
+}
+html[data-ui-theme="mint-blush"] [data-ui-chrome="inventory-tabs"] > button[aria-pressed="true"] { background: var(--ui-pill-blush) center / 100% 100% no-repeat !important; }
+
+/* Compact A1 pills use horizontal three-slicing: preserve full-height endcaps
+   instead of flattening a 260×99 button across a short, wide status label.
+   Only explicit UI chrome; semantic role/Coin/card tags are excluded. */
+html[data-ui-theme="mint-blush"] :is(
+  .badge-cartoon[data-ui-badge], .cartoon-pill-badge, .new-badge,
+  [data-ui-pill], [data-ui-chrome="phase-status"], [data-ui-chrome="countdown"],
+  [data-ui-chrome="inventory-tabs"] > button, [data-ui-surface="room"],
+  [data-ui-surface="dropdown"] > button, .deck-chip, .card-chip,
+  .deck-tabs button, .bottom-trigger, .site-nav-link, .guide-chrome-tabs button
+) {
+  --compact-pill: var(--ui-pill-mint);
+  background: transparent !important;
+  border: 0 solid transparent !important;
+  border-image-source: var(--compact-pill) !important;
+  border-image-slice: 0 80 fill !important;
+  border-image-width: 0 24px !important;
+  border-image-repeat: stretch !important;
+  border-radius: 0;
+  box-shadow: none !important;
+  color: var(--brand-ink) !important;
+  text-shadow: none;
+}
+html[data-ui-theme="mint-blush"] :is(
+  .badge-cartoon[data-ui-badge="cream"], [data-ui-pill="cream"],
+  [data-ui-chrome="phase-status"], [data-ui-chrome="countdown"],
+  [data-ui-surface="dropdown"] > button, .site-nav-link,
+  .guide-chrome-tabs button, [data-ui-chrome="inventory-tabs"] > button
+) { --compact-pill: var(--ui-pill-cream); }
+html[data-ui-theme="mint-blush"] :is(
+  .cartoon-pill-badge, .new-badge, .badge-cartoon[data-ui-badge="blush"],
+  [data-ui-pill="blush"], [data-ui-surface="room"][aria-pressed="true"],
+  .deck-chip.active, .card-chip.active, .deck-tabs button.is-active,
+  .site-nav-link[aria-current="page"], .guide-chrome-tabs button[aria-pressed="true"],
+  [data-ui-chrome="inventory-tabs"] > button[aria-pressed="true"]
+) { --compact-pill: var(--ui-pill-blush); }
+html[data-ui-theme="mint-blush"] :is(.badge-cartoon[data-ui-badge], .cartoon-pill-badge, .new-badge, [data-ui-pill]) {
+  border-image-width: 0 12px !important;
+  padding: 6px 12px;
+  font-size: 12px;
+  line-height: 1.25;
+}
+html[data-ui-theme="mint-blush"] [data-ui-pill] > span { color: var(--brand-ink); }
+html[data-ui-theme="mint-blush"] [data-ui-chrome="phase-status"] { padding: 6px 16px; border-image-width: 0 14px !important; }
+html[data-ui-theme="mint-blush"] [data-ui-surface="room"] { border-image-width: 0 32px !important; }
+html[data-ui-theme="mint-blush"] [data-ui-chrome="phase-status"] > div { font-size: 11px; }
+html[data-ui-theme="mint-blush"] :is([data-ui-chrome="inventory-tabs"] > button, .deck-chip.active, .card-chip.active, [data-ui-surface="room"][aria-pressed="true"]) {
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+html[data-ui-theme="mint-blush"] :is([data-ui-chrome="inventory-tabs"] > button[aria-pressed="true"], .deck-chip.active, .card-chip.active) { text-decoration-line: underline; }
+/* Contrast hierarchy: dark main ink, legible secondary ink, distinct field edges. */
+html[data-ui-theme="mint-blush"] { --muted-foreground: var(--brand-muted-ink); --border: var(--brand-edge); }
+html[data-ui-theme="mint-blush"] :is(.about-page, .site-page, .cards-page, .deck-page, .showcase-root, .site-header) {
+  --muted: var(--brand-muted-ink);
+  --line: #5B83A366;
+  --accent: var(--brand-accent-ink) !important;
+  --header-accent: var(--brand-accent-ink);
+}
+html[data-ui-theme="mint-blush"] :is(input, textarea)::placeholder { color: var(--brand-muted-ink); opacity: 1; }
+html[data-ui-theme="mint-blush"] :is(.input-cartoon, textarea, select, input:not([type="range"]):not([type="checkbox"]):not([type="radio"])) {
+  background: #FFFFFF;
+  border: 2px solid var(--brand-edge);
+}
+html[data-ui-theme="mint-blush"] :is([data-ui-panel="a1"], [data-ui-surface="game-popup"], [data-ui-chrome="waiting-panel"], .admin-page) :is(
+  [class~="text-black/45"], [class~="text-black/50"], [class~="text-black/55"],
+  [class~="text-black/60"], [class~="text-[var(--c-gray)]"]
+) { color: var(--brand-muted-ink); }
+html[data-ui-theme="mint-blush"] [data-ui-ink="accent"] { color: var(--brand-accent-ink) !important; }
+html[data-ui-theme="mint-blush"] [data-ui-chrome="waiting-panel"] { outline-color: var(--brand-edge); }
+html[data-ui-theme="mint-blush"] [data-ui-chrome="turn-status"] {
+  background: #FFFFFF;
+  border: 1px solid var(--brand-edge);
+  box-shadow: 0 3px 0 #9BC7E350;
+}
+html[data-ui-theme="mint-blush"] .cartoon-control:disabled { opacity: .7; }
+
+/* Higher specificity clears historical selected-state background shorthands,
+   leaving only the curved endcap material rather than a rectangular underlay. */
+html[data-ui-theme="mint-blush"] :is(
+  .deck-tabs button.is-active, .deck-chip.active, .card-chip.active,
+  .site-nav-link[aria-current="page"], .guide-chrome-tabs button[aria-pressed="true"],
+  [data-ui-chrome="inventory-tabs"] > button[aria-pressed="true"],
+  [data-ui-surface="room"][aria-pressed="true"]
+):not(.cartoon-control) { background: transparent !important; }
+html[data-ui-theme="mint-blush"] .deck-tabs button.is-active {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+html[data-ui-theme="mint-blush"] :is(.deck-hero p, .deck-section header p) { color: var(--brand-accent-ink); }

@@ -1,5 +1,8 @@
+import { EmcoinImage } from '@/components/cartoon/EmcoinImage'
 import { AnimatePresence, motion, type PanInfo } from 'framer-motion'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { usePopupLifecycle } from '@/features/overlays/usePopupLifecycle'
+import { CoinRulesGuide } from './CoinRulesGuide'
 
 const SLIDES = [
   '/tutorial/1.webp',
@@ -22,6 +25,9 @@ interface GuideBookProps {
 export function GuideBook({ onClose }: GuideBookProps) {
   const [current, setCurrent] = useState(0)
   const [direction, setDirection] = useState(0)
+  const [showCoinRules, setShowCoinRules] = useState(true)
+  const dialogRef = useRef<HTMLDivElement>(null)
+  usePopupLifecycle(dialogRef, true, { onClose })
 
   const goTo = (next: number) => {
     const clamped = Math.max(0, Math.min(SLIDE_COUNT - 1, next))
@@ -39,6 +45,11 @@ export function GuideBook({ onClose }: GuideBookProps) {
 
   return (
     <motion.div
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Hướng dẫn"
+      tabIndex={-1}
       className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -52,11 +63,16 @@ export function GuideBook({ onClose }: GuideBookProps) {
       >
 
         {/* Top bar — same height as bottom bar for balance */}
-        <div className="flex h-[52px] shrink-0 items-center justify-end px-3">
+        <div className="flex min-h-[52px] shrink-0 items-center justify-between gap-2 px-3">
+          <div className="guide-chrome-tabs flex gap-2 font-body text-xs text-white">
+            <button type="button" className="min-h-11 rounded-xl border border-white/50 px-3" aria-pressed={showCoinRules} onClick={() => setShowCoinRules(true)}>Luật Coin</button>
+            <button type="button" className="min-h-11 rounded-xl border border-white/50 px-3" aria-pressed={!showCoinRules} onClick={() => setShowCoinRules(false)}>Minh họa gốc</button>
+          </div>
           <button
             type="button"
             onClick={onClose}
-            className="grid h-9 w-9 place-items-center rounded-full bg-black/60 backdrop-blur-sm"
+            className="guide-chrome-close grid h-11 w-11 shrink-0 place-items-center rounded-full bg-black/60 backdrop-blur-sm"
+            aria-label="Đóng hướng dẫn"
             style={{ fontFamily: 'system-ui', fontSize: 20, color: 'rgba(255,255,255,0.7)' }}
           >
             ×
@@ -65,6 +81,7 @@ export function GuideBook({ onClose }: GuideBookProps) {
 
         {/* Slide area */}
         <div className="relative flex-1 overflow-hidden">
+          {showCoinRules ? <CoinRulesGuide /> : <>
           <AnimatePresence initial={false} custom={direction}>
             <motion.div
               key={current}
@@ -85,7 +102,7 @@ export function GuideBook({ onClose }: GuideBookProps) {
               className="absolute inset-0 cursor-grab active:cursor-grabbing"
               style={{ touchAction: 'pan-y' }}
             >
-              <img
+              <EmcoinImage
                 src={SLIDES[current]}
                 alt={`Hướng dẫn trang ${current + 1}`}
                 className="h-full w-full select-none object-contain"
@@ -112,8 +129,8 @@ export function GuideBook({ onClose }: GuideBookProps) {
             className="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-2 disabled:opacity-20 transition-opacity"
             aria-label="Trang trước"
           >
-            <img
-              src="/cartoon/icons/Arrow---Right.svg"
+            <EmcoinImage
+              src="/emcoin/icons/orbit/arrowRight.svg"
               alt="prev"
               className="w-8 h-8"
               style={{ transform: 'scaleX(-1)', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.4))' }}
@@ -129,18 +146,19 @@ export function GuideBook({ onClose }: GuideBookProps) {
             className="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-2 disabled:opacity-20 transition-opacity"
             aria-label="Trang tiếp"
           >
-            <img
-              src="/cartoon/icons/Arrow---Right.svg"
+            <EmcoinImage
+              src="/emcoin/icons/orbit/arrowRight.svg"
               alt="next"
               className="w-8 h-8"
               style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.4))' }}
               draggable={false}
             />
           </button>
+          </>}
         </div>
 
         {/* Bottom bar — same height as top bar */}
-        <div className="flex h-[52px] shrink-0 flex-col items-center justify-center gap-1.5">
+        {!showCoinRules && <div className="flex h-[52px] shrink-0 flex-col items-center justify-center gap-1.5">
           <div className="flex items-baseline gap-1">
             <span className="font-display text-white" style={{ fontSize: 22, lineHeight: 1 }}>
               {current + 1}
@@ -164,7 +182,7 @@ export function GuideBook({ onClose }: GuideBookProps) {
               />
             ))}
           </div>
-        </div>
+        </div>}
 
       </motion.div>
     </motion.div>

@@ -1,0 +1,36 @@
+{
+  "synthetic": true,
+  "results": [
+    {
+      "theme": "emotion-orbit",
+      "screen": "waiting-density-keyboard",
+      "passed": true
+    },
+    {
+      "theme": "emotion-orbit",
+      "screen": "ending-stable-footer-coins",
+      "passed": true
+    },
+    {
+      "theme": "emotion-orbit",
+      "screen": "original-face-failure-retry",
+      "passed": true
+    },
+    {
+      "theme": "kindness-workshop",
+      "screen": "waiting-density-keyboard",
+      "passed": true
+    },
+    {
+      "theme": "kindness-workshop",
+      "screen": "ending-stable-footer-coins",
+      "passed": true
+    },
+    {
+      "theme": "kindness-workshop",
+      "screen": "original-face-failure-retry",
+      "passed": true
+    }
+  ],
+  "failures": []
+}

@@ -1,0 +1,36 @@
+# Implementation progress — 2026-10-01
+
+Owner-direction implementation2026-10-03 final: BE45files519PASS31.02s + FE48files503PASS44.06s=1022regular tests, zero skipped; BEbuild/typecheck and FE lint0errors/0warnings/typecheck/Vite32.15sPASS. Umami browser script removed, app/PWA entries/art preserved; fixed anonymous volatile HTTP outcome counters feed protected admin overview. Admin email/password domain and guarded login/logout/overview APIs pass7crypto+6HTTP fixtures; configured hash/origin absent, feature disabled by default, no actual credential provisioned. Admin frontend/queued audited close-room/distributed auth still pending, R36inprogress. New deleted-room content archives disabled per explicit owner follow-up;1hinactivity/minimal7dtombstones/active-storage semantics unchanged, no old archives manually deleted. Current compiled realRedisCAS/restart/session/delete/marker fixturePASS and exact labelled QA container/temp removed without shared data. Strict573images/hash7b156028…/200faces/0reskinsPASS, diffcheckPASS/3locks unchanged. Prior isolated dependency-security candidate is preceding-source, not integrated. Codex self-review is owner-approved but not independent, no legal/device/store/staging/deploy claim; no VPS contacted and no secrets recorded. Final reskin still requires notification+representative sample approval, all card-related art protected.41brief statuses5qa/31inprogress/5planned, none done; local implementation/release gates remain.
+
+R39 candidate5 final2026-10-03: frozen-UI502FE/496BE=998PASS, bothdependency audits0/lint/buildPASS; original unchanged998PASS evidence is separate, not1996distinct tests. Actual browser2/2PASS192.15s,5/10guests completed/night/errors[], reports candidate root/yJxDpn and97irmu; desktop/mobile simulated/CDNblocked/mockRedis only. Candidate compiled runtime owned realRedisCAS/session/restart/atomicdelete/seven-day-marker/secondrestart stale-recreationPASS; exact labelled container/owned fixture temp removed without shared data. Final573images/hash/200faces/0reskins preserved. All compatibility fixes only owned candidate; original3locks unchanged, no security integration/independent/device/release signoff. ESLint support and admin/native/staging/rights/privacy/reviewer decisions remain, as do local composition tasks. Latest entries supersede earlier pending candidate outcomes, not their historical scope. R40notstarted and notification required first.
+
+R39 isolated security continuation2026-10-03: owned candidate5 BE fresh install/lint/build/496testsPASS22.87s, equivalent single-worker load8PASS16.90s, audit0. Initial FE compatibility proof502PASS22.74s/typecheck/build56.11s/audit0 retained separately. Non-security React/Motion/Radix/Tailwind roots and typings frozen to original resolved versions after CSS drift; fresh frozen-UI install/audit0/lint0warnings/typecheck/build42.01s PASS. CSS79.09KB/14.57KB gzip and GameContainer438.13KB/128.06KB gzip now near baseline79.06KB/438.41KB, not a visual-device approval or reskin. Final frozen-UI tests/browser pending. Original3lock hashes unchanged, candidate-only compatibility edits; unsupported ESLint9 warning and independent/release gates remain, no security integration or R40 yet.
+
+## Scope and status
+
+Owner requests the whole backlog, including approved 60-coin round cycle and a final warm 2D cartoon image reskin. The index has 41 task briefs (R00–R40), plus the master plan. This is progress evidence, not a completion or release approval.
+
+R00/R02/R03 remain local QA. R04/R05/R07/R08/R10/R14/R16/R17/R24/R27 have partial implementation; their reports identify remaining acceptance gaps. R01 remains blocked on non-coin product decisions. No merge, deployment, production mutation, native signing, store submission or completed reskin is claimed.
+
+## Verification
+
+- BE `npm run lint` and `npm run build`: pass.
+- BE full `npm test -- --run`: 24 files, 321 tests pass, zero skipped. Includes actual Socket.IO registration/loopback transport, 25 concurrent gifts, primary commit failure, receipt retry and JSON reload. Redis remains mocked.
+- FE `npm test -- --run`: 5 files, 38 tests pass. Receipt display, image dedup/concurrency/timeout/cancellation and prior store tests included.
+- FE `npm run build`: pass. `npm run lint`: zero errors, 8 existing warnings in CardInventory/ui/button/ui/sidebar/CardShowcase; no clean-warning claim.
+- Read-only asset audit: 573 local raster/vector images, 15,516,248 bytes; no decode errors. Local content aggregate SHA256 `7b15602886af3ba3832197fe99706792e56c82ffcb0a4bc6c1153800b5502ff8`. 281 static image-reference candidates, 142 remote. Dynamic usage, remote bytes and rights are not verified. One missing candidate remains in starter app-header (`/avatars/shadcn.jpg`). Two actual runtime missing references were corrected.
+- Browser/device E2E, real Redis kill/restart/durability, staging load/SLO, production backup/drain/rollback and native/store QA remain unverified. Earlier standalone isolated backend launch was rejected by tool policy; no bypass/retry against the user's existing backend was performed.
+
+## Coin behavior and compatibility
+
+New games use `web-16-coin60/v1`; each round has 20 red, 20 green and 20 yellow including unused remainder. Sender has all red; other seats receive floor(20/(N-1)) green and yellow. Transfer retains color and records appreciation separately from physical balances. No automatic role/Healer/reflection/NTG bonuses mint coins in this version. Round close records receipts exactly once, collects all balances and preserves history. End view sums recorded receipts, not the reclaimed zero balances. Old unversioned in-progress fixtures continue legacy paths; explicit `legacy/v0` tests exercise old rules. No persisted historical room was rewritten.
+
+Temporary safety policies awaiting owner confirmation: received coins are not regifted; previous-phase is rejected after a coin transfer/round collection instead of guessing compensation. Existing non-coin role/night/rotation/manual progression remains unchanged; not asserted as product-approved.
+
+## Remaining critical boundaries
+
+Per-room queues and repository write order are process-local, not distributed CAS. Current gift IDs are round-scoped, not a universal durable command journal. Membership guards are not full authentication: admission/reconnect still accepts client identity, and public projections still need recipient-specific secret filtering. Redis primary commits are awaited, but AOF/fsync guarantees, degraded JSON mode, recovery/tombstones and cross-process operation need R08/R11/R28. JSON backup degradation after a successful Redis commit logs a warning and retains that committed state; it must not invite a duplicate spend by reporting a rejected action.
+
+## Reskin boundary
+
+No bitmap/vector artwork has been replaced. `node fe/scripts/audit-assets.mjs` prints a read-only summary; `--json` prints hash/dimension/reference inventory with every replacement pending and rights unverified; `--check` rejects unresolved missing/corrupt references. Static inventory is preparation for R40, not proof that every runtime image is covered. Final reskin must preserve card IDs/text/face pairs and red/green/yellow semantics, with new-asset provenance and mobile/desktop visual QA.

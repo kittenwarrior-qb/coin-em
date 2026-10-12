@@ -1,7 +1,7 @@
 # R07 Per-room concurrency
 
 **Priority:** P0  
-**Status:** planned  
+**Status:** in progress
 **Owner:** Codex implementation  
 **Reviewer:** Claude audit  
 **Dependencies:** R03, R04, R06
@@ -63,6 +63,10 @@ Contract requestId/revision từ R04 và transition R06 phải ổn định; kh�
 
 ## Implementation plan
 
+Plan revision retention 2026-10-02: scope thêm RoomService.removePlayer awaited semantics và queued waiting-disconnect callback/cleanup lifecycle. Last-player leave chỉ phát room_closed sau strict delete success; revision/activity conflict không phát false closure. Existing room queue shared với admission/gameplay. Không thêm command/event hay xóa production.
+
+Plan revision 2026-10-02: thêm Room revision, Redis Lua CAS/preflight, background-write ordering và real-Redis script fixtures qua R28. Snapshot/coin receipt/index cùng commit; lobby/profile same-revision compatibility còn phải migrate, không giả nhận mọi command đã atomic.
+
 1. Map read-await-write mutation paths and current repository cache/save behavior; identify a room command boundary for every migrated action.
 2. Wait for R04 requestId/revision and R06 transition contract; define command ordering, expected revision, receipt lookup and rejection behavior without a global lock.
 3. Implement per-room serialization plus storage CAS/atomic receipt and snapshot/index write on one command vertical slice.
@@ -72,7 +76,15 @@ Contract requestId/revision từ R04 và transition R06 phải ổn định; kh�
 
 ## Implementation report
 
-<!-- Codex updates this after implementation: changed files, invariant preserved, commands and results. -->
+2026-10-02 — Latest continuation: initial room+selected settings commit atomically in the admission snapshot. Settings and profile updates now use immutable snapshots and awaited strict CAS before broadcasting, preserving existing lastActivity behavior; primary failure leaves the old cache/snapshot and publishes no success view. Real loopback regression covers failure then success/revision+1 for both commands, plus failed initial admission and collision. Other RoomService waiting/debug/leave compatibility mutations and universal receipts remain to migrate.
+
+2026-10-02 — Continuation: give_coin duplicate ACK replay validates the persisted receipt fingerprint through the existing domain command, then returns the current private projection without primary write, revision increment, rate-window consumption or repeated coin_given broadcast. New gifts retain the rate limit and ACK only after critical commit. Real loopback Socket.IO regression with rate limiting enabled checks identical retry, conflicting amount, stale round and a genuinely new request. Universal receipt journal and other mutation migration remain.
+
+2026-10-02 — Update: Lua revision CAS now atomically commits snapshot + nested coin receipts/ledger + index; actual two-process Redis worker test has one commit/one conflict. Compatibility lobby/profile writes still preserve same revision and optimistic local state; not all commands migrated to a universal receipt journal. R28 evidence supersedes earlier mock-only/no-CAS note.
+
+2026-10-01 — Đã nối per-room promise queue vào toàn bộ production handler registration và delayed card/night callbacks. Repository tuần tự hóa background/awaited writes theo room. Test thực 25 give_coin đồng thời chỉ 20 thành công khi NTG có 20 đỏ; retry không ghi hai lần. Chưa có distributed revision CAS/atomic receipts qua nhiều process.
+
+Evidence chung: `docs/qa/2026-10-01-implementation-progress.md`. Không đánh dấu acceptance/done khi các phần còn lại chưa đạt.
 
 ## QA report
 

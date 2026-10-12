@@ -1,14 +1,20 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { ArrowLeft, Box, ChevronLeft, ChevronRight, Eye, X } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import SiteHeader from '@/components/site/SiteHeader'
 import { CARD_IMAGES } from '@/constants/cardImages'
+import type { CatalogCard } from '@/features/admin/catalogClient'
+import { PublicCatalogBoundary } from '@/features/game/catalog/PublicCatalog'
+import { useRoomCatalog } from '@/features/game/catalog/roomCatalogClient'
+import { usePopupLifecycle } from '@/features/overlays/usePopupLifecycle'
+import { CardFaceImage } from '@/components/game/CardFaceImage'
 
 type CardItem = {
   code: string
   title: string
   image: string
+  backImage?: string
   deckId: string
   deckLabel: string
 }
@@ -33,6 +39,7 @@ const recordCards = (
       code,
       title: `${titlePrefix} ${code.replace(/[A-Z]+/i, '') || code}`,
       image,
+      backImage: source.back,
       deckId,
       deckLabel,
     }))
@@ -47,6 +54,7 @@ const numberedCards = (
     code: `${deckId}-${index + 1}`,
     title: `${titlePrefix} ${index + 1}`,
     image: item.front,
+    backImage: item.back,
     deckId,
     deckLabel,
   }))
@@ -62,7 +70,7 @@ const basicEmotionNames: Record<string, string> = {
   wow: 'Wow',
 }
 
-function buildDecks(): Deck[] {
+function buildLegacyDecks(): Deck[] {
   const roles = recordCards('roles', 'Vai trò', CARD_IMAGES.roles as Record<string, string>, 'Vai trò')
   const situation = recordCards('situation', 'Tình huống', CARD_IMAGES.situation as Record<string, string>, 'Tình huống')
   const reflection = recordCards('reflection', 'Phản tư', CARD_IMAGES.reflection as Record<string, string>, 'Phản tư')
@@ -79,6 +87,7 @@ function buildDecks(): Deck[] {
     code,
     title: basicEmotionNames[code] ?? code,
     image: images.front,
+    backImage: images.back,
     deckId: 'emotion',
     deckLabel: 'Cảm xúc',
   }))
@@ -136,10 +145,23 @@ function buildDecks(): Deck[] {
   ]
 }
 
+function buildDecks(metadata?: CatalogCard[]): Deck[] {
+  return buildLegacyDecks().map(deck => !metadata || deck.id === 'coins' ? deck : { ...deck,
+    cards: metadata.filter(card => (card.category === 'role' ? 'roles' : card.category) === deck.id).map(card => ({
+      code: card.code, title: card.name, image: card.frontImageUrl, backImage: card.backImageUrl, deckId: deck.id, deckLabel: deck.label,
+    })) })
+}
 export default function AboutCards2D() {
-  const decks = useMemo(buildDecks, [])
+  const navigate = useNavigate()
+  return <PublicCatalogBoundary onClose={() => navigate('/about')}><PublishedCardsGallery /></PublicCatalogBoundary>
+}
+function PublishedCardsGallery() {
+  const catalog = useRoomCatalog()
+  const decks = useMemo(() => buildDecks(catalog.metadata), [catalog.metadata])
   const [activeDeck, setActiveDeck] = useState('all')
   const [previewIndex, setPreviewIndex] = useState<number | null>(null)
+  const [previewBack, setPreviewBack] = useState(false)
+  const dialogRef = useRef<HTMLDivElement>(null)
   const [dragX, setDragX] = useState(0)
   const dragStartRef = useRef<number | null>(null)
   const draggingRef = useRef(false)
@@ -158,36 +180,38 @@ export default function AboutCards2D() {
     const index = flatCards.indexOf(card)
     setDragX(0)
     setPreviewIndex(index === -1 ? null : index)
+    setPreviewBack(false)
   }
   const closePreview = () => setPreviewIndex(null)
+  usePopupLifecycle(dialogRef, !!preview, { onClose: closePreview })
   const showPrev = () => {
     setDragX(0)
+    setPreviewBack(false)
     setPreviewIndex((i) => (i === null || flatCards.length === 0 ? i : (i - 1 + flatCards.length) % flatCards.length))
   }
   const showNext = () => {
     setDragX(0)
+    setPreviewBack(false)
     setPreviewIndex((i) => (i === null || flatCards.length === 0 ? i : (i + 1) % flatCards.length))
   }
 
-  // Keyboard nav (←/→/Esc) + lock background scroll while the preview is open.
+  // Popup lifecycle owns Back/Escape, scroll lock and returning focus. Arrow keys browse faces.
   useEffect(() => {
     if (previewIndex === null) return
-    document.body.style.overflow = 'hidden'
     const total = flatCards.length
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setPreviewIndex(null)
-      } else if (event.key === 'ArrowRight') {
+      if (event.key === 'ArrowRight') {
+        event.preventDefault(); setPreviewBack(false)
         setDragX(0)
         setPreviewIndex((i) => (i === null || total === 0 ? i : (i + 1) % total))
       } else if (event.key === 'ArrowLeft') {
+        event.preventDefault(); setPreviewBack(false)
         setDragX(0)
         setPreviewIndex((i) => (i === null || total === 0 ? i : (i - 1 + total) % total))
       }
     }
     window.addEventListener('keydown', onKey)
     return () => {
-      document.body.style.overflow = ''
       window.removeEventListener('keydown', onKey)
     }
   }, [previewIndex, flatCards.length])
@@ -225,6 +249,10 @@ export default function AboutCards2D() {
     const targets = document.querySelectorAll('.deck-hero, .deck-tabs, .deck-section, .deck-footer')
     root?.classList.add('motion-ready')
     targets.forEach((target) => target.classList.add('reveal-target'))
+    if (typeof IntersectionObserver === 'undefined') {
+      targets.forEach(target => target.classList.add('is-visible'))
+      return
+    }
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -292,7 +320,7 @@ export default function AboutCards2D() {
 
               <div className="catalog-grid">
                 {deck.cards.map((card) => (
-                  <button className="catalog-card" key={`${deck.id}-${card.code}`} type="button" onClick={() => openPreview(card)}>
+                  <button className="catalog-card" aria-label={`Xem thẻ ${card.code}: ${card.title}`} key={`${deck.id}-${card.code}`} type="button" onClick={() => openPreview(card)}>
                     <img src={card.image} alt={card.title} loading="lazy" decoding="async" />
                     <span>{card.title}</span>
                   </button>
@@ -315,7 +343,7 @@ export default function AboutCards2D() {
       </div>
 
       {preview && (
-        <div className="preview-layer" role="dialog" aria-modal="true" aria-label={preview.title} onClick={closePreview}>
+        <div ref={dialogRef} className="preview-layer" role="dialog" aria-modal="true" aria-label={preview.title} onClick={closePreview}>
           <div className="preview-card" onClick={(event) => event.stopPropagation()}>
             <button className="preview-close" type="button" aria-label="Đóng xem trước" onClick={closePreview}>
               <X aria-hidden="true" />
@@ -332,9 +360,9 @@ export default function AboutCards2D() {
                   <ChevronLeft aria-hidden="true" />
                 </button>
               )}
-              <img
-                src={preview.image}
-                alt={preview.title}
+              <CardFaceImage retry
+                src={previewBack && preview.backImage ? preview.backImage : preview.image}
+                alt={`${preview.title} · ${previewBack ? 'Mặt sau' : 'Mặt trước'}`}
                 style={{
                   transform: `translateX(${dragX}px)`,
                   transition: draggingRef.current ? 'none' : 'transform .25s ease',
@@ -346,6 +374,8 @@ export default function AboutCards2D() {
                 </button>
               )}
             </div>
+            {preview.backImage && <button type="button" className="preview-flip" aria-pressed={previewBack}
+              onClick={() => setPreviewBack(value => !value)}>{previewBack ? 'Xem mặt trước' : 'Xem mặt sau'}</button>}
 
             <div>
               <span>
@@ -650,7 +680,7 @@ export default function AboutCards2D() {
         .preview-layer {
           position: fixed;
           inset: 0;
-          z-index: 40;
+          z-index: 200;
           display: grid;
           place-items: center;
           padding: 20px;
@@ -661,6 +691,8 @@ export default function AboutCards2D() {
         .preview-card {
           position: relative;
           width: min(420px, 92vw);
+          max-height: calc(100dvh - 32px);
+          overflow-y: auto;
           display: grid;
           gap: 16px;
           padding: 18px;
@@ -677,7 +709,7 @@ export default function AboutCards2D() {
 
         .preview-image-wrap img {
           width: 100%;
-          max-height: 72dvh;
+          max-height: min(65dvh, calc(100dvh - 220px));
           display: block;
           object-fit: contain;
           border-radius: 18px;
@@ -740,6 +772,7 @@ export default function AboutCards2D() {
 
         .preview-close {
           position: absolute;
+          z-index: 3;
           top: 14px;
           right: 14px;
           width: 42px;
@@ -758,6 +791,10 @@ export default function AboutCards2D() {
         .preview-close svg {
           width: 20px;
           height: 20px;
+        }
+        .preview-flip {
+          min-height: 44px; border: 1px solid var(--blue); border-radius: 999px;
+          background: white; color: var(--blue); font: inherit; font-weight: 800; cursor: pointer;
         }
 
         @keyframes previewPop {

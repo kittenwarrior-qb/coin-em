@@ -1,0 +1,49 @@
+{
+  "synthetic": true,
+  "backendConnected": false,
+  "results": [
+    {
+      "theme": "emotion-orbit",
+      "width": 320,
+      "height": 400,
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 430,
+      "height": 660,
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 430,
+      "height": 932,
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 320,
+      "height": 400,
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 430,
+      "height": 660,
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 430,
+      "height": 932,
+      "issues": [],
+      "errors": []
+    }
+  ],
+  "failures": []
+}

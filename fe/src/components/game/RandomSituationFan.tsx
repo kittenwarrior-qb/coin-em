@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { useState, useEffect, useLayoutEffect, useRef } from 'react'
+import { AnimatePresence, motion, useIsPresent } from 'framer-motion'
 import { CartoonButton } from '@/components/cartoon'
 import type { CardData } from '@/stores/types'
+import { cardImageFit } from '@/features/game/catalog/cardImageLayout'
 
 interface RandomSituationFanProps {
   cards: CardData[]
@@ -10,9 +11,14 @@ interface RandomSituationFanProps {
   onBrowse?: (card: CardData) => void
   onStateChange?: (cards: CardData[], activePosition: number) => void
   onConfirm: () => void
+  pending?: boolean
 }
 
-export function RandomSituationFan({ cards, selectedCard, onPick, onBrowse, onStateChange, onConfirm }: RandomSituationFanProps) {
+export function RandomSituationFan({ cards, selectedCard, onPick, onBrowse, onStateChange, onConfirm, pending }: RandomSituationFanProps) {
+  const present = useIsPresent()
+  const blocked = Boolean(pending || !present)
+  const blockedRef = useRef(blocked)
+  useLayoutEffect(() => { blockedRef.current = blocked; return () => { blockedRef.current = true } }, [blocked])
   const [activePosition, setActivePosition] = useState(0)
   const [dragOffset, setDragOffset] = useState(0)
   const cardSpacing = 58
@@ -35,6 +41,7 @@ export function RandomSituationFan({ cards, selectedCard, onPick, onBrowse, onSt
   }
 
   const pickCard = (card: CardData, index: number) => {
+    if (blockedRef.current) return
     setActivePosition(index)
     setDragOffset(0)
     onPick(card)
@@ -51,6 +58,7 @@ export function RandomSituationFan({ cards, selectedCard, onPick, onBrowse, onSt
       exit={{ opacity: 0, y: 80 }}
       className="absolute inset-x-0 bottom-4 z-30 mx-auto w-full max-w-[430px] overflow-hidden px-3"
       data-testid="random-situation-fan"
+      role="group" aria-label="Chọn thẻ tình huống" aria-busy={pending || undefined}
     >
       <div className="rounded-2xl bg-white/75 px-3 py-2 text-center mb-2">
         <div className="font-display text-xs text-[var(--c-gray)]">Chọn một thẻ tình huống</div>
@@ -67,9 +75,9 @@ export function RandomSituationFan({ cards, selectedCard, onPick, onBrowse, onSt
               className="flex flex-col items-center gap-2"
             >
               <div className="h-44 w-[7.35rem] overflow-hidden rounded-[14px] border border-[var(--c-black)] bg-white shadow-[0_7px_0_rgba(0,0,0,0.2)]" style={{ borderWidth: 1 }}>
-                <img src={selectedCard.backImage} alt="" className="h-full w-full object-cover" draggable={false} />
+                <img src={selectedCard.backImage} alt="" className="h-full w-full" style={{ objectFit: cardImageFit(selectedCard.backImage) }} draggable={false} />
               </div>
-              <CartoonButton color="green" size="sm" onClick={onConfirm} data-testid="btn-confirm-situation-card">
+              <CartoonButton color="green" size="sm" pending={pending} disabled={blocked} onClick={() => { if (!blockedRef.current) onConfirm() }} data-testid="btn-confirm-situation-card">
                 Chọn
               </CartoonButton>
             </motion.div>
@@ -77,13 +85,15 @@ export function RandomSituationFan({ cards, selectedCard, onPick, onBrowse, onSt
         </AnimatePresence>
       </div>
       <motion.div
+        data-testid="situation-fan-browse"
         className="relative h-64 overflow-hidden pb-2"
-        drag="x"
+        drag={blocked ? false : 'x'}
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.05}
         dragMomentum={false}
-        onDrag={(_, info) => setDragOffset(info.offset.x)}
+        onDrag={(_, info) => { if (!blockedRef.current) setDragOffset(info.offset.x) }}
         onDragEnd={(_, info) => {
+          if (blockedRef.current) return
           const momentum = clamp(info.velocity.x * 0.08, -cardSpacing * 1.15, cardSpacing * 1.15)
           const newPos = wrapPosition(activePosition - (info.offset.x + momentum) / cardSpacing)
           setActivePosition(newPos)
@@ -93,6 +103,7 @@ export function RandomSituationFan({ cards, selectedCard, onPick, onBrowse, onSt
           onStateChange?.(cards, newPos)
         }}
         onWheel={(event) => {
+          if (blockedRef.current) return
           const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY
           if (Math.abs(delta) < 2) return
           setActivePosition((current) => wrapPosition(current + delta / 180))
@@ -113,6 +124,8 @@ export function RandomSituationFan({ cards, selectedCard, onPick, onBrowse, onSt
               <motion.button
                 key={card.id}
                 type="button"
+                disabled={blocked}
+                aria-label={`Xem thẻ tình huống ${index + 1}`}
                 initial={false}
                 animate={{ opacity, x, y: selected ? y - 2 : y, rotate, scale: selected ? scale + 0.025 : scale }}
                 transition={{ type: 'spring', stiffness: 380, damping: 38, mass: 0.6 }}
@@ -125,7 +138,7 @@ export function RandomSituationFan({ cards, selectedCard, onPick, onBrowse, onSt
                 style={{ zIndex: selected ? 100 : Math.round(30 - absDiff * 5), marginLeft: -58, borderWidth: 1 }}
                 data-testid={`random-situation-card-${index + 1}`}
               >
-                <img src={card.backImage} alt="" className="h-full w-full object-cover" draggable={false} />
+                <img src={card.backImage} alt="" className="h-full w-full" style={{ objectFit: cardImageFit(card.backImage) }} draggable={false} />
               </motion.button>
             )
           })}

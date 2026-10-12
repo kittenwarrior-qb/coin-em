@@ -1,4 +1,6 @@
 import { cn } from '@/lib/utils'
+import { useControlTheme } from './controlThemeContext'
+import { themeBackdrop } from './controlThemes'
 
 const HOME_BG: React.CSSProperties = {
   backgroundImage: 'url(/cartoon/ui/home-bg.webp)',
@@ -17,12 +19,13 @@ interface CartoonScreenProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function CartoonScreen({ panel = true, panelStyle, purpleBg, className, children, ...props }: CartoonScreenProps) {
+  const theme = useControlTheme()
   return (
     <div className={cn('screen-cartoon', className)} {...props}>
       {panel ? (
         <div
           className="screen-panel scroll-cartoon overflow-y-auto"
-          style={purpleBg ? { ...HOME_BG, ...panelStyle } : panelStyle}
+          style={purpleBg ? { ...HOME_BG, backgroundImage: themeBackdrop(theme, HOME_BG.backgroundImage!), ...panelStyle } : panelStyle}
         >
           {children}
         </div>

@@ -1,10 +1,13 @@
 import { Room, GameAction, Role } from '../types'
+import { transferCoin } from '../services/CoinCycle'
+import { validateCardSelection } from '../services/CardCatalog'
 
 export class ActionValidator {
   /**
    * Validate if action can be executed
    */
   validate(room: Room, action: GameAction): { valid: boolean; error?: string } {
+    if (room.status !== 'playing') return { valid: false, error: 'GAME_NOT_PLAYING' }
     // Find actor
     const actor = room.players.find((p) => p.userId === action.actorId)
     if (!actor) {
@@ -119,17 +122,7 @@ export class ActionValidator {
    * Validate select card action (NTG draws situation card)
    */
   private validateSelectCard(room: Room, actor: any, action: GameAction): { valid: boolean; error?: string } {
-    // Actor must be sender
-    if (!actor.isSender) {
-      return { valid: false, error: 'Not a sender' }
-    }
-
-    // Must have card data
-    if (!action.data?.card) {
-      return { valid: false, error: 'No card data' }
-    }
-
-    return { valid: true }
+    return validateCardSelection(room, action)
   }
 
   /**
@@ -137,40 +130,7 @@ export class ActionValidator {
    * Actor: Người Dẫn Lối (Guide) nếu có trong round, ngược lại NTG (Sender) bốc thay
    */
   private validateSelectSelfcareCard(room: Room, actor: any, action: GameAction): { valid: boolean; error?: string } {
-    // Must be selfcare-card phase
-    if (room.phase !== 'selfcare-card') {
-      return { valid: false, error: 'Not selfcare-card phase' }
-    }
-
-    // Check idempotency - already selected card
-    if (room.nightActions?.cardSelected) {
-      return { valid: false, error: 'ACTION_ALREADY_DONE' }
-    }
-
-    // Must have card data
-    if (!action.data?.card) {
-      return { valid: false, error: 'No card data' }
-    }
-
-    // Determine who is allowed to draw:
-    // Guide (originalRole) if present in this round, otherwise NTG (isSender)
-    const guideInRound = room.players.find(
-      (p) => p.originalRole === Role.GUIDE && !p.isFake
-    )
-
-    if (guideInRound) {
-      // Guide must draw
-      if (actor.originalRole !== Role.GUIDE) {
-        return { valid: false, error: 'Only Guide can draw selfcare card this round' }
-      }
-    } else {
-      // No Guide → NTG draws
-      if (!actor.isSender) {
-        return { valid: false, error: 'Only NTG can draw selfcare card when no Guide is present' }
-      }
-    }
-
-    return { valid: true }
+    return validateCardSelection(room, action)
   }
 
   /**
@@ -178,6 +138,10 @@ export class ActionValidator {
    * UPDATED: Support flexible amounts, multiple recipients
    */
   private validateGiveCoin(room: Room, actor: any, action: GameAction): { valid: boolean; error?: string } {
+    if (room.coinCycle) {
+      const result = transferCoin(room, action)
+      return { valid: result.success, error: result.error }
+    }
     // Allow giving coins during give-coins and group-response phases
     if (room.phase !== 'give-coins' && room.phase !== 'group-response') {
       return { valid: false, error: 'Not give-coins phase' }

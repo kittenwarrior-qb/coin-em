@@ -1,10 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { io as ioClient, Socket as ClientSocket } from 'socket.io-client'
 import { Server } from 'socket.io'
-import { createServer } from 'http'
-import express from 'express'
-import { registerRoomHandlers } from '../../src/socket/handlers/roomHandlers'
-import { registerGameHandlers } from '../../src/socket/handlers/gameHandlers'
+import { createIsolatedServer } from '../helpers/isolatedServer'
 import { roomRepository } from '../../src/modules/room'
 
 /**
@@ -29,32 +26,17 @@ describe('Load & Stress Tests', () => {
   let clients: ClientSocket[] = []
   let PORT: number
   let SERVER_URL: string
+  let fixtureServer: Awaited<ReturnType<typeof createIsolatedServer>>
 
   beforeEach(async () => {
     // Clear all rooms before each test
     const existingRooms = roomRepository.findAll()
     existingRooms.forEach(room => roomRepository.delete(room.id))
 
-    const app = express()
-    httpServer = createServer(app)
-    io = new Server(httpServer, {
-      cors: { origin: '*' },
-      pingTimeout: 60000,
-      pingInterval: 25000,
-    })
-
-    io.on('connection', (socket) => {
-      registerRoomHandlers(io, socket)
-      registerGameHandlers(io, socket)
-    })
-
-    await new Promise<void>((resolve) => {
-      httpServer.listen(0, () => {
-        PORT = (httpServer.address() as any).port
-        SERVER_URL = `http://localhost:${PORT}`
-        resolve()
-      })
-    })
+    fixtureServer = await createIsolatedServer()
+    io = fixtureServer.io
+    httpServer = fixtureServer.httpServer
+    SERVER_URL = fixtureServer.url
   })
 
   afterEach(async () => {
@@ -66,8 +48,7 @@ describe('Load & Stress Tests', () => {
     const allRooms = roomRepository.findAll()
     allRooms.forEach(room => roomRepository.delete(room.id))
     
-    io.close()
-    await new Promise<void>((resolve) => httpServer.close(() => resolve()))
+    await fixtureServer.close()
   })
 
   function createClient(): Promise<ClientSocket> {

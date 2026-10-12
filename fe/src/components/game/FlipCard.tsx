@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { CardFaceImage } from './CardFaceImage'
+import { cardImageFit, pdfCardAspect } from '@/features/game/catalog/cardImageLayout'
 
 interface FlipCardProps {
   frontImage: string
@@ -37,8 +39,8 @@ export function FlipCard({
       ? 'min(70vw, calc(65vh * 2 / 3), 280px)'
       : 'min(35vw, calc(32vh * 2 / 3), 140px)'
   const radius = size === 'large' ? '24px' : '14px'
-  const cardAspectRatio = '2 / 3'
-  const imageFit = 'cover'
+  const cardAspectRatio = pdfCardAspect(frontImage) ?? pdfCardAspect(backImage) ?? '2 / 3'
+  const imageFit = cardImageFit(frontImage) === 'contain' || cardImageFit(backImage) === 'contain' ? 'contain' : 'cover'
   const faceStyle: React.CSSProperties = {
     position: 'absolute',
     inset: 0,
@@ -90,11 +92,11 @@ export function FlipCard({
       >
         {/* Front */}
         <div style={faceStyle}>
-          <img src={frontImage} alt={`${altText} - front`} style={imageStyle} draggable={false} />
+          <CardFaceImage retry src={frontImage} alt={`${altText} - front`} style={imageStyle} draggable={false} />
         </div>
         {/* Back */}
         <div style={{ ...faceStyle, transform: 'rotateY(180deg)' }}>
-          <img src={backImage} alt={`${altText} - back`} style={imageStyle} draggable={false} />
+          <CardFaceImage retry src={backImage} alt={`${altText} - back`} style={imageStyle} draggable={false} />
         </div>
       </motion.div>
 

@@ -1,0 +1,64 @@
+{
+  "version": "room-ui-browser-qa/v1",
+  "count": 5,
+  "result": "passed",
+  "backend": "production handlers on isolated loopback",
+  "storage": "temp root / mocked Redis",
+  "realGuestContexts": 5,
+  "browser": "147.0.7727.15",
+  "stage": "completed",
+  "traceFrameScreenshots": false,
+  "explicitScreenshots": true,
+  "offlineCDN": true,
+  "physicalDevice": false,
+  "rateLimiterDisabled": true,
+  "tabReplacement": true,
+  "intentionalLeaveResume": true,
+  "countdownDisplay": {
+    "before": 30,
+    "after": 29
+  },
+  "records": [
+    {
+      "seat": 0,
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "phase": "night"
+    },
+    {
+      "seat": 1,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "phase": "night"
+    },
+    {
+      "seat": 2,
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "phase": "night"
+    },
+    {
+      "seat": 3,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "phase": "night"
+    },
+    {
+      "seat": 4,
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "phase": "night"
+    }
+  ],
+  "errors": []
+}

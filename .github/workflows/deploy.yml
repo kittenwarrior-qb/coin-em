@@ -1,29 +1,62 @@
 name: Deploy
-
 on:
   workflow_run:
     workflows: [CI]
     types: [completed]
-
+permissions:
+  contents: read
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
 jobs:
   deploy:
-    name: Deploy to VPS
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_branch == 'main'
-
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    env:
+      RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
+      - uses: actions/checkout@v4
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            set -e
-            cd ${{ secrets.APP_PATH }}
-            git pull origin main
-            docker compose -f docker-compose.prod.yml build --no-cache backend frontend
-            docker compose -f docker-compose.prod.yml up -d --force-recreate
-            echo "✅ Deploy done — containers started"
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - name: Build exact tested images on GitHub, not on the VPS
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$RELEASE_SHA"
+          [[ "$RELEASE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          docker build --label "org.opencontainers.image.revision=$RELEASE_SHA" -f be/Dockerfile.prod -t "emcoin/backend:$RELEASE_SHA" be
+          docker build --label "org.opencontainers.image.revision=$RELEASE_SHA" --build-arg VITE_API_URL=https://app.emcoin.cloud -f deploy/emcoin/web.Dockerfile -t "emcoin/web:$RELEASE_SHA" fe
+          mkdir release
+          docker save "emcoin/backend:$RELEASE_SHA" "emcoin/web:$RELEASE_SHA" | gzip > release/release-images.tar.gz
+          git archive --format=tar HEAD deploy/emcoin | gzip > release/release-config.tar.gz
+          cd release
+          sha256sum release-images.tar.gz release-config.tar.gz > SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: emcoin-release-${{ github.event.workflow_run.head_sha }}
+          path: release/
+          retention-days: 3
+      - name: Transfer verified release using pinned SSH identity
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          test "$VPS_HOST" = 103.74.102.24
+          test "$VPS_USER" = root
+          test -n "$SSH_KEY" && test -n "$VPS_KNOWN_HOSTS"
+          umask 077
+          printf '%s\n' "$SSH_KEY" > "$RUNNER_TEMP/emcoin-key"
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > "$RUNNER_TEMP/emcoin-known-hosts"
+          ssh_options=(-i "$RUNNER_TEMP/emcoin-key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o "UserKnownHostsFile=$RUNNER_TEMP/emcoin-known-hosts")
+          ssh "${ssh_options[@]}" "$VPS_USER@$VPS_HOST" "test -f /opt/emcoin/shared/.deploy-ready && install -d -m 700 /opt/emcoin/incoming/$RELEASE_SHA"
+          scp "${ssh_options[@]}" release/* "$VPS_USER@$VPS_HOST:/opt/emcoin/incoming/$RELEASE_SHA/"
+          ssh "${ssh_options[@]}" "$VPS_USER@$VPS_HOST" "cd /opt/emcoin/incoming/$RELEASE_SHA && sha256sum -c SHA256SUMS && tar -xOzf release-config.tar.gz deploy/emcoin/deploy-release.sh | bash -s -- $RELEASE_SHA"

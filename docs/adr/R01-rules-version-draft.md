@@ -1,6 +1,6 @@
 # R01 — Draft ADR: rules version and decision gate
 
-**Status:** Draft — blocked; not an approved game specification.  
+**Status:** Historical decision draft. Web/60-Coin baseline approved on 2026-10-01; see `R01-web-coin60-baseline-approved.md`. Remaining catalog/privacy feature decisions are not part of that approval.
 **Owner needed:** Product owner + gameplay owner.  
 **Created:** 2026-09-09.  
 **Decision key:** `rulesVersion: draft-r01-unapproved` (a document label only; it must not be persisted, sent on the wire, or used by tests until approved).
@@ -25,11 +25,14 @@ The master plan records the same conflict as a P0 decision gate and identifies t
 
 ## Decisions required
 
+Update 2026-10-01: coin distribution, meaning and end-of-round collection are confirmed by the project owner in [R01-coin-cycle-approved.md](R01-coin-cycle-approved.md).
+This supersedes the conflicting legacy coin initialization/conversion and automatic rewards for the new coin cycle; other rule decisions remain open.
+
 | ID | Owner must choose | Options to review — none is selected | Required approval artifact |
 |---|---|---|---|
 | OQ-01 | Beta ruleset, count semantics, EMPASS and reflection privacy | A. physical guide as beta baseline; B. existing 16-phase web variant; C. approved hybrid with a written step mapping. For each, state whether 5–10 includes narrator and what skip/private reflection means. | Signed/dated rules version + phase/visibility table. |
 | OQ-02 | Multi-Silencer, healing and vote denominator | A. one shared target; B. independent targets; C. another documented resolver. Specify heal scope, ties, zero votes and disconnected players. | Night-action truth table for every applicable size. |
-| OQ-03 | Coin lifecycle and reward composition | State red spend/reset/retention, yellow initialization, whether NTG + role rewards stack, and mute eligibility. | Ledger examples with exact before/after values. |
+| OQ-03 | Coin lifecycle and reward composition | Confirmed: 20 red to sender; 20 green and 20 yellow shared equally among other seats, remainder unused; gifts by feeling, round receipts recorded and all coins collected/reset. See coin ADR; mute eligibility and presentation remain open. | Owner instruction dated 2026-10-01; golden distribution table in coin ADR. |
 | OQ-04 | Role identity/rotation and Guide capability | A. base role remains fixed; B. role rotates; C. separate narrator/sender assignment from base role. State Guide behavior while muted. | Role/seat table for each size and round. |
 | OQ-05 | Rollback boundary after information disclosure | A. no rollback after reveal; B. only same-round pre-reveal; C. other audited boundary. State behavior after gifts/round advance and disclosure warning. | Permitted-boundary table and player-facing warning. |
 
@@ -62,11 +65,11 @@ These are test **templates**, not expected outcomes. Populate `approved.*` only 
 
 | Field | Value |
 |---|---|
-| Product/gameplay owner | _unassigned_ |
-| Rules version approved | _not approved_ |
-| Approval date | _not approved_ |
-| Golden fixture source | _not created; placeholders only_ |
+| Product/gameplay owner | Project owner, confirmation in this chat |
+| Rules version approved | web-16-coin60/v1 baseline; see R01-web-coin60-baseline-approved.md |
+| Approval date | 2026-10-01 |
+| Golden fixture source | be/tests/unit/ApprovedBaseline.test.ts and CoinCycle.test.ts |
 | Migration impact reviewed by R04/R06/R12–R15 owners | _not reviewed_ |
 
-**Next safe action:** product/gameplay owner chooses and signs OQ-01..OQ-05. Only then create concrete golden fixtures and move R01 toward review/ready.
+**Current next action:** implement and audit the approved baseline. Session UX, catalog/rights and privacy features remain separately scoped, not a renewed gate on approved coin/phase/rotation behavior. Earlier choice tables above are historical evidence.
 

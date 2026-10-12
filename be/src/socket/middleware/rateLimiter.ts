@@ -1,4 +1,5 @@
 import { Socket } from 'socket.io'
+import { operationDiagnostic } from '../../telemetry/operationalDiagnostics'
 
 interface RateLimitConfig {
   windowMs: number // Time window in milliseconds
@@ -26,7 +27,7 @@ export function rateLimitAction(socket: Socket, action: string, limitMs = 500): 
   if (last.length > 0) {
     const lastTimestamp = last[last.length - 1]
     if (now - lastTimestamp < limitMs) {
-      console.log(`[RateLimit] Blocked ${action} from ${socket.id} (too fast)`)
+      operationDiagnostic('rate_limit', 'rejected')
       return false
     }
   }
@@ -57,9 +58,7 @@ export function rateLimitAdvanced(
 
   // Check if limit exceeded
   if (validTimestamps.length >= config.maxRequests) {
-    console.log(
-      `[RateLimit] Blocked ${action} from ${socket.id} (${validTimestamps.length}/${config.maxRequests} in ${config.windowMs}ms)`
-    )
+    operationDiagnostic('rate_limit', 'rejected')
     return false
   }
 
@@ -85,8 +84,14 @@ export function cleanupRateLimiter(): void {
     }
   }
 
-  console.log(`[RateLimit] Cleanup completed. Active keys: ${actionTimestamps.size}`)
+  operationDiagnostic('rate_limit', 'ok')
 }
 
 // Cleanup every 5 minutes
-setInterval(cleanupRateLimiter, 5 * 60 * 1000)
+setInterval(cleanupRateLimiter, 5 * 60 * 1000).unref()
+
+export function clearSocketRateLimits(socketId: string): void {
+  for (const key of actionTimestamps.keys()) {
+    if (key.startsWith(`${socketId}:`)) actionTimestamps.delete(key)
+  }
+}

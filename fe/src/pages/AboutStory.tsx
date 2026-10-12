@@ -1,8 +1,11 @@
+import { EmcoinImage } from '@/components/cartoon/EmcoinImage'
 import { useEffect, type CSSProperties } from 'react'
 import { ArrowRight, Smartphone } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import SiteHeader from '@/components/site/SiteHeader'
+import { CoinRulesGuide } from '@/components/game/CoinRulesGuide'
+import { APPROVED_GAME_INFO } from '@/content/approvedGameInfo'
 
 const tutorialImages = Array.from({ length: 9 }, (_, index) => ({
   src: '/tutorial/' + (index + 1) + '.webp',
@@ -18,24 +21,24 @@ const gameFlow = [
 ]
 
 const roleIcons = [
-  ['Quản Trò', '/cartoon/icons/Crown.svg', '#f5cc00'],
-  ['Người Trao Gửi', '/cartoon/icons/Flower-Multicolor.svg', '#ef5f8a'],
-  ['Người Chữa Lành', '/cartoon/icons/Life-Bag.svg', '#53b025'],
-  ['Người Im Lặng', '/cartoon/icons/Lock-Gold.svg', '#7b4fd4'],
-  ['Người Gợi Mở', '/cartoon/icons/Gift-Pink-Border.svg', '#ff8c42'],
-  ['Người Kết Nối', '/cartoon/icons/Magic.svg', '#0e94c5'],
-  ['Người Dẫn Lối', '/cartoon/icons/Key-Gold.svg', '#e8a020'],
+  ['Quản Trò', '/emcoin/icons/orbit/facilitator.svg', '#f5cc00'],
+  ['Người Trao Gửi', '/emcoin/icons/orbit/storyteller.svg', '#ef5f8a'],
+  ['Người Chữa Lành', '/emcoin/icons/orbit/heal.svg', '#53b025'],
+  ['Người Im Lặng', '/emcoin/icons/orbit/lock.svg', '#7b4fd4'],
+  ['Người Gợi Mở', '/emcoin/icons/orbit/gift.svg', '#ff8c42'],
+  ['Người Kết Nối', '/emcoin/icons/orbit/connect.svg', '#0e94c5'],
+  ['Người Dẫn Lối', '/emcoin/icons/orbit/compass.svg', '#e8a020'],
 ]
 
 const avatarAssets = [
-  '/cartoon/icons/avatars/Girl 1.png',
-  '/cartoon/icons/avatars/Girl 3.png',
-  '/cartoon/icons/avatars/Boy 1.png',
-  '/cartoon/icons/avatars/Boy 4.png',
-  '/cartoon/icons/avatars/Bird.png',
-  '/cartoon/icons/avatars/Cat.png',
-  '/cartoon/icons/avatars/Bunny.png',
-  '/cartoon/icons/avatars/Fish.png',
+  '/emcoin/avatars/orbit/01.webp',
+  '/emcoin/avatars/orbit/05.webp',
+  '/emcoin/avatars/orbit/00.webp',
+  '/emcoin/avatars/orbit/06.webp',
+  '/emcoin/avatars/orbit/12.webp',
+  '/emcoin/avatars/orbit/13.webp',
+  '/emcoin/avatars/orbit/16.webp',
+  '/emcoin/avatars/orbit/21.webp',
 ]
 
 const uiAssets = [
@@ -43,12 +46,12 @@ const uiAssets = [
   ['Nút pill', '/cartoon/buttons/pill/Pink.png'],
   ['Bảng UI', '/cartoon/ui/Panel-Teal.png'],
   ['Cờ heading', '/cartoon/ui/Headline-Flag.png'],
-  ['Sách log', '/cartoon/icons/Book.svg'],
+  ['Sách log', '/emcoin/icons/orbit/book.svg'],
 ]
 
 const principles = [
   ['Mobile-first', 'Mỗi người dùng điện thoại riêng, nên các thao tác quan trọng cần rõ, lớn và dễ chạm.'],
-  ['Offline-first', 'Ứng dụng không thay người điều phối; nó chỉ hỗ trợ thẻ, vai trò, coin và trạng thái lượt chơi.'],
+  ['Trò chuyện trực tiếp', 'Web app cần Internet để chơi; phần offline chỉ hỗ trợ hướng dẫn công khai. Ứng dụng không thay người điều phối.'],
   ['An toàn cảm xúc', 'Luật chơi cần giúp học sinh có quyền quan sát, chia sẻ hoặc dừng lại khi cần.'],
 ]
 
@@ -85,7 +88,7 @@ export default function AboutStory() {
           <p className="section-label">Hướng dẫn</p>
           <h1>EmCoin là một vòng chơi cảm xúc, không phải một bài kiểm tra.</h1>
           <p>
-            Người chơi dùng điện thoại thay cho bộ thẻ giấy: vào phòng, nhận vai, chọn thẻ, chia sẻ offline và ghi nhận nhau bằng coin.
+            Người chơi dùng điện thoại thay cho bộ thẻ giấy: vào phòng, nhận vai, chọn thẻ, trò chuyện trực tiếp và ghi nhận nhau bằng Coin. Web app cần Internet để chơi; phần offline chỉ hỗ trợ hướng dẫn công khai.
           </p>
           <div className="hero-actions">
             <Link className="primary-action" to="/game">
@@ -98,8 +101,17 @@ export default function AboutStory() {
           </div>
         </div>
         <figure className="hero-phone">
-          <img src="/tutorial/1.webp" alt="Màn hình hướng dẫn đầu tiên của EmCoin" />
+          <EmcoinImage src="/tutorial/1.webp" alt="Màn hình hướng dẫn đầu tiên của EmCoin" />
         </figure>
+      </section>
+
+      <section className="flow-section" aria-label="Luật Coin trên web">
+        <div className="section-heading">
+          <h2>Luật Coin trên web</h2>
+          <p>Luật web hiện tại được trình bày dưới đây; các hình minh họa gốc được giữ nguyên ở phần tiếp theo.</p>
+        </div>
+        <CoinRulesGuide />
+        <p>Hỗ trợ: <a href={`mailto:${APPROVED_GAME_INFO.supportEmail}`}>{APPROVED_GAME_INFO.supportEmail}</a></p>
       </section>
 
       <section className="tutorial-board">
@@ -111,7 +123,7 @@ export default function AboutStory() {
           {tutorialImages.map((image, index) => (
             <figure key={image.src}>
               <figcaption>Bước {String(index + 1).padStart(2, '0')}</figcaption>
-              <img src={image.src} alt={image.alt} loading="lazy" decoding="async" />
+              <EmcoinImage src={image.src} alt={image.alt} loading="lazy" decoding="async" />
             </figure>
           ))}
         </div>
@@ -141,14 +153,14 @@ export default function AboutStory() {
           <h2>Avatar giúp bàn chơi có cảm giác gần gũi, còn icon vai trò giúp quản trò đọc trạng thái nhanh hơn.</h2>
           <div className="avatar-cloud">
             {avatarAssets.map((src) => (
-              <img key={src} src={src} alt="" loading="lazy" decoding="async" />
+              <EmcoinImage key={src} src={src} alt="" loading="lazy" decoding="async" />
             ))}
           </div>
         </div>
         <div className="role-cloud">
           {roleIcons.map(([name, icon, color]) => (
             <article key={name} style={{ '--role-color': color } as CSSProperties}>
-              <img src={icon} alt="" loading="lazy" decoding="async" />
+              <EmcoinImage src={icon} alt="" loading="lazy" decoding="async" />
               <span>{name}</span>
             </article>
           ))}
@@ -163,7 +175,7 @@ export default function AboutStory() {
         <div className="ui-grid">
           {uiAssets.map(([label, image]) => (
             <article key={label}>
-              <img src={image} alt="" loading="lazy" decoding="async" />
+              <EmcoinImage src={image} alt="" loading="lazy" decoding="async" />
               <span>{label}</span>
             </article>
           ))}
@@ -181,7 +193,7 @@ export default function AboutStory() {
       </section>
 
       <section className="license-panel">
-        <img src="/support/ricimi logo.png" alt="ricimi" loading="lazy" decoding="async" />
+        <p>Avatar và icon giao diện dùng bộ EmCoin Friends mới.</p>
       </section>
 
       <style>{`

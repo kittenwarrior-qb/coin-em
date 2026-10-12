@@ -1,10 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { io as ioClient, Socket as ClientSocket } from 'socket.io-client'
 import { Server } from 'socket.io'
-import { createServer } from 'http'
-import express from 'express'
-import { registerRoomHandlers } from '../../src/socket/handlers/roomHandlers'
-import { registerGameHandlers } from '../../src/socket/handlers/gameHandlers'
+import { createIsolatedServer } from '../helpers/isolatedServer'
 import { roomRepository } from '../../src/modules/room'
 
 /**
@@ -29,28 +26,16 @@ describe('Reconnection & Network Instability', () => {
   let clients: ClientSocket[] = []
   let PORT: number
   let SERVER_URL: string
+  let fixtureServer: Awaited<ReturnType<typeof createIsolatedServer>>
+  // Simulates guest localStorage across tabs/reloads, not authentication by public ID.
+  const sessionTokens = new Map<string, string>()
 
   beforeEach(async () => {
-    const app = express()
-    httpServer = createServer(app)
-    io = new Server(httpServer, {
-      cors: { origin: '*' },
-      pingTimeout: 5000,
-      pingInterval: 2000,
-    })
-
-    io.on('connection', (socket) => {
-      registerRoomHandlers(io, socket)
-      registerGameHandlers(io, socket)
-    })
-
-    await new Promise<void>((resolve) => {
-      httpServer.listen(0, () => {
-        PORT = (httpServer.address() as any).port
-        SERVER_URL = `http://localhost:${PORT}`
-        resolve()
-      })
-    })
+    sessionTokens.clear()
+    fixtureServer = await createIsolatedServer()
+    io = fixtureServer.io
+    httpServer = fixtureServer.httpServer
+    SERVER_URL = fixtureServer.url
   })
 
   afterEach(async () => {
@@ -60,8 +45,7 @@ describe('Reconnection & Network Instability', () => {
     const allRooms = roomRepository.findAll()
     allRooms.forEach(room => roomRepository.delete(room.id))
     
-    io.close()
-    await new Promise<void>((resolve) => httpServer.close(() => resolve()))
+    await fixtureServer.close()
   })
 
   function createClient(options = {}): Promise<ClientSocket> {
@@ -73,6 +57,17 @@ describe('Reconnection & Network Instability', () => {
         reconnectionAttempts: 5,
         ...options,
       })
+      const emit = client.emit.bind(client)
+      client.emit = ((event: string, ...args: any[]) => {
+        if (event !== 'join_room' && event !== 'reconnect_room') return emit(event, ...args)
+        const payload = args[0]
+        const key = `${payload.roomId}:${payload.userId}`
+        const callback = args[1]
+        return emit(event, { ...payload, sessionToken: sessionTokens.get(key) }, (ack: any) => {
+          if (ack.success && ack.session) sessionTokens.set(key, ack.session.token)
+          callback?.(ack)
+        })
+      }) as typeof client.emit
       
       const timeout = setTimeout(() => {
         reject(new Error('Connection timeout'))

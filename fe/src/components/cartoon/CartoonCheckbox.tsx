@@ -3,6 +3,9 @@
  * Dùng cho chọn bộ thẻ trong CreateRoomModal
  */
 
+import { useControlTheme } from './controlThemeContext'
+import { circleAppearance } from './controlThemes'
+
 interface CartoonCheckboxProps {
   label: string
   checked: boolean
@@ -11,6 +14,7 @@ interface CartoonCheckboxProps {
 }
 
 export function CartoonCheckbox({ label, checked, onChange, 'data-testid': testId }: CartoonCheckboxProps) {
+  const theme = useControlTheme()
   return (
     <button
       type="button"
@@ -22,14 +26,14 @@ export function CartoonCheckbox({ label, checked, onChange, 'data-testid': testI
       {/* Circle */}
       <div className="relative flex items-center justify-center flex-shrink-0" style={{ width: 40, height: 40 }}>
         <img
-          src="/cartoon/buttons/circle/Blue-Teal.png"
+          src={circleAppearance(theme, 'blue-teal', '/cartoon/buttons/circle/Blue-Teal.png').src}
           alt=""
           className="absolute w-full h-full object-contain"
           style={{ filter: 'drop-shadow(0 3px 3px rgba(0,0,0,0.18))' }}
           draggable={false}
         />
         {checked && (
-          <img
+          theme !== 'legacy' ? <span className="absolute rounded-full bg-[var(--brand-ink)]" style={{ width: '30%', height: '30%' }} /> : <img
             src="/cartoon/buttons/circle/White.png"
             alt=""
             className="absolute"
@@ -40,7 +44,7 @@ export function CartoonCheckbox({ label, checked, onChange, 'data-testid': testI
       </div>
 
       {/* Label bên dưới */}
-      <span className="font-display text-[10px] text-[var(--c-gray)] leading-tight text-center">
+      <span className="font-display text-[10px] text-[var(--c-gray)] leading-tight text-center" style={theme !== 'legacy' ? { color: 'var(--brand-ink)' } : undefined}>
         {label}
       </span>
     </button>

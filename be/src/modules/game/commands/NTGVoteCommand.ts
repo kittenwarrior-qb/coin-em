@@ -34,7 +34,7 @@ export class NTGVoteCommand implements ICommand {
 
     // +5 yellow immediately to voted player
     const updatedPlayers = room.players.map((p) =>
-      p.userId === action.targetId
+      !room.coinCycle && p.userId === action.targetId
         ? { ...p, coins: { ...p.coins, yellow: p.coins.yellow + 5 } }
         : p
     )
@@ -53,7 +53,7 @@ export class NTGVoteCommand implements ICommand {
             actorId: action.actorId,
             targetId: action.targetId,
             timestamp: Date.now(),
-            data: { bonus: 5 },
+            data: { bonus: room.coinCycle ? 0 : 5 },
           },
         ],
       },

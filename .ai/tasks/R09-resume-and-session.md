@@ -1,7 +1,9 @@
 # R09 Resume và session
 
+2026-10-03 intentional-exit correction: after confirmed leave, Container retains existing local recovery storage only for playing status and clears the mounted view. A hook-local detach ref prevents that connection refresh immediately auto-admitting the saved playing seat. Explicit recovery still uses the saved secret; successful admission clears detachment. Cold-mount recovery, waiting/ended storage behavior, one-active-generation authorization and 1h inactivity/7d backup policy are unchanged. This fixes a local navigation bug, not a new persistent session policy. Mock transport and Container regressions pass; authenticated-browser evidence is recorded in R29/progress after completion.
+
 **Priority:** P0  
-**Status:** planned  
+**Status:** in progress
 **Owner:** Codex implementation  
 **Reviewer:** Claude audit  
 **Dependencies:** R05, R08
@@ -59,9 +61,11 @@ Do not invent event names, schema fields, phase transitions, card IDs, or rule o
 
 ## Open questions
 
-Blocked bởi OQ-07: guest/account, multi-tab/device và waiting auto-resume policy.
+Owner đã duyệt guest không tài khoản, secret do server cấp, một socket/generation active và tab mới thay tab cũ, giữ grace gameplay 2 giờ. Waiting auto-resume chưa được mở rộng; giữ behavior hiện tại.
 
 ## Implementation plan
+
+Plan revision 2026-10-02: scope thêm `be/src/socket/SeatSession.ts`, `SeatPresence.ts`, `emitRoomView.ts`, `modules/game/types/index.ts`, `modules/game/services/RoomView.ts`, auth boundary và các projector/service phụ thuộc, cùng unit/integration/hook tests và Redis fixture hiện có. Policy/contract: `docs/adr/R09-guest-seat-session-approved.md`. Không deploy hoặc thay retention/privacy policy.
 
 1. Document current join/reconnect/cold-refresh paths and every client-provided identity fallback.
 2. Hold guest/account, multi-tab/device and waiting-room auto-resume choices for OQ-07; write them as decision inputs, not defaults.
@@ -72,7 +76,13 @@ Blocked bởi OQ-07: guest/account, multi-tab/device và waiting auto-resume pol
 
 ## Implementation report
 
-<!-- Codex updates this after implementation: changed files, invariant preserved, commands and results. -->
+2026-10-03 admission ownership: bounded join/reconnect validates private room/actor/token/generation proof and captured socket/credential ownership. Old connection/unmounted completion cannot write credentials or unlock another request. One same-connection slot blocks concurrent create/join/resume; timeout/malformed success is uncertain without automatic resend. Genuine new-connection cold playing/ended recovery remains existing policy; waiting auto-resume is not expanded. Create/join/recovery UI retains intent pending/rejected, manual recovery candidate deletion is disabled pending. Storage failure remains visible after room hydration and does not fabricate a secret. This is memory-only admission uncertainty, not durable recovery of a newly issued token lost with its first ACK. Mock transport/jsdom tests are not multi-backend/production/device evidence.
+
+2026-10-02 — Latest continuation: the existing guest session carries one versioned pending Coin fingerprint, not another bearer credential. Same-secret admission preserves it; a replaced credential does not inherit it. Late ACK clearing compares token, room, actor and operation ID, so an old hook/tab cannot erase a different pending request. Storage failures are surfaced without unmounting a confirmed board. Hook remount/localStorage evidence is not real two-tab/browser/device or adapter-backed takeover evidence.
+
+2026-10-02 — Owner trả lời “ok làm đi”. Implemented opaque server token/private admission ACK, hash-only persistence, active generation, replacement notification/disconnect, frontend token storage/cold reconnect for playing/ended and old-tab auto-reconnect stop. Reclaim rejects public ID/device-only, forged/expired token and legacy no-hash seats; admission awaits primary CAS before publication. Recipient snapshot is shared with join/gameplay/hydration. Waiting policy unchanged. Current local generations persist a 60-second presence lease; dead-socket recovery expires by last-seen, with bounded crash-time precision. Full two-backend adapter takeover, per-phase browser refresh, explicit revoke/delete and restore markers remain; not acceptance/done.
+
+QA evidence: `docs/qa/2026-10-02-p0-progress.md`.
 
 ## QA report
 

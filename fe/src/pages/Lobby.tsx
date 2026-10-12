@@ -1,3 +1,4 @@
+import { EmcoinImage } from '@/components/cartoon/EmcoinImage'
 import { useState, useEffect, useLayoutEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { CartoonButton, CartoonCircleButton, CartoonModal, CartoonScreen } from '@/components/cartoon'
@@ -7,10 +8,16 @@ import { GameMenuModal } from '@/components/lobby/GameMenuModal'
 import { PopIn } from '@/components/PopIn'
 import type { RoomListItem } from '@/components/lobby/RoomCard'
 import type { ResumeCandidate } from '@/hooks/useSocket'
+import { useConfirmedAction } from '@/features/game/controllers/useConfirmedAction'
+import { useControlTheme } from '@/components/cartoon/controlThemeContext'
+import { isBrandTheme, themeLogo } from '@/components/cartoon/controlThemes'
+import { BrandHome } from '@/components/lobby/BrandHome'
+import { GuideBook } from '@/components/game/GuideBook'
 
 interface SplashRect { left: number; top: number; w: number; h: number }
 
 function LogoFly({ splashLogoRect, ready, logoRef }: { splashLogoRect: SplashRect | null; ready: boolean; logoRef: React.RefObject<HTMLImageElement | null> }) {
+  const theme = useControlTheme()
   const containerRef = useRef<HTMLDivElement>(null)
   const [flyFrom, setFlyFrom] = useState<{ x: number; y: number; scale: number } | null>(null)
   const measured = useRef(false)
@@ -33,8 +40,8 @@ function LogoFly({ splashLogoRect, ready, logoRef }: { splashLogoRect: SplashRec
       <motion.img
         ref={logoRef}
         id="home-logo"
-        src="/emcoin_logo.png"
-        alt="EmCoin"
+        src={themeLogo(theme)}
+        alt={isBrandTheme(theme) ? 'EmCoin — Đồng tiền tử tế' : 'EmCoin'}
         className="mx-auto"
         initial={flyFrom ? { x: flyFrom.x, y: flyFrom.y, scale: flyFrom.scale } : false}
         animate={{ x: 0, y: 0, scale: 1 }}
@@ -47,8 +54,8 @@ function LogoFly({ splashLogoRect, ready, logoRef }: { splashLogoRect: SplashRec
 
 interface LobbyProps {
   availableRooms: RoomListItem[]
-  onJoinRoom: (roomId: string, userName: string) => void
-  onCreateRoom: (userName: string, cardDecks?: { situation: Record<string, boolean>; emotion: Record<string, boolean> }) => void
+  onJoinRoom: (roomId: string, userName: string) => Promise<boolean> | void
+  onCreateRoom: (userName: string, cardDecks?: { situation: Record<string, boolean>; emotion: Record<string, boolean> }) => Promise<boolean> | void
   onRefreshRooms: () => void
   ready?: boolean
   splashLogoRect?: SplashRect | null
@@ -56,7 +63,7 @@ interface LobbyProps {
   bgLoaded?: number
   bgTotal?: number
   resumeCandidates?: ResumeCandidate[]
-  onResumeRoom?: (candidate: ResumeCandidate) => void
+  onResumeRoom?: (candidate: ResumeCandidate) => Promise<boolean> | void
   onDismissResume?: (roomId: string) => void
 }
 
@@ -74,6 +81,9 @@ export default function Lobby({
   onResumeRoom,
   onDismissResume,
 }: LobbyProps) {
+  const theme = useControlTheme()
+  const branded = isBrandTheme(theme)
+  const [guideOpen, setGuideOpen] = useState(false)
   const [joinOpen, setJoinOpen] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -81,6 +91,8 @@ export default function Lobby({
   const homeLogoRef = useRef<HTMLImageElement>(null)
   const autoOpenedResumeRef = useRef(false)
   const latestResume = resumeCandidates[0]
+  const { pending: resumePending, run: confirmResume, error: resumeError } = useConfirmedAction('resume', resumeOpen)
+  const [resumeConfirmationError, setResumeConfirmationError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!joinOpen) return
@@ -96,18 +108,23 @@ export default function Lobby({
   }, [resumeCandidates.length])
 
   return (
-    <CartoonScreen data-testid="lobby" purpleBg>
-      <div
+    <CartoonScreen data-testid="lobby" data-ui-screen="home" purpleBg>
+      {branded ? <BrandHome
+        logo={<LogoFly splashLogoRect={splashLogoRect ?? null} ready={ready} logoRef={homeLogoRef} />}
+        onJoin={() => setJoinOpen(true)} onCreate={() => setCreateOpen(true)}
+        onMenu={() => setMenuOpen(true)} onGuide={() => setGuideOpen(true)}
+        onResume={() => setResumeOpen(true)} resumeCount={resumeCandidates.length}
+      /> : <div
         className="flex-1 flex flex-col justify-center p-8 gap-4 relative"
         data-testid="lobby-menu"
       >
         {/* About button — top left */}
-        <div className="absolute top-4 left-4">
+        <div className="absolute top-4 left-4 z-10">
           <PopIn delay={0.16}>
             <CartoonCircleButton
               color="blue"
               size="sm"
-              iconSrc="/cartoon/icons/Question-Mark.svg"
+              iconSrc="/emcoin/icons/orbit/help.svg"
               iconAlt="Về dự án"
               iconSize="42%"
               aria-label="Về dự án"
@@ -117,13 +134,13 @@ export default function Lobby({
           </PopIn>
         </div>
 
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-4 right-4 z-10">
           {ready ? (
             <PopIn delay={0.16}>
               <CartoonCircleButton
                 color="purple"
                 size="sm"
-                iconSrc="/cartoon/icons/Settings.svg"
+                iconSrc="/emcoin/icons/orbit/settings.svg"
                 iconAlt="Cài đặt"
                 iconSize="40%"
                 aria-label="Cài đặt"
@@ -135,7 +152,7 @@ export default function Lobby({
             <CartoonCircleButton
               color="purple"
               size="sm"
-              iconSrc="/cartoon/icons/Settings.svg"
+              iconSrc="/emcoin/icons/orbit/settings.svg"
               iconAlt="Cài đặt"
               iconSize="40%"
               aria-label="Cài đặt"
@@ -145,12 +162,12 @@ export default function Lobby({
           )}
         </div>
 
-        <div className="absolute top-[66px] right-4">
+        <div className="absolute top-[66px] right-4 z-10">
           <PopIn delay={0.22}>
             <CartoonCircleButton
               color="violet"
               size="sm"
-              iconSrc="/cartoon/icons/Arrow-Simple-Right.svg"
+              iconSrc="/emcoin/icons/orbit/play.svg"
               iconAlt="Tiếp tục phòng"
               iconSize="35%"
               aria-label="Tiếp tục phòng"
@@ -161,7 +178,7 @@ export default function Lobby({
           </PopIn>
         </div>
 
-        <div className="text-center" style={{ marginBottom: 32, marginTop: -40 }}>
+        <div data-ui-chrome="home-logo" className="text-center" style={{ marginBottom: 32, marginTop: -40 }}>
           <LogoFly splashLogoRect={splashLogoRect ?? null} ready={ready} logoRef={homeLogoRef} />
         </div>
 
@@ -188,11 +205,11 @@ export default function Lobby({
             Tạo phòng
           </CartoonButton>
         )}
-      </div>
+      </div>}
 
       {!bgDone && (
         <div className="flex items-center justify-center pb-4 gap-2">
-          <img src="/cartoon/icons/Loading-Spinner.svg" alt="" className="w-4 h-4 spin-cartoon opacity-60" />
+          <EmcoinImage src="/emcoin/icons/orbit/spinner.svg" alt="" className="w-4 h-4 spin-cartoon opacity-60" />
           <span className="font-body text-xs" style={{ color: 'var(--c-gray)' }}>
             Downloading... {bgLoaded}/{bgTotal}
           </span>
@@ -206,6 +223,7 @@ export default function Lobby({
         onJoin={onJoinRoom}
         onRefresh={onRefreshRooms}
       />
+      {guideOpen && <GuideBook onClose={() => setGuideOpen(false)} />}
 
       <CreateRoomModal
         open={createOpen}
@@ -219,8 +237,8 @@ export default function Lobby({
         onSettings={() => { setMenuOpen(false) }}
       />
 
-      <CartoonModal open={resumeOpen} onClose={() => setResumeOpen(false)} title="Tiếp tục">
-        <div className="flex flex-col gap-3 py-2">
+      <CartoonModal open={resumeOpen} onClose={resumePending ? undefined : () => setResumeOpen(false)} persistent={resumePending} hideClose={resumePending} title="Tiếp tục">
+        <fieldset disabled={resumePending} className="flex min-w-0 flex-col gap-3 border-0 py-2">
           <div className="text-center font-body text-xs text-black/55">
             Phòng còn dữ liệu khôi phục trong 2 giờ nếu bị ngắt.
           </div>
@@ -255,13 +273,15 @@ export default function Lobby({
                   <div className="flex items-center gap-1.5">
                     <button
                       type="button"
+                      disabled={resumePending}
                       className="shrink-0 flex items-center justify-center h-9 w-9 rounded-full bg-[var(--c-red)]/15 border-2 border-[var(--c-red)]/40 transition-all active:scale-95"
                       onClick={() => onDismissResume?.(candidate.roomId)}
                       aria-label={`Xóa phòng ${candidate.roomId}`}
                       data-testid={`btn-dismiss-resume-${candidate.roomId}`}
+                      data-ui-chrome="circle"
                     >
-                      <img
-                        src="/cartoon/icons/X-Icon.svg"
+                      <EmcoinImage
+                        src="/emcoin/icons/orbit/close.svg"
                         alt=""
                         className="h-4 w-4 object-contain opacity-70"
                         draggable={false}
@@ -271,9 +291,15 @@ export default function Lobby({
                       color="green"
                       size="sm"
                       className="shrink-0"
-                      onClick={() => {
-                        setResumeOpen(false)
-                        onResumeRoom?.(candidate)
+                      pending={resumePending}
+                      onClick={async () => {
+                        if (await confirmResume(async isCurrent => {
+                          setResumeConfirmationError(null)
+                          const result = onResumeRoom?.(candidate)
+                          const confirmed = result === undefined ? true : await result
+                          if (!confirmed && isCurrent()) setResumeConfirmationError('Chưa xác nhận khôi phục phòng. Phiên vẫn được giữ trên thiết bị.')
+                          return confirmed
+                        })) setResumeOpen(false)
                       }}
                     >
                       Tham gia lại
@@ -283,7 +309,8 @@ export default function Lobby({
               ))}
             </div>
           )}
-        </div>
+        </fieldset>
+        {(resumeError || resumeConfirmationError) && <p role="alert" className="font-body text-sm">{resumeError || resumeConfirmationError}</p>}
       </CartoonModal>
     </CartoonScreen>
   )

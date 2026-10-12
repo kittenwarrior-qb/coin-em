@@ -1,4 +1,5 @@
 import { GamePhase } from './types'
+import { operationDiagnostic } from '../../telemetry/operationalDiagnostics'
 
 /**
  * Phase timeout configuration (in milliseconds)
@@ -25,14 +26,14 @@ export class PhaseTimer {
     // Check if this phase has a timeout
     const timeout = PHASE_TIMEOUTS[phase]
     if (!timeout) {
-      console.log(`[PhaseTimer] No timeout for phase: ${phase}`)
+      operationDiagnostic('phase_timer', 'ok')
       return
     }
 
-    console.log(`[PhaseTimer] Starting ${timeout}ms timer for room ${roomId} (phase: ${phase})`)
+    operationDiagnostic('phase_timer', 'ok')
 
     const timer = setTimeout(() => {
-      console.log(`[PhaseTimer] Timer expired for room ${roomId} (phase: ${phase})`)
+      operationDiagnostic('phase_timer', 'ok')
       this.timers.delete(roomId)
       onExpire()
     }, timeout)
@@ -49,7 +50,7 @@ export class PhaseTimer {
     if (timer) {
       clearTimeout(timer)
       this.timers.delete(roomId)
-      console.log(`[PhaseTimer] Cleared timer for room ${roomId}`)
+      operationDiagnostic('phase_timer', 'ok')
     }
   }
 
@@ -69,7 +70,7 @@ export class PhaseTimer {
       clearTimeout(timer)
     }
     this.timers.clear()
-    console.log('[PhaseTimer] Cleared all timers')
+    operationDiagnostic('phase_timer', 'ok')
   }
 
   /**

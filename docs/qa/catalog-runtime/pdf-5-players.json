@@ -1,0 +1,43 @@
+{
+  "version": "terminal-browser-qa/v5",
+  "scenario": "three-color",
+  "result": "passed",
+  "stage": "completed",
+  "browser": "147.0.7727.15",
+  "lostConfirmation": {
+    "enabled": true,
+    "reload": {
+      "droppedAcks": 1,
+      "droppedProjections": 1,
+      "sameRequestEmissions": 1,
+      "identicalPayloads": true,
+      "recovered": 1,
+      "noticeTextWidth": 356
+    },
+    "wireRetry": {
+      "droppedAcks": 1,
+      "droppedProjections": 1,
+      "sameRequestEmissions": 2,
+      "identicalPayloads": true,
+      "recovered": 1,
+      "noticeTextWidth": 356
+    }
+  },
+  "frontend": "production-build-preview",
+  "catalogVersion": "catalog-f40519d34526037f0f48983964c8ae27c2f0b3d2b2b35d0508f9c18e28012530",
+  "realGuestContexts": 5,
+  "originalNonSenderShare": 5,
+  "unusedPerGreenYellow": 0,
+  "completedRounds": 5,
+  "phaseVisits": 75,
+  "emotionSelections": 5,
+  "gifts": 15,
+  "receiptPreviews": 15,
+  "receivedTotal": 15,
+  "errors": [],
+  "storage": "isolated mocked Redis/temp disk",
+  "rateLimiterDisabled": true,
+  "physicalDevice": false,
+  "offlineCDN": true,
+  "limitations": "Actual UI optional-zero or three-color gifts/round receipts/terminal/reload/Back/leave; five-seat positive includes two closed ACK/projection-loss recoveries: hydrated receipt and actual unchanged same-intent wire retry. Not general packet loss/offline gifting, real Redis durability, device/WebKit, load/SLO or release approval."
+}

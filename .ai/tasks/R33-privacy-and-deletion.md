@@ -1,7 +1,7 @@
 # R33 Privacy và deletion
 
 **Priority:** P1  
-**Status:** planned  
+**Status:** in progress
 **Owner:** Codex implementation  
 **Reviewer:** Claude audit  
 **Dependencies:** R05, R09, R11
@@ -59,9 +59,21 @@ Do not invent event names, schema fields, phase transitions, card IDs, or rule o
 
 ## Open questions
 
+Current owner direction2026-10-03 supersedes the historical retention/backup questions below: one-hour room inactivity expiry; NO new deleted-room content archives or external VPS backups. Existing archives are preserved, minimal seven-day anti-resurrection/audited-close markers remain. Audience6–18/Vietnam/support/admin mechanism already approved, not reopened. Owner requests no consent prompt/individual-data deletion feature; this is product scope, not legal clearance for minors. Responsible operator/legal/device/release review remains separate.
+
+Latest 2026-10-02 — Retention đã chốt **1h inactivity / 7d backup**; supersedes unresolved retention notes below. Audience/support/card IP cũng đã xác nhận. Consent/guardian/legal review, external backup enforcement và authenticated individual-data deletion/revocation vẫn chưa hoàn tất. Không cần hỏi lại owner về hai mốc retention.
+
+2026-10-02 — Owner đã xác nhận audience 6–18 tuổi, email hỗ trợ emcoincloud@gmail.com và quyền sở hữu trí tuệ bộ thẻ. ADR `docs/adr/2026-10-02-owner-scope-and-audience.md`. Retention phòng/backup, consent/guardian, deletion authority và legal review vẫn mở; không lấy cleanup 24h làm policy tự động.
+
 Blocked by OQ-08/OQ-10: audience, consent, contact, retention, owner; no legal conclusion without approval.
 
 ## Implementation plan
+
+### Plan revision 2026-10-04 — truthful source-only minimized data map
+
+Admit docs/ops/r33-data-map.md to reconcile actual browser/active Redis/legacy JSON/presence/marker/admin/volatile aggregate/redacted diagnostic/CDN/support boundaries with current owner decisions and source. No fabricated retention for proxy/CDN/mail/storage history, no anonymity/zero-collection/legal-compliance claim, no new deletion/consent endpoint or public legal policy. Document logical deletion vs physical AOF/legacy archive/operator boundaries and missing legal configuration. This is evidence preparation, not production processing approval.
+
+Plan revision retention 2026-10-02: owner duyệt phòng inactive 1h / backup 7d. ADR `docs/adr/2026-10-02-retention-approved.md`. Implement shared persistence cleanup/deletion-marker/managed-backup lifecycle qua R08/R10/R11 và tests; scope thêm retention constants/storage key và cleanup handlers. Đây là một technical subset, không phát hành policy pháp lý hay thêm delete-user endpoint. Audience/support/card IP đã xác nhận, consent/guardian/legal và external backup operator enforcement còn mở.
 
 1. Inventory personal/pseudonymous data across rooms, sessions, Redis/JSON, backups, logs, analytics, assets and support channels; classify purpose/access/retention evidence.
 2. Wait for OQ-08/OQ-10 owner decisions on audience, lawful basis/consent, contact, retention and deletion authority; obtain appropriate legal review rather than make legal claims.
@@ -71,6 +83,10 @@ Blocked by OQ-08/OQ-10: audience, consent, contact, retention, owner; no legal c
 6. Publish approved policy/support language and operational runbook with retention limitations; mark any legal or backup exception explicitly.
 
 ## Implementation report
+
+2026-10-04 — Source-only data map added at docs/ops/r33-data-map.md after owner superseding archive decision and R35/R36 implementation. Actual guest browser credentials, active room names/roles/text/coins, Redis/session hashes, legacy active JSON, content-free markers, fixed admin auth/close audit, process-local aggregate analytics and closed sampled logs are distinguished from provider/network/operator retention. No new room-content backups or VPS backups enabled, no existing archive/data deletion or server access. Logical room expiry is not falsely represented as immediate physical deletion from all AOF/media/provider logs. Public legal policy, responsible controller/legal review for ages6–18 and actual release remain open, not independently accepted.
+
+2026-10-02 — Retention choice được ghi nhận và triển khai cho app-managed room/deleted JSON snapshot: 1h inactivity, 7d archived snapshot + minimal marker. Heartbeat không kéo dài lastActivity; cleanup gồm waiting/playing/ended/fake-only, fresh queued/CAS deletion. No user-data deletion endpoint/legal compliance claim/production cleanup run. External AOF/volume/Umami/operator copies cần enforcement riêng; không bị ứng dụng tự xóa.
 
 <!-- Codex updates this after implementation: changed files, invariant preserved, commands and results. -->
 

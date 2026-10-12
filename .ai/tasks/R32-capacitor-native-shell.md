@@ -59,7 +59,7 @@ Do not invent event names, schema fields, phase transitions, card IDs, or rule o
 
 ## Open questions
 
-Blocked by OQ-08/OQ-10 for audience, permissions, signing owner and iOS capability.
+Audience6–18 is owner-approved; do not reopen that choice. Native permission scope, signing owner, iOS capability and target device decisions still need OQ-08/OQ-10 approval. No distributable/store action is authorized by implementation requests.
 
 ## Implementation plan
 
@@ -71,6 +71,10 @@ Blocked by OQ-08/OQ-10 for audience, permissions, signing owner and iOS capabili
 6. Record platform/tool versions and known gaps; no store upload, credential handling or permission expansion in this task.
 
 ## Implementation report
+
+### Plan revision 2026-10-12 — communication và mobile roadmap
+
+Owner yêu cầu roadmap Android/iOS và chốt voice trong phòng mời có quản trò, micro opt-in, mute/block/report, không recording hoặc ghép người lạ. Quyết định cũ no-micro được thay cho scope này, không mở camera/location/contacts. Owner chưa có Play Console/Apple Developer/Mac hoặc dịch vụ build iOS. Xem `docs/ops/mobile-release-roadmap.md` cho milestones, module boundaries, device evidence và setup hướng dẫn. Chat hiện có chỉ là phản hồi phase; chưa có room chat/voice/native implementation. Game-role silence/heal policy và moderation retention cần chốt trước code communication. Status vẫn planned; không ký/upload/deploy trong bước kế hoạch.
 
 <!-- Codex updates this after implementation: changed files, invariant preserved, commands and results. -->
 

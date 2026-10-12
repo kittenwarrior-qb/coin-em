@@ -9,10 +9,16 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 import { sitePages } from '@/pages/siteContent'
+import { publicSitePath } from '@/content/siteNavigation'
+import { useControlTheme } from '@/components/cartoon/controlThemeContext'
+import { isBrandTheme, themeLogo } from '@/components/cartoon/controlThemes'
 
 export default function SiteHeader() {
+  const theme = useControlTheme()
+  const branded = isBrandTheme(theme)
   const location = useLocation()
-  const currentPage = sitePages.find((item) => item.href === location.pathname)
+  const pathname = publicSitePath(location.pathname)
+  const currentPage = sitePages.find((item) => item.href === pathname)
 
   return (
     <>
@@ -20,20 +26,21 @@ export default function SiteHeader() {
         <div className="site-header-inner">
           <Link className="site-brand" to="/about" aria-label="Về trang giới thiệu EmCoin">
             <span className="site-brand-mark">
-              <img src="/logo.svg" alt="" />
+              <img src={branded ? themeLogo(theme) : '/logo.svg'} alt="" />
             </span>
-            <span>
+            {!branded && <span>
               EmCoin
               <small>Đồng tiền tử tế</small>
-            </span>
+            </span>}
           </Link>
 
           <nav className="site-nav" aria-label="Điều hướng chính">
             {sitePages.map((item) => (
               <Link
                 key={item.href}
-                className={cn('site-nav-link', location.pathname === item.href && 'is-active')}
+                className={cn('site-nav-link', pathname === item.href && 'is-active')}
                 to={item.href}
+                aria-current={pathname === item.href ? 'page' : undefined}
               >
                 {item.label}
               </Link>
@@ -50,7 +57,7 @@ export default function SiteHeader() {
               <DropdownMenuContent align="end" className="site-menu-content">
                 {sitePages.map((item) => (
                   <DropdownMenuItem key={item.href} asChild>
-                    <Link to={item.href}>{item.label}</Link>
+                    <Link to={item.href} aria-current={pathname === item.href ? 'page' : undefined}>{item.label}</Link>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>

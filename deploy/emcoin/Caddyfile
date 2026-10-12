@@ -1,0 +1,37 @@
+{
+    email {$ACME_EMAIL}
+    admin off
+}
+
+{$EMCOIN_DOMAIN} {
+    encode zstd gzip
+    handle /admin/api/* {
+        reverse_proxy backend:3001
+    }
+    handle /api/* {
+        reverse_proxy backend:3001
+    }
+    handle /socket.io/* {
+        reverse_proxy backend:3001
+    }
+    handle /health {
+        reverse_proxy backend:3001
+    }
+    handle {
+        root * /srv
+        @assets path /assets/*
+        header @assets Cache-Control "public, max-age=31536000, immutable"
+        @images path *.webp *.png *.jpg *.jpeg *.svg *.avif *.ico
+        header @images Cache-Control "public, max-age=604800"
+        @fresh path / /index.html /sw.js /manifest.webmanifest
+        header @fresh Cache-Control "no-cache"
+        try_files {path} /index.html
+        file_server
+    }
+    header {
+        Strict-Transport-Security "max-age=31536000"
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy strict-origin-when-cross-origin
+    }
+}

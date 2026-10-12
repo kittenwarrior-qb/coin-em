@@ -1,3 +1,4 @@
+import { EmcoinImage } from '@/components/cartoon/EmcoinImage'
 /**
  * CartoonSwitch — replicates Unity Switch prefab (Slider min:0 max:1 wholeNumbers:true)
  *
@@ -13,19 +14,20 @@
  */
 import { useId } from 'react'
 import { cn } from '@/lib/utils'
+import { useControlTheme } from './controlThemeContext'
+import { circleAppearance, legacyStandaloneCircle } from './controlThemes'
 
 type SwitchColor = 'green' | 'blue' | 'pink' | 'purple' | 'yellow'
 type SwitchIcon = 'music' | 'sound' | 'bell' | 'chat' | 'clock' | 'none'
 
 const ICON_MAP: Record<SwitchIcon, string> = {
-  music:  '/cartoon/icons/Music.svg',
-  sound:  '/cartoon/icons/Sound-On.svg',
-  bell:   '/cartoon/icons/Alert-Bell.svg',
-  chat:   '/cartoon/icons/Chat.svg',
-  clock:  '/cartoon/icons/Clock-Yellow.svg',
+  music:  '/emcoin/icons/orbit/music.svg',
+  sound:  '/emcoin/icons/orbit/sound.svg',
+  bell:   '/emcoin/icons/orbit/bell.svg',
+  chat:   '/emcoin/icons/orbit/facilitator.svg',
+  clock:  '/emcoin/icons/orbit/clock.svg',
   none:   '',
 }
-
 const COLOR_FILL: Record<SwitchColor, string> = {
   green:  'linear-gradient(90deg, #53B025, #94DD26)',
   blue:   'linear-gradient(90deg, #0E94C5, #22B8CF)',
@@ -55,6 +57,9 @@ export function CartoonSwitch({
   disabled,
   className,
 }: CartoonSwitchProps) {
+  const theme = useControlTheme()
+  const themed = theme !== 'legacy'
+  const handleSrc = circleAppearance(theme, color, legacyStandaloneCircle(color)).src
   const id = useId()
   const isControlled = checked !== undefined
 
@@ -94,7 +99,7 @@ export function CartoonSwitch({
         {/* Colored fill — slides in from left when checked */}
         <span
           className="absolute inset-0 rounded-full opacity-0 peer-checked:opacity-100 transition-opacity duration-200"
-          style={{ background: COLOR_FILL[color] }}
+          style={{ background: themed ? 'linear-gradient(90deg, #BFEAF1, #D9F7FB)' : COLOR_FILL[color] }}
         />
 
         {/* Inner glow */}
@@ -110,7 +115,7 @@ export function CartoonSwitch({
             'peer-checked:translate-x-[calc(5rem-2.75rem)]',
           )}
           style={{
-            backgroundImage: `url(/cartoon/buttons/${capitalize(color)}.png)`,
+            backgroundImage: `url(${handleSrc})`,
             backgroundSize: '100% 100%',
           }}
         >
@@ -118,7 +123,7 @@ export function CartoonSwitch({
           <span
             className="absolute inset-0 rounded-full -z-10 translate-y-1"
             style={{
-              backgroundImage: `url(/cartoon/buttons/${capitalize(color)}.png)`,
+              backgroundImage: `url(${handleSrc})`,
               backgroundSize: '100% 100%',
               filter: 'brightness(0) opacity(0.22)',
             }}
@@ -126,7 +131,7 @@ export function CartoonSwitch({
           {/* Icon inside handle */}
           {icon !== 'none' && (
             <span className="absolute inset-0 flex items-center justify-center">
-              <img src={ICON_MAP[icon]} alt={icon} className="w-5 h-5 brightness-0 invert" />
+              <EmcoinImage src={ICON_MAP[icon]} alt={icon} className="w-5 h-5 brightness-0 invert" />
             </span>
           )}
         </span>
@@ -137,8 +142,4 @@ export function CartoonSwitch({
       )}
     </label>
   )
-}
-
-function capitalize(s: string) {
-  return s.charAt(0).toUpperCase() + s.slice(1)
 }

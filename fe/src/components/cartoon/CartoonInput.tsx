@@ -1,5 +1,6 @@
 import { forwardRef } from 'react'
 import { cn } from '@/lib/utils'
+import { useControlTheme } from './controlThemeContext'
 
 interface CartoonInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string
@@ -7,11 +8,12 @@ interface CartoonInputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 
 export const CartoonInput = forwardRef<HTMLInputElement, CartoonInputProps>(
   ({ label, className, id, ...props }, ref) => {
+    const theme = useControlTheme()
     const inputId = id ?? label?.toLowerCase().replace(/\s+/g, '-')
     return (
       <div className="flex flex-col gap-1.5">
         {label && (
-          <label htmlFor={inputId} className="font-display text-sm" style={{ color: '#2f76ac' }}>
+          <label htmlFor={inputId} className="font-display text-sm" style={{ color: theme !== 'legacy' ? 'var(--brand-ink)' : '#2f76ac' }}>
             {label}
           </label>
         )}

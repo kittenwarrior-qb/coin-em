@@ -1,0 +1,842 @@
+{
+  "version": "original-friends/v1",
+  "legacyAvatarSlots": 23,
+  "retirement": "old-avatar-and-icon-pack-owner-reported-expired",
+  "rights": "new-output-owner-review-required-not-a-legal-certificate",
+  "records": [
+    {
+      "url": "/emcoin/avatars/orbit/00.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-b093e674-eed5-47c4-90d0-ac3d18dec4e7.png",
+      "cell": 0,
+      "theme": "orbit",
+      "sha256": "d95a56234619614d8e8f202faaf3f317efccd47cc1677daf76def2067bc8c2e7"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/01.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-b093e674-eed5-47c4-90d0-ac3d18dec4e7.png",
+      "cell": 1,
+      "theme": "orbit",
+      "sha256": "caaf6d8c05465c822d3dead0b2f6a6a10ba190f4ab01fad38fd2e71e2f910c49"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/02.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-b093e674-eed5-47c4-90d0-ac3d18dec4e7.png",
+      "cell": 2,
+      "theme": "orbit",
+      "sha256": "f8cd643ceab8efddaec6532f9ae6849ad2d11e208fbf8749028d9d63a3c858ce"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/03.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-b093e674-eed5-47c4-90d0-ac3d18dec4e7.png",
+      "cell": 3,
+      "theme": "orbit",
+      "sha256": "cec18fa74f53031b2729f667ec6cc6fbd3e5031afc65bba0a10061a1d4e0e839"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/04.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-b093e674-eed5-47c4-90d0-ac3d18dec4e7.png",
+      "cell": 4,
+      "theme": "orbit",
+      "sha256": "78b4abab4468924d4e2308985e8f7fad40f981a343561f9cf08c4c9b38ff7039"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/05.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-b093e674-eed5-47c4-90d0-ac3d18dec4e7.png",
+      "cell": 5,
+      "theme": "orbit",
+      "sha256": "d3ca986ca993096171f5dc542d29c32836a52989bb62eedb91a30cacb8bf8b2c"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/06.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-b093e674-eed5-47c4-90d0-ac3d18dec4e7.png",
+      "cell": 6,
+      "theme": "orbit",
+      "sha256": "84580c1b2586f0f2866a0d843cb3ca0b73bf3aff2b749d2089b451b4209425bc"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/07.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-b093e674-eed5-47c4-90d0-ac3d18dec4e7.png",
+      "cell": 7,
+      "theme": "orbit",
+      "sha256": "4fe792a81ef344a799da9428311a45860b9bf8b8e0d512493d9b5ef59021d9d2"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/08.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-b093e674-eed5-47c4-90d0-ac3d18dec4e7.png",
+      "cell": 8,
+      "theme": "orbit",
+      "sha256": "b0921a9c98f9ca465c5f9c535e9cd09571b2880e5187a07ada43ab7d3dd797a0"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/09.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-b093e674-eed5-47c4-90d0-ac3d18dec4e7.png",
+      "cell": 9,
+      "theme": "orbit",
+      "sha256": "2da9a705b5e00a60488e3381419330629c715f50bc3c9e0c888424421abb8b3e"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/10.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-b093e674-eed5-47c4-90d0-ac3d18dec4e7.png",
+      "cell": 10,
+      "theme": "orbit",
+      "sha256": "b22ea7721c061486a9771308f34b54d3888f6ad8e775c00215ac87d835953921"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/11.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-b093e674-eed5-47c4-90d0-ac3d18dec4e7.png",
+      "cell": 11,
+      "theme": "orbit",
+      "sha256": "71582815d833dce29bb3f03bf5a8121f12009afe8fdf4eb2ed5221a185be539f"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/12.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-10ee5f0e-cad5-4d37-a84b-b09f19cbe9ce.png",
+      "cell": 0,
+      "theme": "orbit",
+      "sha256": "3b0e21809831edd583db5b1638055548b76d03edb88f8759fe35d6c49f6ac87a"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/13.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-10ee5f0e-cad5-4d37-a84b-b09f19cbe9ce.png",
+      "cell": 1,
+      "theme": "orbit",
+      "sha256": "560196dbb000f77e17eaaa1cdde63cd88f9766bea456dcb7eeb013127bf330f8"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/14.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-10ee5f0e-cad5-4d37-a84b-b09f19cbe9ce.png",
+      "cell": 2,
+      "theme": "orbit",
+      "sha256": "507836b8adf6d7cf2b119c3dc2b3daf2813c2159f9168440399752448cec8833"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/15.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-10ee5f0e-cad5-4d37-a84b-b09f19cbe9ce.png",
+      "cell": 3,
+      "theme": "orbit",
+      "sha256": "4dc29ef33f95a232ac439110f3f2333a4c3cfbd2016445874cec911566bbfa3d"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/16.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-10ee5f0e-cad5-4d37-a84b-b09f19cbe9ce.png",
+      "cell": 4,
+      "theme": "orbit",
+      "sha256": "d2b1ea766d1a7292434bbd5b09cc22096120b89fcb426323566e613b64d45a90"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/17.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-10ee5f0e-cad5-4d37-a84b-b09f19cbe9ce.png",
+      "cell": 5,
+      "theme": "orbit",
+      "sha256": "bb0e2f03d7ad38538a73862f0b1519a52e0652acb20c8fd75a48d53b5bb55fdf"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/18.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-10ee5f0e-cad5-4d37-a84b-b09f19cbe9ce.png",
+      "cell": 6,
+      "theme": "orbit",
+      "sha256": "2212db8fee7ff4c3db2f570d5806e324e9290283696d20fffec72d319f4a2a33"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/19.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-10ee5f0e-cad5-4d37-a84b-b09f19cbe9ce.png",
+      "cell": 7,
+      "theme": "orbit",
+      "sha256": "657fa0711cf87e30b45445f5a931d463bedb45d1e8bd144623621f9e4d1af85d"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/20.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-10ee5f0e-cad5-4d37-a84b-b09f19cbe9ce.png",
+      "cell": 8,
+      "theme": "orbit",
+      "sha256": "ccf53c05e44ddbc114de3a9dd1de25bfbbd42b6fdfa68c6a534e230109b3e66a"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/21.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-10ee5f0e-cad5-4d37-a84b-b09f19cbe9ce.png",
+      "cell": 9,
+      "theme": "orbit",
+      "sha256": "42ba3c997b889375e509d00d42960af2bc588b38000729be8deb00fbc18c6c45"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/22.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-10ee5f0e-cad5-4d37-a84b-b09f19cbe9ce.png",
+      "cell": 10,
+      "theme": "orbit",
+      "sha256": "0d0bf2b75b6af4e1b3bf2f539c3e0433cfc484ca8f1bc376ee5bb15784c41d1a"
+    },
+    {
+      "url": "/emcoin/avatars/paper/00.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-38439bb3-f278-42dd-bc1c-913b06492045.png",
+      "cell": 0,
+      "theme": "paper",
+      "sha256": "e9bdd0feba9102c8cc504f260c403fa6ba17bff3a3382d4a3bec91a2e1c1db49"
+    },
+    {
+      "url": "/emcoin/avatars/paper/01.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-38439bb3-f278-42dd-bc1c-913b06492045.png",
+      "cell": 1,
+      "theme": "paper",
+      "sha256": "fc900179024c7252554ba9b7baa66c7082979fdbaf8488252082d4ee24ce3e09"
+    },
+    {
+      "url": "/emcoin/avatars/paper/02.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-38439bb3-f278-42dd-bc1c-913b06492045.png",
+      "cell": 2,
+      "theme": "paper",
+      "sha256": "08b2cd57473855452da1412edc9bd65b01c49b19c5aefd7fc5f45926faa6e699"
+    },
+    {
+      "url": "/emcoin/avatars/paper/03.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-38439bb3-f278-42dd-bc1c-913b06492045.png",
+      "cell": 3,
+      "theme": "paper",
+      "sha256": "beeef7ad55ea11c36857d18ae0e2cbd001ee155202db98eebbe439f4f5035249"
+    },
+    {
+      "url": "/emcoin/avatars/paper/04.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-38439bb3-f278-42dd-bc1c-913b06492045.png",
+      "cell": 4,
+      "theme": "paper",
+      "sha256": "38defacb41a2e2aeb90301e161434a951eb1f77f565404ff2a359dd8d2bc024d"
+    },
+    {
+      "url": "/emcoin/avatars/paper/05.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-38439bb3-f278-42dd-bc1c-913b06492045.png",
+      "cell": 5,
+      "theme": "paper",
+      "sha256": "11635c52be2bfd499b27af4b99a5fdf8700f904cd55dc85bc50bf2dc2bf890e5"
+    },
+    {
+      "url": "/emcoin/avatars/paper/06.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-38439bb3-f278-42dd-bc1c-913b06492045.png",
+      "cell": 6,
+      "theme": "paper",
+      "sha256": "4bbc96a7959e0dfcdf9b97453588a2210871690856e0aeefd1b2216b05745b22"
+    },
+    {
+      "url": "/emcoin/avatars/paper/07.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-38439bb3-f278-42dd-bc1c-913b06492045.png",
+      "cell": 7,
+      "theme": "paper",
+      "sha256": "9b1e93d22006bc145387b39b89bffdf36f8d27e47f1e6c74abdc1cd2fd8e5388"
+    },
+    {
+      "url": "/emcoin/avatars/paper/08.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-38439bb3-f278-42dd-bc1c-913b06492045.png",
+      "cell": 8,
+      "theme": "paper",
+      "sha256": "9cbb9f8fbe50b9d341ceaace619863d429fa7463406941fac27fed9a2a512039"
+    },
+    {
+      "url": "/emcoin/avatars/paper/09.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-38439bb3-f278-42dd-bc1c-913b06492045.png",
+      "cell": 9,
+      "theme": "paper",
+      "sha256": "69e1cb1f50c244fbd2351954f64a866c95774c45485a51fcfdebcf3b500ae38d"
+    },
+    {
+      "url": "/emcoin/avatars/paper/10.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-38439bb3-f278-42dd-bc1c-913b06492045.png",
+      "cell": 10,
+      "theme": "paper",
+      "sha256": "9ee8dc004e12c90e7fd703bf90fdfbbbf5708d35ad57636e4b0d4db8b36b41d6"
+    },
+    {
+      "url": "/emcoin/avatars/paper/11.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-38439bb3-f278-42dd-bc1c-913b06492045.png",
+      "cell": 11,
+      "theme": "paper",
+      "sha256": "32afc44980c3c4c496cd5163717b07c9d9b846ea0e23fa515bdf88fb37a8ea0e"
+    },
+    {
+      "url": "/emcoin/avatars/paper/12.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-3a31c4b8-2806-486a-b4b2-8d7d31fd4608.png",
+      "cell": 0,
+      "theme": "paper",
+      "sha256": "ea167e40de425a138ff1568ab1245be2e2a6da5cd2c773b95dd89937a95b57b6"
+    },
+    {
+      "url": "/emcoin/avatars/paper/13.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-3a31c4b8-2806-486a-b4b2-8d7d31fd4608.png",
+      "cell": 1,
+      "theme": "paper",
+      "sha256": "14238599f5bc81cf5896208a0a3dc54d08d45a9f316f5f03d43665d806be37bd"
+    },
+    {
+      "url": "/emcoin/avatars/paper/14.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-3a31c4b8-2806-486a-b4b2-8d7d31fd4608.png",
+      "cell": 2,
+      "theme": "paper",
+      "sha256": "e81af25438bef786b91bbbe8e1cbf11442e39fc18274432a33fecb2fbd4456f4"
+    },
+    {
+      "url": "/emcoin/avatars/paper/15.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-3a31c4b8-2806-486a-b4b2-8d7d31fd4608.png",
+      "cell": 3,
+      "theme": "paper",
+      "sha256": "38ab251c219250d383165fba632447c0adf90d5e10e5a6b6d508be3c786a669b"
+    },
+    {
+      "url": "/emcoin/avatars/paper/16.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-3a31c4b8-2806-486a-b4b2-8d7d31fd4608.png",
+      "cell": 4,
+      "theme": "paper",
+      "sha256": "dab0bf5470dbe6b4200340521f367485f71bab73c5ac9e4a3adfac748b5fb6e2"
+    },
+    {
+      "url": "/emcoin/avatars/paper/17.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-3a31c4b8-2806-486a-b4b2-8d7d31fd4608.png",
+      "cell": 5,
+      "theme": "paper",
+      "sha256": "194b108704d8ef4f1ba0175792df6f691f8bc9904d52dc7e21e1d90d896b8d7e"
+    },
+    {
+      "url": "/emcoin/avatars/paper/18.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-3a31c4b8-2806-486a-b4b2-8d7d31fd4608.png",
+      "cell": 6,
+      "theme": "paper",
+      "sha256": "4b68af4fc64d79e5850e7fb9cc07f795996f9bf65195440654e971441389a33d"
+    },
+    {
+      "url": "/emcoin/avatars/paper/19.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-3a31c4b8-2806-486a-b4b2-8d7d31fd4608.png",
+      "cell": 7,
+      "theme": "paper",
+      "sha256": "5297e2c04c2e7efff9e7411ea976fcae84f6d5c70a27b4aacfb9b616f7a284c1"
+    },
+    {
+      "url": "/emcoin/avatars/paper/20.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-3a31c4b8-2806-486a-b4b2-8d7d31fd4608.png",
+      "cell": 8,
+      "theme": "paper",
+      "sha256": "3b8dcc06be82cbb954cd14ab9eefdd93307225f51ffaed309f92beeb56c23d36"
+    },
+    {
+      "url": "/emcoin/avatars/paper/21.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-3a31c4b8-2806-486a-b4b2-8d7d31fd4608.png",
+      "cell": 9,
+      "theme": "paper",
+      "sha256": "affe15c86525fafdf4b9c62e38730e006a04bb6a149c419c44186b642f3f2c1c"
+    },
+    {
+      "url": "/emcoin/avatars/paper/22.webp",
+      "kind": "avatar",
+      "source": "built-in-imagegen",
+      "sheet": "exec-3a31c4b8-2806-486a-b4b2-8d7d31fd4608.png",
+      "cell": 10,
+      "theme": "paper",
+      "sha256": "fdbe1a2db341fd3be69799b3d305b56b0d242ede0b0a356c86159f4459335623"
+    },
+    {
+      "url": "/emcoin/icons/orbit/facilitator.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "b3864f4ab1980eb4176178dcf4bdc7d97d416a1daadbdefb67bf4d70a1a5d05d"
+    },
+    {
+      "url": "/emcoin/icons/orbit/storyteller.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "1d20ebf2669e2c0b49af49cd1c75318cca92ec68bb3ceeccdc63fa8a625ad46f"
+    },
+    {
+      "url": "/emcoin/icons/orbit/heal.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "9832079c1adb58f1b26d710796e5671018b0189192fcb3cf9dc0c70651f15634"
+    },
+    {
+      "url": "/emcoin/icons/orbit/lock.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "3bad5aa0ef5998f8d6a5bc71721bcee2dc720dc88c1edaee795190d26858a405"
+    },
+    {
+      "url": "/emcoin/icons/orbit/connect.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "14160a9a98652ee277aef2d1cee909dfa2327f0f05b2d69b7e1326cf130b1730"
+    },
+    {
+      "url": "/emcoin/icons/orbit/gift.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "e7baff48d21959a8e9e327524cf2c5f17b19a834a493f278386a34bec71ea330"
+    },
+    {
+      "url": "/emcoin/icons/orbit/compass.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "ab98915f1ba6947cc6c2433c83158f2842604f88b7c8029c9893e0792d42f8a8"
+    },
+    {
+      "url": "/emcoin/icons/orbit/check.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "4c5c35f44b6c072c9f73ae2e5d0cc78bd5a95362675892b5d96041914cb2d3e3"
+    },
+    {
+      "url": "/emcoin/icons/orbit/arrowRight.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "3d0554bbbf54a8e5be7a2021ea25ea65af24001aafe52e3131dc7613a7e8b0ae"
+    },
+    {
+      "url": "/emcoin/icons/orbit/arrowLeft.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "283e14c64cd2aa113772f26bdb6305f86f97eb2771309c6ee9fc70899ac399b8"
+    },
+    {
+      "url": "/emcoin/icons/orbit/down.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "26b45a25ce809e43231ec3181b833ab65c530c2f9fa5bdef55ce39c1a5c4b8b0"
+    },
+    {
+      "url": "/emcoin/icons/orbit/play.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "44ae3d9d5baea5d6b333ab64c1fe34e8d761d7b1fe10a3dbad6c6a6971028ec3"
+    },
+    {
+      "url": "/emcoin/icons/orbit/book.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "6ef1c48c6ced62f1e64b921fa021f0213ebd9a5a895479e14cec5ad072b7f1e2"
+    },
+    {
+      "url": "/emcoin/icons/orbit/help.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "5bffc557424609bc490edcb48c978fe6c01fd868687f9d68f934b66d52e36deb"
+    },
+    {
+      "url": "/emcoin/icons/orbit/settings.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "9e9e6b516173ab0992a58c4e5927ca0bf510b5c59f174bdaf87d1faa0818b682"
+    },
+    {
+      "url": "/emcoin/icons/orbit/close.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "1ae7c4021f34858d2161c1b3c5891f0e10a02f40876a66e0b014b9a0775984b0"
+    },
+    {
+      "url": "/emcoin/icons/orbit/photo.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "2bf37b5a36d366338d6881c96b23d101dda76531d82951808764818812eb99e2"
+    },
+    {
+      "url": "/emcoin/icons/orbit/sound.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "e83ce7fd56cb2a58dd36fe4b191fca29228b09a081b289f24c48322a97de6451"
+    },
+    {
+      "url": "/emcoin/icons/orbit/mute.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "8cf0da7b1bb57009fc45b7020f1280d39c8e25a9357ae942768a7ffbe5d00cc9"
+    },
+    {
+      "url": "/emcoin/icons/orbit/music.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "c936f55f2153f92d35b9d4c7ffe5633ac5c4672f2051860a5921d1b973192b46"
+    },
+    {
+      "url": "/emcoin/icons/orbit/bell.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "7f4cb60b1b2f4348db1eec097529831695951128f1dfdf3395aed7018cf1accc"
+    },
+    {
+      "url": "/emcoin/icons/orbit/clock.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "d38d2e658233391e938c6ef1301a7505b9c3cd75877e2c5d6330db61b94162c6"
+    },
+    {
+      "url": "/emcoin/icons/orbit/coin.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "572a157b1066d9eedcd98a090293de1652a1314ed52b8d8e6eecea3ccdb7bc29"
+    },
+    {
+      "url": "/emcoin/icons/orbit/surprised.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "384b7c373892d13fae1bb1f22f2c3e813165c3a78ca108d3646d063896358667"
+    },
+    {
+      "url": "/emcoin/icons/orbit/brokenHeart.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "5d012e73a0ea10cb8c5e4e91d53615e23f5ddc4ac79adad7019a8c29b371c8a3"
+    },
+    {
+      "url": "/emcoin/icons/orbit/alert.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "f12ee9e2701ea1d21bef6a10efbfb1af8e376eddd0c88d1d98cafef94fdac37f"
+    },
+    {
+      "url": "/emcoin/icons/orbit/repeat.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "3fb17cc903eca9302316a741c89cc880e694b74185ccc1260367856ac5b36e96"
+    },
+    {
+      "url": "/emcoin/icons/orbit/sleep.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "023794bb4d6299653fdbfacfa0edb4e7d127a27906cc3503bca93d93e2b96344"
+    },
+    {
+      "url": "/emcoin/icons/orbit/spinner.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "bbe182ee5236bb1047eff932d1b03802a3b54a0cd8eea201691109cf196c747b"
+    },
+    {
+      "url": "/emcoin/icons/orbit/friends.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "orbit",
+      "sha256": "56e3f2cf50b63b48ab78ea6d85cf5ef0df179cebaa1b837b266eb688411a2d4b"
+    },
+    {
+      "url": "/emcoin/icons/paper/facilitator.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "ed14ee090186c813b739156367a2483ec01341d8c27f67f7f5d901844ad71563"
+    },
+    {
+      "url": "/emcoin/icons/paper/storyteller.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "0196a40f8bfe6f1ece651b208aab9258009745c4773506527f8cfc06c93c0563"
+    },
+    {
+      "url": "/emcoin/icons/paper/heal.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "34dbc8f2c6b54ec41c7c0ad3a781eefd2495ab0199399516792585d50fb6c26a"
+    },
+    {
+      "url": "/emcoin/icons/paper/lock.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "864ba57af497bf8a76dcd021c4ff352c78299baf0ce87294e5e9d008f2723578"
+    },
+    {
+      "url": "/emcoin/icons/paper/connect.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "78cbbae79e70a6b7e0ded41829bdbd68d152f2e2f24bb3786adba8107299fbdf"
+    },
+    {
+      "url": "/emcoin/icons/paper/gift.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "eec8627116ca2317e28b2e232d059f62f61b4f169b336b6349db9d9178f30f09"
+    },
+    {
+      "url": "/emcoin/icons/paper/compass.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "36622b9e4401383a63b5a0c5ad40fc9548de538c0d0226b3650ac6d735f4bf7e"
+    },
+    {
+      "url": "/emcoin/icons/paper/check.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "684860f3bb9deefb15ae24044e7342784447a05e2b60a575b9796683e9739033"
+    },
+    {
+      "url": "/emcoin/icons/paper/arrowRight.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "1cc281dce5ede7098c92978a93c0a00e76d7e6834f1ad08c650559140a624fcc"
+    },
+    {
+      "url": "/emcoin/icons/paper/arrowLeft.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "5f65ab39a0dc927253bec01705f262daa7f770b971c9b81292b1a4dd48a3105d"
+    },
+    {
+      "url": "/emcoin/icons/paper/down.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "32499435f1cbd18055c6c637036dc1bc7bb4b552979b378755fad9c398ba2b8a"
+    },
+    {
+      "url": "/emcoin/icons/paper/play.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "e3fd064aa437f1fffd6dc9703161694c9ad0d55cfb33f182876dc855bc3168ce"
+    },
+    {
+      "url": "/emcoin/icons/paper/book.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "5f213755ed29bf06c4613c87f5c3c39c64b0bb1f05e7bbccc2c0d029260aedae"
+    },
+    {
+      "url": "/emcoin/icons/paper/help.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "a73a8faf41ab56bb6300a7b05fd0e97a731417b5c14bbe8b307d288e58c5ac22"
+    },
+    {
+      "url": "/emcoin/icons/paper/settings.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "6b9e88812b4bb44f2fe1c6c134d8fc34d0072b026c30d3f4c8a437a7e3109146"
+    },
+    {
+      "url": "/emcoin/icons/paper/close.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "efc4f826777c39b5e5b6efa1aba0ab5bad4f9801a0efa8ec29bf21a7beaf37a2"
+    },
+    {
+      "url": "/emcoin/icons/paper/photo.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "e88a8c6fa63993f477fb57725fc6ddb19f35038e37a9c1035e031aad39b4dae5"
+    },
+    {
+      "url": "/emcoin/icons/paper/sound.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "e46ff4e5828c9d91011226547a48d27a1bdf57f14bc977472e5104fe8a249a9d"
+    },
+    {
+      "url": "/emcoin/icons/paper/mute.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "7d1f7136cd5e440d9619aafd43350205cc66c27350bb8ed3cd2cc5ada244cf17"
+    },
+    {
+      "url": "/emcoin/icons/paper/music.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "2799c6a14a18112112b79a5a9d8a4574063808b48b1991319837ae9f1fee8e69"
+    },
+    {
+      "url": "/emcoin/icons/paper/bell.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "3e0107ae79d15a5ad5ce338939b5dfa299278ba84b9f2774062fffd399f2a6a5"
+    },
+    {
+      "url": "/emcoin/icons/paper/clock.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "f0639c71388d86bf8f02be8954926ba20c5aebe52560dfd7049937b81eba5366"
+    },
+    {
+      "url": "/emcoin/icons/paper/coin.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "6be2ceb67b1a7105d8ba0e1f26db6bdb28527e7b6de96027d731062718629dca"
+    },
+    {
+      "url": "/emcoin/icons/paper/surprised.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "171cba9e75c22c1f660c880971d29b2d8e3cd546c236315b80fef5cefe808b7a"
+    },
+    {
+      "url": "/emcoin/icons/paper/brokenHeart.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "881f0dfa912de097d9c8fe9f8b22898aad56bf9bdec68f52ac260ba0ff539d50"
+    },
+    {
+      "url": "/emcoin/icons/paper/alert.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "abff71586cab2fd369f95af546b1c3baf24bf25573a411cbd09cb74fbc028618"
+    },
+    {
+      "url": "/emcoin/icons/paper/repeat.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "55500f8f59d72af9f8c823109e619bfbd280366a6cca15ec0c567e76de6e99a5"
+    },
+    {
+      "url": "/emcoin/icons/paper/sleep.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "e79115650fe76907e4832daf8a59e7c0a191e185eabf5ddd6343fce618428a30"
+    },
+    {
+      "url": "/emcoin/icons/paper/spinner.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "a2b86bc142aa63e3811bfa5a2910b1a7cf93d42f33f1fa3c421121672bb9a0aa"
+    },
+    {
+      "url": "/emcoin/icons/paper/friends.svg",
+      "kind": "icon",
+      "source": "project-authored-vector",
+      "theme": "paper",
+      "sha256": "661c34101fb98cb855e7378a08b977b1139f8c1bb865e3fe2aad3e9f668435e8"
+    }
+  ]
+}

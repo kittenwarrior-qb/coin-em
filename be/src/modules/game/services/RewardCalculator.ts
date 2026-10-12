@@ -23,6 +23,7 @@ import { Room, Role } from '../types'
  */
 export class RewardCalculator {
   calculateRewards(room: Room): Room {
+    if (room.coinCycle) return room
     const playerCount = room.players.length
     const silencer = room.players.find((p) => p.originalRole === Role.SILENCER)
     const guide = room.players.find((p) => p.originalRole === Role.GUIDE)

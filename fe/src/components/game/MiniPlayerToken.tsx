@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { CartoonAvatar, CartoonCircleButton, ProfileModal } from '@/components/cartoon'
 import type { Player } from '@/components/game/types'
+import { useControlTheme } from '@/components/cartoon/controlThemeContext'
+import { isBrandTheme, themeArtUrl } from '@/components/cartoon/controlThemes'
 
 interface MiniPlayerTokenProps {
   player: Player
@@ -25,7 +27,7 @@ interface MiniPlayerTokenProps {
   showCheckmark?: boolean
   onClick?: () => void
   onActionClick?: () => void
-  onUpdateProfile?: (name: string, avatarIndex: number, bgIndex: number) => void
+  onUpdateProfile?: (name: string, avatarIndex: number, bgIndex: number) => Promise<boolean> | void
 }
 
 // Border colors for special roles
@@ -51,13 +53,13 @@ const ROLE_LABELS: Record<string, string> = {
 }
 
 const ROLE_ICONS: Record<string, string> = {
-  'Người Quản trò': '/cartoon/icons/Crown.svg',
-  'Người Trao Gửi': '/cartoon/icons/Flower-Multicolor.svg',
-  'Người Chữa Lành': '/cartoon/icons/Life-Bag.svg',
-  'Người Im Lặng': '/cartoon/icons/Lock-Gold.svg',
-  'Người Gợi Mở': '/cartoon/icons/Gift-Pink-Border.svg',
-  'Người Kết Nối': '/cartoon/icons/Magic.svg',
-  'Người Dẫn Lối': '/cartoon/icons/Key-Gold.svg',
+  'Người Quản trò': '/emcoin/icons/orbit/facilitator.svg',
+  'Người Trao Gửi': '/emcoin/icons/orbit/storyteller.svg',
+  'Người Chữa Lành': '/emcoin/icons/orbit/heal.svg',
+  'Người Im Lặng': '/emcoin/icons/orbit/lock.svg',
+  'Người Gợi Mở': '/emcoin/icons/orbit/gift.svg',
+  'Người Kết Nối': '/emcoin/icons/orbit/connect.svg',
+  'Người Dẫn Lối': '/emcoin/icons/orbit/compass.svg',
 }
 
 function getRoleLabel(player: Player, isTop?: boolean, isBottom?: boolean) {
@@ -119,7 +121,7 @@ export function MiniPlayerToken({
   isTop,
   isBottom,
   showActionIcon,
-  actionIconSrc = '/cartoon/icons/Potion-Green-Border.svg',
+  actionIconSrc = '/emcoin/icons/orbit/heal.svg',
   actionIconSide = 'right',
   isActionTarget,
   actionTargetTone,
@@ -137,13 +139,12 @@ export function MiniPlayerToken({
   onActionClick,
   onUpdateProfile,
 }: MiniPlayerTokenProps) {
+  const theme = useControlTheme()
+  const branded = isBrandTheme(theme)
   const [showProfile, setShowProfile] = useState(false)
-  const [localAvatarIdx, setLocalAvatarIdx] = useState<number | null>(null)
-  const [localBgIdx, setLocalBgIdx] = useState<number | null>(null)
-
-  // Use local overrides if set (optimistic update), else fall back to server data
-  const displayAvatarIdx = localAvatarIdx ?? player.avatarIndex ?? index
-  const displayBgIdx     = localBgIdx     ?? player.bgIndex     ?? index
+  // Display only the latest committed recipient projection.
+  const displayAvatarIdx = player.avatarIndex ?? index
+  const displayBgIdx = player.bgIndex ?? index
 
   const roleLabel = getRoleLabel(player, isTop, isBottom)
   const roleColor = getRoleColor(player, isTop, isBottom)
@@ -186,22 +187,22 @@ export function MiniPlayerToken({
     <>
       <div
         data-player-token-id={player.id}
-        className="flex flex-col items-center gap-0 cursor-pointer select-none"
+        className="brand-player-token flex flex-col items-center gap-0 cursor-pointer select-none"
         onClick={handleClick}
       >
-        <div className="relative flex h-7 w-[156px] items-end justify-center">
+        <div className={`brand-player-role relative flex h-7 items-end justify-center ${isTop || isBottom ? 'w-[156px]' : 'w-20'}`}>
           {shouldShowRoleLabel && roleLabel && (
-            <CurvedRoleLabel
+            branded ? <span className="brand-player-role-label" style={{ borderColor: roleColor }}>{roleLabel}</span> : isTop || isBottom ? <CurvedRoleLabel
               text={roleLabel}
               color={roleColor}
               id={labelPathId}
-            />
+            /> : <span className="font-display w-20 text-center text-[11px] leading-tight" style={{ color: roleColor, textShadow: '0 1px 2px white' }}>{roleLabel}</span>
           )}
         </div>
 
         {/* Avatar with role-based border + photo badge for self */}
         <div className="relative" data-player-avatar-id={player.id}>
-          {shouldShowRoleLabel && roleIcon && (
+          {shouldShowRoleLabel && roleIcon && !branded && (
             <motion.img
               src={roleIcon}
               alt=""
@@ -270,7 +271,7 @@ export function MiniPlayerToken({
           </motion.div>
           {showSleepEffect && (
             <motion.img
-              src="/cartoon/icons/Zzz.svg"
+              src={themeArtUrl(theme, '/emcoin/icons/orbit/sleep.svg')}
               alt=""
               className="pointer-events-none absolute z-30 h-7 w-7 object-contain"
               initial={{ opacity: 0, scale: 0.6, x: 30, y: -2 }}
@@ -302,7 +303,7 @@ export function MiniPlayerToken({
           )}
           {player.isMuted && (
             <motion.img
-              src="/cartoon/icons/Lock-Sliver.svg"
+              src={themeArtUrl(theme, '/emcoin/icons/orbit/lock.svg')}
               alt=""
               initial={{ scale: 0, opacity: 0, y: 6 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -318,7 +319,7 @@ export function MiniPlayerToken({
           )}
           {showCheckmark && (
             <motion.img
-              src="/cartoon/icons/Checkmark-Cartoon.svg"
+              src={themeArtUrl(theme, '/emcoin/icons/orbit/check.svg')}
               alt=""
               initial={{ scale: 0, opacity: 0 }}
               animate={{
@@ -350,7 +351,7 @@ export function MiniPlayerToken({
             >
               <CartoonCircleButton
                 color="purple"
-                iconSrc="/cartoon/icons/white/Photo.png"
+                iconSrc="/emcoin/icons/orbit/photo.svg"
                 iconSize="50%"
                 style={{ height: 24, width: 24 }}
               />
@@ -360,7 +361,8 @@ export function MiniPlayerToken({
 
         {/* Name */}
         <span
-          className="font-display text-center leading-tight"
+          data-ui-ink={player.isMe ? 'accent' : 'primary'}
+          className="brand-player-name font-display text-center leading-tight"
           style={{
             marginTop: 7,
             fontSize: 12,
@@ -387,10 +389,9 @@ export function MiniPlayerToken({
           currentBgIndex={displayBgIdx}
           lockName
           currentRole={player.role}
-          onSave={(name, avatarIdx, bgIdx) => {
-            setLocalAvatarIdx(avatarIdx)
-            setLocalBgIdx(bgIdx)
-            onUpdateProfile?.(name, avatarIdx, bgIdx)
+          onSave={async (name, avatarIdx, bgIdx) => {
+            if (await onUpdateProfile?.(name, avatarIdx, bgIdx) !== true) return false
+            return true
           }}
         />
       )}

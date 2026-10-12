@@ -1,7 +1,7 @@
 # R20 Phase UI registry
 
 **Priority:** P1  
-**Status:** planned  
+**Status:** in progress
 **Owner:** Codex implementation  
 **Reviewer:** Claude audit  
 **Dependencies:** R06, R12, R19
@@ -63,6 +63,16 @@ Blocked cho UI behavior nếu OQ-01/OQ-04 chưa chốt; không encode luật m�
 
 ## Implementation plan
 
+### Plan revision 2026-10-03 — exhaustive action renderer registry
+
+Pair R19 extraction: include `features/game/phases/BoardPhaseActions.tsx`, GameBoard consumption and adjacent tests. All approved GamePhase keys have an action renderer, including explicit no-op phases and terminal. Existing server capabilities/connectivity/pending/checkpoint decide disabling, never hidden role images or an inferred next phase. Renderers preserve current sender/non-sender/finite/legacy/three-card presentation and expose existing local callbacks only. Validate registry coverage plus every phase under owner/non-owner/offline/pending and old-scope handler regression. No permission/phase/rule change or reskin; diagnostic/overlay registry and independent/device gates remain open.
+
+### Plan revision 2026-10-02 — recipient phase view
+
+Scope adds backend pure `PhaseView.ts`/RoomView integration and focused contract tests, frontend `features/game/phases/registry.ts`/diagnostic component and GameBoard consumption, plus existing useSocket wire type. Additive `phase-view/v1` is derived only from R06 registry and existing ActionValidator/CardCatalog decisions; no new event, permission or transition rule. Public projection receives no private actor capability. Navigation/display use server-computed applicable position/total/next/previous; client must not infer absent healer/Guide from hidden roles. Existing role image mappings stay untouched and become display-only. Legacy/missing/unknown phase view renders a read-only diagnostic, not guessed mutation controls. Offline transport remains the final send guard; this slice does not claim generic pending ACK migration or full phase-view decomposition.
+
+Connectivity extension includes GameContainer passing its existing isConnected signal. Board action controls use an offline mask/native disabled fieldset; target/card/coin/vote confirmation handlers recheck connectivity and relevant capabilities. No offline command queue, fabricated pending status or new auth boundary.
+
 1. Inventory all FE phase/role/order inference and map each to its R06-approved projection/capability equivalent.
 2. Do not encode unresolved R01/OQ-01/OQ-04 behavior; list unsupported phase/capability combinations as blocked or explicit safe fallback.
 3. Define an exhaustive registry keyed by approved phase IDs, with owner/non-owner/pending/terminal renderers consuming typed capabilities.
@@ -72,9 +82,15 @@ Blocked cho UI behavior nếu OQ-01/OQ-04 chưa chốt; không encode luật m�
 
 ## Implementation report
 
+2026-10-03 action-view registry continuation: every17 approved GamePhase key now has an explicit central-action renderer (including no-op and terminal), separate from component-only fieldset/navigation module to retain Fast Refresh hygiene. Board supplies admitted capabilities/destinations/phase/ownership/pending/connectivity and existing local callbacks; no image-role/order permission inference or new command. Exact original reflection limit/labels, finite optional gifts, legacy-confirmed rewards, selfcare chooser and checkpoint explanation preserved.25new tests cover all17phases across owner/non-owner/offline/pending, original arrows/server destinations, card caps, finite/legacy eligibility and stale-scope callbacks. Full FE451 PASS/lint0errors0warnings/TypeScript/Vite15.96s PASS; BE494 unchanged. Overlay/full phase-view composition, profiler/device/independent gates remain distinct; not done/release.
+
+Implemented additive `phase-view/v1` in recipient RoomView, computed from existing PhaseRegistry/ActionValidator/CardCatalog only. Healer-absent rooms show 15 applicable steps, not a client guess of 16; hidden Guide selfcare capability resolves on the server without revealing another role. Client navigation, progress, own-role action permissions and status registry consume this view. Invalid/missing/unknown projections mount a read-only diagnostic; confirmed offline board stays mounted with mutation controls disabled. No game rule, card asset or command type changed. Full phase component/pending renderer extraction remains under R17/R19/R20.
+
 <!-- Codex updates this after implementation: changed files, invariant preserved, commands and results. -->
 
 ## QA report
+
+2026-10-02 local verification: backend 39 files / 477 tests, frontend 11 files / 104 tests pass, zero skipped. New PhaseView has 10 tests including every applicable phase × recipient for 5–10 players, public/disconnected/terminal/unknown actors, hidden Guide and three-card limit; new FE registry/real-board suite has 8 tests, including offline card controls and unknown diagnostic. Actual isolated socket card-catalog suite verifies delivered phaseView. Builds pass; frontend lint/build warnings remain tracked, not waived. No deployment or independent audit claimed.
 
 <!-- QA owner records environment, test matrix, failures, visual/device evidence and final result. -->
 
@@ -83,5 +99,7 @@ Blocked cho UI behavior nếu OQ-01/OQ-04 chưa chốt; không encode luật m�
 <!-- Reviewer records independent findings, unresolved risks, and approval/rework decision. -->
 
 ## Decision log
+
+Backend-first compatibility boundary: new FE requires `phase-view/v1`; old/missing server metadata deliberately fails closed. This is an additive wire field, not a protocol rollout approval. Roll back with targeted compatible source changes; never restore room data over newer revisions. See `docs/adr/R20-server-phase-view.md`.
 
 <!-- Link approved ADR/owner decisions here; do not replace an unresolved decision with an implementation assumption. -->

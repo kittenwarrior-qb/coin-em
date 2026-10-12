@@ -1,0 +1,1892 @@
+{
+  "synthetic": true,
+  "backendConnected": false,
+  "browser": "147.0.7727.15",
+  "cases": 135,
+  "results": [
+    {
+      "name": "emotion-card-narrator",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=emotion-card&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "emotion-card-narrator",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=emotion-card&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "emotion-card-narrator",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=emotion-card&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "emotion-card-sender",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=emotion-card&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "emotion-card-sender",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=emotion-card&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "emotion-card-sender",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=emotion-card&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "ended-narrator",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=ended&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Hành trình kết thúc",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "ended-narrator",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=ended&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Hành trình kết thúc",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "ended-narrator",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=ended&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Hành trình kết thúc",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "ended-sender",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=ended&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Hành trình kết thúc",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "ended-sender",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=ended&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Hành trình kết thúc",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "ended-sender",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=ended&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Hành trình kết thúc",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "give-coins-narrator",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=give-coins&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Trao Coin",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "give-coins-narrator",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=give-coins&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Trao Coin",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "give-coins-narrator",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=give-coins&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Trao Coin",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "give-coins-sender",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=give-coins&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Trao Coin",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "give-coins-sender",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=give-coins&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Trao Coin",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "give-coins-sender",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=give-coins&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Trao Coin",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "group-response-narrator",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=group-response&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "group-response-narrator",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=group-response&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "group-response-narrator",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=group-response&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "group-response-sender",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=group-response&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "group-response-sender",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=group-response&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "group-response-sender",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=group-response&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "guess-silencer-narrator",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=guess-silencer&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "guess-silencer-narrator",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=guess-silencer&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "guess-silencer-narrator",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=guess-silencer&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "guess-silencer-sender",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=guess-silencer&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "guess-silencer-sender",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=guess-silencer&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "guess-silencer-sender",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=guess-silencer&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "healer-turn-narrator",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=healer-turn&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "healer-turn-narrator",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=healer-turn&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "healer-turn-narrator",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=healer-turn&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "healer-turn-sender",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=healer-turn&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "healer-turn-sender",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=healer-turn&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "healer-turn-sender",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=healer-turn&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "history",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-screens.html?screen=history",
+      "fixture": "screen-qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Nhật ký lượt chơi",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "history",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-screens.html?screen=history",
+      "fixture": "screen-qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Nhật ký lượt chơi",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "history",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-screens.html?screen=history",
+      "fixture": "screen-qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Nhật ký lượt chơi",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "hug-action-narrator",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=hug-action&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "hug-action-narrator",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=hug-action&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "hug-action-narrator",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=hug-action&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "hug-action-sender",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=hug-action&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "hug-action-sender",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=hug-action&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "hug-action-sender",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=hug-action&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "loading",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-screens.html?screen=loading",
+      "fixture": "screen-qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "loading",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-screens.html?screen=loading",
+      "fixture": "screen-qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "loading",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-screens.html?screen=loading",
+      "fixture": "screen-qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "lobby",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-screens.html?screen=lobby",
+      "fixture": "screen-qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "lobby",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-screens.html?screen=lobby",
+      "fixture": "screen-qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "lobby",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-screens.html?screen=lobby",
+      "fixture": "screen-qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "lobby-btn-create-room",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-screens.html?screen=lobby",
+      "fixture": "screen-qa-fixture",
+      "action": "btn-create-room",
+      "label": "Tạo phòng",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "lobby-btn-create-room",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-screens.html?screen=lobby",
+      "fixture": "screen-qa-fixture",
+      "action": "btn-create-room",
+      "label": "Tạo phòng",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "lobby-btn-create-room",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-screens.html?screen=lobby",
+      "fixture": "screen-qa-fixture",
+      "action": "btn-create-room",
+      "label": "Tạo phòng",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "lobby-btn-join-room",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-screens.html?screen=lobby",
+      "fixture": "screen-qa-fixture",
+      "action": "btn-join-room",
+      "label": "Tham gia",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "lobby-btn-join-room",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-screens.html?screen=lobby",
+      "fixture": "screen-qa-fixture",
+      "action": "btn-join-room",
+      "label": "Tham gia",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "lobby-btn-join-room",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-screens.html?screen=lobby",
+      "fixture": "screen-qa-fixture",
+      "action": "btn-join-room",
+      "label": "Tham gia",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "lobby-lobby-menu",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-screens.html?screen=lobby",
+      "fixture": "screen-qa-fixture",
+      "action": "lobby-menu",
+      "label": "Menu",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "lobby-lobby-menu",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-screens.html?screen=lobby",
+      "fixture": "screen-qa-fixture",
+      "action": "lobby-menu",
+      "label": "Menu",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "lobby-lobby-menu",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-screens.html?screen=lobby",
+      "fixture": "screen-qa-fixture",
+      "action": "lobby-menu",
+      "label": "Menu",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "night-narrator",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=night&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "night-narrator",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=night&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "night-narrator",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=night&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "night-sender",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=night&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "night-sender",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=night&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "night-sender",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=night&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "offline-narrator",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=give-coins&count=10&viewer=narrator&offline=1",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Trao Coin",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "offline-narrator",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=give-coins&count=10&viewer=narrator&offline=1",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Trao Coin",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "offline-narrator",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=give-coins&count=10&viewer=narrator&offline=1",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Trao Coin",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "offline-sender",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=give-coins&count=10&viewer=sender&offline=1",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Trao Coin",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "offline-sender",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=give-coins&count=10&viewer=sender&offline=1",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Trao Coin",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "offline-sender",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=give-coins&count=10&viewer=sender&offline=1",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Trao Coin",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "reflection-card-narrator",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=reflection-card&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "reflection-card-narrator",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=reflection-card&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "reflection-card-narrator",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=reflection-card&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "reflection-card-sender",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=reflection-card&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "reflection-card-sender",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=reflection-card&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "reflection-card-sender",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=reflection-card&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "reflection-sharing-narrator",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=reflection-sharing&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "reflection-sharing-narrator",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=reflection-sharing&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "reflection-sharing-narrator",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=reflection-sharing&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "reflection-sharing-sender",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=reflection-sharing&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "reflection-sharing-sender",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=reflection-sharing&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "reflection-sharing-sender",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=reflection-sharing&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "reveal-silencer-narrator",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=reveal-silencer&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Tiết lộ vai trò",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "reveal-silencer-narrator",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=reveal-silencer&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Tiết lộ vai trò",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "reveal-silencer-narrator",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=reveal-silencer&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Tiết lộ vai trò",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "reveal-silencer-sender",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=reveal-silencer&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Tiết lộ vai trò",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "reveal-silencer-sender",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=reveal-silencer&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Tiết lộ vai trò",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "reveal-silencer-sender",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=reveal-silencer&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Tiết lộ vai trò",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "reward-narrator",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=reward&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Tổng kết lượt 1/10",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "reward-narrator",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=reward&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Tổng kết lượt 1/10",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "reward-narrator",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=reward&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Tổng kết lượt 1/10",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "reward-sender",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=reward&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Tổng kết lượt 1/10",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "reward-sender",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=reward&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Tổng kết lượt 1/10",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "reward-sender",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=reward&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Tổng kết lượt 1/10",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "role-reveal-narrator",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=role-reveal&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Vai trò của bạn",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "role-reveal-narrator",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=role-reveal&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Vai trò của bạn",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "role-reveal-narrator",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=role-reveal&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Vai trò của bạn",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "role-reveal-sender",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=role-reveal&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Vai trò của bạn",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "role-reveal-sender",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=role-reveal&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Vai trò của bạn",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "role-reveal-sender",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=role-reveal&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [
+        {
+          "label": "Vai trò của bạn",
+          "background": "rgb(247, 252, 255)",
+          "border": "rgb(155, 199, 227)"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "selfcare-card-narrator",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=selfcare-card&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "selfcare-card-narrator",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=selfcare-card&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "selfcare-card-narrator",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=selfcare-card&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "selfcare-card-sender",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=selfcare-card&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "selfcare-card-sender",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=selfcare-card&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "selfcare-card-sender",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=selfcare-card&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "silencer-turn-narrator",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=silencer-turn&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "silencer-turn-narrator",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=silencer-turn&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "silencer-turn-narrator",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=silencer-turn&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "silencer-turn-sender",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=silencer-turn&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "silencer-turn-sender",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=silencer-turn&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "silencer-turn-sender",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=silencer-turn&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "situation-card-narrator",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=situation-card&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "situation-card-narrator",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=situation-card&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "situation-card-narrator",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=situation-card&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "situation-card-sender",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=situation-card&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "situation-card-sender",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=situation-card&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "situation-card-sender",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=situation-card&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "story-telling-narrator",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=story-telling&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "story-telling-narrator",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=story-telling&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "story-telling-narrator",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=story-telling&count=10&viewer=narrator",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "story-telling-sender",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-board.html?phase=story-telling&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "story-telling-sender",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-board.html?phase=story-telling&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "story-telling-sender",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-board.html?phase=story-telling&count=10&viewer=sender",
+      "fixture": "qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "waiting",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-screens.html?screen=waiting",
+      "fixture": "screen-qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "waiting",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-screens.html?screen=waiting",
+      "fixture": "screen-qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "waiting",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-screens.html?screen=waiting",
+      "fixture": "screen-qa-fixture",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "waiting-btn-leave-room",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-screens.html?screen=waiting",
+      "fixture": "screen-qa-fixture",
+      "action": "btn-leave-room",
+      "label": "Thoát",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "waiting-btn-leave-room",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-screens.html?screen=waiting",
+      "fixture": "screen-qa-fixture",
+      "action": "btn-leave-room",
+      "label": "Thoát",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "waiting-btn-leave-room",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-screens.html?screen=waiting",
+      "fixture": "screen-qa-fixture",
+      "action": "btn-leave-room",
+      "label": "Thoát",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "waiting-waiting-player-QA người 1",
+      "width": 320,
+      "height": 568,
+      "url": "/qa-screens.html?screen=waiting",
+      "fixture": "screen-qa-fixture",
+      "action": "waiting-player-QA người 1",
+      "label": "Thông tin",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "waiting-waiting-player-QA người 1",
+      "width": 430,
+      "height": 932,
+      "url": "/qa-screens.html?screen=waiting",
+      "fixture": "screen-qa-fixture",
+      "action": "waiting-player-QA người 1",
+      "label": "Thông tin",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    },
+    {
+      "name": "waiting-waiting-player-QA người 1",
+      "width": 1280,
+      "height": 900,
+      "url": "/qa-screens.html?screen=waiting",
+      "fixture": "screen-qa-fixture",
+      "action": "waiting-player-QA người 1",
+      "label": "Thông tin",
+      "theme": "mint-blush",
+      "overflow": false,
+      "legacy": 0,
+      "panels": [],
+      "errors": []
+    }
+  ]
+}

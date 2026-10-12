@@ -1,12 +1,11 @@
-export const sitePages = [
-  { label: 'Giới thiệu', href: '/about' },
-  { label: 'Bộ thẻ', href: '/about/cards' },
-  { label: 'Hướng dẫn', href: '/about/story' },
-]
+import { APPROVED_GAME_INFO } from '@/content/approvedGameInfo'
+import { PUBLIC_SITE_PAGES } from '@/content/siteNavigation'
+
+export const sitePages = PUBLIC_SITE_PAGES
 
 export const heroFacts = [
-  'Dành cho học sinh 10-15 tuổi',
-  'Chơi offline cùng điện thoại',
+  `Dành cho người chơi ${APPROVED_GAME_INFO.audience} tuổi`,
+  'Chơi trực tiếp; web app cần Internet',
   'Web app hỗ trợ quản trò',
   'Thẻ bài, vai trò và coin ghi nhận',
 ]
@@ -22,17 +21,17 @@ export const problemCards = [
   {
     title: 'Khó gọi tên',
     text: 'Học sinh thường biết mình không ổn, nhưng lại thiếu từ ngữ để nói chính xác điều đang xảy ra.',
-    icon: '/cartoon/icons/Emoji-Shocked.svg',
+    icon: '/emcoin/icons/orbit/surprised.svg',
   },
   {
     title: 'Dễ mất nhịp',
     text: 'Áp lực học tập, bạn bè và môi trường số làm cảm xúc lên xuống nhanh, khó tự điều chỉnh.',
-    icon: '/cartoon/icons/Clock-Yellow.svg',
+    icon: '/emcoin/icons/orbit/clock.svg',
   },
   {
     title: 'Cần không gian an toàn',
     text: 'EmCoin biến việc chia sẻ thành một vòng chơi có luật, có vai, có nhịp và không phán xét.',
-    icon: '/cartoon/icons/Friends.svg',
+    icon: '/emcoin/icons/orbit/friends.svg',
   },
 ]
 
@@ -71,13 +70,13 @@ export const playSteps = [
 ]
 
 export const roleCards = [
-  ['Quản Trò', '/cartoon/icons/Crown.svg', '#f5cc00'],
-  ['Người Trao Gửi', '/cartoon/icons/Flower-Multicolor.svg', '#ef5f8a'],
-  ['Người Chữa Lành', '/cartoon/icons/Life-Bag.svg', '#53b025'],
-  ['Người Im Lặng', '/cartoon/icons/Lock-Gold.svg', '#7b4fd4'],
-  ['Người Gợi Mở', '/cartoon/icons/Gift-Pink-Border.svg', '#ff8c42'],
-  ['Người Kết Nối', '/cartoon/icons/Magic.svg', '#0e94c5'],
-  ['Người Dẫn Lối', '/cartoon/icons/Key-Gold.svg', '#e8a020'],
+  ['Quản Trò', '/emcoin/icons/orbit/facilitator.svg', '#f5cc00'],
+  ['Người Trao Gửi', '/emcoin/icons/orbit/storyteller.svg', '#ef5f8a'],
+  ['Người Chữa Lành', '/emcoin/icons/orbit/heal.svg', '#53b025'],
+  ['Người Im Lặng', '/emcoin/icons/orbit/lock.svg', '#7b4fd4'],
+  ['Người Gợi Mở', '/emcoin/icons/orbit/gift.svg', '#ff8c42'],
+  ['Người Kết Nối', '/emcoin/icons/orbit/connect.svg', '#0e94c5'],
+  ['Người Dẫn Lối', '/emcoin/icons/orbit/compass.svg', '#e8a020'],
 ]
 
 export const principles = [

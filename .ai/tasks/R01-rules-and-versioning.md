@@ -1,7 +1,7 @@
 # R01 ADR luật và rules version
 
 **Priority:** P0  
-**Status:** blocked  
+**Status:** qa
 **Owner:** Codex implementation  
 **Reviewer:** Claude audit  
 **Dependencies:** R00
@@ -82,13 +82,15 @@ OQ-01..OQ-05 chưa có quyết định của product/gameplay owner; task không
 
 ## QA report
 
-<!-- QA owner records environment, test matrix, failures, visual/device evidence and final result. -->
+2026-10-01 — Owner confirmed existing non-coin web rules, non-regift receipts and no prev after gift/collect. Approved ADR: `docs/adr/R01-web-coin60-baseline-approved.md`. R01 now QA for baseline fixture completeness; not blocked on those decisions. Historical reports remain evidence of the earlier gate, not current approval state. Catalog/rights/privacy features remain separately pending.
 
 ## Audit report
 
 <!-- Reviewer records independent findings, unresolved risks, and approval/rework decision. -->
 
 ## Decision log
+
+2026-10-01 — Chủ dự án xác nhận luật coin 20 đỏ/20 xanh/20 vàng, chia đầu lượt, trao theo cảm nhận và thu hồi cuối lượt. Đã ghi `docs/adr/R01-coin-cycle-approved.md`; phần coin cũ trong README/source không còn là expected rule cho bản mới. R01 vẫn blocked cho phase, role, EMPASS và rollback; không đánh dấu toàn bộ ruleset đã duyệt.
 
 | Date | Decision | Status | Evidence / owner needed |
 |---|---|---|---|

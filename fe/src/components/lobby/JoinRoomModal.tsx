@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { CartoonModal, CartoonInput, CartoonButton, CartoonCard } from '@/components/cartoon'
 import { RoomCard, RoomListItem } from './RoomCard'
+import { useConfirmedAction } from '@/features/game/controllers/useConfirmedAction'
 
 interface JoinRoomModalProps {
   open: boolean
   onClose: () => void
   availableRooms: RoomListItem[]
-  onJoin: (roomId: string, userName: string) => void
+  onJoin: (roomId: string, userName: string) => Promise<boolean> | void
   onRefresh: () => void
 }
 
@@ -14,19 +15,26 @@ export function JoinRoomModal({ open, onClose, availableRooms, onJoin }: Omit<Jo
   const [userName, setUserName] = useState('')
   const [selectedRoom, setSelectedRoom] = useState<RoomListItem | null>(null)
   const [manualRoomId, setManualRoomId] = useState('')
+  const { pending, run, error } = useConfirmedAction('join', open)
+  const [confirmationError, setConfirmationError] = useState<string | null>(null)
 
   const effectiveRoomId = selectedRoom?.id || manualRoomId.trim().toUpperCase()
   const canJoin = !!userName.trim() && !!effectiveRoomId
 
-  const handleJoin = () => {
+  const handleJoin = async () => {
     if (!canJoin) return
-    onJoin(effectiveRoomId, userName.trim())
-    onClose()
+    if (await run(async isCurrent => {
+      setConfirmationError(null)
+      const result = onJoin(effectiveRoomId, userName.trim())
+      const confirmed = result === undefined ? true : await result
+      if (!confirmed && isCurrent()) setConfirmationError('Chưa xác nhận vào phòng. Tên và mã phòng của bạn vẫn được giữ.')
+      return confirmed
+    })) onClose()
   }
 
   return (
-    <CartoonModal open={open} onClose={onClose} title="Tìm phòng" data-testid="modal-join">
-      <div className="flex flex-col gap-3">
+    <CartoonModal open={open} onClose={pending ? undefined : onClose} persistent={pending} hideClose={pending} title="Tìm phòng" data-testid="modal-join">
+      <fieldset disabled={pending} className="flex min-w-0 flex-col gap-3 border-0 p-0">
         {availableRooms.length > 0 ? (
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
@@ -72,12 +80,14 @@ export function JoinRoomModal({ open, onClose, availableRooms, onJoin }: Omit<Jo
           color="green"
           size="lg"
           disabled={!canJoin}
+          pending={pending}
           onClick={handleJoin}
           data-testid="btn-confirm-join"
         >
           Vào phòng 🎮
         </CartoonButton>
-      </div>
+      </fieldset>
+      {(error || confirmationError) && <p role="alert" className="font-body text-sm">{error || confirmationError}</p>}
     </CartoonModal>
   )
 }

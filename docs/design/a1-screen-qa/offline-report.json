@@ -1,0 +1,12 @@
+{
+  "synthetic": false,
+  "backendConnected": false,
+  "route": "/offline.html",
+  "results": [
+    { "width": 320, "height": 932, "overflow": false, "ink": "rgb(41, 77, 67)" },
+    { "width": 430, "height": 932, "overflow": false, "ink": "rgb(41, 77, 67)" },
+    { "width": 1280, "height": 932, "overflow": false, "ink": "rgb(41, 77, 67)" }
+  ],
+  "coinBorderColorsUnchanged": ["rgb(217, 56, 65)", "rgb(40, 119, 74)", "rgb(189, 124, 0)"],
+  "note": "Browser preview of standalone public HTML; no service-worker offline-install certification."
+}

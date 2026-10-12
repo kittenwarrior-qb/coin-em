@@ -37,7 +37,7 @@ export function PlayerLayout({ players, renderPlayer, renderCenter }: PlayerLayo
   const playerIndex = (p: Player) => players.findIndex(x => x.id === p.id)
 
   return (
-    <div className="flex flex-col w-full h-full">
+    <div className="game-player-layout flex flex-col w-full h-full" data-player-count={players.length}>
 
       {/* Top — NTG */}
       <div className="flex justify-center">
@@ -48,7 +48,7 @@ export function PlayerLayout({ players, renderPlayer, renderCenter }: PlayerLayo
       <div className="flex items-stretch gap-1 flex-1 min-h-0">
 
         {/* Left column */}
-        <div className="flex flex-col justify-around items-center w-20 flex-shrink-0">
+        <div className="game-player-side flex flex-col justify-around items-center w-20 flex-shrink-0">
           {left.map(p => renderPlayer({ player: p, position: 'left', index: playerIndex(p) }))}
         </div>
 
@@ -58,7 +58,7 @@ export function PlayerLayout({ players, renderPlayer, renderCenter }: PlayerLayo
         </div>
 
         {/* Right column */}
-        <div className="flex flex-col justify-around items-center w-20 flex-shrink-0">
+        <div className="game-player-side flex flex-col justify-around items-center w-20 flex-shrink-0">
           {right.map(p => renderPlayer({ player: p, position: 'right', index: playerIndex(p) }))}
         </div>
       </div>

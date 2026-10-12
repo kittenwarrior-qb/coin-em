@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import type { CardData } from '@/stores/types'
+import { cardImageFit } from '@/features/game/catalog/cardImageLayout'
 
 interface SituationFanSpectatorProps {
   cards: CardData[]
@@ -73,7 +74,7 @@ export function SituationFanSpectator({ cards, activePosition }: SituationFanSpe
                   borderWidth: 1,
                 }}
               >
-                <img src={card.backImage} alt="" className="h-full w-full object-cover" draggable={false} />
+                <img src={card.backImage} alt="" className="h-full w-full" style={{ objectFit: cardImageFit(card.backImage) }} draggable={false} />
                 {isFocused && (
                   <motion.div
                     initial={{ opacity: 0 }}

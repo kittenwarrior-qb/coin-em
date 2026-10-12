@@ -1,0 +1,1167 @@
+{
+  "version": "pdf-deck-assets/v1",
+  "sourceSha256": "8dee0c19bc1572e9fa4cd252597b0de82fd79b227de8c6e815fdc285f91c19db",
+  "preparation": "Poppler 1200px longest edge, WebP94; no creative editing",
+  "records": [
+    {
+      "page": 1,
+      "url": "/emcoin/decks/pdf-v1/page-001.webp",
+      "bytes": 101654,
+      "width": 778,
+      "height": 1200,
+      "sha256": "fa5b2a4a79bee5cb6f9cab0bce57dded37f9a7964119e338f47d0507faddc338"
+    },
+    {
+      "page": 2,
+      "url": "/emcoin/decks/pdf-v1/page-002.webp",
+      "bytes": 158960,
+      "width": 778,
+      "height": 1200,
+      "sha256": "8d0614a9ca5eb2dd770289a7e55435887d69f6294907e0f8b2f10c2a3b0bbca5"
+    },
+    {
+      "page": 3,
+      "url": "/emcoin/decks/pdf-v1/page-003.webp",
+      "bytes": 78186,
+      "width": 778,
+      "height": 1200,
+      "sha256": "4174e5e4d97307c7cb9c057cdaa687846a3731f5e3d30479ff033404dd489baf"
+    },
+    {
+      "page": 4,
+      "url": "/emcoin/decks/pdf-v1/page-004.webp",
+      "bytes": 123800,
+      "width": 778,
+      "height": 1200,
+      "sha256": "1cdc3769616e7e17d0ef526a8a4cf05488a724caf433ccbbaa0a507c3a30a0c7"
+    },
+    {
+      "page": 5,
+      "url": "/emcoin/decks/pdf-v1/page-005.webp",
+      "bytes": 138132,
+      "width": 778,
+      "height": 1200,
+      "sha256": "bb7c61ec949c34414d155508a8408ea3446bfbdaeb3cb7df4abc26954ed0572c"
+    },
+    {
+      "page": 6,
+      "url": "/emcoin/decks/pdf-v1/page-006.webp",
+      "bytes": 116636,
+      "width": 778,
+      "height": 1200,
+      "sha256": "77d60fb0ce7327bbee88ca9fbdeafd398607418a557eb411d71df815d073bfd5"
+    },
+    {
+      "page": 7,
+      "url": "/emcoin/decks/pdf-v1/page-007.webp",
+      "bytes": 43158,
+      "width": 778,
+      "height": 1200,
+      "sha256": "3e760c6460719d9a320b22c680c5981f118d2d751a1f30267e0372a45c579a10"
+    },
+    {
+      "page": 8,
+      "url": "/emcoin/decks/pdf-v1/page-008.webp",
+      "bytes": 73880,
+      "width": 778,
+      "height": 1200,
+      "sha256": "464856018f61551f2ce763a560958c01832f48595740b42eddf6a395a4b8c947"
+    },
+    {
+      "page": 9,
+      "url": "/emcoin/decks/pdf-v1/page-009.webp",
+      "bytes": 78746,
+      "width": 778,
+      "height": 1200,
+      "sha256": "5fe5d1561803df0aa63775a8e26154a147e7a61673a7ab9edcd77d3910474175"
+    },
+    {
+      "page": 10,
+      "url": "/emcoin/decks/pdf-v1/page-010.webp",
+      "bytes": 66028,
+      "width": 778,
+      "height": 1200,
+      "sha256": "7aad79e41af1e639248500fdd1cea91e0c71401bcf3e865c33c4cfc2b0b457eb"
+    },
+    {
+      "page": 11,
+      "url": "/emcoin/decks/pdf-v1/page-011.webp",
+      "bytes": 66028,
+      "width": 778,
+      "height": 1200,
+      "sha256": "7aad79e41af1e639248500fdd1cea91e0c71401bcf3e865c33c4cfc2b0b457eb"
+    },
+    {
+      "page": 12,
+      "url": "/emcoin/decks/pdf-v1/page-012.webp",
+      "bytes": 85384,
+      "width": 778,
+      "height": 1200,
+      "sha256": "47ba717f0b0e0990a5f74d773e09ccc1037b386ac8e513446db4a0fd90b9ca63"
+    },
+    {
+      "page": 13,
+      "url": "/emcoin/decks/pdf-v1/page-013.webp",
+      "bytes": 85384,
+      "width": 778,
+      "height": 1200,
+      "sha256": "47ba717f0b0e0990a5f74d773e09ccc1037b386ac8e513446db4a0fd90b9ca63"
+    },
+    {
+      "page": 14,
+      "url": "/emcoin/decks/pdf-v1/page-014.webp",
+      "bytes": 96010,
+      "width": 778,
+      "height": 1200,
+      "sha256": "9ebb675471f19c4b2a6b2f1472e183c0db62a4fe46c2663b8c253222ece75baf"
+    },
+    {
+      "page": 15,
+      "url": "/emcoin/decks/pdf-v1/page-015.webp",
+      "bytes": 96010,
+      "width": 778,
+      "height": 1200,
+      "sha256": "9ebb675471f19c4b2a6b2f1472e183c0db62a4fe46c2663b8c253222ece75baf"
+    },
+    {
+      "page": 16,
+      "url": "/emcoin/decks/pdf-v1/page-016.webp",
+      "bytes": 58172,
+      "width": 778,
+      "height": 1200,
+      "sha256": "12f90e2212c6f254988b37a2291c431432573d3ae76877da40fce98fa512f0b4"
+    },
+    {
+      "page": 17,
+      "url": "/emcoin/decks/pdf-v1/page-017.webp",
+      "bytes": 74674,
+      "width": 778,
+      "height": 1200,
+      "sha256": "87f5a6f712c6558a517b17bc06d0d91d4c19283b78cd7ed6f5cdbdd0bcafefe6"
+    },
+    {
+      "page": 18,
+      "url": "/emcoin/decks/pdf-v1/page-018.webp",
+      "bytes": 42884,
+      "width": 778,
+      "height": 1200,
+      "sha256": "ed1750b02ae82ab1d8ac163e6ae1466b260092387f34b30188f750c9ec5db973"
+    },
+    {
+      "page": 19,
+      "url": "/emcoin/decks/pdf-v1/page-019.webp",
+      "bytes": 34170,
+      "width": 778,
+      "height": 1200,
+      "sha256": "d860e4c795c9462e3cdbd04a211bb97b03c14da966fe67d48ad38e0545cbf4dc"
+    },
+    {
+      "page": 20,
+      "url": "/emcoin/decks/pdf-v1/page-020.webp",
+      "bytes": 49434,
+      "width": 778,
+      "height": 1200,
+      "sha256": "31ca54241b1b5877bec62a43d91254957a466f19b4e1992dccacbc5194e46917"
+    },
+    {
+      "page": 21,
+      "url": "/emcoin/decks/pdf-v1/page-021.webp",
+      "bytes": 42850,
+      "width": 778,
+      "height": 1200,
+      "sha256": "01a3dfb8bb20f71546f9ca674157670aa9284a5ba876338a3beb0bb7a222bc9f"
+    },
+    {
+      "page": 22,
+      "url": "/emcoin/decks/pdf-v1/page-022.webp",
+      "bytes": 43420,
+      "width": 778,
+      "height": 1200,
+      "sha256": "f10ef25c776ee25f0b1ab8c9f0072414dd48b60b7fde3a4531b2223a7ebeb52b"
+    },
+    {
+      "page": 23,
+      "url": "/emcoin/decks/pdf-v1/page-023.webp",
+      "bytes": 49302,
+      "width": 778,
+      "height": 1200,
+      "sha256": "3a0836935739d0e4ba6a8eb7f6c5a96e23641391934341f7637a8ff6aed17f0d"
+    },
+    {
+      "page": 24,
+      "url": "/emcoin/decks/pdf-v1/page-024.webp",
+      "bytes": 34750,
+      "width": 778,
+      "height": 1200,
+      "sha256": "a8a18cd7ee2d48640e5e99ea4bb172d1a340eecf321963549ec50aa551790ec8"
+    },
+    {
+      "page": 25,
+      "url": "/emcoin/decks/pdf-v1/page-025.webp",
+      "bytes": 35656,
+      "width": 778,
+      "height": 1200,
+      "sha256": "a7a9f277b84b4664cfac558d649b1201387ff9d0da4a5283363c0df8bd817af0"
+    },
+    {
+      "page": 26,
+      "url": "/emcoin/decks/pdf-v1/page-026.webp",
+      "bytes": 43816,
+      "width": 778,
+      "height": 1200,
+      "sha256": "291d06b2e3283a4c79f853d821f2474e5e5ef0e932e39f4c81855292a278f2c0"
+    },
+    {
+      "page": 27,
+      "url": "/emcoin/decks/pdf-v1/page-027.webp",
+      "bytes": 45184,
+      "width": 778,
+      "height": 1200,
+      "sha256": "b2b31ec986a71bf1b95b7db12a84b3adaf4c001314ce36fa71ec89314b217f92"
+    },
+    {
+      "page": 28,
+      "url": "/emcoin/decks/pdf-v1/page-028.webp",
+      "bytes": 43942,
+      "width": 778,
+      "height": 1200,
+      "sha256": "470f0f4a89eb7763c3f7c22c473a333445eafc644b510ef987c1f1854cfafae5"
+    },
+    {
+      "page": 29,
+      "url": "/emcoin/decks/pdf-v1/page-029.webp",
+      "bytes": 37888,
+      "width": 778,
+      "height": 1200,
+      "sha256": "a47acbeb99bb425cc4d05990152538fe39d5ff36b7fff7fcb080a2d64f22c054"
+    },
+    {
+      "page": 30,
+      "url": "/emcoin/decks/pdf-v1/page-030.webp",
+      "bytes": 44254,
+      "width": 778,
+      "height": 1200,
+      "sha256": "2365462d3ef83cbe0d34388dfd1b560d16db0944c846e4c416bce17afd91fa77"
+    },
+    {
+      "page": 31,
+      "url": "/emcoin/decks/pdf-v1/page-031.webp",
+      "bytes": 40328,
+      "width": 778,
+      "height": 1200,
+      "sha256": "9d5a0557dbaea59a850a9cdca318422420c8a7520676b181824350c48a795e2c"
+    },
+    {
+      "page": 32,
+      "url": "/emcoin/decks/pdf-v1/page-032.webp",
+      "bytes": 55034,
+      "width": 778,
+      "height": 1200,
+      "sha256": "053d8819bd8c3fb0b0117940d13ad0563d9dc6fdc1286b3f113c002432ce460f"
+    },
+    {
+      "page": 33,
+      "url": "/emcoin/decks/pdf-v1/page-033.webp",
+      "bytes": 46486,
+      "width": 778,
+      "height": 1200,
+      "sha256": "24a766d6524247649d1e8792141ab9fe833d812e8884133fbc5f482f2eddeb2a"
+    },
+    {
+      "page": 34,
+      "url": "/emcoin/decks/pdf-v1/page-034.webp",
+      "bytes": 43026,
+      "width": 778,
+      "height": 1200,
+      "sha256": "61fd6b9b2dd165f209f95eab59e3944ae3027b6ef3d1ee68924cf7c8b8fd84fb"
+    },
+    {
+      "page": 35,
+      "url": "/emcoin/decks/pdf-v1/page-035.webp",
+      "bytes": 42702,
+      "width": 778,
+      "height": 1200,
+      "sha256": "5e50054c3c00af3155a16ba7c346904dd56edb0e834b24ad260687c615c43ead"
+    },
+    {
+      "page": 36,
+      "url": "/emcoin/decks/pdf-v1/page-036.webp",
+      "bytes": 46278,
+      "width": 778,
+      "height": 1200,
+      "sha256": "85234f2bc442fb60d6eb752b8d2616f3a4b6596d8bf1c942d4faffd68f6df5af"
+    },
+    {
+      "page": 37,
+      "url": "/emcoin/decks/pdf-v1/page-037.webp",
+      "bytes": 40102,
+      "width": 778,
+      "height": 1200,
+      "sha256": "151a718f3dc79c40955df5c8f21b2e8e52a8a6966919e1dd48d10abea92247dc"
+    },
+    {
+      "page": 38,
+      "url": "/emcoin/decks/pdf-v1/page-038.webp",
+      "bytes": 44492,
+      "width": 778,
+      "height": 1200,
+      "sha256": "a1639dada42314481b5a1cdafecc9aee720607d38631293888d26607bf667079"
+    },
+    {
+      "page": 39,
+      "url": "/emcoin/decks/pdf-v1/page-039.webp",
+      "bytes": 37662,
+      "width": 778,
+      "height": 1200,
+      "sha256": "7093fbb15d40a47582803d49cc2b2b37eeb2a9e460655d745487b41781b8e818"
+    },
+    {
+      "page": 40,
+      "url": "/emcoin/decks/pdf-v1/page-040.webp",
+      "bytes": 44530,
+      "width": 778,
+      "height": 1200,
+      "sha256": "14620b9511b219b2d95bb9b15dc31b0b5773e46e112ebea8d344ecbad883f8da"
+    },
+    {
+      "page": 41,
+      "url": "/emcoin/decks/pdf-v1/page-041.webp",
+      "bytes": 40956,
+      "width": 778,
+      "height": 1200,
+      "sha256": "44b2b0fe28068f37c766a8a264b99cf5f13c88a8e49b6a9e136147abbbd53a4d"
+    },
+    {
+      "page": 42,
+      "url": "/emcoin/decks/pdf-v1/page-042.webp",
+      "bytes": 45182,
+      "width": 778,
+      "height": 1200,
+      "sha256": "a305a8a5b0e9c73d27919c81154e53ff810fc124c0bfe3494945e0cdc7f904a0"
+    },
+    {
+      "page": 43,
+      "url": "/emcoin/decks/pdf-v1/page-043.webp",
+      "bytes": 36350,
+      "width": 778,
+      "height": 1200,
+      "sha256": "b677def9a7f999e3649e3ed036643b50429dc5891175e5133fc6f52816a5de65"
+    },
+    {
+      "page": 44,
+      "url": "/emcoin/decks/pdf-v1/page-044.webp",
+      "bytes": 54250,
+      "width": 778,
+      "height": 1200,
+      "sha256": "b2ceadc6e832c2af0198282901d5c6d12bf5a0472912db6c4a746ec17dfa3a69"
+    },
+    {
+      "page": 45,
+      "url": "/emcoin/decks/pdf-v1/page-045.webp",
+      "bytes": 45894,
+      "width": 778,
+      "height": 1200,
+      "sha256": "93918bcccdde442047e81d65c584626dda3ed54f34057d9ff45d0dff1ab6e412"
+    },
+    {
+      "page": 46,
+      "url": "/emcoin/decks/pdf-v1/page-046.webp",
+      "bytes": 39926,
+      "width": 778,
+      "height": 1200,
+      "sha256": "4499a326d6886b5ad0f148a3b83b10c3072f755e1be025190a5ed9765428e513"
+    },
+    {
+      "page": 47,
+      "url": "/emcoin/decks/pdf-v1/page-047.webp",
+      "bytes": 36712,
+      "width": 778,
+      "height": 1200,
+      "sha256": "39712b32677c49aaf41aecbb54925c39a8a994d36fd265d3e5271d62aa9310d1"
+    },
+    {
+      "page": 48,
+      "url": "/emcoin/decks/pdf-v1/page-048.webp",
+      "bytes": 45238,
+      "width": 778,
+      "height": 1200,
+      "sha256": "edb52ac6052356c9310e152ac582a6d29e266b410f69b014dc9fe94cff8d10d9"
+    },
+    {
+      "page": 49,
+      "url": "/emcoin/decks/pdf-v1/page-049.webp",
+      "bytes": 45158,
+      "width": 778,
+      "height": 1200,
+      "sha256": "83cf362bd43ae2778405f7821b2933db1653eb1824bec90c7d2614b8b9c09448"
+    },
+    {
+      "page": 50,
+      "url": "/emcoin/decks/pdf-v1/page-050.webp",
+      "bytes": 44162,
+      "width": 778,
+      "height": 1200,
+      "sha256": "ea3cb9d63eee18046f6a45592a9ef93cbf5195ca8ff2bbab07bcace08080ccfe"
+    },
+    {
+      "page": 51,
+      "url": "/emcoin/decks/pdf-v1/page-051.webp",
+      "bytes": 67606,
+      "width": 778,
+      "height": 1200,
+      "sha256": "8b05687de023424c33379d575737267bc48740b89e2f1d2d5b5e01b17557dcac"
+    },
+    {
+      "page": 52,
+      "url": "/emcoin/decks/pdf-v1/page-052.webp",
+      "bytes": 33784,
+      "width": 778,
+      "height": 1200,
+      "sha256": "a3143dc44ab0a8db7dc8216b102d898eb626ca2274c11aaf3592bb65854724a2"
+    },
+    {
+      "page": 53,
+      "url": "/emcoin/decks/pdf-v1/page-053.webp",
+      "bytes": 73138,
+      "width": 778,
+      "height": 1200,
+      "sha256": "3e0fe2e84681c132bd87d47e595170f9f2a255574a7418f66e74a0467e5a88ad"
+    },
+    {
+      "page": 54,
+      "url": "/emcoin/decks/pdf-v1/page-054.webp",
+      "bytes": 34088,
+      "width": 778,
+      "height": 1200,
+      "sha256": "f5d5c0d4dc7fdae49bb7c8a8684fa471da57beeb8f4b06dae2b8aa0ee6ee14f4"
+    },
+    {
+      "page": 55,
+      "url": "/emcoin/decks/pdf-v1/page-055.webp",
+      "bytes": 55918,
+      "width": 778,
+      "height": 1200,
+      "sha256": "63c4a775ec705f64f6398ded9b33c305516c1e60228a04ef4601bd9cb77e00d2"
+    },
+    {
+      "page": 56,
+      "url": "/emcoin/decks/pdf-v1/page-056.webp",
+      "bytes": 30816,
+      "width": 778,
+      "height": 1200,
+      "sha256": "d3a84193b4fafe503fab28eeea51cf5a163d546cd7eca68e5f71052b456e35a6"
+    },
+    {
+      "page": 57,
+      "url": "/emcoin/decks/pdf-v1/page-057.webp",
+      "bytes": 69952,
+      "width": 778,
+      "height": 1200,
+      "sha256": "126bfba7211d5dfffddfef6a87e3011f31f6efeb23c34e4306335a05005cd15a"
+    },
+    {
+      "page": 58,
+      "url": "/emcoin/decks/pdf-v1/page-058.webp",
+      "bytes": 36312,
+      "width": 778,
+      "height": 1200,
+      "sha256": "ecf9d3664e88ad49cd6adf35dacad8faabe07f8ca52f69a92e27ae4a32b78d46"
+    },
+    {
+      "page": 59,
+      "url": "/emcoin/decks/pdf-v1/page-059.webp",
+      "bytes": 73346,
+      "width": 778,
+      "height": 1200,
+      "sha256": "0907e3e243e0f4fce7f8a6379e33880fd3948cf4aa8837b1658bef91905907f6"
+    },
+    {
+      "page": 60,
+      "url": "/emcoin/decks/pdf-v1/page-060.webp",
+      "bytes": 36074,
+      "width": 778,
+      "height": 1200,
+      "sha256": "969b4d549eb43c55eb9c440bdcfc65e8108588596dd0d10f173749ae8afe9849"
+    },
+    {
+      "page": 61,
+      "url": "/emcoin/decks/pdf-v1/page-061.webp",
+      "bytes": 66302,
+      "width": 778,
+      "height": 1200,
+      "sha256": "104508822ef2c99a8feb109a292bb42916e3d798d69c881193ba6f7d801d8d37"
+    },
+    {
+      "page": 62,
+      "url": "/emcoin/decks/pdf-v1/page-062.webp",
+      "bytes": 33080,
+      "width": 778,
+      "height": 1200,
+      "sha256": "d9890c986703f981c5b2d11a9732e8a13ab739c9fd3b2ca853a7b9ae87324656"
+    },
+    {
+      "page": 63,
+      "url": "/emcoin/decks/pdf-v1/page-063.webp",
+      "bytes": 66836,
+      "width": 778,
+      "height": 1200,
+      "sha256": "e90d48bbe6bcd48df6b4554a9fd28a81a830f3296735cd43aea020a86215c1e8"
+    },
+    {
+      "page": 64,
+      "url": "/emcoin/decks/pdf-v1/page-064.webp",
+      "bytes": 38906,
+      "width": 778,
+      "height": 1200,
+      "sha256": "41d96438717004386399e568ff7f198f4fb6254b3bdf08b66a020df8edeba184"
+    },
+    {
+      "page": 65,
+      "url": "/emcoin/decks/pdf-v1/page-065.webp",
+      "bytes": 69602,
+      "width": 778,
+      "height": 1200,
+      "sha256": "1e194d3d49b38a649b8aa59864b00e724e3912b88bd503c36a3968e62f46deb9"
+    },
+    {
+      "page": 66,
+      "url": "/emcoin/decks/pdf-v1/page-066.webp",
+      "bytes": 39364,
+      "width": 778,
+      "height": 1200,
+      "sha256": "25f007f2fcdff867440a2bdca37917dfa60494b4095d166cc5106dae941f8776"
+    },
+    {
+      "page": 67,
+      "url": "/emcoin/decks/pdf-v1/page-067.webp",
+      "bytes": 67060,
+      "width": 778,
+      "height": 1200,
+      "sha256": "88f0127d0bce3424187a485def09a4d687701c84fba04b1e088f905434fe0bd7"
+    },
+    {
+      "page": 68,
+      "url": "/emcoin/decks/pdf-v1/page-068.webp",
+      "bytes": 34644,
+      "width": 778,
+      "height": 1200,
+      "sha256": "e0fec3def8b9cdc318df472abd858b9734e362f91cfcfe88b99aa0fd5ff16faa"
+    },
+    {
+      "page": 69,
+      "url": "/emcoin/decks/pdf-v1/page-069.webp",
+      "bytes": 67110,
+      "width": 778,
+      "height": 1200,
+      "sha256": "3bd70e36764ed47f5f514c84165e85b6ac33f17b1b6f4b3a301e52b68a075588"
+    },
+    {
+      "page": 70,
+      "url": "/emcoin/decks/pdf-v1/page-070.webp",
+      "bytes": 34624,
+      "width": 778,
+      "height": 1200,
+      "sha256": "904219bf023883217d114e3f91e89eb9f0bc023f3d81f93aafddc124d7c888eb"
+    },
+    {
+      "page": 71,
+      "url": "/emcoin/decks/pdf-v1/page-071.webp",
+      "bytes": 61024,
+      "width": 778,
+      "height": 1200,
+      "sha256": "40ad8ebf02ae2147960bce2ded133752b111e7000be2ddfe19565da1c721508b"
+    },
+    {
+      "page": 72,
+      "url": "/emcoin/decks/pdf-v1/page-072.webp",
+      "bytes": 60184,
+      "width": 778,
+      "height": 1200,
+      "sha256": "cbff989c631b700a63af18083fff9544f7ff8a97d07f12847a884173deb0e77a"
+    },
+    {
+      "page": 73,
+      "url": "/emcoin/decks/pdf-v1/page-073.webp",
+      "bytes": 68956,
+      "width": 778,
+      "height": 1200,
+      "sha256": "3b87715cf917fe9e381cdba4169917892c6c1f87dd1bf88f5fb2f5e38c7cc7a7"
+    },
+    {
+      "page": 74,
+      "url": "/emcoin/decks/pdf-v1/page-074.webp",
+      "bytes": 33010,
+      "width": 778,
+      "height": 1200,
+      "sha256": "93bd0cff97309e24e99c88ad3c9050d4f4193713e170523ba089480445995561"
+    },
+    {
+      "page": 75,
+      "url": "/emcoin/decks/pdf-v1/page-075.webp",
+      "bytes": 75822,
+      "width": 778,
+      "height": 1200,
+      "sha256": "56601d7d77728be0b2c0868c1bcbc00ca259b3a413b20e0b182d3f2de53b20c0"
+    },
+    {
+      "page": 76,
+      "url": "/emcoin/decks/pdf-v1/page-076.webp",
+      "bytes": 37332,
+      "width": 778,
+      "height": 1200,
+      "sha256": "a375702379d34f6bd3f573e8b8d3d8dbaa365bf84eaa76749af855e55d2e0d4b"
+    },
+    {
+      "page": 77,
+      "url": "/emcoin/decks/pdf-v1/page-077.webp",
+      "bytes": 64502,
+      "width": 778,
+      "height": 1200,
+      "sha256": "5608966e2117b39e3eec8ac83d56f2803ff22724fb719eac39864dea70481081"
+    },
+    {
+      "page": 78,
+      "url": "/emcoin/decks/pdf-v1/page-078.webp",
+      "bytes": 49316,
+      "width": 778,
+      "height": 1200,
+      "sha256": "df15c365733c4e77a9e51d6c99bf8d4515dd1a3eb9fc74770a0628393892f34e"
+    },
+    {
+      "page": 79,
+      "url": "/emcoin/decks/pdf-v1/page-079.webp",
+      "bytes": 53094,
+      "width": 778,
+      "height": 1200,
+      "sha256": "189a4a9ff8c9bade48fa021cb54dfd83f16bcc99f99472baf16f6a7782b7c437"
+    },
+    {
+      "page": 80,
+      "url": "/emcoin/decks/pdf-v1/page-080.webp",
+      "bytes": 24970,
+      "width": 778,
+      "height": 1200,
+      "sha256": "f140e6b49ef6d593b51679ab76bb3efde761013a7f43857b78e1629c3a087b04"
+    },
+    {
+      "page": 81,
+      "url": "/emcoin/decks/pdf-v1/page-081.webp",
+      "bytes": 61956,
+      "width": 778,
+      "height": 1200,
+      "sha256": "c0f52a4047b71d8c9c1375c710709f9390290e3127f4a2a58d5fae949082d7bf"
+    },
+    {
+      "page": 82,
+      "url": "/emcoin/decks/pdf-v1/page-082.webp",
+      "bytes": 29990,
+      "width": 778,
+      "height": 1200,
+      "sha256": "9bda12e5177be7dc36adfa6379cce9c9854e98bbe2799a5db06d10be1210bc5f"
+    },
+    {
+      "page": 83,
+      "url": "/emcoin/decks/pdf-v1/page-083.webp",
+      "bytes": 44680,
+      "width": 778,
+      "height": 1200,
+      "sha256": "743838e92d827e648e888bb0b46aaed8c6effca30365a73b11c994369803c154"
+    },
+    {
+      "page": 84,
+      "url": "/emcoin/decks/pdf-v1/page-084.webp",
+      "bytes": 56716,
+      "width": 778,
+      "height": 1200,
+      "sha256": "8a5e65757b17d54ce1ccf6e9d26734909853df795090a3cd889fb0fcfaa63499"
+    },
+    {
+      "page": 85,
+      "url": "/emcoin/decks/pdf-v1/page-085.webp",
+      "bytes": 75616,
+      "width": 778,
+      "height": 1200,
+      "sha256": "a2b875cbf8290c933db4d6c7c1c821a64b17c63b662ba4ccea6f634516bd6336"
+    },
+    {
+      "page": 86,
+      "url": "/emcoin/decks/pdf-v1/page-086.webp",
+      "bytes": 27516,
+      "width": 778,
+      "height": 1200,
+      "sha256": "6b689d6ea72dd4bb7d1111daea495e384764ba36b30bb7b199645425cc462c79"
+    },
+    {
+      "page": 87,
+      "url": "/emcoin/decks/pdf-v1/page-087.webp",
+      "bytes": 82854,
+      "width": 778,
+      "height": 1200,
+      "sha256": "cdef094e10f5799fcc750ef09ae071d4760b120e2fc56bdabbc6ab92fb262afe"
+    },
+    {
+      "page": 88,
+      "url": "/emcoin/decks/pdf-v1/page-088.webp",
+      "bytes": 32312,
+      "width": 778,
+      "height": 1200,
+      "sha256": "4d994698f8be7d4b6ba51cf45fe940c580c22356a95f8d87d823a29514da9db4"
+    },
+    {
+      "page": 89,
+      "url": "/emcoin/decks/pdf-v1/page-089.webp",
+      "bytes": 58264,
+      "width": 778,
+      "height": 1200,
+      "sha256": "f36f8c7f1ff7d476612a544dd47ddc397dc271e9bbb5f06ea698a87d29ddb46c"
+    },
+    {
+      "page": 90,
+      "url": "/emcoin/decks/pdf-v1/page-090.webp",
+      "bytes": 61126,
+      "width": 778,
+      "height": 1200,
+      "sha256": "2d723b08962086f9919b138b4682306dc91a38014be03201debbb1f76869c510"
+    },
+    {
+      "page": 91,
+      "url": "/emcoin/decks/pdf-v1/page-091.webp",
+      "bytes": 74884,
+      "width": 778,
+      "height": 1200,
+      "sha256": "b2ab297e8bb9414b645f97cc54c8f9e2d381292cb6113bce9e5fb6277b395043"
+    },
+    {
+      "page": 92,
+      "url": "/emcoin/decks/pdf-v1/page-092.webp",
+      "bytes": 29768,
+      "width": 778,
+      "height": 1200,
+      "sha256": "343c6c2bbbdc2ece61d2dc49e49cf63c44724fbf7fc9d04668136835b3495d69"
+    },
+    {
+      "page": 93,
+      "url": "/emcoin/decks/pdf-v1/page-093.webp",
+      "bytes": 69140,
+      "width": 778,
+      "height": 1200,
+      "sha256": "ab9069e53a2b98790b4d9c9a026d21bf4d5abb8128291fadce1aa8e508c775d5"
+    },
+    {
+      "page": 94,
+      "url": "/emcoin/decks/pdf-v1/page-094.webp",
+      "bytes": 32890,
+      "width": 778,
+      "height": 1200,
+      "sha256": "972f669f911522742eb8223e2f3e0d7aff206af309a47ded045e8b213df23b82"
+    },
+    {
+      "page": 95,
+      "url": "/emcoin/decks/pdf-v1/page-095.webp",
+      "bytes": 52526,
+      "width": 778,
+      "height": 1200,
+      "sha256": "47a4c3b3ae8e462880e3d866bbbb4b6c82a76c6486a860d2f1168e2bfd336e5e"
+    },
+    {
+      "page": 96,
+      "url": "/emcoin/decks/pdf-v1/page-096.webp",
+      "bytes": 47654,
+      "width": 778,
+      "height": 1200,
+      "sha256": "f688a23e51210f7a36012e72b462b4e15744927e49cadcebb0ae3f4621c0357a"
+    },
+    {
+      "page": 97,
+      "url": "/emcoin/decks/pdf-v1/page-097.webp",
+      "bytes": 63652,
+      "width": 778,
+      "height": 1200,
+      "sha256": "30d7806a1322de961b7744d3fbf53020b94b8b67674c6fb68e7265545adedd82"
+    },
+    {
+      "page": 98,
+      "url": "/emcoin/decks/pdf-v1/page-098.webp",
+      "bytes": 28458,
+      "width": 778,
+      "height": 1200,
+      "sha256": "161262d233a96855363d647bd7b9353ade835d175b83da292cc2ba29916c4b2f"
+    },
+    {
+      "page": 99,
+      "url": "/emcoin/decks/pdf-v1/page-099.webp",
+      "bytes": 69356,
+      "width": 778,
+      "height": 1200,
+      "sha256": "4ea67aac4e48a94dee699e890b6b871b5316e85893cb653791aadf0bcf1e6272"
+    },
+    {
+      "page": 100,
+      "url": "/emcoin/decks/pdf-v1/page-100.webp",
+      "bytes": 36158,
+      "width": 778,
+      "height": 1200,
+      "sha256": "f5bad337b7002d975e23e91f0252e80d0414d3e802d0a92c23a6c1747d06d89a"
+    },
+    {
+      "page": 101,
+      "url": "/emcoin/decks/pdf-v1/page-101.webp",
+      "bytes": 63256,
+      "width": 778,
+      "height": 1200,
+      "sha256": "76c5b91932df26da064d1984c694b51c0501bf7eba68dec7ea9bc49118732fc6"
+    },
+    {
+      "page": 102,
+      "url": "/emcoin/decks/pdf-v1/page-102.webp",
+      "bytes": 48862,
+      "width": 778,
+      "height": 1200,
+      "sha256": "d028dbe5f0723a4ee67a49585df387f482497ff7cdce695a0c3aebdbc27307ce"
+    },
+    {
+      "page": 103,
+      "url": "/emcoin/decks/pdf-v1/page-103.webp",
+      "bytes": 63708,
+      "width": 778,
+      "height": 1200,
+      "sha256": "c480d49a7ee55364d0855e02cbd7c51f329791d6ce1a3c8385c092fed58d1279"
+    },
+    {
+      "page": 104,
+      "url": "/emcoin/decks/pdf-v1/page-104.webp",
+      "bytes": 26228,
+      "width": 778,
+      "height": 1200,
+      "sha256": "f07aa6dfaf545bcc740a2386204cd9d1882a9b5795369511b442cb7ab1950c9a"
+    },
+    {
+      "page": 105,
+      "url": "/emcoin/decks/pdf-v1/page-105.webp",
+      "bytes": 66662,
+      "width": 778,
+      "height": 1200,
+      "sha256": "fb97dec80096cfc11ebc8b47948a85984cfa9d6922c0a1616ff77ee538ec3ce9"
+    },
+    {
+      "page": 106,
+      "url": "/emcoin/decks/pdf-v1/page-106.webp",
+      "bytes": 35346,
+      "width": 778,
+      "height": 1200,
+      "sha256": "59b2536a9da33d02153f0e3f506a730d2f0433502325450d00d764ebdbc6b510"
+    },
+    {
+      "page": 107,
+      "url": "/emcoin/decks/pdf-v1/page-107.webp",
+      "bytes": 53578,
+      "width": 778,
+      "height": 1200,
+      "sha256": "5c09f7961a9e36200e2089fa280845a49db4f3e81448210e4dfb2567109582c3"
+    },
+    {
+      "page": 108,
+      "url": "/emcoin/decks/pdf-v1/page-108.webp",
+      "bytes": 45402,
+      "width": 778,
+      "height": 1200,
+      "sha256": "55f7fe1ee0552bdb19a5b766ef04a0e08cc2430acdaab89398ae30b987e44e16"
+    },
+    {
+      "page": 109,
+      "url": "/emcoin/decks/pdf-v1/page-109.webp",
+      "bytes": 60202,
+      "width": 778,
+      "height": 1200,
+      "sha256": "0debcf1569e63a5425dde59abf2800f4e702b8152baa2645dc0c5a90bd0a312e"
+    },
+    {
+      "page": 110,
+      "url": "/emcoin/decks/pdf-v1/page-110.webp",
+      "bytes": 24714,
+      "width": 778,
+      "height": 1200,
+      "sha256": "9e15ef8f5fdb4f4e6e72026affcb6fe7beeb5b779d41720ffdb4945420b7f756"
+    },
+    {
+      "page": 111,
+      "url": "/emcoin/decks/pdf-v1/page-111.webp",
+      "bytes": 61250,
+      "width": 778,
+      "height": 1200,
+      "sha256": "80fc131f123a015bcda210e6e25ebd7f0e6174136440b42d3a888ad7b762b0f3"
+    },
+    {
+      "page": 112,
+      "url": "/emcoin/decks/pdf-v1/page-112.webp",
+      "bytes": 27598,
+      "width": 778,
+      "height": 1200,
+      "sha256": "50cfa95bd6a91894e9dd788795eb6f193d4be65da78e3e741d201eb98ffbbc1f"
+    },
+    {
+      "page": 113,
+      "url": "/emcoin/decks/pdf-v1/page-113.webp",
+      "bytes": 65386,
+      "width": 778,
+      "height": 1200,
+      "sha256": "ee336effdb5f8211d9e1c42ab8701cf08652e248794e7854afab7911d32d7097"
+    },
+    {
+      "page": 114,
+      "url": "/emcoin/decks/pdf-v1/page-114.webp",
+      "bytes": 59462,
+      "width": 778,
+      "height": 1200,
+      "sha256": "ab1f0fd76e576cd0d57d9a84cf3080b0d6d18ff4b22f7f121be4824c394e65db"
+    },
+    {
+      "page": 115,
+      "url": "/emcoin/decks/pdf-v1/page-115.webp",
+      "bytes": 84988,
+      "width": 778,
+      "height": 1200,
+      "sha256": "9a2dc98d62156d75445608c3ff071fa531d807eb4f6014e6307946d97f18df26"
+    },
+    {
+      "page": 116,
+      "url": "/emcoin/decks/pdf-v1/page-116.webp",
+      "bytes": 50824,
+      "width": 778,
+      "height": 1200,
+      "sha256": "56ca554fc711de3a74a196d08ddc6b87e2a81ae39ca7dd7c1b8541386262f28f"
+    },
+    {
+      "page": 117,
+      "url": "/emcoin/decks/pdf-v1/page-117.webp",
+      "bytes": 52954,
+      "width": 778,
+      "height": 1200,
+      "sha256": "35fe4640af9d08346ccde70fb999f97343f5c6a4aaf51d2fa801fe0c4507bc45"
+    },
+    {
+      "page": 118,
+      "url": "/emcoin/decks/pdf-v1/page-118.webp",
+      "bytes": 54048,
+      "width": 778,
+      "height": 1200,
+      "sha256": "e8b2ef4a3764b5d9d3c233ac77c6c159cb7689c57547c4b46097187b32f39d21"
+    },
+    {
+      "page": 119,
+      "url": "/emcoin/decks/pdf-v1/page-119.webp",
+      "bytes": 52226,
+      "width": 778,
+      "height": 1200,
+      "sha256": "a3984465b0c91db4529ddf424f30cb4a737b0b719728982874e16923eea346eb"
+    },
+    {
+      "page": 120,
+      "url": "/emcoin/decks/pdf-v1/page-120.webp",
+      "bytes": 51752,
+      "width": 778,
+      "height": 1200,
+      "sha256": "834d147598efccab3c2d3f4b80e36656881555b325a5de11d8c555b4ee62e9dd"
+    },
+    {
+      "page": 121,
+      "url": "/emcoin/decks/pdf-v1/page-121.webp",
+      "bytes": 51892,
+      "width": 778,
+      "height": 1200,
+      "sha256": "2d36051f21bd109e71e749ef226417179ef9c83b70d930892b7f3519bf28dfd1"
+    },
+    {
+      "page": 122,
+      "url": "/emcoin/decks/pdf-v1/page-122.webp",
+      "bytes": 52542,
+      "width": 778,
+      "height": 1200,
+      "sha256": "9d5c4d13dbda2f4a1739c3848dab34d1437d48e4ba4a039bf14432dd700710be"
+    },
+    {
+      "page": 123,
+      "url": "/emcoin/decks/pdf-v1/page-123.webp",
+      "bytes": 47288,
+      "width": 778,
+      "height": 1200,
+      "sha256": "51a9c1cf6a083c558fb2692ba3c04f7de33b3befbb90a45ecced3174cc0b002d"
+    },
+    {
+      "page": 124,
+      "url": "/emcoin/decks/pdf-v1/page-124.webp",
+      "bytes": 57256,
+      "width": 778,
+      "height": 1200,
+      "sha256": "50d37cbb32b6ee1c86ee1063a80b83bd9eed50f14442b376627e04fd39bbd46f"
+    },
+    {
+      "page": 125,
+      "url": "/emcoin/decks/pdf-v1/page-125.webp",
+      "bytes": 55734,
+      "width": 778,
+      "height": 1200,
+      "sha256": "9e69dd2328aad3a76919b61ba076b9617374f9642c95f4319dbc4bfde9b205e7"
+    },
+    {
+      "page": 126,
+      "url": "/emcoin/decks/pdf-v1/page-126.webp",
+      "bytes": 65430,
+      "width": 778,
+      "height": 1200,
+      "sha256": "b7eb091c48fab5287d0775d09892591a0be7215f4b11eb16839eeab7073c4376"
+    },
+    {
+      "page": 127,
+      "url": "/emcoin/decks/pdf-v1/page-127.webp",
+      "bytes": 51666,
+      "width": 778,
+      "height": 1200,
+      "sha256": "21c5b598f8d0ba7e27947b5d52bd96e03994910996646427cb2f0d62b82803ec"
+    },
+    {
+      "page": 128,
+      "url": "/emcoin/decks/pdf-v1/page-128.webp",
+      "bytes": 51240,
+      "width": 778,
+      "height": 1200,
+      "sha256": "132abfa2e13728ea6698f0f7385b529bd5a61c380b7c57a5c554ef9147c61ed6"
+    },
+    {
+      "page": 129,
+      "url": "/emcoin/decks/pdf-v1/page-129.webp",
+      "bytes": 58516,
+      "width": 778,
+      "height": 1200,
+      "sha256": "224871646eca071525ecc4082cb16d96ecbb2c83636a500f331af2d128058a0b"
+    },
+    {
+      "page": 130,
+      "url": "/emcoin/decks/pdf-v1/page-130.webp",
+      "bytes": 53328,
+      "width": 778,
+      "height": 1200,
+      "sha256": "749306c00096ad855cbbf8f35518a7640fe5eb48fce78ece298a569c32d29471"
+    },
+    {
+      "page": 131,
+      "url": "/emcoin/decks/pdf-v1/page-131.webp",
+      "bytes": 69382,
+      "width": 778,
+      "height": 1200,
+      "sha256": "f97b6758399a8449f2f210a6e8386a9a271cb9d45ca9b5b45ba66bf6f2fa9ebb"
+    },
+    {
+      "page": 132,
+      "url": "/emcoin/decks/pdf-v1/page-132.webp",
+      "bytes": 102902,
+      "width": 778,
+      "height": 1200,
+      "sha256": "5799365c78fc0589d7cb987e7a061604503a59876ff46f5f5a91ad7651579dff"
+    },
+    {
+      "page": 133,
+      "url": "/emcoin/decks/pdf-v1/page-133.webp",
+      "bytes": 103074,
+      "width": 778,
+      "height": 1200,
+      "sha256": "827b26b5f36fa9ea75458c970f65b9a7a4f9ed9aa049174096069fe7043b208d"
+    },
+    {
+      "page": 134,
+      "url": "/emcoin/decks/pdf-v1/page-134.webp",
+      "bytes": 62476,
+      "width": 778,
+      "height": 1200,
+      "sha256": "4c4f02337f43715648cac48168d762b0a6e1d51f537ed6fdcd3d94c00c0b95c6"
+    },
+    {
+      "page": 135,
+      "url": "/emcoin/decks/pdf-v1/page-135.webp",
+      "bytes": 79134,
+      "width": 778,
+      "height": 1200,
+      "sha256": "b0e4bb44e4e5a82410e614d43baa43f39b27a529a371f232ad8998a5bcecc8d7"
+    },
+    {
+      "page": 136,
+      "url": "/emcoin/decks/pdf-v1/page-136.webp",
+      "bytes": 98884,
+      "width": 778,
+      "height": 1200,
+      "sha256": "1cae640ec1b6ffe65895dba09ea34353723324cf9e346d130920257ce00febc2"
+    },
+    {
+      "page": 137,
+      "url": "/emcoin/decks/pdf-v1/page-137.webp",
+      "bytes": 87186,
+      "width": 778,
+      "height": 1200,
+      "sha256": "d3b06fd2fb7e2ee4f5dd9de20f81955e78854a24e4b2d4c0fd00db4c971cc9ec"
+    },
+    {
+      "page": 138,
+      "url": "/emcoin/decks/pdf-v1/page-138.webp",
+      "bytes": 73786,
+      "width": 778,
+      "height": 1200,
+      "sha256": "76959d117d44216d2406d3d4e16ee62f2db5334d2f7005386463c46757e2b3c4"
+    },
+    {
+      "page": 139,
+      "url": "/emcoin/decks/pdf-v1/page-139.webp",
+      "bytes": 83562,
+      "width": 778,
+      "height": 1200,
+      "sha256": "a4f91af1f73b65b78a535e64798a95277e35d62b8105bb6e662b6b3c8ad796c1"
+    },
+    {
+      "page": 140,
+      "url": "/emcoin/decks/pdf-v1/page-140.webp",
+      "bytes": 68872,
+      "width": 778,
+      "height": 1200,
+      "sha256": "7493e4acabd4bfd318ac68ba76341c891d1736f75411f08ee8aee3af05a5defa"
+    },
+    {
+      "page": 141,
+      "url": "/emcoin/decks/pdf-v1/page-141.webp",
+      "bytes": 71206,
+      "width": 778,
+      "height": 1200,
+      "sha256": "94899543e326784411574133e51beb0ebea70d7a61bf3316203c57a73463c0c4"
+    },
+    {
+      "page": 142,
+      "url": "/emcoin/decks/pdf-v1/page-142.webp",
+      "bytes": 63562,
+      "width": 778,
+      "height": 1200,
+      "sha256": "6c8258005c1b4b835655554f5534ea1cdf2890ffef936042e2fd6e29f6cfff4d"
+    },
+    {
+      "page": 143,
+      "url": "/emcoin/decks/pdf-v1/page-143.webp",
+      "bytes": 91368,
+      "width": 778,
+      "height": 1200,
+      "sha256": "6172c9b72064a9abb6e0cc8e78996631c79e2bf8d21feab8c861d3b860ba374a"
+    },
+    {
+      "page": 144,
+      "url": "/emcoin/decks/pdf-v1/page-144.webp",
+      "bytes": 64774,
+      "width": 778,
+      "height": 1200,
+      "sha256": "90381d2e02cde02cb102710b49d27e3123f27dfb93ff268eefe7051daf9815f8"
+    },
+    {
+      "page": 145,
+      "url": "/emcoin/decks/pdf-v1/page-145.webp",
+      "bytes": 69758,
+      "width": 778,
+      "height": 1200,
+      "sha256": "6743c167ab5c3ccefcafbf6f9d7f7da5b864a8d4ab718d759a9645524b8e6d7a"
+    }
+  ]
+}

@@ -1,13 +1,27 @@
+import { EmcoinImage } from '@/components/cartoon/EmcoinImage'
 import { forwardRef } from 'react'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { CONTROL_HEIGHTS, CONTROL_MOTION, controlState } from './controlTokens'
+import { useControlTheme } from './controlThemeContext'
+import { circleAppearance, pillAppearance, isBrandTheme } from './controlThemes'
+import { BrandIcon, type BrandIconName } from './BrandIcon'
+import { Settings, BookOpen, Image as ImageIcon, Volume2, VolumeX, Music2, X, ArrowLeft, ArrowRight, ChevronDown, CircleHelp, Play } from 'lucide-react'
 
-// ─── Squash & Stretch spring ──────────────────────────────────────────────────
-// Low damping (9) → spring overshoots on release → natural "stretch" phase
-// High stiffness → fast squash on press, snappy feel
-const BLOB_RETURN   = { type: 'spring', stiffness: 420, damping: 9 }  as const
-const BLOB_PRESS    = { type: 'spring', stiffness: 700, damping: 22 } as const
-const BLOB_HOVER_IN = { type: 'spring', stiffness: 350, damping: 18 } as const
+const UI_ICONS = {
+  '/emcoin/icons/orbit/help.svg': CircleHelp,
+  '/emcoin/icons/orbit/play.svg': Play,
+  '/emcoin/icons/orbit/settings.svg': Settings,
+  '/emcoin/icons/orbit/book.svg': BookOpen,
+  '/emcoin/icons/orbit/photo.svg': ImageIcon,
+  '/emcoin/icons/orbit/sound.svg': Volume2,
+  '/emcoin/icons/orbit/mute.svg': VolumeX,
+  '/emcoin/icons/orbit/music.svg': Music2,
+  '/emcoin/icons/orbit/close.svg': X,
+  '/emcoin/icons/orbit/arrowLeft.svg': ArrowLeft,
+  '/emcoin/icons/orbit/arrowRight.svg': ArrowRight,
+  '/emcoin/icons/orbit/down.svg': ChevronDown,
+} as const
 
 // ─── Pill button ─────────────────────────────────────────────────────────────
 const PILL_SRCS: Record<string, { src: string; textColor: string }> = {
@@ -24,53 +38,50 @@ type PillSize  = 'sm' | 'md' | 'lg'
 interface CartoonButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   color?: PillColor
   size?:  PillSize
+  pending?: boolean
+  badge?: string
 }
 
 export const CartoonButton = forwardRef<HTMLButtonElement, CartoonButtonProps>(
-  ({ color = 'green', size = 'md', className, style, children, disabled, ...props }, ref) => {
-    const { src, textColor } = PILL_SRCS[color] ?? PILL_SRCS.green
-
-    const heights: Record<PillSize, string> = {
-      sm: 'h-10',
-      md: 'h-14',
-      lg: 'h-16',
-    }
+  ({ color = 'green', size = 'md', className, style, children, disabled, pending = false, badge, type = 'button', 'aria-busy': callerBusy, ...props }, ref) => {
+    const theme = useControlTheme()
+    const { src, textColor, themed, shadow } = pillAppearance(theme, color, PILL_SRCS[color] ?? PILL_SRCS.green)
+    const reduceMotion = useReducedMotion()
+    const { blocked, animate } = controlState(disabled, pending, reduceMotion)
 
     return (
       <motion.button
         ref={ref}
         className={cn(
-          'relative inline-flex items-center justify-center p-0 bg-transparent border-none outline-none cursor-pointer',
+          'cartoon-control relative inline-flex items-center justify-center p-0 bg-transparent border-none cursor-pointer',
           'disabled:opacity-50 disabled:cursor-not-allowed',
           className,
         )}
         style={{ color: textColor, transformOrigin: 'center', ...style }}
-        disabled={disabled}
+        type={type}
+        disabled={blocked}
+        aria-busy={pending ? true : callerBusy}
         // Squash on press — scaleX widens, scaleY flattens like pressing a ball
-        whileTap={disabled ? undefined : {
-          scaleX: 1.09,
-          scaleY: 0.87,
-          transition: BLOB_PRESS,
-        }}
+        whileTap={animate ? isBrandTheme(theme) ? { scale: 0.98 } : CONTROL_MOTION.pill.press : undefined}
         // Subtle inflate on hover — ball swells slightly
-        whileHover={disabled ? undefined : {
-          scaleX: 1.04,
-          scaleY: 0.97,
-          transition: BLOB_HOVER_IN,
-        }}
+        whileHover={animate ? isBrandTheme(theme) ? { y: -1 } : CONTROL_MOTION.pill.hover : undefined}
         // Bouncy return: spring overshoots → scaleX dips, scaleY rises → "stretch" phase
-        transition={BLOB_RETURN}
+        transition={CONTROL_MOTION.pill.return}
         {...(props as React.ComponentPropsWithoutRef<typeof motion.button>)}
+        data-control-theme={themed ? theme : 'legacy'}
       >
-        <img
+        <span data-cartoon-surface="pill" className="relative inline-flex max-w-full items-center justify-center">
+        <EmcoinImage
           src={src}
           alt=""
-          className={cn('block w-auto object-contain pointer-events-none select-none', heights[size])}
-          style={{ filter: 'drop-shadow(0 6px 4px rgba(0,0,0,0.18))' }}
+          className={cn('block w-auto object-contain pointer-events-none select-none', CONTROL_HEIGHTS.pill[size])}
+          style={{ filter: shadow }}
           draggable={false}
         />
-        <span className="absolute inset-0 flex items-center justify-center font-display text-[1.1rem] drop-shadow-md whitespace-nowrap px-4 pointer-events-none">
+        <span className={cn('absolute inset-0 flex items-center justify-center font-display text-[1.1rem] whitespace-nowrap px-4 pointer-events-none', !themed && 'drop-shadow-md')}>
           {children}
+        </span>
+        {badge && <span data-cartoon-badge="pill" aria-hidden="true" className="cartoon-pill-badge font-display">{badge}</span>}
         </span>
       </motion.button>
     )
@@ -106,54 +117,49 @@ interface CartoonCircleButtonProps extends React.ButtonHTMLAttributes<HTMLButton
   iconAlt?:  string
   iconSize?: string
   badge?:    number | string
+  pending?: boolean
 }
 
 export const CartoonCircleButton = forwardRef<HTMLButtonElement, CartoonCircleButtonProps>(
-  ({ color = 'blue', size = 'md', iconSrc, iconAlt = '', iconSize = '55%', badge, className, disabled, children, ...props }, ref) => {
-    const src = CIRCLE_SRCS[color] ?? CIRCLE_SRCS.blue
-
-    const sizes: Record<CircleSize, string> = {
-      sm: 'h-10',
-      md: 'h-14',
-      lg: 'h-16',
-      xl: 'h-20',
-    }
+  ({ color = 'blue', size = 'md', iconSrc, iconAlt = '', iconSize = '55%', badge, className, disabled, pending = false, type = 'button', children, 'aria-busy': callerBusy, ...props }, ref) => {
+    const theme = useControlTheme()
+    const { src, textColor, themed, shadow } = circleAppearance(theme, color, CIRCLE_SRCS[color] ?? CIRCLE_SRCS.blue)
+    const Icon = iconSrc ? UI_ICONS[iconSrc as keyof typeof UI_ICONS] : undefined
+    const brandIcons: Record<string, BrandIconName> = { '/emcoin/icons/orbit/help.svg': 'help', '/emcoin/icons/orbit/settings.svg': 'settings', '/emcoin/icons/orbit/book.svg': 'book', '/emcoin/icons/orbit/close.svg': 'close' }
+    const brandIcon = (theme === 'kindness-workshop' || (theme === 'emotion-orbit' && iconSrc === '/emcoin/icons/orbit/help.svg')) && iconSrc ? brandIcons[iconSrc] : undefined
+    const reduceMotion = useReducedMotion()
+    const { blocked, animate } = controlState(disabled, pending, reduceMotion)
 
     return (
       <motion.button
         ref={ref}
         className={cn(
-          'relative inline-flex items-center justify-center p-0 bg-transparent border-none outline-none cursor-pointer',
+          'cartoon-control relative inline-flex items-center justify-center p-0 bg-transparent border-none cursor-pointer',
           'disabled:opacity-50 disabled:cursor-not-allowed',
           className,
         )}
-        style={{ transformOrigin: 'center' }}
-        disabled={disabled}
+        style={{ transformOrigin: 'center', color: textColor }}
+        type={type}
+        disabled={blocked}
+        aria-busy={pending ? true : callerBusy}
         // Circle = more pronounced blob squash (like a water balloon)
-        whileTap={disabled ? undefined : {
-          scaleX: 1.14,
-          scaleY: 0.86,
-          transition: BLOB_PRESS,
-        }}
-        whileHover={disabled ? undefined : {
-          scaleX: 1.06,
-          scaleY: 0.96,
-          transition: BLOB_HOVER_IN,
-        }}
+        whileTap={animate ? isBrandTheme(theme) ? { scale: 0.96 } : CONTROL_MOTION.circle.press : undefined}
+        whileHover={animate ? isBrandTheme(theme) ? { y: -1 } : CONTROL_MOTION.circle.hover : undefined}
         // Lower damping for circle = more wobble oscillations = more "blob" feel
-        transition={{ type: 'spring', stiffness: 360, damping: 8 }}
+        transition={CONTROL_MOTION.circle.return}
         {...(props as React.ComponentPropsWithoutRef<typeof motion.button>)}
+        data-control-theme={themed ? theme : 'legacy'}
       >
-        <img
+        <EmcoinImage
           src={src}
           alt=""
-          className={cn('block w-auto object-contain pointer-events-none select-none', sizes[size])}
-          style={{ filter: 'drop-shadow(0 6px 4px rgba(0,0,0,0.18))' }}
+          className={cn('block w-auto object-contain pointer-events-none select-none', CONTROL_HEIGHTS.circle[size])}
+          style={{ filter: shadow }}
           draggable={false}
         />
         <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          {iconSrc ? (
-            <img
+          {brandIcon ? <span role={iconAlt ? 'img' : undefined} aria-label={iconAlt || undefined} style={{ display: 'contents' }}><BrandIcon name={brandIcon} style={{ width: iconSize, height: iconSize }} /></span> : themed && Icon ? <Icon aria-hidden={!iconAlt} aria-label={iconAlt || undefined} style={{ width: iconSize, height: iconSize }} strokeWidth={2.6} /> : iconSrc ? (
+            <EmcoinImage
               src={iconSrc}
               alt={iconAlt}
               className="object-contain"
@@ -168,7 +174,8 @@ export const CartoonCircleButton = forwardRef<HTMLButtonElement, CartoonCircleBu
           <span
             className="absolute bottom-0 right-0 flex items-center justify-center font-display text-white"
             style={{
-              background: 'linear-gradient(135deg, #7B4FD4, #5B2FB4)',
+              background: themed ? 'var(--brand-blush)' : 'linear-gradient(135deg, #7B4FD4, #5B2FB4)',
+              color: themed ? 'var(--brand-ink)' : undefined,
               border: '2.5px solid white',
               borderRadius: '9999px',
               minWidth: 22,

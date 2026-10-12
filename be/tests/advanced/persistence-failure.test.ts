@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import fs from 'fs'
 import path from 'path'
-import { loadRooms, saveRoom, saveRooms, autoSaveRoom, deleteRoomFile } from '../../src/persistence'
+import { DATA_DIR, cancelPendingRoomSaves, loadRooms, saveRoom, saveRooms, autoSaveRoom, deleteRoomFile } from '../../src/persistence'
 import { createPlayingRoom } from '../helpers/mockData'
 import { Room } from '../../src/modules/game/types'
 
@@ -13,7 +13,7 @@ import { Room } from '../../src/modules/game/types'
  */
 
 describe('Persistence Failure Scenarios', () => {
-  const TEST_DATA_DIR = path.join(process.cwd(), 'test-data', 'rooms')
+  const TEST_DATA_DIR = DATA_DIR
 
   beforeEach(() => {
     if (!fs.existsSync(TEST_DATA_DIR)) {
@@ -22,10 +22,11 @@ describe('Persistence Failure Scenarios', () => {
   })
 
   afterEach(() => {
+    vi.restoreAllMocks()
+    cancelPendingRoomSaves()
     try {
-      const parent = path.dirname(TEST_DATA_DIR)
-      if (fs.existsSync(parent)) {
-        fs.rmSync(parent, { recursive: true, force: true })
+      if (fs.existsSync(TEST_DATA_DIR)) {
+        fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true })
       }
     } catch {
       // ignore cleanup errors
@@ -40,7 +41,7 @@ describe('Persistence Failure Scenarios', () => {
       validRoom.id = 'valid-room'
 
       vi.spyOn(fs, 'readdirSync').mockReturnValue(['valid-room.json', 'bad-room.json'] as any)
-      vi.spyOn(fs, 'existsSync').mockReturnValue(true)
+      vi.spyOn(fs, 'existsSync').mockImplementation((filename: any) => !filename.toString().includes('.tombstones'))
       vi.spyOn(fs, 'readFileSync').mockImplementation((filePath: any, ...args: any[]) => {
         if (filePath.toString().includes('bad-room.json')) return '{ invalid json }'
         if (filePath.toString().includes('valid-room.json')) return JSON.stringify(validRoom)
@@ -174,18 +175,13 @@ describe('Persistence Failure Scenarios', () => {
       room2.id = 'crash-room-2'
 
       // Write files directly
-      const dir = path.join(process.cwd(), 'test-data', 'rooms')
+      const dir = TEST_DATA_DIR
       fs.mkdirSync(dir, { recursive: true })
       fs.writeFileSync(path.join(dir, 'crash-room-1.json'), JSON.stringify(room1), 'utf-8')
       fs.writeFileSync(path.join(dir, 'crash-room-2.json'), JSON.stringify(room2), 'utf-8')
 
       // Simulate restart load
-      const files = fs.readdirSync(dir).filter((f) => f.endsWith('.json'))
-      const recovered = new Map<string, Room>()
-      for (const file of files) {
-        const r = JSON.parse(fs.readFileSync(path.join(dir, file), 'utf-8')) as Room
-        recovered.set(r.id, r)
-      }
+      const recovered = loadRooms()
 
       expect(recovered.size).toBe(2)
       expect(recovered.get('crash-room-1')?.players.length).toBe(7)
@@ -226,7 +222,7 @@ describe('Persistence Failure Scenarios', () => {
     })
 
     it('should delete existing room file', () => {
-      const dir = path.join(process.cwd(), 'test-data', 'rooms')
+      const dir = TEST_DATA_DIR
       fs.mkdirSync(dir, { recursive: true })
       const filePath = path.join(dir, 'to-delete.json')
       fs.writeFileSync(filePath, '{}', 'utf-8')

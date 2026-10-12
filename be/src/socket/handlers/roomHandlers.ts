@@ -1,32 +1,53 @@
 import { Server, Socket } from 'socket.io'
+import { operationDiagnostic } from '../../telemetry/operationalDiagnostics'
 import { roomRepository, roomService } from '../../modules/room'
-import { Player, Role } from '../../modules/game/types'
+import { Player, Role, RoomSettings } from '../../modules/game/types'
 import { cancelDisconnectTimer } from './playerHandlers'
+import { getRoleDeck, MAX_PLAYERS } from '../../modules/game/engine/RoleDeck'
+import { authenticateSeat, issueSeatSession, publicPlayer } from '../SeatSession'
+import { roomView } from '../../modules/game/services/RoomView'
+import { emitRoomView } from '../emitRoomView'
+import { changeRoundLimit } from '../../modules/game/services/RoundLimit'
+import { rateLimitAction } from '../middleware/rateLimiter'
 
 export function registerRoomHandlers(io: Server, socket: Socket) {
+  socket.on('set_round_limit', async (payload, callback) => {
+    const reject = (error: string) => callback?.({ success: false, error, message: 'Chưa lưu số lượt. Kiểm tra số người và làm mới trạng thái phòng.' })
+    if (!rateLimitAction(socket, 'set_round_limit', 500)) { reject('RATE_LIMITED'); return }
+    try {
+      if (!payload || Object.keys(payload).sort().join('|') !== 'expectedRevision|limit|requestId|roomId') { reject('INVALID_ROUND_LIMIT'); return }
+      const room = await roomRepository.findByIdFresh(payload.roomId)
+      const actor = room?.players.find(player => player.socketId === socket.id && !player.isDisconnected)
+      if (!room || !actor) { reject('NOT_ROOM_MEMBER'); return }
+      const updated = changeRoundLimit(room, actor.userId, payload)
+      if (updated !== room) await roomRepository.saveAndWait(updated)
+      await emitRoomView(io, updated, 'room_state')
+      callback?.({ success: true, data: roomView(updated, actor.userId) })
+    } catch (error) {
+      const code = error instanceof Error ? error.message : ''
+      reject(['NOT_HOST', 'GAME_ALREADY_STARTED', 'INVALID_ROUND_LIMIT', 'ROUND_REVISION_CONFLICT', 'ROUND_REQUEST_CONFLICT'].includes(code) ? code : 'INTERNAL_ERROR')
+    }
+  })
   const AVATAR_COUNT = 22
   const BG_COUNT = 12
 
   function randomAvatarIndex() { return Math.floor(Math.random() * AVATAR_COUNT) }
   function randomBgIndex()     { return Math.floor(Math.random() * BG_COUNT) }
 
+  function parseSettings(value: unknown): RoomSettings | null {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return null
+    const { situationGroups, emotionGroups } = value as RoomSettings
+    const allowedSituation = ['light', 'medium', 'sensitive']
+    const allowedEmotion = ['basic', 'light', 'strong', 'advanced']
+    if (!Array.isArray(situationGroups) || situationGroups.length < 1 || situationGroups.length > 3 ||
+      new Set(situationGroups).size !== situationGroups.length || !situationGroups.every(group => allowedSituation.includes(group)) ||
+      !Array.isArray(emotionGroups) || emotionGroups.length < 1 || emotionGroups.length > 4 ||
+      new Set(emotionGroups).size !== emotionGroups.length || !emotionGroups.every(group => allowedEmotion.includes(group))) return null
+    return { situationGroups: [...situationGroups], emotionGroups: [...emotionGroups] }
+  }
+
   function getDebugRoleDeck(count: number): Role[] {
-    switch (count) {
-      case 5:
-        return [Role.NARRATOR, Role.SENDER, Role.SILENCER, Role.CONNECTOR, Role.OPENER]
-      case 6:
-        return [Role.NARRATOR, Role.SENDER, Role.SILENCER, Role.CONNECTOR, Role.OPENER, Role.GUIDE]
-      case 7:
-        return [Role.NARRATOR, Role.SENDER, Role.SILENCER, Role.CONNECTOR, Role.OPENER, Role.GUIDE, Role.HEALER]
-      case 8:
-        return [Role.NARRATOR, Role.SENDER, Role.SILENCER, Role.SILENCER, Role.CONNECTOR, Role.OPENER, Role.GUIDE, Role.HEALER]
-      case 9:
-        return [Role.NARRATOR, Role.SENDER, Role.SILENCER, Role.SILENCER, Role.CONNECTOR, Role.CONNECTOR, Role.OPENER, Role.GUIDE, Role.HEALER]
-      case 10:
-        return [Role.NARRATOR, Role.SENDER, Role.SILENCER, Role.SILENCER, Role.CONNECTOR, Role.CONNECTOR, Role.OPENER, Role.OPENER, Role.GUIDE, Role.HEALER]
-      default:
-        return []
-    }
+    try { return getRoleDeck(count) } catch { return [] }
   }
 
   function countRoles(roles: Role[]): Partial<Record<Role, number>> {
@@ -81,147 +102,86 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
   /**
    * Join or create room
    */
-  socket.on('join_room', ({ name, roomId, userId, deviceId, createIfMissing = false }) => {
-    if (!name || !roomId || !userId) {
-      return socket.emit('error', {
-        code: 'invalid_params',
-        message: 'name, roomId và userId là bắt buộc.',
-      })
+  type AdmissionAck = (result: { success: boolean; error?: string; code?: string; message?: string; session?: { roomId: string; userId: string; token: string; generation: number } }) => void
+
+  function rejectAdmission(code: string, callback?: AdmissionAck) {
+    const error = { success: false, error: code, code, message: code }
+    if (callback) callback(error)
+    else socket.emit('error', error)
+  }
+
+  async function resumeSeat(roomId: string, userId: string, token: unknown, callback?: AdmissionAck) {
+    const room = await roomRepository.findByIdFresh(roomId)
+    if (!room) return rejectAdmission('room_not_found', callback)
+    const player = room.players.find(p => p.userId === userId && !p.isFake)
+    if (!player || !authenticateSeat(player, token)) return rejectAdmission('INVALID_SESSION', callback)
+    const activeSockets = await io.in(player.socketId).fetchSockets()
+    const active = activeSockets.some(s => s.id === player.socketId && s.data.seatSession?.roomId === roomId &&
+      s.data.seatSession?.generation === player.session!.generation)
+    if (!authenticateSeat(player, token, Date.now(), active)) return rejectAdmission('INVALID_SESSION', callback)
+    const bound = socket.data.seatSession
+    if (bound && (bound.roomId !== roomId || bound.userId !== userId)) return rejectAdmission('ALREADY_SEATED', callback)
+    const oldSocketId = player.socketId
+    const generation = player.session!.generation + 1
+    const updatedRoom = { ...room, lastActivity: Date.now(), players: room.players.map(p =>
+      p.userId === userId ? { ...p, socketId: socket.id, isDisconnected: false, disconnectedAt: null,
+        lastSeenAt: Date.now(), session: { ...p.session!, generation } } : p) }
+    await roomRepository.saveAndWait(updatedRoom)
+    socket.data.seatSession = { roomId, userId, generation }
+    cancelDisconnectTimer(oldSocketId)
+    await socket.join(roomId)
+    if (oldSocketId !== socket.id) {
+      io.to(oldSocketId).emit('session_replaced', { roomId })
+      io.in(oldSocketId).disconnectSockets(true)
     }
+    // Token stays stable for safe ACK-loss retries; only the active generation is replaced.
+    callback?.({ success: true, session: { roomId, userId, token: token as string, generation } })
+    socket.emit('room_state', roomView(updatedRoom, userId))
+    await emitRoomView(io, updatedRoom, 'player_reconnected', {
+      socketId: socket.id, userId, name: player.name,
+      players: updatedRoom.players.map(publicPlayer), room: roomService.getPublicState(updatedRoom),
+    }, socket.id)
+  }
 
-    let room = roomRepository.findById(roomId)
-
-    if (!room) {
-      if (!createIfMissing) {
-        return socket.emit('error', {
-          code: 'room_not_found',
-          message: `Phòng "${roomId}" không tồn tại.`,
-        })
-      }
-
-      // Create new room
-      const host: Player = {
-        socketId: socket.id,
-        userId,
-        deviceId,
-        name,
-        isDisconnected: false,
-        disconnectedAt: null,
-        lastSeenAt: Date.now(),
-        avatarIndex: randomAvatarIndex(),
-        bgIndex: randomBgIndex(),
-        coins: { red: 0, yellow: 0, green: 0 },
-      }
-
-      room = roomService.createRoom(roomId, host)
-      socket.join(roomId)
-      console.log(`[create_room] ${name} (userId: ${userId}) tạo phòng ${roomId}`)
-    } else {
-      if (room.status !== 'waiting') {
-        return socket.emit('error', {
-          code: 'game_in_progress',
-          message: 'Trò chơi đã bắt đầu, không thể tham gia.',
-        })
-      }
-
-      if (room.players.length >= 11) {
-        return socket.emit('error', {
-          code: 'room_full',
-          message: 'Phòng đã đủ 11 người.',
-        })
-      }
-
-      // Cancel any pending disconnect timer for this player's old socket
-      const existingPlayer = room.players.find((p) => p.userId === userId)
-      if (existingPlayer) {
-        cancelDisconnectTimer(existingPlayer.socketId)
-      }
-
-      // Add or update player
-      const player: Player = {
-        socketId: socket.id,
-        userId,
-        deviceId,
-        name,
-        isDisconnected: false,
-        disconnectedAt: null,
-        lastSeenAt: Date.now(),
-        avatarIndex: existingPlayer?.avatarIndex ?? randomAvatarIndex(),
-        bgIndex: existingPlayer?.bgIndex ?? randomBgIndex(),
-        coins: { red: 0, yellow: 0, green: 0 },
-      }
-
-      room = roomService.addPlayer(roomId, player)
-      socket.join(roomId)
-      console.log(`[join_room] ${name} (userId: ${userId}) vào phòng ${roomId}`)
+  socket.on('join_room', async ({ name, roomId, userId, createIfMissing = false, sessionToken, settings }, callback?: AdmissionAck) => {
+    if (typeof userId !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(userId) || typeof name !== 'string' || !name.trim() || typeof createIfMissing !== 'boolean') return rejectAdmission('invalid_params', callback)
+    if (socket.data.seatSession) return rejectAdmission('ALREADY_SEATED', callback)
+    let room = await roomRepository.findByIdFresh(roomId)
+    if (room?.players.some(p => p.userId === userId)) {
+      return resumeSeat(roomId, userId, sessionToken, callback)
     }
-
-    // Send state to joiner
-    socket.emit('room_state', roomService.getPublicState(room!))
-
-    // Notify others in room
-    socket.to(roomId).emit('player_joined', {
-      socketId: socket.id,
-      userId,
-      name,
-      players: room!.players,
-    })
-    
-    // Broadcast updated room list to all clients (for lobby)
-    const availableRooms = roomService.getAvailableRooms()
-    io.emit('rooms_list', availableRooms)
+    if (!room && !createIfMissing) return rejectAdmission('room_not_found', callback)
+    if (room && room.status !== 'waiting') return rejectAdmission('game_in_progress', callback)
+    if (room && room.players.length >= MAX_PLAYERS) return rejectAdmission('room_full', callback)
+    let initialSettings: RoomSettings | null = null
+    if (settings !== undefined) {
+      if (!createIfMissing) return rejectAdmission('invalid_params', callback)
+      if (room) return rejectAdmission('room_already_exists', callback)
+      initialSettings = parseSettings(settings)
+      if (!initialSettings) return rejectAdmission('invalid_settings', callback)
+    }
+    const issued = issueSeatSession()
+    const player: Player = {
+      socketId: socket.id, userId, name: name.trim(), session: issued.session,
+      isDisconnected: false, disconnectedAt: null, lastSeenAt: Date.now(),
+      avatarIndex: randomAvatarIndex(), bgIndex: randomBgIndex(),
+      coins: { red: 0, yellow: 0, green: 0 },
+    }
+    room = room ? { ...room, players: [...room.players, player], lastActivity: Date.now() }
+      : roomService.createRoom(roomId, player, false)
+    if (initialSettings) room = { ...room, settings: initialSettings }
+    await roomRepository.saveAndWait(room)
+    socket.data.seatSession = { roomId, userId, generation: 1 }
+    await socket.join(roomId)
+    callback?.({ success: true, session: { roomId, userId, token: issued.token, generation: 1 } })
+    socket.emit('room_state', roomView(room, userId))
+    await emitRoomView(io, room, 'player_joined', { socketId: socket.id, userId, name: player.name, players: room.players.map(publicPlayer) }, socket.id)
+    io.emit('rooms_list', roomService.getAvailableRooms())
   })
 
-  /**
-   * Reconnect to room
-   */
-  socket.on('reconnect_room', async ({ roomId, userId, deviceId, name }) => {
-    console.log(`[reconnect_room] Attempt: roomId=${roomId}, userId=${userId}, deviceId=${deviceId}`)
-    
-    if (!roomId || (!userId && !deviceId)) {
-      return socket.emit('error', {
-        code: 'invalid_params',
-        message: 'roomId và userId là bắt buộc.',
-      })
-    }
-
-    const room = await roomRepository.findByIdFresh(roomId)
-    if (!room) {
-      console.warn(`[reconnect_room] Room ${roomId} not found. Available rooms: ${roomRepository.count()}`)
-      return socket.emit('error', {
-        code: 'room_not_found',
-        message: 'Phòng không còn tồn tại.',
-      })
-    }
-
-    // Find player by stable browser userId, then deviceId fallback.
-    const existingPlayer = room.players.find((p) =>
-      (!!userId && p.userId === userId) || (!!deviceId && p.deviceId === deviceId)
-    )
-
-    if (existingPlayer) {
-      // Cancel any pending disconnect timer for old socket
-      cancelDisconnectTimer(existingPlayer.socketId)
-
-      const updatedRoom = roomService.reconnectPlayer(roomId, socket.id, userId, deviceId, name)
-      socket.join(roomId)
-
-      console.log(`[reconnect_room] ${name} (userId: ${userId}) reconnected`)
-
-      socket.emit('room_state', roomService.getPublicState(updatedRoom!))
-      socket.to(roomId).emit('player_reconnected', {
-        socketId: socket.id,
-        userId: existingPlayer.userId,
-        name: name || existingPlayer.name,
-        players: updatedRoom!.players,
-        room: roomService.getPublicState(updatedRoom!),
-      })
-    } else {
-      return socket.emit('error', {
-        code: 'player_not_found',
-        message: 'Không tìm thấy người chơi trong phòng.',
-      })
-    }
+  socket.on('reconnect_room', async ({ roomId, userId, sessionToken }, callback?: AdmissionAck) => {
+    if (typeof userId !== 'string' || userId.length > 128) return rejectAdmission('invalid_params', callback)
+    return resumeSeat(roomId, userId, sessionToken, callback)
   })
 
   /**
@@ -243,20 +203,31 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
         message: 'Phòng không tồn tại.',
       })
     }
-    socket.emit('room_state', roomService.getPublicState(room))
+    socket.emit('room_state', roomView(room, room.players.find(p => p.socketId === socket.id)?.userId))
   })
 
   /**
    * Add fake players (debug)
    */
-  socket.on('add_fake_players', ({ roomId, count = 1 }) => {
+  socket.on('add_fake_players', async ({ roomId, count = 1 }) => {
+    if (process.env.NODE_ENV === 'production') {
+      return socket.emit('error', { code: 'debug_disabled', message: 'Debug actions are disabled in production.' })
+    }
+    const room = roomRepository.findById(roomId)
+    const actor = room?.players.find((player) => player.socketId === socket.id)
+    if (!room || !actor || actor.userId !== room.host) {
+      return socket.emit('error', { code: 'not_host', message: 'Only the connected host can add debug players.' })
+    }
+    if (!Number.isInteger(count) || count < 1 || count > 10) {
+      return socket.emit('error', { code: 'invalid_params', message: 'count must be an integer from 1 to 10.' })
+    }
     const result = roomService.addFakePlayers(roomId, count)
 
     if ('error' in result) {
       const messages = {
         room_not_found: 'Phòng không tồn tại.',
         game_already_started: 'Trò chơi đã bắt đầu, không thể thêm bot.',
-        room_full: 'Phòng đã đủ 11 người.',
+        room_full: 'Phòng đã đủ 10 người.',
       }
       return socket.emit('error', {
         code: result.error,
@@ -264,15 +235,15 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
       })
     }
 
-    console.log(`[add_fake_players] Added ${result.added} fake player(s) to room ${roomId}`)
-    io.to(roomId).emit('room_state', roomService.getPublicState(result.room))
+    operationDiagnostic('add_fake_players', 'ok')
+    await emitRoomView(io, result.room, 'room_state')
   })
 
   /**
    * Debug role picker: host assigns first-round roles in the waiting room.
    */
-  socket.on('set_debug_role_preference', ({ roomId, userId, targetUserId, role }) => {
-    if (process.env.DEBUG_ROLE_PICKER !== 'true') {
+  socket.on('set_debug_role_preference', async ({ roomId, userId, targetUserId, role }) => {
+    if (process.env.NODE_ENV === 'production' || process.env.DEBUG_ROLE_PICKER !== 'true') {
       return socket.emit('error', {
         code: 'debug_role_picker_disabled',
         message: 'Debug role picker is disabled.',
@@ -384,101 +355,62 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
     const updatedRoom = roomRepository.update(roomId, {
       players: fillLastDebugRole(updatedPlayers, room.host, roleDeck),
     })
-    io.to(roomId).emit('room_state', roomService.getPublicState(updatedRoom!))
+    await emitRoomView(io, updatedRoom!, 'room_state')
   })
 
   /**
    * Update room settings (host only)
    */
-  socket.on('update_room_settings', ({ roomId, userId, settings }) => {
+  socket.on('update_room_settings', async ({ roomId, userId, settings }, callback) => {
+    const reject = (code: string, message: string) => callback ? callback({ success: false, error: code, message }) : socket.emit('error', { code, message })
     if (!roomId || !userId || !settings) {
-      return socket.emit('error', {
-        code: 'invalid_params',
-        message: 'roomId, userId và settings là bắt buộc.',
-      })
+      return reject('invalid_params', 'roomId, userId và settings là bắt buộc.')
     }
 
     const room = roomRepository.findById(roomId)
     if (!room) {
-      return socket.emit('error', {
-        code: 'room_not_found',
-        message: 'Phòng không tồn tại.',
-      })
+      return reject('room_not_found', 'Phòng không tồn tại.')
     }
 
     // Only host can update settings
-    if (room.host !== userId) {
-      return socket.emit('error', {
-        code: 'not_host',
-        message: 'Chỉ host mới có thể thay đổi cài đặt.',
-      })
+    if (room.host !== userId || !room.players.some(p => p.socketId === socket.id && p.userId === room.host)) {
+      return reject('not_host', 'Chỉ host mới có thể thay đổi cài đặt.')
     }
 
     // Can only update in waiting phase
     if (room.status !== 'waiting') {
-      return socket.emit('error', {
-        code: 'game_in_progress',
-        message: 'Không thể thay đổi cài đặt khi game đã bắt đầu.',
-      })
+      return reject('game_in_progress', 'Không thể thay đổi cài đặt khi game đã bắt đầu.')
     }
 
-    // Validate settings
-    const { situationGroups, emotionGroups } = settings
+    const parsed = parseSettings(settings)
+    if (!parsed) return reject('invalid_settings', 'Nhóm thẻ không hợp lệ hoặc bị trùng.')
+    const updatedRoom = { ...room, settings: parsed, lastActivity: Date.now() }
+    await roomRepository.saveAndWait(updatedRoom)
 
-    if (!situationGroups || !Array.isArray(situationGroups) || situationGroups.length === 0) {
-      return socket.emit('error', {
-        code: 'invalid_settings',
-        message: 'Phải chọn ít nhất 1 nhóm tình huống.',
-      })
-    }
-
-    if (!emotionGroups || !Array.isArray(emotionGroups) || emotionGroups.length === 0) {
-      return socket.emit('error', {
-        code: 'invalid_settings',
-        message: 'Phải chọn ít nhất 1 nhóm cảm xúc.',
-      })
-    }
-
-    const validSituationGroups = ['light', 'medium', 'sensitive']
-    const validEmotionGroups = ['basic', 'light', 'strong', 'advanced']
-
-    if (!situationGroups.every((g: string) => validSituationGroups.includes(g))) {
-      return socket.emit('error', {
-        code: 'invalid_settings',
-        message: 'Nhóm tình huống không hợp lệ.',
-      })
-    }
-
-    if (!emotionGroups.every((g: string) => validEmotionGroups.includes(g))) {
-      return socket.emit('error', {
-        code: 'invalid_settings',
-        message: 'Nhóm cảm xúc không hợp lệ.',
-      })
-    }
-
-    // Update settings
-    const updatedRoom = roomRepository.update(roomId, {
-      settings: {
-        situationGroups,
-        emotionGroups,
-      },
-    })
-
-    console.log(`[update_room_settings] Room ${roomId} settings updated by ${userId}`)
+    operationDiagnostic('update_room_settings', 'ok')
     io.to(roomId).emit('room_settings_updated', updatedRoom!.settings)
-    io.to(roomId).emit('room_state', roomService.getPublicState(updatedRoom!))
+    await emitRoomView(io, updatedRoom!, 'room_state')
+    if (callback) callback({ success: true, data: roomView(updatedRoom, userId) })
   })
 
   /**
    * Update player profile (name + avatarIndex + bgIndex)
    */
-  socket.on('update_profile', ({ roomId, userId, name, avatarIndex, bgIndex }) => {
+  socket.on('update_profile', async ({ roomId, userId, name, avatarIndex, bgIndex }, callback) => {
+    const reject = (code: string, message: string) => callback ? callback({ success: false, error: code, message }) : socket.emit('error', { code, message })
     if (!roomId || !userId || !name) {
-      return socket.emit('error', { code: 'invalid_params', message: 'roomId, userId và name là bắt buộc.' })
+      return reject('invalid_params', 'roomId, userId và name là bắt buộc.')
     }
 
     const room = roomRepository.findById(roomId)
-    if (!room) return
+    if (!room) return reject('ROOM_NOT_FOUND', 'Phòng không tồn tại.')
+    if (!room.players.some(p => p.socketId === socket.id && p.userId === userId)) {
+      return reject('NOT_PROFILE_OWNER', 'Chỉ được sửa hồ sơ của mình.')
+    }
+    if ((avatarIndex !== undefined && (!Number.isSafeInteger(avatarIndex) || avatarIndex < 0 || avatarIndex >= AVATAR_COUNT)) ||
+      (bgIndex !== undefined && (!Number.isSafeInteger(bgIndex) || bgIndex < 0 || bgIndex >= BG_COUNT))) {
+      return reject('INVALID_PROFILE', 'Ảnh đại diện hoặc nền không hợp lệ.')
+    }
 
     const updatedPlayers = room.players.map(p =>
       p.userId === userId
@@ -486,8 +418,10 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
         : p
     )
 
-    const updatedRoom = roomRepository.update(roomId, { players: updatedPlayers })
-    console.log(`[update_profile] ${userId} updated profile in room ${roomId}`)
-    io.to(roomId).emit('room_state', roomService.getPublicState(updatedRoom!))
+    const updatedRoom = { ...room, players: updatedPlayers, lastActivity: Date.now() }
+    await roomRepository.saveAndWait(updatedRoom)
+    operationDiagnostic('update_profile', 'ok')
+    await emitRoomView(io, updatedRoom!, 'room_state')
+    if (callback) callback({ success: true, data: roomView(updatedRoom, userId) })
   })
 }
