@@ -11,5 +11,7 @@ it('owns independent original-model and sticker browser cases without weakening 
     'extension.restoreContext()', 'next.click()', "channel: 'chromium'", "inputMode: 'pointer'", '170_000', 'windowsHide: true', 'route.abort()', 'await report()',
     'await browser?.close(); vite.kill()']) expect(source).toContain(invariant)
   expect(config).toContain('testTimeout: 180_000')
+  expect(source).toContain("process.platform === 'linux' ? 290_000 : 170_000")
+  expect(source).toContain('assetsTimeoutMs + 10_000')
   expect(source).not.toMatch(/test\.(skip|todo)|\.click\(\{\s*force|process\.env|https:\/\//)
 })

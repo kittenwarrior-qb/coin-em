@@ -8,6 +8,9 @@ import { chromium, expect as expectUI } from '../../../e2e/node_modules/@playwri
 import { startPublicCatalogFixture } from '../helpers/publicCatalogFixture'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
+// Linux hosted CI uses software graphics; this is a functional lifecycle gate,
+// not a device FPS/latency benchmark. Keep all 100+20 switches and restore checks.
+const assetsTimeoutMs = process.platform === 'linux' ? 290_000 : 170_000
 
 test.each(['models', 'stickers'] as const)('original showcase assets: %s', async scenario => {
   const output = await mkdtemp(path.join(os.tmpdir(), 'emcoin-showcase-browser-qa-'))
@@ -25,7 +28,7 @@ test.each(['models', 'stickers'] as const)('original showcase assets: %s', async
       backendConnected: false, catalogApiConnected: true, physicalDevice: false, limitations: 'Actual reported desktop renderer, simulated viewport; not mobile device, FPS or memory-budget acceptance' }, null, 2))
     reportWritten = true
   }
-  const watchdog = setTimeout(() => { errors.push('Owned170s watchdog expired'); void browser?.close().catch(() => {}); vite.kill() }, 170_000)
+  const watchdog = setTimeout(() => { errors.push(`Owned${assetsTimeoutMs / 1000}s watchdog expired`); void browser?.close().catch(() => {}); vite.kill() }, assetsTimeoutMs)
   onTestFinished(async () => { clearTimeout(watchdog); if (!reportWritten) await report(); vite.kill(); await browser?.close(); await catalogApi.close() })
   try {
     const base = await new Promise<string>((resolve, reject) => {
@@ -113,4 +116,4 @@ test.each(['models', 'stickers'] as const)('original showcase assets: %s', async
     await catalogApi.close()
     console.log(`Showcase assets QA: ${output}`)
   }
-})
+}, assetsTimeoutMs + 10_000)

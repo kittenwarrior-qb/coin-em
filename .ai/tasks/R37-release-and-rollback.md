@@ -63,6 +63,10 @@ Blocked by OQ-06/OQ-10 for release authority, RPO/RTO and host ownership.
 
 ## Implementation plan
 
+### CI environment revision 2026-10-12
+
+Exact c382861 CI passes BE669/FE738/lint/build/assets but short matrix fails4/11: PWA optimizer rejects arbitrary external output and two model/sticker cases hit170s watchdog on hosted Linux. Keep those failed runs. PWA now builds an owned frontend source copy with linked dependencies and its own root/dist, then copies only built artifacts; optimizer/source guards unchanged, no .env copied/shared checkout build overwritten. Source-copy recursive cleanup verifies allocated temp prefix/parent. Model/sticker functional tests retain100switches+20cached+actual requests/context restore; Linux-only bounded290s watchdog/300s outer budget reflects runner graphics, Windows170/180 unchanged. This is not an improved product latency/FPS or device acceptance claim; do not remove cases, force clicks, omit failed modes or change runtime art/renderer to fabricate green. Admit these adjacent fixtures/guard tests only.
+
 ### Plan revision 2026-10-12 — fresh host bootstrap / before-admission publication
 
 Owner completed Ubuntu24.04 reinstall, confirmed another legitimate host-key change and installed the local EmCoin public key. Matching explicitly accepted RSA fingerprint pinned; root key login succeeds. Fresh host contains no Mendez/source/Docker; no agent deletion required. Admit bootstrap-ubuntu.sh for official Docker apt repo/security package installation/firewall/new EmCoin directories, no old-resource wipe. Owner approves strong generated separate admin credential, encrypted with Windows DPAPI; host gets hash only. GitHub secrets use existing authorized key without printing it. Initial release must publish canonical PDF catalog **before** backend/web admission via explicit empty-store-only initializer; never auto-approve existing edited data. Add tests for fresh100-card publication/no-overwrite and release order. CI failures from omitted ignored deploy/artwork files are corrected by root-only `/EMCOIN/` exclusion and complete runtime asset staging, not weakened checks.

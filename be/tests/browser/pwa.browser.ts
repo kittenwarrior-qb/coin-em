@@ -1,6 +1,6 @@
 import { test, expect } from 'vitest'
 import { spawn } from 'node:child_process'
-import { mkdtemp, readFile, writeFile } from 'node:fs/promises'
+import { mkdtemp, readFile, writeFile, mkdir, cp, symlink, rm } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -13,6 +13,8 @@ const mime: Record<string, string> = { '.html': 'text/html; charset=utf-8', '.js
 test.each(['/', '/emcoin/'])('production PWA %s caches only public guide and defers update for another admitted tab', async base => {
   const output = await mkdtemp(path.join(os.tmpdir(), 'emcoin-pwa-browser-qa-'))
   const buildRoot = path.join(output, 'build')
+  const sourceRoot = await mkdtemp(path.join(os.tmpdir(), 'emcoin-pwa-build-source-'))
+  const frontendRoot = path.join(sourceRoot, 'frontend')
   const server = await createIsolatedServer()
   let browser: Awaited<ReturnType<typeof chromium.launch>> | undefined
   let nextVersion = false
@@ -21,9 +23,17 @@ test.each(['/', '/emcoin/'])('production PWA %s caches only public guide and def
   const errors: string[] = []
   let cachePaths: string[] = []
   try {
+    // Run the unchanged production optimizer against its own root/dist, never a
+    // shared checkout or arbitrary external pruning target. Do not copy .env.
+    await mkdir(frontendRoot)
+    for (const directory of ['src', 'public', 'pwa']) await cp(path.join(root, 'fe', directory), path.join(frontendRoot, directory), { recursive: true })
+    for (const filename of ['vite.config.ts', 'package.json', 'package-lock.json', 'index.html', 'tsconfig.json', 'tsconfig.app.json', 'tsconfig.node.json']) {
+      await cp(path.join(root, 'fe', filename), path.join(frontendRoot, filename))
+    }
+    await symlink(path.join(root, 'fe/node_modules'), path.join(frontendRoot, 'node_modules'), 'junction')
     await new Promise<void>((resolve, reject) => {
-      const child = spawn(process.execPath, [path.join(root, 'fe/node_modules/vite/bin/vite.js'), 'build', '--outDir', buildRoot], {
-        cwd: path.join(root, 'fe'), windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'],
+      const child = spawn(process.execPath, [path.join(root, 'fe/node_modules/vite/bin/vite.js'), 'build'], {
+        cwd: frontendRoot, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'],
         env: { ...process.env, NODE_ENV: 'production', VITE_API_URL: server.url, VITE_BASE_URL: base, VITE_USE_HASH_ROUTE: base === '/' ? 'false' : 'true' },
       })
       let logs = ''
@@ -32,6 +42,7 @@ test.each(['/', '/emcoin/'])('production PWA %s caches only public guide and def
       child.once('error', error => { clearTimeout(timeout); reject(error) })
       child.once('exit', code => { clearTimeout(timeout); code === 0 ? resolve() : reject(new Error(`Owned PWA build failed ${code}: ${logs.slice(-1500)}`)) })
     })
+    await cp(path.join(frontendRoot, 'dist'), buildRoot, { recursive: true })
     server.httpServer.on('request', async (req, res) => {
       const url = new URL(req.url ?? '/', server.url)
       if (url.pathname.startsWith('/socket.io')) return
@@ -141,5 +152,8 @@ test.each(['/', '/emcoin/'])('production PWA %s caches only public guide and def
       browser: browser?.version(), output, cachePaths, errors, backend: 'production handlers / isolated temp root / mocked Redis',
       workerUpdate: 'controlled version change of compiled worker, identical app/assets', physicalDevice: false, installationPromptVerified: false }, null, 2))
     console.log(`PWA browser QA: ${output}`)
+    const cleanupRoot = path.resolve(sourceRoot)
+    if (path.dirname(cleanupRoot) !== path.resolve(os.tmpdir()) || !path.basename(cleanupRoot).startsWith('emcoin-pwa-build-source-')) throw new Error('UNSAFE_OWNED_SOURCE_CLEANUP')
+    await rm(cleanupRoot, { recursive: true, force: true })
   }
 })
