@@ -5,13 +5,15 @@ import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium, expect as expectUI } from '../../../e2e/node_modules/@playwright/test/index.mjs'
+import { startPublicCatalogFixture } from '../helpers/publicCatalogFixture'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
 
 test.each(['models', 'stickers'] as const)('original showcase assets: %s', async scenario => {
   const output = await mkdtemp(path.join(os.tmpdir(), 'emcoin-showcase-browser-qa-'))
+  const catalogApi = await startPublicCatalogFixture()
   const vite = spawn(process.execPath, [path.join(root, 'fe/node_modules/vite/bin/vite.js'), '--host', '127.0.0.1', '--port', '0', '--clearScreen', 'false'], {
-    cwd: path.join(root, 'fe'), windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'],
+    cwd: path.join(root, 'fe'), env: catalogApi.env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'],
   })
   let browser: Awaited<ReturnType<typeof chromium.launch>> | undefined
   let stage = 'startup', result = 'failed', completedSwitches = 0, renderer: string | undefined
@@ -20,11 +22,11 @@ test.each(['models', 'stickers'] as const)('original showcase assets: %s', async
   const report = async () => {
     await writeFile(path.join(output, 'report.json'), JSON.stringify({ version: 'showcase-assets-qa/v2', scenario, stage, result,
       completedSwitches, browserChannel: 'chromium-new-headless', inputMode: 'pointer', renderer, browser: browser?.version(), assetRequests: Object.fromEntries(requests), errors,
-      backendConnected: false, physicalDevice: false, limitations: 'Actual reported desktop renderer, simulated viewport; not mobile device, FPS or memory-budget acceptance' }, null, 2))
+      backendConnected: false, catalogApiConnected: true, physicalDevice: false, limitations: 'Actual reported desktop renderer, simulated viewport; not mobile device, FPS or memory-budget acceptance' }, null, 2))
     reportWritten = true
   }
   const watchdog = setTimeout(() => { errors.push('Owned170s watchdog expired'); void browser?.close().catch(() => {}); vite.kill() }, 170_000)
-  onTestFinished(async () => { clearTimeout(watchdog); if (!reportWritten) await report(); vite.kill(); await browser?.close() })
+  onTestFinished(async () => { clearTimeout(watchdog); if (!reportWritten) await report(); vite.kill(); await browser?.close(); await catalogApi.close() })
   try {
     const base = await new Promise<string>((resolve, reject) => {
       const timeout = setTimeout(() => reject(new Error('Owned Vite startup timeout')), 20_000)
@@ -41,7 +43,7 @@ test.each(['models', 'stickers'] as const)('original showcase assets: %s', async
     browser = await chromium.launch({ headless: true, channel: 'chromium' })
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
     await context.tracing.start({ screenshots: false, snapshots: true, sources: false })
-    await context.route('**/*', route => new URL(route.request().url()).origin === new URL(base).origin ? route.continue() : route.abort())
+    await context.route('**/*', route => [new URL(base).origin, new URL(catalogApi.url).origin].includes(new URL(route.request().url()).origin) ? route.continue() : route.abort())
     const page = await context.newPage()
     page.on('pageerror', error => errors.push(error.message))
     page.on('request', request => {
@@ -108,6 +110,7 @@ test.each(['models', 'stickers'] as const)('original showcase assets: %s', async
       await context.tracing.stop({ path: path.join(output, 'failure-trace.zip') }).catch(() => {})
     }
     await browser?.close(); vite.kill()
+    await catalogApi.close()
     console.log(`Showcase assets QA: ${output}`)
   }
 })

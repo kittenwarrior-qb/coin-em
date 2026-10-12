@@ -5,13 +5,15 @@ import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium, expect as expectUI } from '../../../e2e/node_modules/@playwright/test/index.mjs'
+import { startPublicCatalogFixture } from '../helpers/publicCatalogFixture'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
 
 test.each(['unsupported-webgl', 'switches-context-loss', 'missing-texture'] as const)('existing card art lifecycle: %s', async scenario => {
   const output = await mkdtemp(path.join(os.tmpdir(), 'emcoin-showcase-browser-qa-'))
+  const catalogApi = await startPublicCatalogFixture()
   const vite = spawn(process.execPath, [path.join(root, 'fe/node_modules/vite/bin/vite.js'), '--host', '127.0.0.1', '--port', '0', '--clearScreen', 'false'], {
-    cwd: path.join(root, 'fe'), windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'],
+    cwd: path.join(root, 'fe'), env: catalogApi.env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'],
   })
   let browser: Awaited<ReturnType<typeof chromium.launch>> | undefined
   let stage = 'startup', result = 'failed', renderer: string | undefined
@@ -20,7 +22,7 @@ test.each(['unsupported-webgl', 'switches-context-loss', 'missing-texture'] as c
   let reportWritten = false
   const report = async () => {
     await writeFile(path.join(output, 'report.json'), JSON.stringify({ version: 'showcase-lifecycle-qa/v2', scenario, result, stage, browser: browser?.version(), renderer,
-      roleCardSwitches: completedRoleCardSwitches, errors, backendConnected: false, physicalDevice: false,
+      roleCardSwitches: completedRoleCardSwitches, errors, backendConnected: false, catalogApiConnected: true, physicalDevice: false,
       limitations: '100 existing role-card switches only; no100 model/deck switches, FPS/device budget or GPU memory-cap claim' }, null, 2))
     reportWritten = true
   }
@@ -31,6 +33,7 @@ test.each(['unsupported-webgl', 'switches-context-loss', 'missing-texture'] as c
     if (!reportWritten) await report()
     vite.kill()
     await browser?.close()
+    await catalogApi.close()
   })
   try {
     const base = await new Promise<string>((resolve, reject) => {
@@ -48,7 +51,7 @@ test.each(['unsupported-webgl', 'switches-context-loss', 'missing-texture'] as c
     browser = await chromium.launch({ headless: true })
     const offlineCDN = async (context: Awaited<ReturnType<typeof browser.newContext>>) => context.route('**/*', route => {
       const url = new URL(route.request().url())
-      return url.origin === new URL(base).origin ? route.continue() : route.abort()
+      return [new URL(base).origin, new URL(catalogApi.url).origin].includes(url.origin) ? route.continue() : route.abort()
     })
     if (scenario === 'unsupported-webgl') {
       const fallback = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' })
@@ -140,6 +143,7 @@ test.each(['unsupported-webgl', 'switches-context-loss', 'missing-texture'] as c
       await context.tracing.stop({ path: path.join(output, `failure-${index}-trace.zip`) }).catch(() => {})
     }
     await browser?.close(); vite.kill()
+    await catalogApi.close()
     console.log(`Showcase browser QA: ${output}`)
   }
 })
