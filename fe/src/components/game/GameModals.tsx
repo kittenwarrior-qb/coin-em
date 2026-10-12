@@ -1,9 +1,11 @@
-import { useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { EmcoinImage } from '@/components/cartoon/EmcoinImage'
+import { useEffect, useRef } from 'react'
+import { motion, useIsPresent } from 'framer-motion'
 import { CartoonButton } from '@/components/cartoon'
 import { AVATAR_BG_COLORS, AVATAR_ICONS } from '@/components/cartoon/avatarConfig'
 import { PHASE_LABELS, type GamePhase } from '@/stores/types'
 import type { Player } from './types'
+import { usePopupLifecycle } from '@/features/overlays/usePopupLifecycle'
 
 const BACKDROP_TRANSITION = { duration: 0.15 }
 const PANEL_STYLE: React.CSSProperties = { willChange: 'transform' }
@@ -15,6 +17,9 @@ interface MutedNoticeProps {
 }
 
 export function MutedNoticeModal({ notice, onDismiss }: MutedNoticeProps) {
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const present = useIsPresent()
+  usePopupLifecycle(dialogRef, !!notice && present, { onClose: onDismiss }, notice?.nonce)
   if (!notice) return null
   return (
     <motion.div
@@ -24,19 +29,21 @@ export function MutedNoticeModal({ notice, onDismiss }: MutedNoticeProps) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={BACKDROP_TRANSITION}
-      onClick={onDismiss}
+      onClick={present ? onDismiss : undefined}
     >
       <motion.div
+        ref={dialogRef} role="dialog" aria-label="Thông báo im lặng" tabIndex={-1}
         className="relative w-full max-w-[330px] rounded-[30px] border-[3px] border-[var(--c-black)] bg-white px-5 pb-5 pt-6 text-center shadow-[0_8px_0_rgba(0,0,0,0.24)]"
         initial={{ scale: 0.84, y: 24 }}
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.9, y: 18 }}
         transition={{ type: 'spring', stiffness: 420, damping: 26 }}
+        data-ui-surface="game-popup"
         style={PANEL_STYLE}
         onClick={(e) => e.stopPropagation()}
       >
-        <img
-          src="/cartoon/icons/Lock-Sliver.svg"
+        <EmcoinImage
+          src="/emcoin/icons/orbit/lock.svg"
           alt=""
           className="absolute -right-3 -top-4 h-14 w-14 rotate-12 object-contain drop-shadow"
           draggable={false}
@@ -45,7 +52,7 @@ export function MutedNoticeModal({ notice, onDismiss }: MutedNoticeProps) {
           className="mx-auto grid h-24 w-24 place-items-center rounded-full border-[4px] border-[#7D7F8C] shadow-[0_4px_0_rgba(0,0,0,0.18)]"
           style={{ background: AVATAR_BG_COLORS[Math.abs(notice.bgIndex ?? 0) % AVATAR_BG_COLORS.length] }}
         >
-          <img
+          <EmcoinImage
             src={AVATAR_ICONS[Math.abs(notice.avatarIndex ?? 0) % AVATAR_ICONS.length]}
             alt=""
             className="h-16 w-16 object-contain"
@@ -60,7 +67,7 @@ export function MutedNoticeModal({ notice, onDismiss }: MutedNoticeProps) {
             đã bị im lặng ở vòng này
           </div>
         )}
-        <CartoonButton color="purple" size="md" className="mt-5 w-full" onClick={onDismiss}>
+        <CartoonButton color="purple" size="md" className="mt-5 w-full" disabled={!present} onClick={onDismiss}>
           Đã hiểu
         </CartoonButton>
       </motion.div>
@@ -70,6 +77,7 @@ export function MutedNoticeModal({ notice, onDismiss }: MutedNoticeProps) {
 
 // ─── Night action confirm ──────────────────────────────────────────────────────
 interface NightActionConfirmProps {
+  pending?: boolean
   action: { type: 'heal' | 'silence'; targetId: string; targetName: string; iconSrc: string } | null
   myPlayerId?: string
   onCancel: () => void
@@ -77,7 +85,10 @@ interface NightActionConfirmProps {
   onConfirmSilence: (id: string) => void
 }
 
-export function NightActionConfirmModal({ action, myPlayerId, onCancel, onConfirmHeal, onConfirmSilence }: NightActionConfirmProps) {
+export function NightActionConfirmModal({ action, myPlayerId, onCancel, onConfirmHeal, onConfirmSilence, pending }: NightActionConfirmProps) {
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const present = useIsPresent()
+  usePopupLifecycle(dialogRef, !!action && present, { onClose: onCancel, persistent: pending })
   if (!action) return null
   return (
     <motion.div
@@ -86,18 +97,20 @@ export function NightActionConfirmModal({ action, myPlayerId, onCancel, onConfir
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={BACKDROP_TRANSITION}
-      onClick={onCancel}
+      onClick={pending || !present ? undefined : onCancel}
     >
       <motion.div
+        ref={dialogRef} role="dialog" aria-busy={pending || undefined} aria-label={action.type === 'heal' ? 'Xác nhận bảo vệ' : 'Xác nhận làm im lặng'} tabIndex={-1}
         className="w-full max-w-[320px] rounded-[28px] border-[3px] border-[var(--c-black)] bg-white px-4 py-5 text-center shadow-[0_8px_0_rgba(0,0,0,0.24)]"
         initial={{ scale: 0.86, y: 26 }}
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.86, y: 26 }}
         transition={{ type: 'spring', stiffness: 420, damping: 28 }}
+        data-ui-surface="game-popup"
         style={PANEL_STYLE}
         onClick={(e) => e.stopPropagation()}
       >
-        <img src={action.iconSrc} alt="" className="mx-auto mb-2 h-12 w-12 object-contain" draggable={false} />
+        <EmcoinImage src={action.iconSrc} alt="" className="mx-auto mb-2 h-12 w-12 object-contain" draggable={false} />
         <div className="font-display text-base text-[var(--c-black)]">
           {action.type === 'heal' ? 'Xác nhận bảo vệ' : 'Xác nhận làm im lặng'}
         </div>
@@ -109,11 +122,13 @@ export function NightActionConfirmModal({ action, myPlayerId, onCancel, onConfir
             : `Người Im Lặng sẽ chọn ${action.targetName}.`}
         </div>
         <div className="mt-4 grid grid-cols-2 gap-2">
-          <CartoonButton color="orange" size="sm" onClick={onCancel}>Hủy</CartoonButton>
+          <CartoonButton color="orange" size="sm" disabled={pending || !present} onClick={onCancel}>Hủy</CartoonButton>
           <CartoonButton
             color={action.type === 'heal' ? 'green' : 'purple'}
+            pending={pending}
+            disabled={!present}
             size="sm"
-            onClick={() => action.type === 'heal' ? onConfirmHeal(action.targetId) : onConfirmSilence(action.targetId)}
+            onClick={() => { if (present && !pending) { if (action.type === 'heal') onConfirmHeal(action.targetId); else onConfirmSilence(action.targetId) } }}
           >
             Xác nhận
           </CartoonButton>
@@ -125,13 +140,17 @@ export function NightActionConfirmModal({ action, myPlayerId, onCancel, onConfir
 
 // ─── Phase nav confirm ─────────────────────────────────────────────────────────
 interface PhaseNavConfirmProps {
+  pending?: boolean
   navigation: { direction: 'next' | 'prev'; targetPhase: GamePhase } | null
   activePhase: string
   onCancel: () => void
   onConfirm: (direction: 'next' | 'prev') => void
 }
 
-export function PhaseNavConfirmModal({ navigation, activePhase, onCancel, onConfirm }: PhaseNavConfirmProps) {
+export function PhaseNavConfirmModal({ navigation, activePhase, onCancel, onConfirm, pending }: PhaseNavConfirmProps) {
+  const present = useIsPresent()
+  const dialogRef = useRef<HTMLDivElement>(null)
+  usePopupLifecycle(dialogRef, !!navigation && present, { onClose: onCancel, persistent: pending })
   if (!navigation) return null
   return (
     <motion.div
@@ -140,7 +159,7 @@ export function PhaseNavConfirmModal({ navigation, activePhase, onCancel, onConf
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={BACKDROP_TRANSITION}
-      onClick={onCancel}
+      onClick={pending || !present ? undefined : onCancel}
     >
       <motion.div
         className="w-full max-w-[320px] rounded-[28px] border-[3px] border-[var(--c-black)] bg-white px-4 py-5 text-center shadow-[0_8px_0_rgba(0,0,0,0.24)]"
@@ -148,12 +167,14 @@ export function PhaseNavConfirmModal({ navigation, activePhase, onCancel, onConf
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.86, y: 26 }}
         transition={{ type: 'spring', stiffness: 420, damping: 28 }}
+        data-ui-surface="game-popup"
         style={PANEL_STYLE}
         onClick={(e) => e.stopPropagation()}
         data-testid="phase-nav-confirm-popup"
+        ref={dialogRef} role="dialog" aria-busy={pending || undefined} aria-label={navigation.direction === 'next' ? 'Chuyển sang phase tiếp theo?' : 'Quay lại phase trước?'} tabIndex={-1}
       >
-        <img
-          src={navigation.direction === 'next' ? '/cartoon/icons/Arrow---Right.svg' : '/cartoon/icons/Arrow---Left.svg'}
+        <EmcoinImage
+          src={navigation.direction === 'next' ? '/emcoin/icons/orbit/arrowRight.svg' : '/emcoin/icons/orbit/arrowLeft.svg'}
           alt=""
           className="mx-auto mb-2 h-10 w-10 object-contain"
           draggable={false}
@@ -172,11 +193,13 @@ export function PhaseNavConfirmModal({ navigation, activePhase, onCancel, onConf
           </div>
         )}
         <div className="mt-4 grid grid-cols-2 gap-2">
-          <CartoonButton color="orange" size="sm" onClick={onCancel}>Hủy</CartoonButton>
+          <CartoonButton color="orange" size="sm" disabled={pending || !present} onClick={onCancel}>Hủy</CartoonButton>
           <CartoonButton
             color={navigation.direction === 'next' ? 'green' : 'blue'}
+            pending={pending}
+            disabled={!present}
             size="sm"
-            onClick={() => onConfirm(navigation.direction)}
+            onClick={() => { if (present && !pending) onConfirm(navigation.direction) }}
           >
             {navigation.direction === 'next' ? 'Tiếp tục' : 'Quay lại'}
           </CartoonButton>
@@ -203,14 +226,16 @@ export function NtgRewardSuccessPopup({ names, onClose }: NtgRewardSuccessProps)
   return (
     <motion.div
       className="absolute bottom-20 left-1/2 -translate-x-1/2 z-[80] w-full max-w-[320px] px-4 pointer-events-none"
+      role="status"
       initial={{ y: 40, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: 40, opacity: 0 }}
       transition={{ type: 'spring', stiffness: 420, damping: 28 }}
-      style={PANEL_STYLE}
+      data-ui-surface="game-toast"
+        style={PANEL_STYLE}
     >
-      <div className="flex items-center gap-3 rounded-2xl bg-[#1e6b2e] px-4 py-3 shadow-[0_4px_16px_rgba(0,0,0,0.3)]">
-        <img src="/cartoon/icons/Checkmark.svg" alt="" className="h-8 w-8 shrink-0" draggable={false} />
+      <div data-ui-chrome="success-toast" className="flex items-center gap-3 rounded-2xl bg-[#1e6b2e] px-4 py-3 shadow-[0_4px_16px_rgba(0,0,0,0.3)]">
+        <EmcoinImage src="/emcoin/icons/orbit/check.svg" alt="" className="h-8 w-8 shrink-0" draggable={false} />
         <div>
           <div className="font-display text-sm text-white">Tặng coin thành công</div>
           <div className="font-body text-[11px] text-white/75 leading-snug">
@@ -230,6 +255,9 @@ interface ReflectionRewardConfirmProps {
 }
 
 export function ReflectionRewardConfirmModal({ players, onSkip, onConfirm }: ReflectionRewardConfirmProps) {
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const present = useIsPresent()
+  usePopupLifecycle(dialogRef, present, { persistent: true })
   const hasEligiblePlayers = players.some(
     (p) => p.role === 'Người Kết Nối' || p.role === 'Người Gợi Mở' || p.role === 'Người Dẫn Lối',
   )
@@ -248,8 +276,10 @@ export function ReflectionRewardConfirmModal({ players, onSkip, onConfirm }: Ref
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.9, y: 20 }}
         transition={{ type: 'spring', stiffness: 420, damping: 28 }}
+        data-ui-surface="game-popup"
         style={PANEL_STYLE}
         className="relative w-full max-w-[320px] rounded-3xl bg-white px-6 py-5 shadow-[0_8px_0_rgba(0,0,0,0.12)] mx-4"
+        ref={dialogRef} role="dialog" aria-label="Xác nhận phần thưởng" tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="text-center mb-4">
@@ -259,10 +289,10 @@ export function ReflectionRewardConfirmModal({ players, onSkip, onConfirm }: Ref
           </div>
         </div>
         <div className="flex gap-2">
-          <CartoonButton color="orange" size="md" className="flex-1" onClick={() => onSkip()}>
+          <CartoonButton color="orange" size="md" className="flex-1" disabled={!present} onClick={() => onSkip()}>
             Bỏ qua
           </CartoonButton>
-          <CartoonButton color="green" size="md" className="flex-1" onClick={() => onConfirm()}>
+          <CartoonButton color="green" size="md" className="flex-1" disabled={!present} onClick={() => onConfirm()}>
             Xác nhận
           </CartoonButton>
         </div>

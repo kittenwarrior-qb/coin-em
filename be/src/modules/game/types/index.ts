@@ -1,3 +1,4 @@
+import type { CoinCycle } from '../services/CoinCycle'
 // Game Types
 export type GamePhase =
   | 'role-reveal'
@@ -30,6 +31,7 @@ export enum Role {
 }
 
 export interface Player {
+  session?: { tokenHash: string; generation: number }
   socketId: string
   userId: string
   deviceId?: string
@@ -62,6 +64,21 @@ export interface RoomSettings {
 }
 
 export interface Room {
+  catalogVersion?: string
+  roundLimit?: number | null
+  roundLimitReceipts?: { requestId: string; actorId: string; limit: number | null; expectedRevision: number }[]
+  revision?: number
+  phaseInstance?: string
+  pendingAutoAdvance?: {
+    kind: 'card' | 'night'
+    dueAt: number
+    phase: GamePhase
+    phaseInstance?: string
+    round: number
+    narratorId: string
+  } | null
+  rulesVersion?: string
+  coinCycle?: CoinCycle
   id: string
   host: string // userId
   players: Player[]

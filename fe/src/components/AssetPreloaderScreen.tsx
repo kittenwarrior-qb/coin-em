@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import type { PreloadState } from '@/hooks/useAssetPreloader'
+import { useControlTheme } from '@/components/cartoon/controlThemeContext'
+import { themeBackdrop, themeLogo, isBrandTheme } from '@/components/cartoon/controlThemes'
 
 interface Rect { left: number; top: number; w: number; h: number }
 
@@ -11,6 +13,8 @@ interface Props {
 }
 
 export function AssetPreloaderScreen({ state, onExited, onFullyGone }: Props) {
+  const theme = useControlTheme()
+  const themed = theme !== 'legacy'
   const { progress, done } = state
   const [showFinished, setShowFinished] = useState(false)
   const [rippling, setRippling] = useState(false)
@@ -71,21 +75,22 @@ export function AssetPreloaderScreen({ state, onExited, onFullyGone }: Props) {
   return (
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center"
-      style={{ background: 'var(--c-bg)' }}
+      data-ui-screen="loading"
+      style={{ background: themed ? 'var(--brand-ivory)' : 'var(--c-bg)' }}
     >
       <div style={{ position: 'relative', width: '100%', maxWidth: 430, height: '100dvh', overflow: 'hidden' }}>
 
         {/* Layer 1: home background */}
         <div style={{
           position: 'absolute', inset: 0,
-          backgroundImage: 'url(/cartoon/ui/home-bg.webp)',
+          backgroundImage: themeBackdrop(theme, 'url(/cartoon/ui/home-bg.webp)'),
           backgroundSize: 'cover',
           backgroundPosition: 'center top',
         }} />
 
         {/* Layer 2: solid cover — fades out to reveal home-bg (GPU-compositable opacity, no clip-path) */}
         <motion.div
-          style={{ position: 'absolute', inset: 0, background: '#1695b1' }}
+          style={{ position: 'absolute', inset: 0, background: themed ? 'var(--brand-mint-soft)' : '#1695b1' }}
           animate={{ opacity: rippling ? 0 : 1 }}
           transition={{ duration: 0.55, ease: [0.85, 0, 0.15, 1] }}
           onAnimationComplete={() => { if (rippling) finishSplash() }}
@@ -100,9 +105,9 @@ export function AssetPreloaderScreen({ state, onExited, onFullyGone }: Props) {
           {!rippling && (
             <img
               ref={splashLogoRef}
-              src="/emcoin_logo.png"
+              src={themeLogo(theme)}
               alt="EmCoin"
-              style={{ height: 64, objectFit: 'contain', opacity: rippling ? 0 : 1 }}
+              style={{ height: isBrandTheme(theme) ? undefined : 64, width: isBrandTheme(theme) ? 'min(84vw, 360px)' : undefined, objectFit: 'contain', opacity: rippling ? 0 : 1 }}
             />
           )}
           {rippling && <div style={{ height: 64 }} />}
@@ -115,16 +120,16 @@ export function AssetPreloaderScreen({ state, onExited, onFullyGone }: Props) {
             <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.08)' }}>
               <motion.div
                 className="h-full rounded-full"
-                style={{ background: '#41e4ed' }}
+                style={{ background: themed ? 'var(--brand-mint)' : '#41e4ed' }}
                 animate={{ width: `${progress}%` }}
                 transition={{ ease: 'easeOut', duration: 0.3 }}
               />
             </div>
-            <p className="font-display text-base" style={{ color: '#fff' }}>
+            <p className="font-display text-base" style={{ color: themed ? 'var(--brand-ink)' : '#fff' }}>
               {showFinished ? 'Finished' : `${state.loaded}/${state.total}`}
             </p>
             {!showFinished && state.currentFile ? (
-              <p className="font-body text-[10px] opacity-60 truncate w-48 text-center" style={{ color: '#fff' }}>
+              <p className="font-body text-[10px] opacity-60 truncate w-48 text-center" style={{ color: themed ? 'var(--brand-ink)' : '#fff' }}>
                 {state.currentFile}
               </p>
             ) : null}
@@ -135,7 +140,7 @@ export function AssetPreloaderScreen({ state, onExited, onFullyGone }: Props) {
       {/* Flying logo — fixed, animates from splash center to home-logo center simultaneously with circle */}
       {rippling && splashRect && targetRect && (
         <motion.img
-          src="/emcoin_logo.png"
+          src={themeLogo(theme)}
           alt=""
           style={{
             position: 'fixed',

@@ -1,7 +1,7 @@
 # R13 Night action integrity
 
 **Priority:** P0  
-**Status:** planned  
+**Status:** in progress
 **Owner:** Codex implementation  
 **Reviewer:** Claude audit  
 **Dependencies:** R01, R12, R07
@@ -59,9 +59,11 @@ Do not invent event names, schema fields, phase transitions, card IDs, or rule o
 
 ## Open questions
 
-Blocked bởi OQ-02/OQ-04: targets, heal scope, tie/zero/disconnect, Guide mute.
+Owner-approved web baseline giữ target restrictions/shared night slot và heal-before-silence hiện tại; không tự thêm future protection, multi-actor resolver hoặc tie policy mới. Outcomes khác vẫn cần ADR riêng.
 
 ## Implementation plan
+
+Plan revision 2026-10-02: ADR `docs/adr/R01-web-coin60-baseline-approved.md` supersedes the proposed new multi-actor resolver. Characterize and secure the approved shared-slot behavior first; no new outcome or coin reward is introduced. Add `be/tests/unit/ApprovedNightBaseline.test.ts` alongside R27. Stale action envelopes and full socket/fault matrix remain dependencies on R04/R07.
 
 1. Characterize Heal, Silence, Vote and reward behavior, including multiple actors and missing/disconnected targets.
 2. Wait for OQ-02/OQ-04 to specify targets, protection order, tie/zero/disconnect and Guide behavior; make each unresolved outcome blocked.
@@ -71,6 +73,8 @@ Blocked bởi OQ-02/OQ-04: targets, heal scope, tie/zero/disconnect, Guide mute.
 6. Do not change rewards or public secrecy until R14 and the approved rule fixture consume the resolver output.
 
 ## Implementation report
+
+2026-10-02 — Characterization fixtures for 5–10 seats: phase/actor/self/public/missing target rejection, immutable rejected state, exactly one shared Silence completion (including two Silencers), self-heal, duplicate Heal, frozen heal-before-Silence outcome and no new Coin minting. This is not a new resolver and does not certify the complete transport/fault matrix.
 
 <!-- Codex updates this after implementation: changed files, invariant preserved, commands and results. -->
 

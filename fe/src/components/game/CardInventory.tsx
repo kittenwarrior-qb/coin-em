@@ -1,44 +1,19 @@
-import { useState } from 'react'
+import { EmcoinImage } from '@/components/cartoon/EmcoinImage'
+import { useId, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CartoonButton, CartoonCircleButton } from '@/components/cartoon'
 import { FlipCard } from './FlipCard'
 import type { CardData, CardCategory, EmotionSubType, SituationSubType } from '@/stores/types'
+import { usePopupLifecycle } from '@/features/overlays/usePopupLifecycle'
 
-// ─── Card data builder (module-level singleton) ───────────────────────────────
-import { CARD_IMAGES } from '@/constants/cardImages'
-
-function buildCards() {
-  const make = (key: string, url: string, cat: CardCategory, back: string) =>
-    ({ id: `${cat}-${key}`, frontImage: url, backImage: back, category: cat } as CardData)
-
-  const roles = Object.entries(CARD_IMAGES.roles)
-    .filter(([k]) => k !== 'back')
-    .map(([k, u]) => make(k, u, 'role', CARD_IMAGES.roles.back))
-
-  const allSituation = Object.entries(CARD_IMAGES.situation).filter(([k]) => k !== 'back').map(([k, u]) => make(k, u, 'situation', CARD_IMAGES.situation.back))
-  // TH1-TH13 = Nhẹ, TH14-TH24 = Vừa, TH25-TH32 = Nhạy cảm
-  const situationLight     = allSituation.filter(c => { const n = parseInt(c.id.replace('situation-TH', '')); return n >= 1 && n <= 13 })
-  const situationMedium    = allSituation.filter(c => { const n = parseInt(c.id.replace('situation-TH', '')); return n >= 14 && n <= 24 })
-  const situationSensitive = allSituation.filter(c => { const n = parseInt(c.id.replace('situation-TH', '')); return n >= 25 })
-
-  const reflection = Object.entries(CARD_IMAGES.reflection).filter(([k]) => k !== 'back').map(([k, u]) => make(k, u, 'reflection', CARD_IMAGES.reflection.back))
-  const selfcare   = Object.entries(CARD_IMAGES.selfcare).filter(([k]) => k !== 'back').map(([k, u]) => make(k, u, 'selfcare', CARD_IMAGES.selfcare.back))
-
-  const emotionBasic    = Object.entries(CARD_IMAGES.emotionBasic).map(([k, imgs]) => ({ id: `emotion-basic-${k}`, frontImage: imgs.front, backImage: imgs.back, category: 'emotion' as CardCategory, subType: 'basic' as EmotionSubType }))
-  const emotionLight    = CARD_IMAGES.emotionLight.map((imgs, i) => ({ id: `emotion-light-${i+1}`, frontImage: imgs.front, backImage: imgs.back, category: 'emotion' as CardCategory, subType: 'light' as EmotionSubType }))
-  const emotionStrong   = CARD_IMAGES.emotionStrong.map((imgs, i) => ({ id: `emotion-strong-${i+1}`, frontImage: imgs.front, backImage: imgs.back, category: 'emotion' as CardCategory, subType: 'strong' as EmotionSubType }))
-  const emotionAdvanced = CARD_IMAGES.emotionAdvanced.map((imgs, i) => ({ id: `emotion-advanced-${i+1}`, frontImage: imgs.front, backImage: imgs.back, category: 'emotion' as CardCategory, subType: 'advanced' as EmotionSubType }))
-
-  return {
-    roles,
-    situation: allSituation, reflection, selfcare,
-    situationByType: { light: situationLight, medium: situationMedium, sensitive: situationSensitive },
-    emotion: [...emotionBasic, ...emotionLight, ...emotionStrong, ...emotionAdvanced],
-    emotionsByType: { basic: emotionBasic, light: emotionLight, strong: emotionStrong, advanced: emotionAdvanced },
-  }
-}
-
-export const CARD_DATA = buildCards()
+import { useRoomCatalog } from '@/features/game/catalog/roomCatalogClient'
+import { protectedCardAssets } from '@/assets/protectedCardAssets'
+import { useControlTheme } from '@/components/cartoon/controlThemeContext'
+import { themePanel } from '@/components/cartoon/controlThemes'
+import { isBrandTheme } from '@/components/cartoon/controlThemes'
+import { X } from 'lucide-react'
+import { CardFaceImage } from './CardFaceImage'
+import { cardImageFit, pdfCardAspect } from '@/features/game/catalog/cardImageLayout'
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -65,7 +40,7 @@ const EMOTION_TABS: { key: EmotionSubType; label: string }[] = [
 
 interface CardInventoryProps {
   onClose: () => void
-  onSelectCard?: (card: CardData) => void
+  onSelectCard?: (card: CardData) => Promise<boolean> | void
   allowedCategory?: CardCategory
   allowedEmotionGroups?: ('basic' | 'light' | 'strong' | 'advanced')[]
   allowedSituationGroups?: ('light' | 'medium' | 'sensitive')[]
@@ -73,11 +48,20 @@ interface CardInventoryProps {
 }
 
 export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedEmotionGroups, allowedSituationGroups, showConfirmButton = false }: CardInventoryProps) {
+  const { data: CARD_DATA, metadata } = useRoomCatalog()
+  const captionId = useId()
+  const theme = useControlTheme()
   const [activeTab, setActiveTab]       = useState<CardCategory>(allowedCategory ?? 'role')
   const [situationSub, setSituationSub] = useState<SituationSubType>('light')
   const [emotionSub, setEmotionSub]     = useState<EmotionSubType>('basic')
   const [preview, setPreview]           = useState<CardData | null>(null)
   const [previewDir, setPreviewDir]     = useState<1 | -1>(1)
+  const [pending, setPending] = useState(false)
+  const pendingRef = useRef(false)
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const previewRef = useRef<HTMLDivElement>(null)
+  usePopupLifecycle(dialogRef, true, { onClose, persistent: pending })
+  usePopupLifecycle(previewRef, !!preview, { onClose: () => setPreview(null), persistent: pending })
 
   // Filter tabs based on allowed groups
   const allowedEmotionTabs = EMOTION_TABS.filter(t =>
@@ -98,6 +82,7 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedE
     CARD_DATA[activeTab as 'reflection' | 'selfcare']
 
   const previewIndex = preview ? cards.findIndex(c => c.id === preview.id) : -1
+  const previewAssets = preview ? protectedCardAssets(preview.id) ?? preview : null
 
   const navigatePreview = (dir: 1 | -1) => {
     if (previewIndex < 0) return
@@ -111,18 +96,27 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedE
     setPreview(card)
   }
 
-  const handleConfirm = (card: CardData) => {
-    if (onSelectCard) { onSelectCard(card); onClose() }
+  const handleConfirm = async (card: CardData) => {
+    if (!onSelectCard || pendingRef.current) return
+    pendingRef.current = true
+    setPending(true)
+    try { if ((await onSelectCard(card)) === true) onClose() }
+    finally { pendingRef.current = false; setPending(false) }
   }
 
   return (
     <motion.div
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Bộ thẻ"
+      tabIndex={-1}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/65"
       transition={{ duration: 0.15 }}
-      onClick={onClose}
+      onClick={pending ? undefined : onClose}
     >
       {/* Constrain to mobile panel width */}
       <div className="relative w-full h-full flex items-center justify-center" style={{ maxWidth: 430 }}>
@@ -138,23 +132,25 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedE
         {/* Panel-Teal background */}
         <div
           className="flex flex-col min-h-0"
+          data-ui-surface="modal"
           style={{
-            borderImage: 'url(/cartoon/ui/Panel-Teal.png) 120 fill / 40px / 0px stretch',
+            borderImage: themePanel(theme),
           }}
         >
           {/* Inner clip layer — bo góc để content không tràn ra ngoài border-image */}
-          <div className="flex flex-col min-h-0 overflow-hidden p-4 pt-5" style={{ borderRadius: '28px', margin: '8px' }}>
+          <div className="flex flex-col min-h-0 overflow-hidden p-4 pt-5 [&>*:not([data-testid=inventory-scroll])]:shrink-0" style={{ borderRadius: '28px', margin: '8px', maxHeight: 'calc(100dvh - 64px)' }}>
 
             {/* Title */}
-            <h2 className="font-display text-2xl text-[var(--c-pink)] text-center mb-3">Bộ thẻ</h2>
+            <h2 data-ui-ink="primary" className="font-display text-2xl text-[var(--c-pink)] text-center mb-3">Bộ thẻ</h2>
 
             {/* Category tabs */}
             {!allowedCategory && (
-              <div className="flex bg-[var(--c-gray-pale)] rounded-t-lg overflow-hidden mb-0">
+              <div data-ui-chrome="inventory-tabs" className="flex bg-[var(--c-gray-pale)] rounded-t-lg overflow-hidden mb-0">
                 {TABS.map(t => (
                   <button
                     key={t.key}
                     onClick={() => setActiveTab(t.key)}
+                    aria-pressed={activeTab === t.key}
                     className={[
                       'flex-1 py-2 font-display text-xs transition-colors',
                       activeTab === t.key
@@ -170,11 +166,12 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedE
 
             {/* Situation sub-tabs — ẩn nếu chỉ có 1 nhóm được phép */}
             {activeTab === 'situation' && allowedSituationTabs.length > 1 && (
-              <div className="flex bg-[var(--c-sky-mist)] px-2 rounded-md">
+              <div data-ui-chrome="inventory-tabs" className="flex bg-[var(--c-sky-mist)] px-2 rounded-md">
                 {allowedSituationTabs.map(t => (
                   <button
                     key={t.key}
                     onClick={() => setSituationSub(t.key)}
+                    aria-pressed={effectiveSituationSub === t.key}
                     className={[
                       'flex-1 py-1.5 font-display text-[10px] transition-colors',
                       effectiveSituationSub === t.key
@@ -190,11 +187,12 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedE
 
             {/* Emotion sub-tabs — ẩn nếu chỉ có 1 nhóm được phép */}
             {activeTab === 'emotion' && allowedEmotionTabs.length > 1 && (
-              <div className="flex bg-[var(--c-sky-mist)] px-2 rounded-md">
+              <div data-ui-chrome="inventory-tabs" className="flex bg-[var(--c-sky-mist)] px-2 rounded-md">
                 {allowedEmotionTabs.map(t => (
                   <button
                     key={t.key}
                     onClick={() => setEmotionSub(t.key)}
+                    aria-pressed={effectiveEmotionSub === t.key}
                     className={[
                       'flex-1 py-1.5 font-display text-[10px] transition-colors',
                       effectiveEmotionSub === t.key
@@ -210,26 +208,30 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedE
 
             {/* Grid — cố định 4 hàng */}
             <div
-              className="overflow-y-auto scroll-cartoon py-3"
-              style={{ height: '60vh', minHeight: '60vh', maxHeight: '60vh' }}
+              data-testid="inventory-scroll"
+              className="min-h-0 overflow-y-auto overscroll-contain scroll-cartoon py-3"
+              style={{ height: isBrandTheme(theme) ? undefined : '60dvh', maxHeight: '60dvh' }}
             >
-              <div className="grid grid-cols-4 gap-2">
+              <div className={`grid ${isBrandTheme(theme) ? 'grid-cols-3 gap-3' : 'grid-cols-4 gap-2'}`}>
                 {cards.map((card, index) => (
                   <div key={card.id} className="flex flex-col items-center gap-1">
                     <motion.button
+                      aria-label={card.id}
+                      aria-describedby={metadata ? `${captionId}-${card.id}` : undefined}
+                      style={{ aspectRatio: pdfCardAspect(card.frontImage) }}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => handleCardClick(card)}
                       className={[
-                        'aspect-[2/3] w-full rounded-[14px] border overflow-hidden',
+                        'relative aspect-[2/3] w-full rounded-[14px] border overflow-hidden',
                         preview?.id === card.id
                           ? 'border-[var(--c-blue-mid)] shadow-cartoon'
                           : 'border-[var(--c-black)] shadow-cartoon-sm',
                       ].join(' ')}
                     >
-                      <img src={card.frontImage} alt={card.id} className="w-full h-full object-cover" draggable={false} />
+                      <CardFaceImage src={protectedCardAssets(card.id)?.frontImage ?? card.frontImage} alt={card.id} className="w-full h-full" style={{ objectFit: cardImageFit(card.frontImage) }} draggable={false} loading="lazy" decoding="async" />
                     </motion.button>
-                    <span className="font-body text-[9px] text-[var(--c-gray)] leading-none">Thẻ {index + 1}</span>
+                    <span id={`${captionId}-${card.id}`} className={metadata ? 'font-body text-[11px] text-[var(--brand-ink)] leading-tight text-center' : 'font-body text-[9px] text-[var(--c-gray)] leading-none'}>{metadata?.find(item => item.id === card.id)?.name ?? `Thẻ ${index + 1}`}</span>
                   </div>
                 ))}
               </div>
@@ -244,15 +246,16 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedE
             color="blue-teal"
             size="sm"
             onClick={onClose}
+            disabled={pending}
             aria-label="Đóng"
             className="!h-8 !w-8"
           >
-            <img
-              src="/cartoon/icons/X-Icon-Rounded.svg"
+            {isBrandTheme(theme) ? <X size={18} aria-hidden="true" /> : <EmcoinImage
+              src="/emcoin/icons/orbit/close.svg"
               alt="close"
               className="w-[33%] h-[33%] object-contain brightness-0 invert"
               draggable={false}
-            />
+            />}
           </CartoonCircleButton>
         </div>
       </motion.div>
@@ -262,21 +265,26 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedE
       <AnimatePresence>
         {preview && (
           <motion.div
+            ref={previewRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Xem thẻ"
+            tabIndex={-1}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="absolute inset-0 z-[60] flex items-center justify-center bg-black/40"
             style={{ maxWidth: 430, margin: '0 auto' }}
-            onClick={e => { e.stopPropagation(); setPreview(null) }}
+            onClick={e => { e.stopPropagation(); if (!pending) setPreview(null) }}
           >
             {/* Prev button */}
             <button
               className="absolute left-2 z-10 p-2 disabled:opacity-20 transition-opacity"
               onClick={e => { e.stopPropagation(); navigatePreview(-1) }}
-              disabled={previewIndex <= 0}
+              disabled={pending || previewIndex <= 0}
               aria-label="Thẻ trước"
             >
-              <img src="/cartoon/icons/Arrow---Right.svg" alt="prev" className="w-8 h-8" style={{ transform: 'scaleX(-1)', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.4))' }} draggable={false} />
+              <EmcoinImage src="/emcoin/icons/orbit/arrowRight.svg" alt="prev" className="w-8 h-8" style={{ transform: 'scaleX(-1)', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.4))' }} draggable={false} />
             </button>
 
             {/* Card with slide transition */}
@@ -293,7 +301,7 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedE
                 animate="center"
                 exit="exit"
                 transition={{ duration: 0.16, ease: [0.25, 0.46, 0.45, 0.94] }}
-                drag="x"
+                drag={pending ? false : 'x'}
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={0.25}
                 onDragEnd={(_, info) => {
@@ -304,11 +312,11 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedE
                 className="flex flex-col items-center"
               >
                 <FlipCard
-                  frontImage={preview.frontImage}
-                  backImage={preview.backImage}
+                  frontImage={previewAssets!.frontImage}
+                  backImage={previewAssets!.backImage}
                   altText={preview.id}
                   size="large"
-                  onClose={() => setPreview(null)}
+                  onClose={pending ? undefined : () => setPreview(null)}
                 />
                 {showConfirmButton && (
                   <div className="mt-12">
@@ -317,6 +325,7 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedE
                       size="sm"
                       onClick={e => { e.stopPropagation(); handleConfirm(preview) }}
                       data-testid="btn-confirm-preview-card"
+                      pending={pending}
                     >
                       Chọn
                     </CartoonButton>
@@ -329,10 +338,10 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedE
             <button
               className="absolute right-2 z-10 p-2 disabled:opacity-20 transition-opacity"
               onClick={e => { e.stopPropagation(); navigatePreview(1) }}
-              disabled={previewIndex >= cards.length - 1}
+              disabled={pending || previewIndex >= cards.length - 1}
               aria-label="Thẻ tiếp"
             >
-              <img src="/cartoon/icons/Arrow---Right.svg" alt="next" className="w-8 h-8" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.4))' }} draggable={false} />
+              <EmcoinImage src="/emcoin/icons/orbit/arrowRight.svg" alt="next" className="w-8 h-8" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.4))' }} draggable={false} />
             </button>
 
             {/* Counter */}

@@ -26,11 +26,11 @@ describe('Coin Reward System', () => {
 
       assertThat(result).isSuccessful()
 
+      expect(result.room!.rulesVersion).toBe('web-16-coin60/v1')
       result.room!.players.forEach(player => {
-        expect(player.coins.red).toBe(3)
-        expect(player.coins.yellow).toBeGreaterThanOrEqual(5)
-        expect(player.coins.yellow).toBeLessThanOrEqual(10)
-        expect(player.coins.green).toBe(0)
+        expect(player.coins).toEqual(player.isSender
+          ? { red: 20, green: 0, yellow: 0 }
+          : { red: 0, green: 3, yellow: 3 })
       })
     })
 
@@ -38,7 +38,7 @@ describe('Coin Reward System', () => {
       { playerCount: 5 },
       { playerCount: 7 },
       { playerCount: 10 },
-    ])('should give random 5-10 yellow coins for $playerCount players', ({ playerCount }) => {
+    ])('should divide 20 green and yellow coins for $playerCount players', ({ playerCount }) => {
       const room = new RoomBuilder()
         .withPlayers(playerCount)
         .build()
@@ -48,9 +48,10 @@ describe('Coin Reward System', () => {
       assertThat(result).isSuccessful()
 
       result.room!.players.forEach(player => {
-        expect(player.coins.yellow).toBeGreaterThanOrEqual(5)
-        expect(player.coins.yellow).toBeLessThanOrEqual(10)
+        expect(player.coins.yellow).toBe(player.isSender ? 0 : Math.floor(20 / (playerCount - 1)))
+        expect(player.coins.green).toBe(player.coins.yellow)
       })
+      expect(result.room!.coinCycle!.reserve.yellow).toBe(20 % (playerCount - 1))
     })
   })
 

@@ -1,7 +1,7 @@
 # R03 Test harness isolation
 
 **Priority:** P0  
-**Status:** planned  
+**Status:** qa
 **Owner:** Codex implementation  
 **Reviewer:** Claude audit  
 **Dependencies:** R00
@@ -63,6 +63,9 @@ Không có; vẫn phải giữ dữ liệu working tree ngoài test root an toà
 
 ## Implementation plan
 
+Plan revision 2026-10-01: bổ sung `storageKeys.ts`, RoomRepository và socket handler/rate-limit lifecycle vào scope để test dùng cùng namespace và teardown của registration production. Không đổi schema hay key production khi env namespace trống. Unit/legacy suites vẫn mock Redis; chưa nhận đó là bằng chứng Redis thật.
+E2E helper PlayerContext được phép nhận BASE_URL thay hardcode localhost:5173 để chạy trên port local riêng, tránh backend đang có ở port 3001; chỉ sửa plumbing test, không thay luật/assertion để che lỗi.
+
 1. Map all current filesystem, clock, Redis and process globals touched by setup, persistence and integration/advanced tests.
 2. Introduce a per-run test context that supplies an explicit temporary storage root, Redis namespace, clock and handler server factory; reject production-like roots.
 3. Migrate one representative unit, integration and advanced test to the context before moving the remaining suites.
@@ -72,11 +75,22 @@ Không có; vẫn phải giữ dữ liệu working tree ngoài test root an toà
 
 ## Implementation report
 
-<!-- Codex updates this after implementation: changed files, invariant preserved, commands and results. -->
+2026-10-01 — Implemented locally.
+
+- Setup cấp root tạm duy nhất mỗi test file và Redis key namespace trước khi import persistence; cleanup xác minh root, restore mocks/clock và huỷ debounce trước khi dọn.
+- Persistence nhận ROOM_DATA_DIR; storageKeys dùng namespace env, mặc định production giữ `room:`/`rooms:index`.
+- Factory loopback/random-port đăng ký đầy đủ production room/game/player handlers. Integration/socket-game, reconnect/network và load/stress đã chuyển sang factory; close chờ server shutdown và huỷ disconnect/cleanup/game timers.
+- Rate limiter có teardown theo socket; fake-clock regression bật rate limit thật. Persistence crash test gọi actual loadRooms thay vì tự dựng loader trong test; toàn bộ filesystem test dùng root cấp bởi setup.
+- Regression mới kiểm root/namespace, cancel debounce và JSON fixture restore/checksum → repository → get_room_state socket thật. R28 vẫn phụ trách Redis thật và lỗi storage/crash nhiều process.
+- Bật lại hai integration test từng skip: join vào phòng đang chơi và start khi thiếu người. Listener đăng ký trước emit, chờ room_state thay sleep; cả hai PASS qua full-handler factory.
 
 ## QA report
 
-<!-- QA owner records environment, test matrix, failures, visual/device evidence and final result. -->
+2026-10-01 — BE lint/build PASS. Full suite sau migration full-handler factory: 21 files PASS, 292 passed, 2 legacy skipped (294 total); recovery/storage regression PASS. Hai full-suite run đồng thời PASS cùng kết quả (19.31s/19.13s); aggregate SHA-256 trên 364 file `be/data` trước/sau không đổi: `4252b1c2b4e2e87563cccc781767d52fe54bdc2ab2b5146044eabaf373c682fe`. Cần independent review; không tuyên bố E2E/Redis thật đã pass.
+
+Sau khi bật lại test skip, riêng socket integration PASS 9/9. Browser E2E chưa chạy: lệnh khởi động backend test riêng bị automatic approval review từ chối với thông báo `blocked by policy`, không có lý do chi tiết. Frontend thử nghiệm đã được dừng. Không dùng backend có sẵn ở port 3001 hoặc dữ liệu thật để thay thế.
+
+Final regression 2026-10-01: full backend PASS 21 files, **294/294 tests**, không còn skipped; thời gian 14.65s. `git diff --check` PASS.
 
 ## Audit report
 

@@ -18,7 +18,7 @@ export class ShareReflectionCommand implements ICommand {
 
     // Give +5 yellow immediately
     const updatedPlayers = room.players.map((p) => {
-      if (p.userId === action.actorId) {
+      if (!room.coinCycle && p.userId === action.actorId) {
         return {
           ...p,
           coins: {
@@ -40,7 +40,7 @@ export class ShareReflectionCommand implements ICommand {
           type: 'SHARE_REFLECTION',
           actorId: action.actorId,
           timestamp: Date.now(),
-          data: { bonus: 5, message: action.data?.message },
+          data: { bonus: room.coinCycle ? 0 : 5, message: action.data?.message },
         },
       ],
     }

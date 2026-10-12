@@ -1,3 +1,4 @@
+import { EmcoinImage } from '@/components/cartoon/EmcoinImage'
 /**
  * CartoonSoundButton / CartoonMusicButton
  * Replicates SoundButton.cs + MusicButton.cs + SpriteSwapper.cs
@@ -47,8 +48,8 @@ export function CartoonSoundButton({ size = 'md', className, onToggle }: Cartoon
       aria-label={on ? 'Tắt âm thanh' : 'Bật âm thanh'}
       className={cn('transition-all', className)}
     >
-      <img
-        src={on ? '/cartoon/icons/Sound-On.svg' : '/cartoon/icons/Sound-Off.svg'}
+      <EmcoinImage
+        src={on ? '/emcoin/icons/orbit/sound.svg' : '/emcoin/icons/orbit/mute.svg'}
         alt={on ? 'Sound On' : 'Sound Off'}
         className="btn-icon brightness-0 invert"
       />
@@ -83,8 +84,8 @@ export function CartoonMusicButton({ size = 'md', className, onToggle }: Cartoon
       aria-label={on ? 'Tắt nhạc' : 'Bật nhạc'}
       className={cn('transition-all', className)}
     >
-      <img
-        src={on ? '/cartoon/icons/Music.svg' : '/cartoon/icons/Sound-Off.svg'}
+      <EmcoinImage
+        src={on ? '/emcoin/icons/orbit/music.svg' : '/emcoin/icons/orbit/mute.svg'}
         alt={on ? 'Music On' : 'Music Off'}
         className="btn-icon brightness-0 invert"
       />

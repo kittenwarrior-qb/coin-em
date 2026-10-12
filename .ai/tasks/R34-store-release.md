@@ -72,6 +72,10 @@ Blocked by OQ-08/OQ-10 and current official-store verification; no submission/si
 
 ## Implementation report
 
+### Plan revision 2026-10-12 — hướng dẫn enrollment và store gates
+
+Owner chưa có tài khoản Google Play Console/Apple Developer hoặc iOS build environment và yêu cầu hướng dẫn. `docs/ops/mobile-release-roadmap.md` ghi setup theo nguồn chính thức, Android trước/iOS sau, testing/account/signing/privacy/UGC/Families gates. Voice scope mới đã chốt nhưng chưa implement; TestFlight không thay App Review. Status vẫn planned, không tạo tài khoản/thanh toán/ký/submit hay khẳng định đã được duyệt.
+
 <!-- Codex updates this after implementation: changed files, invariant preserved, commands and results. -->
 
 ## QA report

@@ -1,4 +1,19 @@
 @import "tailwindcss";
+@import "./styles/mintBlushTheme.css";
+@import "./styles/brandThemes.css";
+@import "./styles/prototypeFidelity.css";
+@import "./styles/gameplayFidelity.css";
+@import "./styles/screenRefinement.css";
+
+/* Only migrated, non-card controls opt in. No global/game palette override. */
+.cartoon-control[data-control-theme="mint-blush"]:focus-visible {
+  outline: var(--control-focus-width) solid var(--ui-brand-focus);
+  outline-offset: var(--control-focus-offset);
+}
+.cartoon-control[data-control-theme="mint-blush"] .cartoon-pill-badge {
+  background: var(--brand-blush-soft);
+  color: var(--brand-ink);
+}
 
 /* Global safety net: nothing on any page should ever be able to create a
    real horizontal page scrollbar (decorative bleeds, pre-reveal animation
@@ -22,14 +37,6 @@ html, body {
   font-family: 'Cookii';
   src: url('/fonts/Cookii-Display.otf') format('opentype');
   font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'BPreplay';
-  src: url('/fonts/BPreplayExtendedBold.otf') format('opentype');
-  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
@@ -68,6 +75,29 @@ html, body {
 
 /* ─── Cartoon Design Tokens ──────────────────────────────────────────────── */
 :root {
+  /* Owner-selected sky/pink brand seam (R22/R40), scoped to themed controls.
+     Keep legacy/game/Coin colors below independent. Future non-card controls
+     consume semantic --ui-brand-* aliases, never globally replace --c-*. */
+  --brand-sky: #BFEAF1;
+  --brand-sky-soft: #D9F7FB;
+  /* Compatibility aliases for migrated controls; active palette is sky/pink. */
+  --brand-mint: var(--brand-sky);
+  --brand-mint-soft: var(--brand-sky-soft);
+  --brand-blush: #F0BCCB;
+  --brand-blush-soft: #FAE5EC;
+  --brand-ivory: #F7FCFF;
+  --brand-ink: #20557F;
+  --brand-focus: #245F8F;
+  --brand-muted-ink: #45627C;
+  --brand-edge: #5B83A3;
+  --brand-accent-ink: #873D5A;
+  --ui-brand-action-bg: var(--brand-sky);
+  --ui-brand-action-ink: var(--brand-ink);
+  --ui-brand-secondary-bg: var(--brand-blush);
+  --ui-brand-secondary-ink: var(--brand-ink);
+  --ui-brand-surface: var(--brand-ivory);
+  --ui-brand-focus: var(--brand-focus);
+
   /* === Palette (from Cartoon GUI Pack .colors, Unity float→hex) === */
   --c-white:        #FFFFFF;
   --c-black:        #2f76ac;
@@ -115,6 +145,10 @@ html, body {
   --c-bg:           #EEF6FF;
 
   /* === Semantic tokens === */
+  --control-focus-width: 3px;
+  --control-focus-offset: 4px;
+  --control-badge-ink: #e84a5f;
+  --control-badge-bg: #fff1f4;
   --background:     var(--c-bg);
   --foreground:     var(--c-black);
   --card:           var(--c-white);
@@ -169,6 +203,28 @@ html, body {
 }
 
 /* ─── Tailwind v4 theme mapping ──────────────────────────────────────────── */
+.cartoon-control:focus-visible {
+  outline: var(--control-focus-width) solid var(--c-blue-dark);
+  outline-offset: var(--control-focus-offset);
+  border-radius: var(--radius-full);
+}
+.cartoon-pill-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: translate(12%, -30%) rotate(8deg);
+  pointer-events: none;
+  border: 1px solid var(--control-badge-ink);
+  border-radius: 8px;
+  background: var(--control-badge-bg);
+  color: var(--control-badge-ink);
+  padding: 4px 8px;
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: .04em;
+  box-shadow: 0 4px 10px rgba(232,74,95,.16);
+}
+
 @theme inline {
   /* Colors */
   --color-background:   var(--background);
@@ -506,6 +562,26 @@ html, body {
   }
 
   /* ── Game board animated background ── */
+  /* Preserve the mobile board; only its play area scrolls on short viewports. */
+  .game-shell {
+    padding-top: max(16px, env(safe-area-inset-top));
+    padding-right: max(16px, env(safe-area-inset-right));
+    padding-bottom: calc(64px + env(safe-area-inset-bottom));
+    padding-left: max(16px, env(safe-area-inset-left));
+  }
+  .game-shell > .top-2 { top: calc(8px + env(safe-area-inset-top)); }
+  .game-shell > .bottom-3 { bottom: calc(12px + env(safe-area-inset-bottom)); }
+  .game-board-scroll {
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior-y: contain;
+    scrollbar-width: thin;
+    touch-action: pan-y;
+  }
+  .game-player-layout { min-height: 700px; }
+  .game-player-layout [data-player-token-id] { flex-shrink: 0; }
+  .game-table-content { padding-inline: 8px; }
+
   @keyframes spotlight {
     0%, 100% { opacity: 0.5; }
     25%       { opacity: 0.9; }

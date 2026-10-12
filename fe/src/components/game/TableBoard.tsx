@@ -4,6 +4,8 @@
  */
 import type { CardData, SelectedCards } from '@/stores/types'
 import { CenterBoard } from './CenterBoard'
+import { useControlTheme } from '@/components/cartoon/controlThemeContext'
+import { A_DECOR, isBrandTheme } from '@/components/cartoon/controlThemes'
 
 interface TableBoardProps {
   selectedCards: SelectedCards
@@ -16,14 +18,16 @@ interface TableBoardProps {
 }
 
 export function TableBoard({ selectedCards, phase, revealSituation, previewSituationCard, onCardClick, status, actions }: TableBoardProps) {
+  const theme = useControlTheme()
   return (
     <div className="relative w-full h-full flex items-center justify-center">
       <div
-        className="relative w-full h-full flex flex-col"
+        className="game-table-surface relative w-full h-full flex flex-col"
+        data-surface-theme={theme}
         style={{
-          borderRadius: '5px',
+          borderRadius: theme === 'mint-blush' ? '24px' : '5px',
           overflow: 'hidden',
-          backgroundImage: 'url(/pink_carpet.webp)',
+          backgroundImage: isBrandTheme(theme) ? 'none' : theme === 'mint-blush' ? `url(${A_DECOR.table})` : 'url(/pink_carpet.webp)',
           backgroundSize: '100% 100%',
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center',
@@ -44,7 +48,7 @@ export function TableBoard({ selectedCards, phase, revealSituation, previewSitua
         />
 
         {/* Cards + Actions — centered */}
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center min-h-0 gap-3 px-4 py-5">
+        <div className="game-table-content relative z-10 flex-1 flex flex-col items-center justify-center min-h-0 gap-3 px-4 py-5">
           {status && (
             <div className="w-full">
               {status}

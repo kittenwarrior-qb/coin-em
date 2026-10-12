@@ -22,7 +22,7 @@ help:
 	@echo ""
 	@echo "Maintenance:"
 	@echo "  make clean        - Remove all containers and volumes"
-	@echo "  make backup       - Backup data"
+	@echo "  make backup       - Disabled: owner opted out of room/VPS backups"
 	@echo "  make backup-fixture - Run isolated fixture backup/checksum drill"
 	@echo "  make restore-fixture - Run isolated fixture restore/checksum drill"
 
@@ -59,16 +59,15 @@ clean:
 	docker system prune -f
 
 backup:
-	@mkdir -p ./backup
-	docker cp emcoin-backend-prod:/app/data ./backup/data-$$(date +%Y%m%d-%H%M%S)
-	@echo "Backup completed: ./backup/data-$$(date +%Y%m%d-%H%M%S)"
+	@echo "Backup disabled by owner policy. Existing archives are not modified."
+	@exit 1
 
 # R00 evidence drills. These commands use only a temporary local fixture.
 backup-fixture:
-	@set -eu; d=$$(mktemp -d); trap 'rm -rf "$$d"' EXIT; mkdir -p "$$d/source" "$$d/backup"; printf '%s\n' '{"roomId":"fixture-room","players":[]}' > "$$d/source/room.json"; sha256sum "$$d/source/room.json" > "$$d/source/SHA256SUMS"; cp -a "$$d/source/room.json" "$$d/backup/"; (cd "$$d/backup" && sha256sum -c "../source/SHA256SUMS"); echo "Isolated fixture backup PASS"
+	cd be && npx vitest run tests/integration/recovery-fixture.test.ts -t "restores a checksummed fixture"
 
 restore-fixture:
-	@set -eu; d=$$(mktemp -d); trap 'rm -rf "$$d"' EXIT; mkdir -p "$$d/source" "$$d/backup" "$$d/restored"; printf '%s\n' '{"roomId":"fixture-room","players":[]}' > "$$d/source/room.json"; sha256sum "$$d/source/room.json" > "$$d/source/SHA256SUMS"; cp -a "$$d/source/room.json" "$$d/backup/"; cp -a "$$d/backup/room.json" "$$d/restored/"; (cd "$$d/restored" && sha256sum -c "../source/SHA256SUMS"); grep -q 'fixture-room' "$$d/restored/room.json"; echo "Isolated fixture restore PASS: fixture-room readable"
+	cd be && npx vitest run tests/integration/recovery-fixture.test.ts -t "restores a checksummed fixture"
 
 # Debug
 check-redis:

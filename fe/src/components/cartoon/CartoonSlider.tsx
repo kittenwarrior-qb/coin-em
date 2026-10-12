@@ -10,16 +10,11 @@
  */
 import { forwardRef } from 'react'
 import { cn } from '@/lib/utils'
+import { useControlTheme } from './controlThemeContext'
+import { circleAppearance, legacyStandaloneCircle } from './controlThemes'
 
 type SliderColor = 'red' | 'blue' | 'green' | 'purple' | 'yellow'
 
-const HANDLE_COLOR: Record<SliderColor, string> = {
-  red:    'Red',
-  blue:   'Blue',
-  green:  'Green',
-  purple: 'Purple',
-  yellow: 'Yellow',
-}
 
 const FILL_GRADIENT: Record<SliderColor, string> = {
   red:    'linear-gradient(90deg, #A61932, #EB3C54)',
@@ -36,6 +31,8 @@ interface CartoonSliderProps extends Omit<React.InputHTMLAttributes<HTMLInputEle
 
 export const CartoonSlider = forwardRef<HTMLInputElement, CartoonSliderProps>(
   ({ color = 'blue', showValue, className, value, defaultValue, min = 0, max = 100, ...props }, ref) => {
+    const theme = useControlTheme()
+    const handleSrc = circleAppearance(theme, color, legacyStandaloneCircle(color)).src
     const pct = value !== undefined
       ? ((Number(value) - Number(min)) / (Number(max) - Number(min))) * 100
       : ((Number(defaultValue ?? 50) - Number(min)) / (Number(max) - Number(min))) * 100
@@ -62,7 +59,7 @@ export const CartoonSlider = forwardRef<HTMLInputElement, CartoonSliderProps>(
           {/* Colored fill */}
           <div
             className="h-full rounded-full transition-all duration-150"
-            style={{ width: `${pct}%`, background: FILL_GRADIENT[color] }}
+            style={{ width: `${pct}%`, background: theme === 'mint-blush' ? 'linear-gradient(90deg, #BFEAF1, #D9F7FB)' : theme !== 'legacy' ? 'var(--brand-primary)' : FILL_GRADIENT[color] }}
           />
         </div>
 
@@ -94,7 +91,7 @@ export const CartoonSlider = forwardRef<HTMLInputElement, CartoonSliderProps>(
           <div
             className="absolute inset-0 rounded-full translate-y-1.5"
             style={{
-              backgroundImage: `url(/cartoon/buttons/${HANDLE_COLOR[color]}.png)`,
+              backgroundImage: `url(${handleSrc})`,
               backgroundSize: '100% 100%',
               filter: 'brightness(0) opacity(0.22)',
             }}
@@ -103,7 +100,7 @@ export const CartoonSlider = forwardRef<HTMLInputElement, CartoonSliderProps>(
           <div
             className="absolute inset-0 rounded-full"
             style={{
-              backgroundImage: `url(/cartoon/buttons/${HANDLE_COLOR[color]}.png)`,
+              backgroundImage: `url(${handleSrc})`,
               backgroundSize: '100% 100%',
             }}
           >

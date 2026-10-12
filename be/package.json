@@ -17,7 +17,7 @@
     "test:advanced": "vitest run tests/advanced",
     "test:concurrent": "vitest run tests/advanced/concurrent-actions.test.ts",
     "test:persistence": "vitest run tests/advanced/persistence-failure.test.ts",
-    "test:load": "vitest run tests/advanced/load-stress.test.ts --pool=forks --poolOptions.forks.singleFork",
+    "test:load": "vitest run tests/advanced/load-stress.test.ts --pool=forks --maxWorkers=1 --no-file-parallelism",
     "test:reconnect": "vitest run tests/advanced/reconnect-network.test.ts"
   },
   "dependencies": {
@@ -31,11 +31,12 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^25.6.0",
-    "@vitest/coverage-v8": "^2.1.8",
+    "@vitest/coverage-v8": "5.0.3",
     "cross-env": "^7.0.3",
     "socket.io-client": "^4.7.4",
     "tsx": "^4.21.0",
     "typescript": "^6.0.3",
-    "vitest": "^2.1.8"
+    "vite": "6.4.3",
+    "vitest": "5.0.3"
   }
 }

@@ -1,0 +1,246 @@
+{
+  "version": "catalog-f40519d34526037f0f48983964c8ae27c2f0b3d2b2b35d0508f9c18e28012530",
+  "scope": "actual isolated SQLite/published-only HTTP API proxied to owned frontend; pointer503 fault injection; not deployment/device/native/3D GPU evidence",
+  "results": [
+    {
+      "theme": "emotion-orbit",
+      "width": 320,
+      "height": 400,
+      "name": "gallery",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 320,
+      "height": 400,
+      "name": "preview",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 320,
+      "height": 400,
+      "name": "about-teaser",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 320,
+      "height": 400,
+      "name": "public-menu",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 320,
+      "height": 400,
+      "name": "outage",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 430,
+      "height": 932,
+      "name": "gallery",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 430,
+      "height": 932,
+      "name": "preview",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 430,
+      "height": 932,
+      "name": "about-teaser",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 430,
+      "height": 932,
+      "name": "public-menu",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 430,
+      "height": 932,
+      "name": "outage",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 1280,
+      "height": 900,
+      "name": "gallery",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 1280,
+      "height": 900,
+      "name": "preview",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 1280,
+      "height": 900,
+      "name": "about-teaser",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 1280,
+      "height": 900,
+      "name": "public-menu",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 1280,
+      "height": 900,
+      "name": "outage",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 320,
+      "height": 400,
+      "name": "gallery",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 320,
+      "height": 400,
+      "name": "preview",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 320,
+      "height": 400,
+      "name": "about-teaser",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 320,
+      "height": 400,
+      "name": "public-menu",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 320,
+      "height": 400,
+      "name": "outage",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 430,
+      "height": 932,
+      "name": "gallery",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 430,
+      "height": 932,
+      "name": "preview",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 430,
+      "height": 932,
+      "name": "about-teaser",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 430,
+      "height": 932,
+      "name": "public-menu",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 430,
+      "height": 932,
+      "name": "outage",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 1280,
+      "height": 900,
+      "name": "gallery",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 1280,
+      "height": 900,
+      "name": "preview",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 1280,
+      "height": 900,
+      "name": "about-teaser",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 1280,
+      "height": 900,
+      "name": "public-menu",
+      "result": "passed",
+      "overflowX": false
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 1280,
+      "height": 900,
+      "name": "outage",
+      "result": "passed",
+      "overflowX": false
+    }
+  ]
+}

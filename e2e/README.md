@@ -1,6 +1,18 @@
 # E2E Tests - Multiplayer Game
 
-Production-ready Playwright E2E tests for real-time multiplayer game.
+The legacy Playwright suites below are **not verified against the current rules/session/catalog**. Their historical checkmarks describe intended coverage, not current passing evidence. They contain obsolete selectors, bot shortcuts and random-role skips; do not run them against production or an existing shared local backend.
+
+## Current isolated browser verification
+
+The CI browser job uses this same owned fixture, not the legacy shared-port runner. It installs locked dependencies and Chromium, allocates output under runner temp and uploads synthetic screenshots/traces/reports for three days even on failure. This configuration is locally reviewed/tested; a successful GitHub/Linux run is not claimed. No Redis service, legacy approval bypass or production backend is used.
+
+From `be`, run `node node_modules/vitest/vitest.mjs run --config vitest.browser.config.ts`.
+
+This opt-in suite owns a random loopback production-handler server, test-only temp storage/mock Redis, a private Vite child and Chromium. Two scenarios use 5 and 10 independent real browser guest contexts, no bot or forced role, for UI create/join/start, own-role reveal, narrator-only navigation, synchronized night phase, reload, offline recovery and same-context new-tab replacement. Screenshots/traces/report live in a unique `emcoin-room-browser-qa-*` temp directory printed at completion. External requests are blocked deliberately to exercise CDN-unavailable behavior; rate limiting is disabled by the existing test fixture. This is not full gameplay, real Redis, Safari/physical-device or production readiness evidence.
+
+Legacy config supports desktop Chromium, mobile Chromium and mobile WebKit project definitions. `--list` is read-only and permitted. Execution is refused unless `EMCOIN_LEGACY_E2E_APPROVED=1` and explicit loopback `BASE_URL` are provided by an owner-approved isolated setup; the flag does not itself prove storage isolation. WebKit is not installed/verified on this host. No legacy suite was skipped into a green claim or silently rewritten to bypass the approved rules.
+
+The owned suite also exercises actual previous/next reentry before Coin checkpoints and disabled Narrator navigation while offline, followed by recovery without a phase advance. Its report includes flow stage/failure type and each viewport. These are viewport simulations, not physical mobile devices; random role draws are not forced.
 
 ## 📋 Test Coverage
 
@@ -349,6 +361,6 @@ jobs:
 
 ---
 
-**Status**: Production Ready ✅  
+**Status**: Legacy suites unverified; bounded isolated Chromium scenarios verified separately.
 **Coverage**: 5 test suites, 25+ test cases  
 **Maintainability**: High (using design patterns)

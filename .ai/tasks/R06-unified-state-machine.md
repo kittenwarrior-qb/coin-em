@@ -1,7 +1,7 @@
 # R06 Unified state machine
 
 **Priority:** P0  
-**Status:** planned  
+**Status:** in progress
 **Owner:** Codex implementation  
 **Reviewer:** Claude audit  
 **Dependencies:** R01, R04
@@ -72,7 +72,9 @@ Blocked bởi OQ-01 và OQ-05 cho phase/rollback; chỉ hợp nhất cấu trúc
 
 ## Implementation report
 
-<!-- Codex updates this after implementation: changed files, invariant preserved, commands and results. -->
+Plan revision 2026-10-02: thêm PhaseRegistry.ts, Room phaseInstance và service endGame vào scope. StateMachine/TurnManager dùng một registry; engine NEXT/PREV/END theo cùng approved baseline. Manual end và final-round end dùng cùng domain effect, actor/terminal guards, collect/history và một GAME_ENDED log. Invalid phase bị từ chối, terminal không quay lại role-reveal. ApprovedBaseline test giữ deck/phase/skip/rotation và manual/final end; vẫn chờ toàn bộ R04/shared capability contract và audit.
+
+QA evidence: `docs/qa/2026-10-02-p0-progress.md`.
 
 ## QA report
 

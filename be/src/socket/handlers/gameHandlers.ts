@@ -1,14 +1,22 @@
 import { Server, Socket } from 'socket.io'
+import { operationDiagnostic } from '../../telemetry/operationalDiagnostics'
+import { emitRoomView } from '../emitRoomView'
+import { roomView } from '../../modules/game/services/RoomView'
 import { roomRepository, roomService } from '../../modules/room'
 import { gameService, Role } from '../../modules/game'
 import { rateLimitAction } from '../middleware/rateLimiter'
 import { phaseTimer } from '../../modules/game/PhaseTimer'
+import { inRoomQueue } from '../roomQueue'
+import { receivedCoinTotal } from '../../modules/game/services/CoinCycle'
+import { isCardEnabled, resolveWebCard } from '../../modules/game/services/CardCatalog'
+
+const INTERNAL_ERROR_MESSAGE = 'Chưa thể xác nhận thao tác. Vui lòng kiểm tra lại trạng thái phòng.'
 
 export function registerGameHandlers(io: Server, socket: Socket) {
   /**
    * Start game
    */
-  socket.on('start_game', async ({ roomId }, callback) => {
+  socket.on('start_game', async ({ roomId, expectedRevision }, callback) => {
     try {
       const room = await roomRepository.findByIdFresh(roomId)
       if (!room) {
@@ -28,6 +36,9 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       }
 
       // Start game via engine
+      if (expectedRevision !== undefined && (!Number.isSafeInteger(expectedRevision) || expectedRevision !== (room.revision ?? 0))) {
+        callback?.({ success: false, error: 'ROUND_REVISION_CONFLICT', message: 'Phòng đã thay đổi. Kiểm tra lại số lượt trước khi bắt đầu.', data: roomView(room, hostPlayer.userId) }); return
+      }
       const result = await gameService.startGame(room)
 
       if (!result.success) {
@@ -35,6 +46,8 @@ export function registerGameHandlers(io: Server, socket: Socket) {
           GAME_ALREADY_STARTED: 'Trò chơi đã bắt đầu rồi.',
           NOT_ENOUGH_PLAYERS: 'Cần ít nhất 5 người để bắt đầu.',
           TOO_MANY_PLAYERS: 'Tối đa 10 người chơi.',
+          INVALID_ROUND_LIMIT: 'Số lượt vượt số người hiện có. Quản trò cần chọn lại.',
+          CATALOG_UNAVAILABLE: 'Chưa tải được đúng bộ thẻ của phòng. Chưa bắt đầu trò chơi.',
           ROLE_ASSIGNMENT_FAILED: result.message || 'Không thể chia vai trò.',
         }
         const error = {
@@ -51,33 +64,16 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       await roomRepository.saveAndWait(result.room!)
 
       // Broadcast
-      console.log(`[start_game] Phòng ${roomId} bắt đầu - Roles assigned`)
-      io.to(roomId).emit('game_started', gameService.getPublicState(result.room!))
+      operationDiagnostic('start_game', 'ok')
+      await emitRoomView(io, result.room!, 'game_started')
 
-      // Start phase timer for role-reveal phase
-      phaseTimer.startTimer(roomId, result.room!.phase, () => {
-        // Auto-advance when timer expires
-        const room = roomRepository.findById(roomId)
-        if (room && room.currentNarrator) {
-          gameService.advanceTurn(room, room.currentNarrator).then((advanceResult) => {
-            if (advanceResult.success && advanceResult.room) {
-              roomRepository.saveAndWait(advanceResult.room).catch(err =>
-                console.error(`[phase_timer] Failed to save room ${roomId}:`, err)
-              )
-              io.to(roomId).emit('turn_changed', gameService.getPublicState(advanceResult.room))
-              // Start timer for next phase
-              phaseTimer.startTimer(roomId, advanceResult.room.phase, () => {
-                /* recursive auto-advance */
-              })
-            }
-          })
-        }
-      })
+      // General phase timers stay disabled in the approved manual baseline.
+      phaseTimer.clearTimer(roomId)
 
-      if (callback) callback({ success: true })
-    } catch (error: any) {
-      console.error('[start_game] Error:', error)
-      const err = { success: false, error: 'INTERNAL_ERROR', message: error.message }
+      if (callback) callback({ success: true, data: roomView(result.room!, hostPlayer.userId) })
+    } catch {
+      operationDiagnostic('start_game', 'failed')
+      const err = { success: false, error: 'INTERNAL_ERROR', message: INTERNAL_ERROR_MESSAGE }
       if (callback) callback(err)
       else socket.emit('error', err)
     }
@@ -86,7 +82,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
   /**
    * Advance turn
    */
-  socket.on('next_turn', async ({ roomId, userId, deviceId }, callback) => {
+  socket.on('next_turn', async ({ roomId }, callback) => {
     try {
       const room = await roomRepository.findByIdFresh(roomId)
       if (!room) {
@@ -97,12 +93,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       }
 
       // Find narrator by current socket first, then stable browser identity after reload/reconnect.
-      let narratorPlayer = room.players.find((p) => p.socketId === socket.id)
-      if (!narratorPlayer) {
-        narratorPlayer = room.players.find((p) =>
-          (!!userId && p.userId === userId) || (!!deviceId && p.deviceId === deviceId)
-        )
-      }
+      const narratorPlayer = room.players.find(p => p.socketId === socket.id && !p.isDisconnected)
       if (!narratorPlayer) {
         const error = { success: false, error: 'PLAYER_NOT_FOUND', message: 'Người chơi không tồn tại.' }
         if (callback) callback(error)
@@ -110,27 +101,6 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         return
       }
 
-      if (narratorPlayer.socketId !== socket.id || narratorPlayer.isDisconnected) {
-        const updatedRoom = roomRepository.update(roomId, {
-          players: room.players.map((p) =>
-            p.userId === narratorPlayer!.userId
-              ? {
-                  ...p,
-                  socketId: socket.id,
-                  deviceId: deviceId ?? p.deviceId,
-                  isDisconnected: false,
-                  disconnectedAt: null,
-                  lastSeenAt: Date.now(),
-                }
-              : p
-          ),
-        })
-        if (updatedRoom) {
-          socket.join(roomId)
-          Object.assign(room, updatedRoom)
-          narratorPlayer = updatedRoom.players.find((p) => p.userId === narratorPlayer!.userId) ?? narratorPlayer
-        }
-      }
 
       // Advance turn via engine
       const result = await gameService.advanceTurn(room, narratorPlayer.userId)
@@ -154,43 +124,20 @@ export function registerGameHandlers(io: Server, socket: Socket) {
 
       // Broadcast
       if (result.message === 'GAME_ENDED') {
-        console.log(`[next_turn] Game ended in room ${roomId}`)
+        operationDiagnostic('next_turn', 'ok')
         phaseTimer.clearTimer(roomId) // Clear timer when game ends
-        io.to(roomId).emit('game_ended', gameService.getPublicState(result.room!))
+        await emitRoomView(io, result.room!, 'game_ended')
       } else {
-        console.log(`[next_turn] Room ${roomId} -> Turn ${result.room!.turn}, Phase ${result.room!.phase}`)
-        io.to(roomId).emit('turn_changed', gameService.getPublicState(result.room!))
+        operationDiagnostic('next_turn', 'ok')
+        await emitRoomView(io, result.room!, 'turn_changed')
 
-        // Start phase timer for new phase
-        phaseTimer.startTimer(roomId, result.room!.phase, () => {
-          // Auto-advance when timer expires
-          const room = roomRepository.findById(roomId)
-          if (room && room.currentNarrator) {
-            gameService.advanceTurn(room, room.currentNarrator).then((advanceResult) => {
-              if (advanceResult.success && advanceResult.room) {
-                roomRepository.saveAndWait(advanceResult.room).catch(err =>
-                  console.error(`[phase_timer] Failed to save room ${roomId}:`, err)
-                )
-                if (advanceResult.message === 'GAME_ENDED') {
-                  phaseTimer.clearTimer(roomId)
-                  io.to(roomId).emit('game_ended', gameService.getPublicState(advanceResult.room))
-                } else {
-                  io.to(roomId).emit('turn_changed', gameService.getPublicState(advanceResult.room))
-                  // Recursively start timer for next phase
-                  phaseTimer.startTimer(roomId, advanceResult.room.phase, () => {
-                    /* recursive */
-                  })
-                }
-              }
-            })
-          }
-        })
+        phaseTimer.clearTimer(roomId)
       }
 
-      if (callback) callback({ success: true, data: gameService.getPublicState(result.room!) })
-    } catch (error: any) {
-      console.error('[next_turn] Error:', error)
-      const err = { success: false, error: 'INTERNAL_ERROR', message: error.message }
+      if (callback) callback({ success: true, data: roomView(result.room!, narratorPlayer.userId) })
+    } catch {
+      operationDiagnostic('next_turn', 'failed')
+      const err = { success: false, error: 'INTERNAL_ERROR', message: INTERNAL_ERROR_MESSAGE }
       if (callback) callback(err)
       else socket.emit('error', err)
     }
@@ -199,14 +146,8 @@ export function registerGameHandlers(io: Server, socket: Socket) {
   /**
    * Move back one phase
    */
-  socket.on('prev_turn', async ({ roomId, userId, deviceId }, callback) => {
+  socket.on('prev_turn', async ({ roomId }, callback) => {
     try {
-      console.log('[prev_turn] Received:', {
-        roomId,
-        socketId: socket.id,
-        userId,
-        deviceId,
-      })
       const room = await roomRepository.findByIdFresh(roomId)
       if (!room) {
         const error = { success: false, error: 'ROOM_NOT_FOUND', message: 'PhÃ²ng khÃ´ng tá»“n táº¡i.' }
@@ -215,12 +156,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         return
       }
 
-      let narratorPlayer = room.players.find((p) => p.socketId === socket.id)
-      if (!narratorPlayer) {
-        narratorPlayer = room.players.find((p) =>
-          (!!userId && p.userId === userId) || (!!deviceId && p.deviceId === deviceId)
-        )
-      }
+      const narratorPlayer = room.players.find(p => p.socketId === socket.id && !p.isDisconnected)
       if (!narratorPlayer) {
         const error = { success: false, error: 'PLAYER_NOT_FOUND', message: 'NgÆ°á»i chÆ¡i khÃ´ng tá»“n táº¡i.' }
         if (callback) callback(error)
@@ -228,48 +164,13 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         return
       }
 
-      if (narratorPlayer.socketId !== socket.id || narratorPlayer.isDisconnected) {
-        const updatedRoom = roomRepository.update(roomId, {
-          players: room.players.map((p) =>
-            p.userId === narratorPlayer!.userId
-              ? {
-                  ...p,
-                  socketId: socket.id,
-                  deviceId: deviceId ?? p.deviceId,
-                  isDisconnected: false,
-                  disconnectedAt: null,
-                  lastSeenAt: Date.now(),
-                }
-              : p
-          ),
-        })
-        if (updatedRoom) {
-          socket.join(roomId)
-          Object.assign(room, updatedRoom)
-          narratorPlayer = updatedRoom.players.find((p) => p.userId === narratorPlayer!.userId) ?? narratorPlayer
-        }
-      }
 
       const phaseBefore = room.phase
-      console.log('[prev_turn] Before:', {
-        roomId,
-        turn: room.turn,
-        phase: phaseBefore,
-        currentNarrator: room.currentNarrator,
-        actorUserId: narratorPlayer.userId,
-        actorSocketId: narratorPlayer.socketId,
-      })
 
       const result = await gameService.previousTurn(room, narratorPlayer.userId)
 
       if (!result.success) {
-        console.warn('[prev_turn] Failed:', {
-          roomId,
-          reason: result.error,
-          phase: room.phase,
-          currentNarrator: room.currentNarrator,
-          actorUserId: narratorPlayer.userId,
-        })
+        operationDiagnostic('prev_turn', 'rejected')
         const messages = {
           NOT_NARRATOR: 'Chỉ Quản trò mới có thể chuyển lượt.',
           NO_PREVIOUS_PHASE: 'Không thể quay lại phase trước.',
@@ -287,14 +188,14 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       await roomRepository.saveAndWait(result.room!)
       phaseTimer.clearTimer(roomId)
       socket.join(roomId)
-      const publicState = gameService.getPublicState(result.room!)
-      console.log(`[prev_turn] Room ${roomId}: ${phaseBefore} -> ${result.room!.phase} (turn ${result.room!.turn})`)
-      io.to(roomId).emit('turn_changed', publicState)
+      const publicState = roomView(result.room!, narratorPlayer.userId)
+      operationDiagnostic('prev_turn', 'ok')
+      await emitRoomView(io, result.room!, 'turn_changed')
 
       if (callback) callback({ success: true, data: publicState, previousPhase: phaseBefore, phase: result.room!.phase })
-    } catch (error: any) {
-      console.error('[prev_turn] Error:', error)
-      const err = { success: false, error: 'INTERNAL_ERROR', message: error.message }
+    } catch {
+      operationDiagnostic('prev_turn', 'failed')
+      const err = { success: false, error: 'INTERNAL_ERROR', message: INTERNAL_ERROR_MESSAGE }
       if (callback) callback(err)
       else socket.emit('error', err)
     }
@@ -360,43 +261,29 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       }
 
       // Save room before broadcasting
+      if (result.room!.currentNarrator && ['healer-turn', 'silencer-turn'].includes(result.room!.phase)) {
+        result.room!.pendingAutoAdvance = {
+          kind: 'night', dueAt: Date.now() + 1200, phase: result.room!.phase,
+          phaseInstance: result.room!.phaseInstance, round: result.room!.currentRound,
+          narratorId: result.room!.currentNarrator,
+        }
+      }
       await roomRepository.saveAndWait(result.room!)
 
       // Broadcast night action to all clients
-      console.log(`[night_action] ${action} by ${socket.id} in room ${roomId}`)
-      io.to(roomId).emit('night_action_completed', {
+      operationDiagnostic('night_action', 'ok')
+      await emitRoomView(io, result.room!, 'night_action_completed', {
         action,
         actorId: actor.userId,
         targetId: target.userId,
         actorSocketId: actor.socketId,
-        targetSocketId: target.socketId,
-        room: gameService.getPublicState(result.room!),
-      })
+        targetSocketId: target.socketId,      })
 
       if (callback) callback({ success: true })
 
-      // Auto-advance after healer/silencer acts — narrator doesn't need to tap through these
-      const autoPhase = result.room!.phase
-      const narratorId = result.room!.currentNarrator
-      if (narratorId && (autoPhase === 'healer-turn' || autoPhase === 'silencer-turn')) {
-        setTimeout(async () => {
-          try {
-            const freshRoom = await roomRepository.findByIdFresh(roomId)
-            if (!freshRoom || freshRoom.phase !== autoPhase) return
-            const advResult = await gameService.advanceTurn(freshRoom, narratorId)
-            if (advResult.success && advResult.room) {
-              await roomRepository.saveAndWait(advResult.room)
-              io.to(roomId).emit('turn_changed', gameService.getPublicState(advResult.room))
-              console.log(`[night_action] Auto-advanced ${autoPhase} → ${advResult.room.phase} in room ${roomId}`)
-            }
-          } catch (e) {
-            console.error('[night_action] Auto-advance error:', e)
-          }
-        }, 1200)
-      }
-    } catch (error: any) {
-      console.error('[night_action] Error:', error)
-      const err = { success: false, error: 'INTERNAL_ERROR', message: error.message }
+    } catch {
+      operationDiagnostic('night_action', 'failed')
+      const err = { success: false, error: 'INTERNAL_ERROR', message: INTERNAL_ERROR_MESSAGE }
       if (callback) callback(err)
       else socket.emit('error', err)
     }
@@ -405,15 +292,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
   /**
    * Give coin
    */
-  socket.on('give_coin', async ({ roomId, receiverSocketId, coinType, amount = 1 }, callback) => {
-    // Rate limit: 1 coin per second
-    if (!rateLimitAction(socket, 'give_coin', 1000)) {
-      const error = { success: false, error: 'RATE_LIMITED', message: 'Vui lòng chờ trước khi tặng coin tiếp theo.' }
-      if (callback) callback(error)
-      else socket.emit('error', error)
-      return
-    }
-
+  socket.on('give_coin', async ({ roomId, receiverSocketId, coinType, amount = 1, requestId, round }, callback) => {
     try {
       const room = roomRepository.findById(roomId)
       if (!room) {
@@ -439,7 +318,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         type: 'GIVE_COIN' as const,
         actorId: giver.userId,
         targetId: receiver.userId,
-        data: { coinType, amount },
+        data: { coinType, amount, requestId, round },
       }
 
       // Execute via engine
@@ -452,22 +331,35 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         return
       }
 
-      // Save room
-      roomRepository.save(result.room!)
+      // The engine validates the complete receipt fingerprint, including actor,
+      // target, color, amount and round. Replaying a committed receipt is a read:
+      // it must not consume rate limit, create a revision or replay celebrations.
+      const duplicate = room.coinCycle?.transfers.some(transfer => transfer.id === requestId)
+      if (duplicate) {
+        if (callback) callback({ success: true, data: roomView(room, giver.userId) })
+        return
+      }
+      if (!rateLimitAction(socket, 'give_coin', 1000)) {
+        const error = { success: false, error: 'RATE_LIMITED', message: 'Vui lòng chờ trước khi tặng coin tiếp theo.' }
+        if (callback) callback(error)
+        else socket.emit('error', error)
+        return
+      }
+
+      // Acknowledge only after the critical coin snapshot has been saved.
+      await roomRepository.saveAndWait(result.room!)
 
       // Broadcast
-      console.log(`[give_coin] ${coinType} from ${socket.id} to ${receiverSocketId}`)
-      io.to(roomId).emit('coin_given', {
+      operationDiagnostic('give_coin', 'ok')
+      await emitRoomView(io, result.room!, 'coin_given', {
         giver: giver.userId,
         receiver: receiver.userId,
-        coinType,
-        room: gameService.getPublicState(result.room!),
-      })
+        coinType,      })
 
-      if (callback) callback({ success: true })
-    } catch (error: any) {
-      console.error('[give_coin] Error:', error)
-      const err = { success: false, error: 'INTERNAL_ERROR', message: error.message }
+      if (callback) callback({ success: true, data: roomView(result.room!, giver.userId) })
+    } catch {
+      operationDiagnostic('give_coin', 'failed')
+      const err = { success: false, error: 'INTERNAL_ERROR', message: INTERNAL_ERROR_MESSAGE }
       if (callback) callback(err)
       else socket.emit('error', err)
     }
@@ -532,22 +424,22 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       }
 
       // Save room
-      roomRepository.save(result.room!)
+      await roomRepository.saveAndWait(result.room!)
 
-      console.log(`[vote] ${socket.id} votes ${suspectSocketId}`)
-      socket.emit('vote_submitted', { success: true, room: gameService.getPublicState(result.room!) })
-      io.to(roomId).emit('vote_updated', { room: gameService.getPublicState(result.room!) })
+      operationDiagnostic('submit_vote', 'ok')
+      socket.emit('vote_submitted', { success: true, room: roomView(result.room!, voter.userId) })
+      await emitRoomView(io, result.room!, 'vote_updated', {})
 
       // Check if all voted
       if (result.autoAdvance) {
-        console.log(`[vote] All players voted in room ${roomId}`)
-        io.to(roomId).emit('voting_complete', { votes: result.room!.votes })
+        operationDiagnostic('submit_vote', 'ok')
+        await emitRoomView(io, result.room!, 'voting_complete', { votes: result.room!.votes })
       }
 
       if (callback) callback({ success: true })
-    } catch (error: any) {
-      console.error('[submit_vote] Error:', error)
-      const err = { success: false, error: 'INTERNAL_ERROR', message: error.message }
+    } catch {
+      operationDiagnostic('submit_vote', 'failed')
+      const err = { success: false, error: 'INTERNAL_ERROR', message: INTERNAL_ERROR_MESSAGE }
       if (callback) callback(err)
       else socket.emit('error', err)
     }
@@ -582,7 +474,13 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         return
       }
 
-      const actionType = type === 'SELECT_SELFCARE_CARD' ? 'SELECT_SELFCARE_CARD' : 'SELECT_CARD'
+      if (type !== 'SELECT_SELFCARE_CARD' && type !== 'SELECT_CARD') {
+        const error = { success: false, error: 'INVALID_CARD_ACTION', message: 'Loại thao tác thẻ không hợp lệ.' }
+        if (callback) callback(error)
+        else socket.emit('error', error)
+        return
+      }
+      const actionType = type
       const gameAction = {
         type: actionType as 'SELECT_CARD' | 'SELECT_SELFCARE_CARD',
         actorId: actor.userId,
@@ -598,41 +496,28 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         return
       }
 
-      await roomRepository.saveAndWait(result.room!)
-      console.log(`[select_card] ${actionType} by ${socket.id} in room ${roomId}`)
-      io.to(roomId).emit('card_selected', {
-        actorId: actor.userId,
-        card,
-        type: actionType,
-        room: gameService.getPublicState(result.room!),
-      })
-
-      // Auto-advance after card selection (situation, emotion, selfcare)
-      const shouldAutoAdvance =
-        (actionType === 'SELECT_CARD' && (result.room!.phase === 'situation-card' || result.room!.phase === 'emotion-card')) ||
-        (actionType === 'SELECT_SELFCARE_CARD' && result.room!.phase === 'selfcare-card')
-
-      if (shouldAutoAdvance) {
-        const selectedPhase = result.room!.phase
-        const delayMs = selectedPhase === 'situation-card' ? 2000 : 350
-        
-        setTimeout(async () => {
-          const currentRoom = roomRepository.findById(roomId)
-          if (!currentRoom || currentRoom.phase !== selectedPhase) return
-          if (!currentRoom.currentNarrator) return
-          
-          const advanceResult = await gameService.advanceTurn(currentRoom, currentRoom.currentNarrator)
-          if (advanceResult.success && advanceResult.room) {
-            await roomRepository.saveAndWait(advanceResult.room)
-            io.to(roomId).emit('turn_changed', gameService.getPublicState(advanceResult.room))
-          }
-        }, delayMs)
+      const autoCardPhase = result.room!.phase
+      if (result.room!.currentNarrator &&
+        ((actionType === 'SELECT_CARD' && ['situation-card', 'emotion-card'].includes(autoCardPhase)) ||
+         (actionType === 'SELECT_SELFCARE_CARD' && autoCardPhase === 'selfcare-card'))) {
+        result.room!.pendingAutoAdvance = {
+          kind: 'card', dueAt: Date.now() + (autoCardPhase === 'situation-card' ? 2000 : 350),
+          phase: autoCardPhase, phaseInstance: result.room!.phaseInstance,
+          round: result.room!.currentRound, narratorId: result.room!.currentNarrator,
+        }
       }
+      await roomRepository.saveAndWait(result.room!)
+      operationDiagnostic('select_card', 'ok')
+      await emitRoomView(io, result.room!, 'card_selected', {
+        actorId: actor.userId,
+        card: result.room!.selectedCard,
+        type: actionType,      })
+
 
       if (callback) callback({ success: true })
-    } catch (error: any) {
-      console.error('[select_card] Error:', error)
-      const err = { success: false, error: 'INTERNAL_ERROR', message: error.message }
+    } catch {
+      operationDiagnostic('select_card', 'failed')
+      const err = { success: false, error: 'INTERNAL_ERROR', message: INTERNAL_ERROR_MESSAGE }
       if (callback) callback(err)
       else socket.emit('error', err)
     }
@@ -682,21 +567,19 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         return
       }
 
-      roomRepository.save(result.room!)
-      console.log(`[send_response] ${socket.id} responded in room ${roomId}`)
+      await roomRepository.saveAndWait(result.room!)
+      operationDiagnostic('send_response', 'ok')
 
       // Broadcast response to all (so everyone sees who responded)
-      io.to(roomId).emit('response_received', {
+      await emitRoomView(io, result.room!, 'response_received', {
         actorId: actor.userId,
         actorName: actor.name,
-        message,
-        room: gameService.getPublicState(result.room!),
-      })
+        message,      })
 
       if (callback) callback({ success: true })
-    } catch (error: any) {
-      console.error('[send_response] Error:', error)
-      const err = { success: false, error: 'INTERNAL_ERROR', message: error.message }
+    } catch {
+      operationDiagnostic('send_response', 'failed')
+      const err = { success: false, error: 'INTERNAL_ERROR', message: INTERNAL_ERROR_MESSAGE }
       if (callback) callback(err)
       else socket.emit('error', err)
     }
@@ -766,7 +649,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         const target = updatedRoom.players.find((p) => p.socketId === targetId) 
           || updatedRoom.players.find((p) => p.userId === targetId)
         if (!target) {
-          console.warn(`[ntg_vote] Target ${targetId} not found, skipping`)
+          operationDiagnostic('ntg_vote', 'rejected')
           continue
         }
 
@@ -778,7 +661,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
 
         const result = await gameService.executeAction(updatedRoom, gameAction)
         if (!result.success) {
-          console.warn(`[ntg_vote] Failed to vote for ${targetId}: ${result.error}`)
+          operationDiagnostic('ntg_vote', 'rejected')
           continue
         }
 
@@ -793,24 +676,22 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         return
       }
 
-      roomRepository.save(updatedRoom)
-      console.log(`[ntg_vote] NTG ${socket.id} voted for ${votedPlayers.length} player(s) in room ${roomId}`)
+      await roomRepository.saveAndWait(updatedRoom)
+      operationDiagnostic('ntg_vote', 'ok')
 
       // Emit event for each voted player
       for (const voted of votedPlayers) {
-        io.to(roomId).emit('ntg_vote_cast', {
+        await emitRoomView(io, updatedRoom, 'ntg_vote_cast', {
           ntgId: actor.userId,
           votedId: voted.userId,
           votedName: voted.name,
-          bonus: 5,
-          room: gameService.getPublicState(updatedRoom),
-        })
+          bonus: 5,        })
       }
 
       if (callback) callback({ success: true, votedCount: votedPlayers.length })
-    } catch (error: any) {
-      console.error('[ntg_vote] Error:', error)
-      const err = { success: false, error: 'INTERNAL_ERROR', message: error.message }
+    } catch {
+      operationDiagnostic('ntg_vote', 'failed')
+      const err = { success: false, error: 'INTERNAL_ERROR', message: INTERNAL_ERROR_MESSAGE }
       if (callback) callback(err)
       else socket.emit('error', err)
     }
@@ -818,12 +699,20 @@ export function registerGameHandlers(io: Server, socket: Socket) {
 
   // Relay: NTG is browsing situation cards — broadcast current card to others (read-only)
   socket.on('card_preview', ({ roomId, card }: { roomId: string; card: object | null }) => {
-    socket.to(roomId).emit('card_preview', { card })
+    const room = roomRepository.findById(roomId)
+    const resolved = card === null ? null : resolveWebCard(card, room ?? undefined)
+    if (!room || (card !== null && (!resolved || resolved.category !== 'situation' || !isCardEnabled(room, resolved)))) return
+    socket.to(roomId).emit('card_preview', { card: resolved })
   })
 
   // Relay: NTG fan state for spectators (only position changes + initial cards)
   socket.on('situation_fan_state', ({ roomId, cards, activePosition }: { roomId: string; cards?: object[]; activePosition: number }) => {
-    socket.to(roomId).emit('situation_fan_state', { cards, activePosition })
+    const room = roomRepository.findById(roomId)
+    if (!room) return
+    const resolved = cards?.map(card => resolveWebCard(card, room ?? undefined))
+    if (resolved && (resolved.some(card => !card || card.category !== 'situation' || !isCardEnabled(room, card)) ||
+        new Set(resolved.map(card => card!.id)).size !== resolved.length || activePosition >= resolved.length)) return
+    socket.to(roomId).emit('situation_fan_state', { cards: resolved, activePosition })
   })
 
   /**
@@ -896,21 +785,19 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         return
       }
 
-      roomRepository.save(result.room!)
-      console.log(`[share_reflection] ${isNarrator ? 'Narrator confirmed reward for' : ''} NTG ${ntgPlayer.socketId} in room ${roomId}`)
+      await roomRepository.saveAndWait(result.room!)
+      operationDiagnostic('share_reflection', 'ok')
 
-      io.to(roomId).emit('reflection_shared', {
+      await emitRoomView(io, result.room!, 'reflection_shared', {
         ntgId: ntgPlayer.userId,
         ntgName: ntgPlayer.name,
         message,
-        bonus: 5,
-        room: gameService.getPublicState(result.room!),
-      })
+        bonus: 5,      })
 
       if (callback) callback({ success: true })
-    } catch (error: any) {
-      console.error('[share_reflection] Error:', error)
-      const err = { success: false, error: 'INTERNAL_ERROR', message: error.message }
+    } catch {
+      operationDiagnostic('share_reflection', 'failed')
+      const err = { success: false, error: 'INTERNAL_ERROR', message: INTERNAL_ERROR_MESSAGE }
       if (callback) callback(err)
       else socket.emit('error', err)
     }
@@ -949,6 +836,11 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         const error = { success: false, error: 'NOT_NARRATOR', message: 'Chỉ Quản trò mới có thể xác nhận phần thưởng vai trò.' }
         if (callback) callback(error)
         else socket.emit('error', error)
+        return
+      }
+
+      if (room.coinCycle) {
+        if (callback) callback({ success: true, rewards: [] })
         return
       }
 
@@ -1018,17 +910,15 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         ],
       }
 
-      roomRepository.save(updatedRoom)
+      await roomRepository.saveAndWait(updatedRoom)
 
-      io.to(roomId).emit('role_rewards_confirmed', {
-        rewards,
-        room: gameService.getPublicState(updatedRoom),
-      })
+      await emitRoomView(io, updatedRoom, 'role_rewards_confirmed', {
+        rewards,      })
 
       if (callback) callback({ success: true, rewards })
-    } catch (error: any) {
-      console.error('[confirm_role_rewards] Error:', error)
-      const err = { success: false, error: 'INTERNAL_ERROR', message: error.message }
+    } catch {
+      operationDiagnostic('confirm_role_rewards', 'failed')
+      const err = { success: false, error: 'INTERNAL_ERROR', message: INTERNAL_ERROR_MESSAGE }
       if (callback) callback(err)
       else socket.emit('error', err)
     }
@@ -1047,33 +937,43 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         return
       }
 
+      const actor = room.players.find(p => p.socketId === socket.id)
+      if (!actor || actor.userId !== room.currentNarrator) {
+        if (callback) callback({ success: false, error: 'NOT_NARRATOR' })
+        else socket.emit('error', { success: false, error: 'NOT_NARRATOR' })
+        return
+      }
+      const result = await gameService.endGame(room, actor.userId)
+      if (!result.success || !result.room) {
+        const error = { success: false, error: result.error }
+        if (callback) callback(error)
+        else socket.emit('error', error)
+        return
+      }
+      const finalRoom = result.room
       // Coin summary per player — no ranking, no score
       const coinSummary = room.players
         .filter((p) => !p.isFake)
         .map((p) => ({
           userId: p.userId,
           name: p.name,
-          coins: {
-            red: p.coins.red,
-            yellow: p.coins.yellow,
-            green: p.coins.green,
-          },
+          coins: receivedCoinTotal(finalRoom, p.userId),
         }))
 
-      const updatedRoom = roomRepository.update(roomId, { status: 'ended', phase: 'ended' })
+      const updatedRoom = finalRoom
       if (updatedRoom) {
         // Ensure Redis save completes for ended game
         await roomRepository.saveAndWait(updatedRoom)
       }
       phaseTimer.clearTimer(roomId)
 
-      console.log(`[end_game] Room ${roomId} ended`)
-      io.to(roomId).emit('game_ended', { coinSummary })
+      operationDiagnostic('end_game', 'ok')
+      await emitRoomView(io, updatedRoom, 'game_ended', { coinSummary }, undefined, true)
 
-      if (callback) callback({ success: true })
-    } catch (error: any) {
-      console.error('[end_game] Error:', error)
-      const err = { success: false, error: 'INTERNAL_ERROR', message: error.message }
+      if (callback) callback({ success: true, data: roomView(updatedRoom, actor.userId) })
+    } catch {
+      operationDiagnostic('end_game', 'failed')
+      const err = { success: false, error: 'INTERNAL_ERROR', message: INTERNAL_ERROR_MESSAGE }
       if (callback) callback(err)
       else socket.emit('error', err)
     }

@@ -1,5 +1,6 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
 import { cn } from '@/lib/utils'
+import { useControlTheme } from './controlThemeContext'
 
 interface CartoonScrollAreaProps {
   children: React.ReactNode
@@ -10,6 +11,7 @@ interface CartoonScrollAreaProps {
 }
 
 export function CartoonScrollArea({ children, className, style, alwaysShowScrollbar, 'data-testid': testId }: CartoonScrollAreaProps) {
+  const theme = useControlTheme()
   const viewportRef = useRef<HTMLDivElement>(null)
   const [thumbTop, setThumbTop] = useState(0)
   const [thumbHeight, setThumbHeight] = useState(0)
@@ -155,7 +157,7 @@ export function CartoonScrollArea({ children, className, style, alwaysShowScroll
               bottom: TRACK_PADDING,
               width: SCROLLBAR_W,
               borderRadius: SCROLLBAR_R,
-              background: '#d4f4ff',
+              background: theme !== 'legacy' ? 'var(--brand-mint-soft)' : '#d4f4ff',
             }}
           />
 
@@ -173,12 +175,12 @@ export function CartoonScrollArea({ children, className, style, alwaysShowScroll
               transition: 'opacity 100ms ease',
             }}
           >
-            <img
+            {theme !== 'legacy' ? <div className="h-full w-full rounded-full" style={{ background: theme === 'mint-blush' ? 'linear-gradient(90deg,#659DC4,#D9F7FB,#BFEAF1)' : 'var(--brand-primary)', boxShadow: theme === 'mint-blush' ? 'inset 0 -3px 0 #659DC4' : undefined }} /> : <img
               src="/cartoon/ui/Scrollbar.png"
               alt=""
               draggable={false}
               style={{ width: '100%', height: '100%', objectFit: 'fill', display: 'block' }}
-            />
+            />}
           </div>
         </div>
       )}

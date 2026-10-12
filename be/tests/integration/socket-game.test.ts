@@ -1,10 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest'
 import { io as ioClient, Socket as ClientSocket } from 'socket.io-client'
 import { Server } from 'socket.io'
-import { createServer } from 'http'
-import express from 'express'
-import { registerRoomHandlers } from '../../src/socket/handlers/roomHandlers'
-import { registerGameHandlers } from '../../src/socket/handlers/gameHandlers'
+import { createIsolatedServer } from '../helpers/isolatedServer'
 import { roomRepository } from '../../src/modules/room'
 
 describe('Socket.IO Game Integration', () => {
@@ -13,26 +10,13 @@ describe('Socket.IO Game Integration', () => {
   let clients: ClientSocket[] = []
   let PORT: number
   let SERVER_URL: string
+  let fixtureServer: Awaited<ReturnType<typeof createIsolatedServer>>
 
   beforeAll(async () => {
-    const app = express()
-    httpServer = createServer(app)
-    io = new Server(httpServer, {
-      cors: { origin: '*' },
-    })
-
-    io.on('connection', (socket) => {
-      registerRoomHandlers(io, socket)
-      registerGameHandlers(io, socket)
-    })
-
-    await new Promise<void>((resolve) => {
-      httpServer.listen(0, () => {
-        PORT = (httpServer.address() as any).port
-        SERVER_URL = `http://localhost:${PORT}`
-        resolve()
-      })
-    })
+    fixtureServer = await createIsolatedServer()
+    io = fixtureServer.io
+    httpServer = fixtureServer.httpServer
+    SERVER_URL = fixtureServer.url
   })
 
   afterAll(async () => {
@@ -47,22 +31,7 @@ describe('Socket.IO Game Integration', () => {
     })
     clients = []
     
-    // Close server
-    try {
-      io.close()
-      await new Promise<void>((resolve) => {
-        httpServer.close(() => {
-          resolve()
-        })
-        
-        // Force close after 1 second
-        setTimeout(() => {
-          resolve()
-        }, 1000)
-      })
-    } catch (e) {
-      // Ignore errors
-    }
+    await fixtureServer.close()
   })
 
   beforeEach(() => {
@@ -184,20 +153,17 @@ describe('Socket.IO Game Integration', () => {
       })
     })
 
-    it.skip('should reject joining room with game in progress', async () => {
-      // TODO: Fix timeout issue - event listener race condition
+    it('should reject joining room with game in progress', async () => {
       const roomId = 'test-room-4'
       const client1 = await createClient()
 
       // Create room and start game
-      client1.emit('join_room', {
-        name: 'Player 1',
-        roomId,
-        userId: 'user-1',
-        createIfMissing: true,
+      await new Promise<void>((resolve) => {
+        client1.once('room_state', () => resolve())
+        client1.emit('join_room', {
+          name: 'Player 1', roomId, userId: 'user-1', createIfMissing: true,
+        })
       })
-
-      await new Promise(resolve => setTimeout(resolve, 100))
 
       // Manually set room to playing
       const room = roomRepository.findById(roomId)
@@ -208,16 +174,16 @@ describe('Socket.IO Game Integration', () => {
       const client2 = await createClient()
 
       return new Promise<void>((resolve) => {
+        client2.once('error', (error) => {
+          expect(error.code).toBe('game_in_progress')
+          resolve()
+        })
         client2.emit('join_room', {
           name: 'Player 2',
           roomId,
           userId: 'user-2',
         })
 
-        client2.on('error', (error) => {
-          expect(error.code).toBe('game_in_progress')
-          resolve()
-        })
       })
     })
   })
@@ -251,25 +217,26 @@ describe('Socket.IO Game Integration', () => {
         playerClients[1].on('game_started', (state) => {
           expect(state.status).toBe('playing')
           expect(state.phase).toBe('role-reveal')
-          expect(state.players.every((p: any) => p.role)).toBe(true)
+          expect(state.players.find((p: any) => p.userId === 'user-2').role).toBeDefined()
+          expect(state.players.filter((p: any) => p.userId !== 'user-2' && !p.isNarrator && !p.isSender)
+            .every((p: any) => p.role === undefined && p.originalRole === undefined)).toBe(true)
           resolve()
         })
       })
     })
 
-    it.skip('should reject start with less than 5 players', async () => {
-      // TODO: Fix timeout issue - callback not being called
+    it('should reject start with less than 5 players', async () => {
       const roomId = 'test-room-6'
       const client = await createClient()
 
       await new Promise<void>((resolve) => {
+        client.once('room_state', () => resolve())
         client.emit('join_room', {
           name: 'Player 1',
           roomId,
           userId: 'user-1',
           createIfMissing: true,
         })
-        client.on('room_state', () => resolve())
       })
 
       return new Promise<void>((resolve) => {

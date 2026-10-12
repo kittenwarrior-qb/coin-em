@@ -1,7 +1,7 @@
 # R28 Real Redis persistence suite
 
 **Priority:** P0  
-**Status:** planned  
+**Status:** in progress
 **Owner:** Codex implementation  
 **Reviewer:** Claude audit  
 **Dependencies:** R03, R08, R09, R10, R11
@@ -72,9 +72,17 @@ Need isolated Redis infrastructure and OQ-06 durability/RPO target; never flush 
 
 ## Implementation report
 
-<!-- Codex updates this after implementation: changed files, invariant preserved, commands and results. -->
+2026-10-02 — Extended dedicated fixture with actual Redis atomic deletion: fresh activity prevents expiry-only delete; stale revision prevents erasing newer state; wrong index type fails before snapshot/marker changes. Successful delete removes snapshot/index and creates seven-day TTL marker. A second kill/start retains the marker; new worker with different empty ROOM_DATA_DIR rejects recreation through Redis marker (not local JSON), leaving snapshot/index absent. Allocated labelled loopback container and validated temporary root removed; no shared/production storage touched.
+
+2026-10-02 — Latest dedicated AOF kill/restart run also recovered persisted session hash in a fresh worker, accepted correct token and rejected forgery; no plaintext credential in snapshot or hash in recipient projection. No fixture credential printed. This remains repository/domain-worker evidence, not full backend adapter takeover or production RPO proof.
+
+Plan revision 2026-10-02: thêm be/scripts/test-real-redis.mjs và redis-fixture-worker.cjs; chạy dist production domain/repository trong worker độc lập, không dùng global Redis mock. Dedicated redis:7-alpine container loopback/random port, label/run ID xác minh trước cleanup; no shared Redis/volume/FLUSH. PASS: snapshot+receipt, hai process cùng revision chỉ một commit, stale compatibility write không overwrite gameplay, primary-down fail-closed, Redis SIGKILL/start với AOF appendfsync=always, new-process reload/retry, corrupt index preflight không đổi snapshot. Container và allocated temp root đã dọn. Chưa có hai full backend socket processes, session TTL/revocation/tombstone hoặc host-loss backup proof; không suy fixture always thành production RPO=0.
+
+QA evidence: `docs/qa/2026-10-02-p0-progress.md`.
 
 ## QA report
+
+Fresh rerun2026-10-03 PASSED after the Docker daemon became externally available (no agent service start). Exact portable Node22.23.3, current BE TypeScript build passed before running existing `test-real-redis.mjs`. Dedicated actual Redis: snapshot/receipt, two domain/repository worker CAS convergence, offline fail-closed, SIGKILL/start AOF recovery, fresh-worker idempotent retry/index checks, persisted session hash/correct-token/forged-token rejection, atomic expiry/revision/corrupt-index delete guards and seven-day tombstone surviving another restart/different empty local data directory all passed. Fixture verified its label/owned temp containment and removed only the disposable container/synthetic files; no shared Redis/volume/FLUSH or existing QA report deletion. This is not two full Socket.IO backend adapters, host-loss backup, production RPO/RTO or independent acceptance evidence.
 
 <!-- QA owner records environment, test matrix, failures, visual/device evidence and final result. -->
 

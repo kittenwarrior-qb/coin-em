@@ -1,0 +1,605 @@
+{
+  "synthetic": true,
+  "results": [
+    {
+      "name": "ended",
+      "width": 320,
+      "height": 568,
+      "targets": 2,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "ended",
+      "width": 320,
+      "height": 400,
+      "targets": 2,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "ended",
+      "width": 1280,
+      "height": 720,
+      "targets": 2,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "ended",
+      "width": 844,
+      "height": 390,
+      "targets": 2,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "ended",
+      "width": 390,
+      "height": 400,
+      "targets": 2,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "reveal-silencer",
+      "width": 320,
+      "height": 568,
+      "targets": 2,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "reveal-silencer",
+      "width": 390,
+      "height": 400,
+      "targets": 2,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "reveal-silencer",
+      "width": 844,
+      "height": 390,
+      "targets": 2,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "reveal-silencer",
+      "width": 320,
+      "height": 400,
+      "targets": 2,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "reveal-silencer",
+      "width": 1280,
+      "height": 720,
+      "targets": 2,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "role-reveal",
+      "width": 320,
+      "height": 568,
+      "targets": 1,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "role-reveal",
+      "width": 390,
+      "height": 400,
+      "targets": 1,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "role-reveal",
+      "width": 1280,
+      "height": 720,
+      "targets": 1,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "role-reveal",
+      "width": 320,
+      "height": 400,
+      "targets": 1,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "role-reveal",
+      "width": 844,
+      "height": 390,
+      "targets": 1,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "guess-silencer",
+      "width": 320,
+      "height": 568,
+      "targets": 0,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "guess-silencer",
+      "width": 390,
+      "height": 400,
+      "targets": 0,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "guess-silencer",
+      "width": 1280,
+      "height": 720,
+      "targets": 0,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "guess-silencer",
+      "width": 844,
+      "height": 390,
+      "targets": 0,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "guess-silencer",
+      "width": 320,
+      "height": 400,
+      "targets": 0,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "reward",
+      "width": 320,
+      "height": 568,
+      "targets": 0,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "reward",
+      "width": 390,
+      "height": 400,
+      "targets": 0,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "reward",
+      "width": 1280,
+      "height": 720,
+      "targets": 0,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "reward",
+      "width": 844,
+      "height": 390,
+      "targets": 0,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "reward",
+      "width": 320,
+      "height": 400,
+      "targets": 0,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "give-coins",
+      "width": 320,
+      "height": 568,
+      "targets": 14,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "give-coins",
+      "width": 390,
+      "height": 400,
+      "targets": 14,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "waiting",
+      "width": 320,
+      "height": 568,
+      "targets": 12,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "give-coins",
+      "width": 1280,
+      "height": 720,
+      "targets": 14,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "give-coins",
+      "width": 844,
+      "height": 390,
+      "targets": 14,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "give-coins",
+      "width": 320,
+      "height": 400,
+      "targets": 14,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "waiting",
+      "width": 390,
+      "height": 400,
+      "targets": 12,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "history",
+      "width": 320,
+      "height": 568,
+      "targets": 41,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "waiting",
+      "width": 1280,
+      "height": 720,
+      "targets": 12,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "waiting",
+      "width": 844,
+      "height": 390,
+      "targets": 12,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "waiting",
+      "width": 320,
+      "height": 400,
+      "targets": 12,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "history",
+      "width": 390,
+      "height": 400,
+      "targets": 41,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "menu",
+      "width": 320,
+      "height": 568,
+      "targets": 5,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "history",
+      "width": 1280,
+      "height": 720,
+      "targets": 41,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "menu",
+      "width": 390,
+      "height": 400,
+      "targets": 5,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "history",
+      "width": 844,
+      "height": 390,
+      "targets": 41,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "history",
+      "width": 320,
+      "height": 400,
+      "targets": 41,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "create",
+      "width": 320,
+      "height": 568,
+      "targets": 9,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "menu",
+      "width": 1280,
+      "height": 720,
+      "targets": 5,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "menu",
+      "width": 844,
+      "height": 390,
+      "targets": 5,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "create",
+      "width": 390,
+      "height": 400,
+      "targets": 9,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "menu",
+      "width": 320,
+      "height": 400,
+      "targets": 5,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "join",
+      "width": 320,
+      "height": 568,
+      "targets": 32,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "create",
+      "width": 1280,
+      "height": 720,
+      "targets": 9,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "create",
+      "width": 844,
+      "height": 390,
+      "targets": 9,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "create",
+      "width": 320,
+      "height": 400,
+      "targets": 9,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "join",
+      "width": 390,
+      "height": 400,
+      "targets": 32,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "join",
+      "width": 1280,
+      "height": 720,
+      "targets": 32,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "inventory",
+      "width": 320,
+      "height": 568,
+      "targets": 19,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "join",
+      "width": 844,
+      "height": 390,
+      "targets": 32,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "inventory",
+      "width": 390,
+      "height": 400,
+      "targets": 19,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "join",
+      "width": 320,
+      "height": 400,
+      "targets": 32,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "role-reward",
+      "width": 320,
+      "height": 568,
+      "targets": 12,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "inventory",
+      "width": 1280,
+      "height": 720,
+      "targets": 19,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "ntg-reward",
+      "width": 320,
+      "height": 568,
+      "targets": 10,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "role-reward",
+      "width": 390,
+      "height": 400,
+      "targets": 12,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "inventory",
+      "width": 844,
+      "height": 390,
+      "targets": 19,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "role-reward",
+      "width": 1280,
+      "height": 720,
+      "targets": 12,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "inventory",
+      "width": 320,
+      "height": 400,
+      "targets": 19,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "guess-picker",
+      "width": 320,
+      "height": 568,
+      "targets": 9,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "ntg-reward",
+      "width": 390,
+      "height": 400,
+      "targets": 10,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "ntg-reward",
+      "width": 1280,
+      "height": 720,
+      "targets": 10,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "role-reward",
+      "width": 844,
+      "height": 390,
+      "targets": 12,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "role-reward",
+      "width": 320,
+      "height": 400,
+      "targets": 12,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "guess-picker",
+      "width": 390,
+      "height": 400,
+      "targets": 9,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "guess-picker",
+      "width": 1280,
+      "height": 720,
+      "targets": 9,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "ntg-reward",
+      "width": 844,
+      "height": 390,
+      "targets": 10,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "ntg-reward",
+      "width": 320,
+      "height": 400,
+      "targets": 10,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "guess-picker",
+      "width": 844,
+      "height": 390,
+      "targets": 9,
+      "failures": [],
+      "overflowX": false
+    },
+    {
+      "name": "guess-picker",
+      "width": 320,
+      "height": 400,
+      "targets": 9,
+      "failures": [],
+      "overflowX": false
+    }
+  ]
+}

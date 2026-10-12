@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { EmcoinImage } from '@/components/cartoon/EmcoinImage'
 
 import SiteHeader from '@/components/site/SiteHeader'
 import { teamMembers } from './siteContent'
@@ -22,7 +23,7 @@ export default function AboutTeam() {
           {teamMembers.map(([name, role], index) => (
             <article className="team-card" key={name}>
               <div className="avatar">
-                <img src={`/cartoon/icons/avatars/${index === 1 ? 'Girl 2.png' : 'Girl 1.png'}`} alt="" />
+                <EmcoinImage src={`/emcoin/avatars/orbit/${index === 1 ? '03' : '01'}.webp`} alt="" />
               </div>
               <div className="copy">
                 <h2>{name}</h2>
@@ -33,7 +34,7 @@ export default function AboutTeam() {
         </section>
 
         <section className="credit-panel">
-          <p>Tài nguyên giao diện trong game được cấp phép từ ricimi.</p>
+          <p>Avatar và icon giao diện dùng bộ EmCoin Friends mới.</p>
         </section>
       </div>
 

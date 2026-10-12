@@ -6,6 +6,10 @@
 emcoin.cloud {
     encode zstd gzip
 
+    handle /admin/api/* {
+        reverse_proxy backend:3001
+    }
+
     handle /api/* {
         reverse_proxy backend:3001
     }
@@ -50,20 +54,7 @@ emcoin.cloud {
 }
 
 admin.emcoin.cloud {
-    reverse_proxy umami:3000 {
-        header_up Host {host}
-        header_up X-Real-IP {remote_host}
-        header_up X-Forwarded-For {remote_host}
-        header_up X-Forwarded-Proto {scheme}
-    }
-
-    header {
-        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-        X-Content-Type-Options "nosniff"
-        X-Frame-Options "DENY"
-        X-XSS-Protection "1; mode=block"
-        Referrer-Policy "strict-origin-when-cross-origin"
-    }
+    redir https://emcoin.cloud/admin permanent
 }
 
 ocr2.quocbui.dev {

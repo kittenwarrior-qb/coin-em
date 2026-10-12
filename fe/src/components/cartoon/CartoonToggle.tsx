@@ -1,3 +1,4 @@
+import { EmcoinImage } from '@/components/cartoon/EmcoinImage'
 /**
  * CartoonToggle — replicates Unity Toggle prefab
  * Structure: circle button background + checkmark SVG overlay
@@ -5,6 +6,8 @@
  */
 import { forwardRef } from 'react'
 import { cn } from '@/lib/utils'
+import { useControlTheme } from './controlThemeContext'
+import { circleAppearance, legacyStandaloneCircle } from './controlThemes'
 
 type ToggleColor = 'teal' | 'blue' | 'green' | 'pink' | 'purple' | 'yellow'
 
@@ -12,9 +15,11 @@ interface CartoonToggleProps extends Omit<React.InputHTMLAttributes<HTMLInputEle
   color?: ToggleColor
   label?: string
 }
-
 export const CartoonToggle = forwardRef<HTMLInputElement, CartoonToggleProps>(
   ({ color = 'teal', label, className, id, ...props }, ref) => {
+    const theme = useControlTheme()
+    const checkedSrc = circleAppearance(theme, color, legacyStandaloneCircle(color)).src
+    const uncheckedSrc = circleAppearance(theme, 'gray', legacyStandaloneCircle('gray')).src
     const inputId = id ?? `toggle-${Math.random().toString(36).slice(2)}`
 
     return (
@@ -32,7 +37,7 @@ export const CartoonToggle = forwardRef<HTMLInputElement, CartoonToggleProps>(
           <span
             className="absolute inset-0 rounded-full transition-all duration-150"
             style={{
-              backgroundImage: 'url(/cartoon/buttons/Gray.png)',
+              backgroundImage: `url(${uncheckedSrc})`,
               backgroundSize: '100% 100%',
             }}
           />
@@ -40,14 +45,14 @@ export const CartoonToggle = forwardRef<HTMLInputElement, CartoonToggleProps>(
           <span
             className="absolute inset-0 rounded-full opacity-0 peer-checked:opacity-100 transition-opacity duration-150"
             style={{
-              backgroundImage: `url(/cartoon/buttons/${capitalize(color)}.png)`,
+              backgroundImage: `url(${checkedSrc})`,
               backgroundSize: '100% 100%',
             }}
           />
           {/* Checkmark icon */}
           <span className="absolute inset-0 flex items-center justify-center opacity-0 peer-checked:opacity-100 transition-opacity duration-150">
-            <img
-              src="/cartoon/icons/Checkmark-Cartoon.svg"
+            <EmcoinImage
+              src="/emcoin/icons/orbit/check.svg"
               alt="checked"
               className="w-6 h-6 brightness-0 invert"
             />
@@ -56,7 +61,7 @@ export const CartoonToggle = forwardRef<HTMLInputElement, CartoonToggleProps>(
           <span
             className="absolute inset-0 rounded-full -z-10 translate-y-1.5"
             style={{
-              backgroundImage: 'url(/cartoon/buttons/Gray.png)',
+              backgroundImage: `url(${uncheckedSrc})`,
               backgroundSize: '100% 100%',
               filter: 'brightness(0) opacity(0.22)',
             }}
@@ -71,7 +76,3 @@ export const CartoonToggle = forwardRef<HTMLInputElement, CartoonToggleProps>(
 )
 
 CartoonToggle.displayName = 'CartoonToggle'
-
-function capitalize(s: string) {
-  return s.charAt(0).toUpperCase() + s.slice(1)
-}

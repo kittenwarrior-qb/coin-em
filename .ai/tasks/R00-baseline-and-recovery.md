@@ -75,11 +75,56 @@ then R02 release/debug/health guardrails.
 
 ## QA report
 
-<!-- CI/Antigravity cập nhật sau khi test. -->
+2026-10-01 — Bổ sung bằng chứng sau audit, giữ nguyên audit cũ bên dưới.
+
+- F1/F2 được xử lý cục bộ trong R02: debug/bot deny production, bỏ debug lưu trong room khi start, CI push/repository/SHA gate, concurrency và chỉ recreate BE/FE. Chưa rollout VPS.
+- F4: thay Make fixture targets bằng test checksum backup/restored → actual loadRooms/RoomRepository → get_room_state qua socket loopback thật; đã PASS. Redis vẫn mock, không phải production/Redis-real durability evidence.
+- F3: giữ đầy đủ E2E gate, không tách/tắt để tạo CI xanh. Chưa có evidence GitHub CI mới.
+- R03 tách root và namespace test khỏi dữ liệu làm việc, thêm teardown; full backend local 21 files PASS, 292 passed/2 skipped.
+- R00 vẫn qa do CI/E2E và production inventory/owner/retention/RPO/RTO còn thiếu; không tự đánh dấu done.
 
 ## Audit report
 
-<!-- Claude cập nhật nếu task có thay đổi CI/deploy/backup. -->
+**Auditor:** Claude (Opus 5.5) · **Ngày:** 2026-09-29 · **HEAD:** `5f76b13` · **Kết luận:** chưa đạt, giữ `qa`.
+
+### Re-run tại HEAD (local, Windows)
+
+| Check | Kết quả |
+|---|---|
+| `be`: lint / build / test | PASS — 17 files, 279 passed, 2 skipped |
+| `fe`: lint / test (single thread) / build | PASS — 0 errors, 8 warnings; 31 tests |
+| GitHub CI run `36139007919` (push `main`, 2026-09-25) | **FAIL** — Test & Lint pass 1m06s; E2E: mọi test fail ~1.1m/test, job bị cancel ở mốc `timeout-minutes: 20` |
+| Deploy run sau đó | skipped (đúng thiết kế vì CI không xanh) |
+
+### Đối chiếu acceptance criteria
+
+| # | Criterion | Đánh giá |
+|---|---|---|
+| 1 | Baseline report | ĐẠT — `docs/ops/r00-baseline.md` |
+| 2 | Backup inventory | ĐẠT phần tài liệu; retention/owner/nơi lưu production vẫn là open question |
+| 3 | Restore drill chứng minh đọc được fixture room | **CHƯA ĐẠT** — xem F4 |
+| 4 | CI chạy trên PR/push, BE có lint | ĐẠT cấu hình; nhưng chưa có lần CI xanh nào trên GitHub (F3) |
+| 5 | Deploy không bật debug bằng export trong workflow | ĐẠT đúng câu chữ, nhưng production vẫn bật debug (F1) |
+| 6 | Deploy chỉ sau CI xanh; không dừng toàn stack | **CHƯA ĐẠT** — F2 |
+| 7 | Không tag/backup/deploy production | ĐẠT |
+
+### Findings
+
+- **F1 — P0, bảo mật/gameplay (production hiện tại).** `docker-compose.prod.yml:30` hardcode `DEBUG_ROLE_PICKER: "true"` cho backend. Hệ quả: trên production bất kỳ client nào cũng gọi được `set_debug_role_preference` (`be/src/socket/handlers/roomHandlers.ts:274`) để chọn vai trước khi bắt đầu, và `GameEngine.ts:427` áp dụng các vai này — phá role secrecy và tính công bằng của ván. `add_fake_players` (`roomHandlers.ts:251`) **không có guard nào**, kể cả khi tắt flag. Đề xuất chuyển ngay sang R02 với ưu tiên cao nhất: đặt `"false"`/bỏ biến trong compose prod và thêm guard cho `add_fake_players`.
+- **F2 — P1, deploy.** `deploy.yml`:
+  - `docker compose ... up -d --force-recreate` không giới hạn service → recreate cả `redis`, `caddy`, `umami`, `umami-db`, ngắt mọi phòng đang chơi (vi phạm criterion 6).
+  - `git pull origin main` deploy HEAD của `main` tại thời điểm chạy, không phải `workflow_run.head_sha` đã qua CI → có thể deploy commit chưa được test.
+  - Điều kiện chỉ kiểm `head_branch == 'main'`, không kiểm `workflow_run.event == 'push'` → một PR mở từ nhánh tên `main` (vd. fork) có CI xanh cũng kích hoạt deploy/restart production.
+- **F3 — P1, CI gate.** Toàn bộ E2E suite đang hỏng (không phải flaky: 17/17 test đã chạy đều fail, kể cả "host creates room"). Vì deploy phụ thuộc CI gồm cả E2E, hiện **không commit nào deploy được** qua pipeline. Cần quyết định: tạm tách E2E khỏi gate deploy (chỉ gate bằng Test & Lint) cho tới khi R03/R27 sửa suite, hoặc sửa suite trước. Phụ: action `checkout@v4`/`setup-node@v4` đang bị ép chạy Node 24 (cảnh báo deprecation) — thuộc R39.
+- **F4 — P2, restore drill.** `make restore-fixture` chỉ copy một file JSON trong tmp dir rồi `sha256sum` + `grep` chuỗi `fixture-room`. Nó không đi qua Redis/`RoomRepository` hay endpoint health/read-room nên không chứng minh backend khôi phục được room (plan dòng 16, 22 yêu cầu điều này). Đề xuất: drill bằng Redis container isolated + load snapshot fixture + gọi repository/`get_room_state`, có thể gộp vào R28.
+
+### Việc cần để chuyển R00 → `done`
+
+1. Sửa F1 (có thể làm trong R02 nhưng nên ưu tiên trước mọi thứ vì đang ảnh hưởng production).
+2. Sửa F2 (R02).
+3. Chốt cách xử lý F3 để có ít nhất một CI run xanh trên GitHub.
+4. Nâng cấp restore drill (F4) hoặc ghi rõ việc chuyển nó sang R28 trong Decision log.
+5. Chủ dự án trả lời các Open questions về backup production.
 
 ## Goal
 

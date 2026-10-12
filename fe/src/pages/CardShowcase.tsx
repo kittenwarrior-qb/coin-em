@@ -1,15 +1,17 @@
 import type { CSSProperties } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { RotateCcw, RotateCw } from 'lucide-react'
+import { ArrowLeft, ChevronLeft, ChevronRight, RotateCcw, RotateCw } from 'lucide-react'
 import * as THREE from 'three'
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
-import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js'
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
 import { CARD_IMAGES } from '@/constants/cardImages'
 import { characters3D } from './characterModels'
+import type { ResourceOwner } from '@/features/showcase/resourceOwner'
+import type { createShowcaseLoaders } from '@/features/showcase/assetLoaders'
+import { createShowcaseRenderer } from '@/features/showcase/renderer'
+import { PublicCatalogBoundary } from '@/features/game/catalog/PublicCatalog'
+import { useRoomCatalog } from '@/features/game/catalog/roomCatalogClient'
+import { publishedShowcaseDecks } from '@/features/showcase/publishedDecks'
 
 type ShowcaseCard = { title: string; group: string; front: string; back: string; kind?: 'model' | 'sticker' }
-type StickerOutline = { label: string; aspect: number; points: [number, number][] }
 type ShowcaseDeck = { id: string; label: string; count: number; cards: ShowcaseCard[] }
 
 const deckColors: Record<string, string> = {
@@ -19,12 +21,6 @@ const deckLabels: Record<string, string> = {
   role: 'Vai trò', situation: 'Tình huống', emotion: 'Cảm xúc', reflection: 'Phản tư', selfcare: 'Bí kíp ôm', coin: 'Coin', characters3d: 'Nhân vật 3D', sticker: 'Sticker',
 }
 
-const CARD_HEIGHT = 2.38
-const CARD_WIDTH = CARD_HEIGHT * (491 / 760)
-const CARD_DEPTH = 0.018
-// Match the rounded corners in the supplied card artwork so no rectangular
-// texture edge peeks out beyond the 3D card silhouette.
-const CARD_RADIUS = 0.105
 const DEFAULT_ZOOM = 0.92
 
 // Tripo/Meshy exports don't face +Z by default — reset to this yaw whenever a
@@ -98,31 +94,6 @@ const stickerDeck: ShowcaseDeck = {
   cards: stickerModels.map((s) => ({ title: s.label, group: 'sticker', front: `/stickers/${s.slug}.webp`, back: s.slug, kind: 'sticker' as const })),
 }
 
-function roundedShape(width: number, height: number, radius: number) {
-  const x = -width / 2; const y = -height / 2
-  const shape = new THREE.Shape()
-  shape.moveTo(x + radius, y); shape.lineTo(x + width - radius, y)
-  shape.quadraticCurveTo(x + width, y, x + width, y + radius)
-  shape.lineTo(x + width, y + height - radius)
-  shape.quadraticCurveTo(x + width, y + height, x + width - radius, y + height)
-  shape.lineTo(x + radius, y + height)
-  shape.quadraticCurveTo(x, y + height, x, y + height - radius)
-  shape.lineTo(x, y + radius)
-  shape.quadraticCurveTo(x, y, x + radius, y)
-  return shape
-}
-
-function cardFace(width: number, height: number, radius: number) {
-  const geometry = new THREE.ShapeGeometry(roundedShape(width, height, radius), 32)
-  const positions = geometry.attributes.position
-  const uvs: number[] = []
-  for (let index = 0; index < positions.count; index += 1) {
-    uvs.push((positions.getX(index) + width / 2) / width, (positions.getY(index) + height / 2) / height)
-  }
-  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2))
-  return geometry
-}
-
 // Build a die-cut sticker: a white extruded body in the PNG's silhouette shape,
 // with the artwork drawn on the front face. `points` are normalized [0,1] image
 // coords (y-down); the texture is the same trimmed PNG so UVs line up 1:1.
@@ -173,9 +144,14 @@ function buildStickerMesh(points: [number, number][], aspect: number, texture: T
 }
 
 function useCardManifest() {
+  const { metadata } = useRoomCatalog()
   const [decks, setDecks] = useState<ShowcaseDeck[]>([])
   const [loading, setLoading] = useState(true)
   useEffect(() => {
+    if (metadata) {
+      setDecks([...publishedShowcaseDecks(metadata), coinDeck, stickerDeck, charactersDeck]); setLoading(false)
+      return
+    }
     let mounted = true
     fetch('/card-showcase/manifest.json')
       .then((res) => res.json() as Promise<ShowcaseDeck[]>)
@@ -189,11 +165,14 @@ function useCardManifest() {
       })
       .catch(() => { if (mounted) setLoading(false) })
     return () => { mounted = false }
-  }, [])
+  }, [metadata])
   return { decks, loading }
 }
 
 export default function CardShowcase() {
+  return <PublicCatalogBoundary onClose={() => window.location.assign('/about/cards')} closeLabel="Xem bộ thẻ 2D"><PublishedShowcase /></PublicCatalogBoundary>
+}
+function PublishedShowcase() {
   const { decks, loading } = useCardManifest()
   const [deckId, setDeckId] = useState('role')
   const [cardIndex, setCardIndex] = useState(0)
@@ -201,6 +180,8 @@ export default function CardShowcase() {
   const [leftOpen, setLeftOpen] = useState(false)
   const [rightOpen, setRightOpen] = useState(false)
   const [cardLoading, setCardLoading] = useState(true)
+  const [graphicsUnavailable, setGraphicsUnavailable] = useState(false)
+  const [assetError, setAssetError] = useState(false)
   const hostRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const rotationRef = useRef(0)
@@ -211,11 +192,11 @@ export default function CardShowcase() {
   const backMaterialRef = useRef<THREE.MeshBasicMaterial | null>(null)
   const materialsInUseRef = useRef<THREE.MeshBasicMaterial[]>([])
   const texturesRef = useRef<THREE.Texture[]>([])
-  const textureCacheRef = useRef(new Map<string, THREE.Texture>())
+  const textureOwnerRef = useRef<ResourceOwner<THREE.Texture> | null>(null)
+  const rendererGenerationRef = useRef({ disposed: true })
   const slideControllerRef = useRef<{ setInitial: (front: THREE.Texture, back: THREE.Texture) => void; transition: (front: THREE.Texture, back: THREE.Texture, direction: number) => void } | null>(null)
   const cardDirectionRef = useRef(1)
   const dragRef = useRef({ active: false, lastX: 0, lastY: 0 })
-  const tapStartRef = useRef<{ x: number; y: number; t: number } | null>(null)
   // Tracks the yaw the current flip started/ends at so the scale-pulse can be
   // driven by actual rotation progress instead of a guessed fixed duration —
   // it reaches full size again exactly when the 180° turn visually finishes.
@@ -226,13 +207,11 @@ export default function CardShowcase() {
   const characterGroupRef = useRef<THREE.Group | null>(null)
   const characterIntroRef = useRef(1)
   const characterDistanceRef = useRef(6.75)
-  const modelCacheRef = useRef(new Map<string, { scene: THREE.Object3D; distance: number }>())
+  const assetLoadersRef = useRef<ReturnType<typeof createShowcaseLoaders> | null>(null)
   const isCharacterModeRef = useRef(false)
   const stickerGroupRef = useRef<THREE.Group | null>(null)
   const isStickerModeRef = useRef(false)
   const stickerIntroRef = useRef(1)
-  const stickerCacheRef = useRef(new Map<string, THREE.Group>())
-  const outlinesRef = useRef<Record<string, StickerOutline> | null>(null)
   const regenerateEnvironmentRef = useRef<(() => void) | null>(null)
   const zoomRef = useRef(DEFAULT_ZOOM)
 
@@ -274,292 +253,26 @@ export default function CardShowcase() {
   useEffect(() => {
     if (!activeCard) return
     resetView(true)
-  }, [activeCard?.front, isCharacterDeck])
+  }, [activeCard, isCharacterDeck])
 
   useEffect(() => {
-    const host = hostRef.current; const canvas = canvasRef.current
+    const host = hostRef.current, canvas = canvasRef.current
     if (!host || !canvas) return
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true })
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
-    renderer.outputColorSpace = THREE.SRGBColorSpace
-    renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 0.62
-    const scene = new THREE.Scene(); const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100)
-    camera.position.set(0, 0.08, 6.75)
-    const pmrem = new THREE.PMREMGenerator(renderer)
-    // A soft, heavily-blurred environment reads as gentle studio light on the
-    // glossy character materials instead of harsh, blown-out highlights.
-    const applyEnvironment = () => { scene.environment = pmrem.fromScene(new RoomEnvironment(), 2.2).texture }
-    applyEnvironment()
-    regenerateEnvironmentRef.current = applyEnvironment
-    const group = new THREE.Group(); const incomingGroup = new THREE.Group(); scene.add(group, incomingGroup); incomingGroup.visible = false
-    const characterGroup = new THREE.Group(); characterGroup.visible = false; scene.add(characterGroup)
-    const stickerGroup = new THREE.Group(); stickerGroup.visible = false; scene.add(stickerGroup)
-    groupRef.current = group; incomingGroupRef.current = incomingGroup; characterGroupRef.current = characterGroup; stickerGroupRef.current = stickerGroup
-    const triggerFlip = () => {
-      const activeGroup = isCharacterModeRef.current ? characterGroup : isStickerModeRef.current ? stickerGroup : group
-      flipTargetRef.current += Math.PI
-      flipPulseRef.current = { startYaw: activeGroup.rotation.y, targetYaw: activeGroup.rotation.y + Math.PI }
-    }
-    triggerFlipRef.current = triggerFlip
-    const faceGeometry = cardFace(CARD_WIDTH, CARD_HEIGHT, CARD_RADIUS)
-    const backGeometry = cardFace(CARD_WIDTH, CARD_HEIGHT, CARD_RADIUS)
-    const sideGeometry = new THREE.ExtrudeGeometry(roundedShape(CARD_WIDTH, CARD_HEIGHT, CARD_RADIUS), { depth: CARD_DEPTH, bevelEnabled: false, curveSegments: 24 })
-    sideGeometry.translate(0, 0, -CARD_DEPTH / 2)
-    const sideMaterial = new THREE.MeshStandardMaterial({ color: '#f2fbff', roughness: 0.8 })
-    const frontMaterial = new THREE.MeshBasicMaterial({ color: '#fff', transparent: true })
-    const backMaterial = new THREE.MeshBasicMaterial({ color: '#fff', transparent: true })
-    const incomingSideMaterial = new THREE.MeshStandardMaterial({ color: '#f2fbff', roughness: 0.8 })
-    const incomingFrontMaterial = new THREE.MeshBasicMaterial({ color: '#fff', transparent: true })
-    const incomingBackMaterial = new THREE.MeshBasicMaterial({ color: '#fff', transparent: true })
-    // Card faces are flat, pre-lit artwork — tone mapping is meant to tame HDR-ish
-    // PBR lighting on the 3D characters, but applying it here just darkens/skews
-    // the card images, so these specific materials opt out of it.
-    frontMaterial.toneMapped = false; backMaterial.toneMapped = false
-    incomingFrontMaterial.toneMapped = false; incomingBackMaterial.toneMapped = false
-    frontMaterialRef.current = frontMaterial; backMaterialRef.current = backMaterial
-    const side = new THREE.Mesh(sideGeometry, sideMaterial)
-    const front = new THREE.Mesh(faceGeometry, frontMaterial); const back = new THREE.Mesh(backGeometry, backMaterial)
-    const incomingSide = new THREE.Mesh(sideGeometry, incomingSideMaterial)
-    const incomingFront = new THREE.Mesh(faceGeometry, incomingFrontMaterial); const incomingBack = new THREE.Mesh(backGeometry, incomingBackMaterial)
-    front.position.z = CARD_DEPTH / 2 + 0.001; back.position.z = -CARD_DEPTH / 2 - 0.001; back.rotation.y = Math.PI
-    incomingFront.position.z = CARD_DEPTH / 2 + 0.001; incomingBack.position.z = -CARD_DEPTH / 2 - 0.001; incomingBack.rotation.y = Math.PI
-    group.add(side, front, back)
-    incomingGroup.add(incomingSide, incomingFront, incomingBack)
-    scene.add(new THREE.AmbientLight(0xffffff, 1.25)); const key = new THREE.DirectionalLight(0xffffff, 1.2); key.position.set(2.5, 4, 5); scene.add(key)
-    materialsInUseRef.current = [frontMaterial, backMaterial, incomingFrontMaterial, incomingBackMaterial]
-    const slideDistance = 2.45
-    let slide: { direction: number; front: THREE.Texture; back: THREE.Texture; oldX: number; incomingX: number; oldScale: number; incomingScale: number } | null = null
-    const setMaps = (frontMap: THREE.Texture, backMap: THREE.Texture) => {
-      frontMaterial.map = frontMap; frontMaterial.needsUpdate = true
-      backMaterial.map = backMap; backMaterial.needsUpdate = true
-    }
-    // Disposing a texture that is still referenced by the cache would leave a dead
-    // entry behind (three.js does not re-upload a disposed texture on reuse), so any
-    // interrupted-transition disposal must also evict the matching cache entry.
-    const disposeAndUncache = (texture: THREE.Texture) => {
-      for (const [key, cached] of textureCacheRef.current) {
-        if (cached === texture) { textureCacheRef.current.delete(key); break }
-      }
-      texture.dispose()
-    }
-    const completeSlide = () => {
-      if (!slide) return
-      setMaps(slide.front, slide.back)
-      texturesRef.current = [slide.front, slide.back]
-      group.position.x = 0; incomingGroup.position.x = slideDistance * slide.direction; incomingGroup.visible = false
-      group.scale.setScalar(1); incomingGroup.scale.setScalar(1)
-      slide = null
-    }
-    slideControllerRef.current = {
-      setInitial: (frontMap, backMap) => { setMaps(frontMap, backMap); incomingGroup.visible = false; group.position.x = 0 },
-      transition: (frontMap, backMap, direction) => {
-        if (slide) { disposeAndUncache(slide.front); disposeAndUncache(slide.back) }
-        incomingFrontMaterial.map = frontMap; incomingFrontMaterial.needsUpdate = true
-        incomingBackMaterial.map = backMap; incomingBackMaterial.needsUpdate = true
-        incomingGroup.position.x = direction * slideDistance; incomingGroup.visible = true
-        incomingGroup.scale.setScalar(0.9)
-        slide = { direction, front: frontMap, back: backMap, oldX: 0, incomingX: direction * slideDistance, oldScale: 1, incomingScale: 0.9 }
-      },
-    }
-    const onContextLost = (event: Event) => { event.preventDefault() }
-    const onContextRestored = () => {
-      completeSlide()
-      applyEnvironment()
-      ;[frontMaterial, backMaterial, incomingFrontMaterial, incomingBackMaterial].forEach((material) => {
-        if (material.map) material.map.needsUpdate = true
-        material.needsUpdate = true
-      })
-      characterGroup.traverse((node) => {
-        if (node instanceof THREE.Mesh) {
-          const material = node.material as THREE.MeshStandardMaterial
-          material.needsUpdate = true
-          if (material.map) material.map.needsUpdate = true
-        }
-      })
-    }
-    canvas.addEventListener('webglcontextlost', onContextLost, false)
-    canvas.addEventListener('webglcontextrestored', onContextRestored, false)
-    const resize = () => { const rect = host.getBoundingClientRect(); renderer.setSize(Math.max(1, Math.floor(rect.width)), Math.max(1, Math.floor(rect.height)), false); camera.aspect = rect.width / rect.height; camera.updateProjectionMatrix() }
-    const MIN_ZOOM = 0.74; const MAX_ZOOM = 1.45
-    const clampZoom = (value: number) => Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, value))
-    const activePointers = new Map<number, { x: number; y: number }>()
-    let pinchStartDist = 0
-    let pinchStartZoom = DEFAULT_ZOOM
-    const down = (event: PointerEvent) => {
-      activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
-      canvas.setPointerCapture?.(event.pointerId)
-      if (activePointers.size === 1) {
-        dragRef.current = { active: true, lastX: event.clientX, lastY: event.clientY }
-        tapStartRef.current = { x: event.clientX, y: event.clientY, t: performance.now() }
-      } else if (activePointers.size === 2) {
-        dragRef.current.active = false
-        tapStartRef.current = null
-        const [a, b] = Array.from(activePointers.values())
-        pinchStartDist = Math.hypot(a.x - b.x, a.y - b.y)
-        pinchStartZoom = zoomRef.current
-      }
-    }
-    const move = (event: PointerEvent) => {
-      if (activePointers.has(event.pointerId)) activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY })
-      if (activePointers.size >= 2) {
-        const [a, b] = Array.from(activePointers.values())
-        const dist = Math.hypot(a.x - b.x, a.y - b.y)
-        if (pinchStartDist > 0) zoomRef.current = clampZoom(pinchStartZoom * (dist / pinchStartDist))
-        return
-      }
-      if (!dragRef.current.active) return
-      const deltaX = event.clientX - dragRef.current.lastX
-      const deltaY = event.clientY - dragRef.current.lastY
-      dragRef.current.lastX = event.clientX; dragRef.current.lastY = event.clientY
-      rotationRef.current += deltaX * 0.012
-      verticalRotationRef.current = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, verticalRotationRef.current + deltaY * 0.012))
-    }
-    const up = (event: PointerEvent) => {
-      const wasSoloDrag = activePointers.size === 1 && tapStartRef.current
-      if (wasSoloDrag) {
-        const start = tapStartRef.current!
-        const dx = event.clientX - start.x
-        const dy = event.clientY - start.y
-        const elapsed = performance.now() - start.t
-        // A quick tap with barely any movement flips the card; anything that
-        // moved further was a rotate-drag and shouldn't also trigger a flip.
-        if (elapsed < 320 && Math.hypot(dx, dy) < 12) {
-          triggerFlip()
-        }
-      }
-      tapStartRef.current = null
-      activePointers.delete(event.pointerId)
-      if (activePointers.size < 2) pinchStartDist = 0
-      if (activePointers.size === 0) dragRef.current.active = false
-      else if (activePointers.size === 1) {
-        const [[, point]] = Array.from(activePointers.entries())
-        dragRef.current = { active: true, lastX: point.x, lastY: point.y }
-      }
-    }
-    const onWheel = (event: WheelEvent) => {
-      event.preventDefault()
-      zoomRef.current = clampZoom(zoomRef.current * (1 - event.deltaY * 0.001))
-    }
-    canvas.addEventListener('pointerdown', down); window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); window.addEventListener('resize', resize); canvas.addEventListener('wheel', onWheel, { passive: false }); resize()
-    let frame = 0
-    const animate = () => {
-      frame = requestAnimationFrame(animate)
-      const now = performance.now()
-      const idleYaw = Math.sin(now / 4200) * 0.018
-      const idleTilt = Math.sin(now / 2800) * 0.009
-      if (!dragRef.current.active && autoRotateRef.current) rotationRef.current += 0.0025
-      const baseYaw = rotationRef.current + flipTargetRef.current + idleYaw
-      const basePitch = verticalRotationRef.current + Math.sin(now / 3200) * 0.014
-      const baseRoll = idleTilt
-      const floatY = Math.sin(now / 1900) * 0.045
-
-      // A tap-to-flip (or the Lật button) pulses the scale up and back down —
-      // driven by how far the rotation itself has actually turned rather than
-      // a guessed fixed duration, so full size lands exactly when the 180°
-      // turn visually finishes (works regardless of frame rate or auto-rotate
-      // speed changes mid-flip).
-      let flipPulse = 1
-      if (flipPulseRef.current) {
-        const activeGroup = isCharacterModeRef.current ? characterGroup : isStickerModeRef.current ? stickerGroup : group
-        const { startYaw, targetYaw } = flipPulseRef.current
-        const total = targetYaw - startYaw
-        const remaining = targetYaw - activeGroup.rotation.y
-        const progress = total !== 0 ? Math.min(1, Math.max(0, 1 - Math.abs(remaining / total))) : 1
-        if (progress >= 0.99) flipPulseRef.current = null
-        else flipPulse = 1 + Math.sin(progress * Math.PI) * 0.1
-      }
-
-      if (isCharacterModeRef.current) {
-        camera.position.set(0, 0.05, characterDistanceRef.current / zoomRef.current)
-        camera.lookAt(0, 0, 0)
-        characterGroup.rotation.y += (baseYaw - characterGroup.rotation.y) * 0.12
-        characterGroup.rotation.x += (basePitch - characterGroup.rotation.x) * 0.12
-        characterGroup.rotation.z += (baseRoll - characterGroup.rotation.z) * 0.1
-        characterGroup.position.y += (floatY - characterGroup.position.y) * 0.06
-        characterIntroRef.current += (1 - characterIntroRef.current) * 0.2
-        characterGroup.scale.setScalar((0.9 + characterIntroRef.current * 0.1) * flipPulse)
-      } else {
-        camera.position.set(0, 0.08, 6.75 / zoomRef.current)
-        camera.lookAt(0, 0, 0)
-      }
-
-      if (isStickerModeRef.current) {
-        stickerGroup.rotation.y += (baseYaw - stickerGroup.rotation.y) * 0.12
-        stickerGroup.rotation.x += (basePitch - stickerGroup.rotation.x) * 0.12
-        stickerGroup.rotation.z += (baseRoll - stickerGroup.rotation.z) * 0.1
-        stickerGroup.position.y += (floatY - stickerGroup.position.y) * 0.06
-        stickerIntroRef.current += (1 - stickerIntroRef.current) * 0.2
-        stickerGroup.scale.setScalar((0.9 + stickerIntroRef.current * 0.1) * flipPulse)
-      }
-
-      group.rotation.y += (baseYaw - group.rotation.y) * 0.12
-      group.rotation.x += (basePitch - group.rotation.x) * 0.12
-      group.rotation.z += (baseRoll - group.rotation.z) * 0.1
-      group.scale.setScalar(flipPulse)
-      group.position.z += (group.position.z * -1) * 0.12
-      group.position.y += (floatY - group.position.y) * 0.06
-      if (slide) {
-        // Simple exponential easing toward each target — unlike a hand-rolled
-        // spring integrator this can never overshoot or run away, so the old
-        // card is guaranteed to reach the edge and get swapped out.
-        const oldTarget = -slide.direction * slideDistance
-        const ease = 0.22
-        slide.oldX += (oldTarget - slide.oldX) * ease
-        slide.incomingX += (0 - slide.incomingX) * ease
-        group.position.x = slide.oldX
-        incomingGroup.position.x = slide.incomingX
-        slide.oldScale += (0.9 - slide.oldScale) * 0.24
-        slide.incomingScale += (1 - slide.incomingScale) * 0.24
-        group.scale.setScalar(slide.oldScale)
-        incomingGroup.scale.setScalar(slide.incomingScale)
-        group.position.y = floatY
-        incomingGroup.position.y += (floatY - incomingGroup.position.y) * 0.14
-        group.rotation.y += (baseYaw - group.rotation.y) * 0.2
-        incomingGroup.rotation.y += (baseYaw - incomingGroup.rotation.y) * 0.2
-        group.rotation.x += (basePitch - group.rotation.x) * 0.18
-        incomingGroup.rotation.x += (basePitch - incomingGroup.rotation.x) * 0.18
-        group.rotation.z += (baseRoll - group.rotation.z) * 0.18
-        incomingGroup.rotation.z += (baseRoll - incomingGroup.rotation.z) * 0.18
-        const settled = Math.abs(slide.oldX - oldTarget) < 0.01 && Math.abs(slide.incomingX) < 0.01 && Math.abs(slide.incomingScale - 1) < 0.01
-        if (settled) completeSlide()
-      }
-      renderer.render(scene, camera)
-    }
-    animate()
-    return () => {
-      slideControllerRef.current = null; regenerateEnvironmentRef.current = null; triggerFlipRef.current = null; cancelAnimationFrame(frame)
-      canvas.removeEventListener('pointerdown', down); window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('resize', resize); canvas.removeEventListener('wheel', onWheel)
-      canvas.removeEventListener('webglcontextlost', onContextLost); canvas.removeEventListener('webglcontextrestored', onContextRestored)
-      frontMaterial.dispose(); backMaterial.dispose(); sideMaterial.dispose(); incomingFrontMaterial.dispose(); incomingBackMaterial.dispose(); incomingSideMaterial.dispose(); faceGeometry.dispose(); backGeometry.dispose(); sideGeometry.dispose()
-      textureCacheRef.current.forEach((texture) => texture.dispose()); textureCacheRef.current.clear()
-      modelCacheRef.current.forEach(({ scene: modelScene }) => modelScene.traverse((node) => {
-        if (node instanceof THREE.Mesh) {
-          node.geometry.dispose()
-          const material = node.material as THREE.MeshStandardMaterial
-          material.map?.dispose(); material.normalMap?.dispose(); material.roughnessMap?.dispose(); material.dispose()
-        }
-      }))
-      modelCacheRef.current.clear()
-      stickerCacheRef.current.forEach((built) => built.traverse((node) => {
-        if (node instanceof THREE.Mesh) {
-          node.geometry.dispose()
-          const mats = (Array.isArray(node.material) ? node.material : [node.material]) as THREE.MeshBasicMaterial[]
-          mats.forEach((m) => { m.map?.dispose(); m.dispose() })
-        }
-      }))
-      stickerCacheRef.current.clear()
-      pmrem.dispose()
-      renderer.dispose(); frontMaterialRef.current = null; backMaterialRef.current = null; materialsInUseRef.current = []
-      groupRef.current = null; incomingGroupRef.current = null; characterGroupRef.current = null; stickerGroupRef.current = null
-    }
+    return createShowcaseRenderer({ host, canvas, modelLimit: characters3D.length, stickerLimit: stickerModels.length,
+      buildSticker: buildStickerMesh, onUnavailable: setGraphicsUnavailable, onLoading: setCardLoading,
+      bindings: { rendererGenerationRef, materialsInUseRef, textureOwnerRef, assetLoadersRef, regenerateEnvironmentRef, groupRef, incomingGroupRef, characterGroupRef, stickerGroupRef, isCharacterModeRef, isStickerModeRef, flipTargetRef, flipPulseRef, triggerFlipRef, frontMaterialRef, backMaterialRef, texturesRef, slideControllerRef, dragRef, rotationRef, verticalRotationRef, zoomRef, autoRotateRef, characterDistanceRef, characterIntroRef, stickerIntroRef },
+    })
   }, [])
 
   useEffect(() => {
-    if (!activeCard) return
+    if (!activeCard || graphicsUnavailable) return
+    setAssetError(false)
+    const generation = rendererGenerationRef.current
     const group = groupRef.current; const incomingGroup = incomingGroupRef.current; const characterGroup = characterGroupRef.current
     const stickerGroup = stickerGroupRef.current
     if (!group || !incomingGroup || !characterGroup || !stickerGroup) return
+    const assets = assetLoadersRef.current
+    if (!assets) return
 
     if (activeCard.kind === 'sticker') {
       group.visible = false; incomingGroup.visible = false; characterGroup.visible = false; stickerGroup.visible = true
@@ -573,32 +286,13 @@ export default function CardShowcase() {
         stickerGroup.scale.setScalar(0.9)
         setCardLoading(false)
       }
-      const cached = stickerCacheRef.current.get(slug)
-      if (cached) {
-        apply(cached)
-      } else {
-        setCardLoading(true)
-        const build = (data: Record<string, StickerOutline>) => {
-          const meta = data[slug]
-          if (!meta) { setCardLoading(false); return }
-          new THREE.TextureLoader().load(activeCard.front, (texture) => {
-            if (cancelled) { texture.dispose(); return }
-            texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = 8
-            const built = buildStickerMesh(meta.points, meta.aspect, texture)
-            stickerCacheRef.current.set(slug, built)
-            apply(built)
-          }, undefined, () => { if (!cancelled) setCardLoading(false) })
-        }
-        if (outlinesRef.current) {
-          build(outlinesRef.current)
-        } else {
-          fetch('/stickers/outlines.json')
-            .then((res) => res.json() as Promise<Record<string, StickerOutline>>)
-            .then((data) => { if (cancelled) return; outlinesRef.current = data; build(data) })
-            .catch(() => { if (!cancelled) setCardLoading(false) })
-        }
-      }
-      return () => { cancelled = true }
+      const key = assets.stickerKey(slug, activeCard.front)
+      const release = assets.stickers.retain([key])
+      setCardLoading(true)
+      void assets.loadSticker(slug, activeCard.front).then(built => {
+        if (!cancelled && !generation.disposed) { apply(built); assets.stickers.trim() }
+      }).catch(() => { if (!cancelled && !generation.disposed) { setAssetError(true); setCardLoading(false) } })
+      return () => { cancelled = true; release() }
     }
 
     if (activeCard.kind === 'model') {
@@ -613,63 +307,29 @@ export default function CardShowcase() {
         characterGroup.scale.setScalar(0.9)
         setCardLoading(false)
       }
-      const cached = modelCacheRef.current.get(activeCard.front)
-      if (cached) {
-        applyModel(cached.scene, cached.distance)
-      } else {
-        setCardLoading(true)
-        const loader = new GLTFLoader()
-        loader.setMeshoptDecoder(MeshoptDecoder)
-        loader.load(activeCard.front, (gltf) => {
-          if (cancelled) return
-          const box = new THREE.Box3().setFromObject(gltf.scene)
-          const size = box.getSize(new THREE.Vector3())
-          const center = box.getCenter(new THREE.Vector3())
-          const maxDim = Math.max(size.x, size.y, size.z) || 1
-          gltf.scene.position.sub(center)
-          const distance = maxDim * 3.6
-          modelCacheRef.current.set(activeCard.front, { scene: gltf.scene, distance })
-          applyModel(gltf.scene, distance)
-        }, undefined, () => { if (!cancelled) setCardLoading(false) })
-      }
-      return () => { cancelled = true }
+      const release = assets.models.retain([activeCard.front])
+      setCardLoading(true)
+      void assets.loadModel(activeCard.front).then(model => {
+        if (!cancelled && !generation.disposed) { applyModel(model.scene, model.distance); assets.models.trim() }
+      }).catch(() => { if (!cancelled && !generation.disposed) { setAssetError(true); setCardLoading(false) } })
+      return () => { cancelled = true; release() }
     }
 
     group.visible = true; characterGroup.visible = false; stickerGroup.visible = false
     if (!frontMaterialRef.current || !backMaterialRef.current) return
-    // Textures accumulate across every deck a curious visitor browses in one session;
-    // without a cap the GPU-memory footprint grows unbounded and mobile GPUs can hit
-    // context loss. Cap the cache and evict the least-recently-used entries, but never
-    // an entry that's still bound to a currently visible material.
-    const MAX_TEXTURE_CACHE = 96
-    const evictIfNeeded = () => {
-      const cache = textureCacheRef.current
-      if (cache.size <= MAX_TEXTURE_CACHE) return
-      const inUse = new Set(materialsInUseRef.current.map((material) => material.map).filter(Boolean))
-      let overflow = cache.size - MAX_TEXTURE_CACHE
-      for (const [key, texture] of cache) {
-        if (overflow <= 0) break
-        if (inUse.has(texture)) continue
-        texture.dispose(); cache.delete(key); overflow -= 1
-      }
-    }
+    const owner = textureOwnerRef.current
+    if (!owner) return
+    const release = owner.retain([activeCard.front, activeCard.back])
+    setCardLoading(true)
     const load = (src: string) => {
-      const cached = textureCacheRef.current.get(src)
-      if (cached) {
-        // bump recency so it's not picked for eviction while still relevant
-        textureCacheRef.current.delete(src); textureCacheRef.current.set(src, cached)
-        return Promise.resolve(cached)
-      }
-      return new Promise<THREE.Texture>((resolve, reject) => new THREE.TextureLoader().load(src, (texture) => {
+      return owner.load(src, () => new Promise<THREE.Texture>((resolve, reject) => new THREE.TextureLoader().load(src, (texture) => {
         texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = 8
-        textureCacheRef.current.set(src, texture)
-        evictIfNeeded()
         resolve(texture)
-      }, undefined, reject))
+      }, undefined, reject)))
     }
     let cancelled = false
     Promise.all([load(activeCard.front), load(activeCard.back)]).then(([front, back]) => {
-      if (cancelled) { front.dispose(); back.dispose(); return }
+      if (cancelled || generation.disposed) return
       const direction = cardDirectionRef.current
       if (!texturesRef.current.length) {
         slideControllerRef.current?.setInitial(front, back)
@@ -682,13 +342,15 @@ export default function CardShowcase() {
       if (count > 1) {
         const next = activeDeck.cards[(cardIndex + 1) % count]
         const previous = activeDeck.cards[(cardIndex - 1 + count) % count]
-        if (next.kind !== 'model' && previous.kind !== 'model') {
-          void Promise.all([load(next.front), load(next.back), load(previous.front), load(previous.back)])
+        if (!next.kind && !previous.kind) {
+          const paths = [next.front, next.back, previous.front, previous.back]
+          const releaseNeighbors = owner.retain(paths)
+          void Promise.all(paths.map(load)).catch(() => { /* Noncritical neighbor failure must not reject the active card. */ }).finally(releaseNeighbors)
         }
       }
-    })
-    return () => { cancelled = true }
-  }, [activeCard])
+    }).catch(() => { if (!cancelled && !generation.disposed) { setAssetError(true); setCardLoading(false) } })
+    return () => { cancelled = true; release() }
+  }, [activeCard, activeDeck, cardIndex, graphicsUnavailable])
 
   return <main className="showcase-root" style={{ '--accent': accent } as CSSProperties}>
     <style>{`
@@ -729,19 +391,26 @@ export default function CardShowcase() {
     `}</style>
     <div className="showcase-panel" ref={hostRef}>
       <div className="showcase-top">
-        <a className="circle-link" href="/about" aria-label="Quay lại landing"><span>←</span></a>
+        <a className="circle-link" href="/about" aria-label="Quay lại landing"><ArrowLeft size={18} aria-hidden="true" /></a>
         <div className="showcase-title"><b>{activeDeckLabel}</b><span>{activeCard ? `${activeCard.title} · ${activeDeck?.count ?? 0} ${isCharacterDeck ? 'nhân vật' : isStickerDeck ? 'sticker' : 'thẻ mẫu'}` : 'Đang tải bộ thẻ'}</span></div>
         <button className="circle-link" type="button" onClick={() => setAutoRotate((value) => !value)} aria-label="Bật tắt xoay tự động"><span>{autoRotate ? 'Dừng' : 'Tự động'}</span></button>
       </div>
       <div className="showcase-canvas">
-        <canvas ref={canvasRef} data-testid="card-showcase-canvas" />
+        <canvas ref={canvasRef} data-testid="card-showcase-canvas" aria-hidden={graphicsUnavailable || assetError} />
+        {(graphicsUnavailable || assetError) && <section aria-label="Bản xem thay thế" style={{ position: 'absolute', inset: 0, overflowY: 'auto', padding: 'calc(166px + env(safe-area-inset-top)) 24px 140px', background: '#e6f5ff', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+          <p role="status">{graphicsUnavailable ? 'Không thể hiển thị 3D trên thiết bị này. Hình gốc được giữ nguyên.' : 'Chưa tải được nội dung 3D. Bạn vẫn có thể chuyển bộ thẻ.'}</p>
+          {activeCard && activeCard.kind !== 'model' ? <>
+            <img src={activeCard.front} alt={`${activeCard.title} — mặt trước`} style={{ maxWidth: '100%', width: 180, height: 'auto' }} />
+            {!activeCard.kind && <img src={activeCard.back} alt={`${activeCard.title} — mặt sau`} style={{ maxWidth: '100%', width: 180, height: 'auto' }} />}
+          </> : activeCard && <p>Chưa có hình thay thế được duyệt cho nhân vật này.</p>}
+        </section>}
         {cardLoading && <div className="canvas-loading-hint">{isCharacterDeck ? 'Đang tải nhân vật...' : isStickerDeck ? 'Đang tải sticker...' : 'Đang tải thẻ...'}</div>}
       </div>
       {loading && <div className="showcase-loading">Đang mở bộ thẻ...</div>}
       {(leftOpen || rightOpen) && <div className="panel-backdrop" onClick={() => { setLeftOpen(false); setRightOpen(false) }} />}
       <div className="side-nav" aria-label="Chuyển card">
-        <button className="side-nav-button" type="button" onClick={() => moveCard(-1)} aria-label="Card trước">‹</button>
-        <button className="side-nav-button" type="button" onClick={() => moveCard(1)} aria-label="Card kế tiếp">›</button>
+        <button className="side-nav-button" type="button" onClick={() => moveCard(-1)} aria-label="Card trước"><ChevronLeft size={26} aria-hidden="true" /></button>
+        <button className="side-nav-button" type="button" onClick={() => moveCard(1)} aria-label="Card kế tiếp"><ChevronRight size={26} aria-hidden="true" /></button>
       </div>
       <div className="right-actions">
         <button className="right-action-btn" type="button" onClick={() => triggerFlipRef.current?.()} aria-label="Lật 180°"><RotateCw size={18} /></button>

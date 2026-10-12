@@ -1,23 +1,44 @@
-﻿/**
+import { EmcoinImage } from '@/components/cartoon/EmcoinImage'
+/**
  * All bottom-sheet overlays that appear during specific game phases.
  * Kept in one file since they share the same slide-up animation pattern.
  */
-import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { motion, useIsPresent } from 'framer-motion'
 import { CartoonButton, CartoonCard, CartoonBadge } from '@/components/cartoon'
 import { AVATAR_BG_COLORS, AVATAR_ICONS } from '@/components/cartoon/avatarConfig'
 import type { Player } from './types'
+import { usePopupLifecycle } from '@/features/overlays/usePopupLifecycle'
+import { useControlTheme } from '@/components/cartoon/controlThemeContext'
+import { isBrandTheme } from '@/components/cartoon/controlThemes'
+import { BrandCoinIcon } from './BrandCoinIcon'
+import { HeartHandshake } from 'lucide-react'
+
+function usePhaseOverlayLock(pending: boolean) {
+  const isPresent = useIsPresent()
+  const blocked = pending || !isPresent
+  const current = useRef(blocked)
+  useLayoutEffect(() => {
+    current.current = blocked
+    return () => { current.current = true }
+  }, [blocked])
+  return { blocked, current }
+}
 
 // ─── Shared slide-up sheet ────────────────────────────────────────────────────
-function BottomSheet({ children, testId }: { children: React.ReactNode; testId?: string }) {
+function BottomSheet({ children, testId, label, busy }: { children: React.ReactNode; testId?: string; label?: string; busy?: boolean }) {
   return (
     <motion.div
       data-testid={testId}
+      role={label ? 'group' : undefined}
+      data-ui-panel="a1"
+      aria-label={label}
+      aria-busy={busy}
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: 100, opacity: 0 }}
       className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-sm z-40
-                 bg-white border-t-[3px] border-[var(--c-black)] rounded-t-3xl p-4 flex flex-col gap-3"
+                 bg-white border-t-[3px] border-[var(--c-black)] rounded-t-3xl p-4 flex flex-col gap-3 max-h-[90dvh] overflow-y-auto overscroll-contain [&>*]:shrink-0"
     >
       {children}
     </motion.div>
@@ -115,16 +136,18 @@ export function ReflectionSharingOverlay({ text, hasShared, onChange, onShare }:
 interface GuessSilencerProps {
   players: Player[]
   hasVoted: boolean
+  pending?: boolean
   onVote: (id: string) => void
 }
 
-export function GuessSilencerOverlay({ players, hasVoted, onVote }: GuessSilencerProps) {
+export function GuessSilencerOverlay({ players, hasVoted, pending = false, onVote }: GuessSilencerProps) {
+  const { blocked, current } = usePhaseOverlayLock(pending)
   return (
-    <BottomSheet>
+    <BottomSheet label="Bình chọn Người Im Lặng" busy={pending}>
       {!hasVoted ? (
         <>
           <div className="text-center">
-            <div className="font-display text-base text-[var(--c-pink)]">{'Đoán Người Im Lặng'}</div>
+            <div data-ui-ink="primary" className="font-display text-base text-[var(--c-pink)]">{'Đoán Người Im Lặng'}</div>
             <div className="mt-1 font-body text-[11px] leading-snug text-black/55">
               {'Chọn người bạn nghĩ là Người Im Lặng trong lượt này.'}
             </div>
@@ -139,7 +162,8 @@ export function GuessSilencerOverlay({ players, hasVoted, onVote }: GuessSilence
                 <button
                   key={player.id}
                   type="button"
-                  onClick={() => onVote(player.id)}
+                  disabled={blocked}
+                  onClick={() => { if (!current.current) onVote(player.id) }}
                   className="relative flex min-w-0 items-center gap-2 overflow-hidden rounded-2xl border-2 border-white bg-white p-2 text-left shadow-[0_2px_0_rgba(0,0,0,0.12)] transition-all active:translate-y-[1px]"
                   data-testid={`btn-vote-silencer-${player.name}`}
                 >
@@ -147,7 +171,7 @@ export function GuessSilencerOverlay({ players, hasVoted, onVote }: GuessSilence
                     className="grid h-12 w-12 shrink-0 place-items-center rounded-full border-2 border-white shadow-[0_2px_0_rgba(0,0,0,0.18)]"
                     style={{ background: AVATAR_BG_COLORS[Math.abs(bgIndex) % AVATAR_BG_COLORS.length] }}
                   >
-                    <img
+                    <EmcoinImage
                       src={AVATAR_ICONS[Math.abs(avatarIndex) % AVATAR_ICONS.length]}
                       alt=""
                       className="h-9 w-9 object-contain"
@@ -170,8 +194,8 @@ export function GuessSilencerOverlay({ players, hasVoted, onVote }: GuessSilence
           transition={{ type: 'spring', stiffness: 460, damping: 20 }}
           className="rounded-2xl bg-[var(--c-sky-mist)] px-4 py-4 text-center"
         >
-          <img src="/cartoon/icons/Checkmark-Cartoon.svg" alt="" className="mx-auto mb-2 h-12 w-12 object-contain drop-shadow" draggable={false} />
-          <div className="font-display text-sm text-[var(--c-pink)]">{'Đã ghi nhận bình chọn'}</div>
+          <EmcoinImage src="/emcoin/icons/orbit/check.svg" alt="" className="mx-auto mb-2 h-12 w-12 object-contain drop-shadow" draggable={false} />
+          <div data-ui-ink="primary" className="font-display text-sm text-[var(--c-pink)]">{'Đã ghi nhận bình chọn'}</div>
           <div className="mt-1 font-body text-[11px] leading-snug text-black/55">
             {'Chờ cả bàn hoàn tất bình chọn.'}
           </div>
@@ -183,14 +207,14 @@ export function GuessSilencerOverlay({ players, hasVoted, onVote }: GuessSilence
 
 // Reveal silencer
 const REVEAL_ROLE_META = {
-  narrator: { label: 'Quản trò', color: '#FFB830', icon: '/cartoon/icons/Crown.svg' },
-  sender: { label: 'Người trao gửi', color: '#FF6B9D', icon: '/cartoon/icons/Flower-Multicolor.svg' },
-  healer: { label: 'Người chữa lành', color: '#62C76D', icon: '/cartoon/icons/Life-Bag.svg' },
-  silencer: { label: 'Người im lặng', color: '#7D7F8C', icon: '/cartoon/icons/Lock-Gold.svg' },
-  connector: { label: 'Người kết nối', color: '#3FA7F5', icon: '/cartoon/icons/Magic.svg' },
-  opener: { label: 'Người gợi mở', color: '#A66CFF', icon: '/cartoon/icons/Gift-Pink-Border.svg' },
-  guide: { label: 'Người dẫn lối', color: '#F59E42', icon: '/cartoon/icons/Key-Gold.svg' },
-  unknown: { label: 'Vai trò', color: '#2F76AC', icon: '/cartoon/icons/Star-Yellow.svg' },
+  narrator: { label: 'Quản trò', color: '#FFB830', icon: '/emcoin/icons/orbit/facilitator.svg' },
+  sender: { label: 'Người trao gửi', color: '#FF6B9D', icon: '/emcoin/icons/orbit/storyteller.svg' },
+  healer: { label: 'Người chữa lành', color: '#62C76D', icon: '/emcoin/icons/orbit/heal.svg' },
+  silencer: { label: 'Người im lặng', color: '#7D7F8C', icon: '/emcoin/icons/orbit/lock.svg' },
+  connector: { label: 'Người kết nối', color: '#3FA7F5', icon: '/emcoin/icons/orbit/connect.svg' },
+  opener: { label: 'Người gợi mở', color: '#A66CFF', icon: '/emcoin/icons/orbit/gift.svg' },
+  guide: { label: 'Người dẫn lối', color: '#F59E42', icon: '/emcoin/icons/orbit/compass.svg' },
+  unknown: { label: 'Vai trò', color: '#2F76AC', icon: '/cartoon/ui/Star-Yellow.png' },
 }
 
 function getRevealRoleMeta(player: Player) {
@@ -215,12 +239,30 @@ function getRevealRoleMeta(player: Player) {
 interface RevealSilencerProps {
   players: Player[]
   votes: Record<string, string>
+  pending?: boolean
   onCloseComplete?: () => void
 }
 
-export function RevealSilencerOverlay({ players, votes, onCloseComplete }: RevealSilencerProps) {
+export function RevealSilencerOverlay({ players, votes, pending = false, onCloseComplete }: RevealSilencerProps) {
   const [closing, setClosing] = useState(false)
   const [hidden, setHidden] = useState(false)
+  const [animationFinished, setAnimationFinished] = useState(false)
+  const closingRef = useRef(false)
+  const completed = useRef(false)
+  const panel = useRef<HTMLDivElement>(null)
+  const { blocked, current } = usePhaseOverlayLock(pending)
+  const close = () => {
+    if (current.current || closingRef.current) return
+    closingRef.current = true
+    setClosing(true)
+  }
+  usePopupLifecycle(panel, !hidden, { persistent: blocked || closing, onClose: close })
+  useEffect(() => {
+    if (!closing || !animationFinished || blocked || current.current || completed.current) return
+    completed.current = true
+    setHidden(true)
+    onCloseComplete?.()
+  }, [closing, animationFinished, blocked, current, onCloseComplete])
 
   const voteCounts = Object.values(votes).reduce<Record<string, number>>((acc, targetId) => {
     acc[targetId] = (acc[targetId] ?? 0) + 1
@@ -232,7 +274,6 @@ export function RevealSilencerOverlay({ players, votes, onCloseComplete }: Revea
   const totalVoters = Object.keys(votes).length
   const others = players.filter(p => p.id !== silencer?.id)
 
-  const close = () => setClosing(true)
   if (hidden) return null
 
   return (
@@ -243,26 +284,33 @@ export function RevealSilencerOverlay({ players, votes, onCloseComplete }: Revea
       className="absolute inset-0 z-40 flex items-center justify-center bg-black/55 px-4"
       onClick={close}
       onAnimationComplete={() => {
-        if (closing && !hidden) { setHidden(true); onCloseComplete?.() }
+        if (closing && !hidden) setAnimationFinished(true)
       }}
     >
       <motion.div
+        ref={panel}
+        role="dialog" data-ui-panel="a1"
+        aria-label="Tiết lộ vai trò"
+        aria-busy={pending}
+        tabIndex={-1}
         initial={{ scale: 0.9, y: 20 }}
         animate={{ scale: closing ? 0.92 : 1, y: closing ? 16 : 0 }}
         transition={{ type: 'spring', stiffness: 420, damping: 28 }}
         style={{ willChange: 'transform' }}
-        className="relative w-full max-w-sm rounded-[28px] border-[3px] border-[var(--c-black)] bg-white p-5 shadow-[0_8px_0_rgba(0,0,0,0.22)]"
+        className="relative w-full max-w-sm max-h-[calc(100%-32px)] overflow-y-auto overscroll-contain rounded-[28px] border-[3px] border-[var(--c-black)] bg-white p-5 shadow-[0_8px_0_rgba(0,0,0,0.22)]"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           type="button"
+          data-ui-chrome="circle"
           className="absolute right-3 top-2 z-20 font-display text-xl leading-none text-[var(--c-pink)]"
           onClick={close}
+          disabled={blocked || closing}
           aria-label="Đóng"
         >×</button>
 
         <div className="text-center mb-5">
-          <div className="font-display text-base text-[var(--c-pink)]">🎭 Tiết lộ vai trò!</div>
+          <div data-ui-ink="primary" className="font-display text-base text-[var(--c-pink)]">🎭 Tiết lộ vai trò!</div>
         </div>
 
         {/* Silencer hero card */}
@@ -273,8 +321,8 @@ export function RevealSilencerOverlay({ players, votes, onCloseComplete }: Revea
           const caught = silencerVotes > 0
           return (
             <div className="mb-5 rounded-3xl border-[3px] border-[#7D7F8C] bg-[#f4f4f6] px-4 py-4 text-center shadow-[0_4px_0_rgba(0,0,0,0.14)]">
-              <img
-                src="/cartoon/icons/Lock-Sliver.svg"
+              <EmcoinImage
+                src="/emcoin/icons/orbit/lock.svg"
                 alt=""
                 className="mx-auto mb-2 h-10 w-10 object-contain drop-shadow"
                 draggable={false}
@@ -283,7 +331,7 @@ export function RevealSilencerOverlay({ players, votes, onCloseComplete }: Revea
                 className="mx-auto grid h-20 w-20 place-items-center rounded-full border-[3px] border-[#7D7F8C] shadow-[0_3px_0_rgba(0,0,0,0.18)]"
                 style={{ background: AVATAR_BG_COLORS[Math.abs(bgIdx) % AVATAR_BG_COLORS.length] }}
               >
-                <img
+                <EmcoinImage
                   src={AVATAR_ICONS[Math.abs(avatarIdx) % AVATAR_ICONS.length]}
                   alt=""
                   className="h-14 w-14 object-contain"
@@ -319,7 +367,7 @@ export function RevealSilencerOverlay({ players, votes, onCloseComplete }: Revea
                     className="grid h-11 w-11 place-items-center rounded-full border-2 shadow-[0_2px_0_rgba(0,0,0,0.12)]"
                     style={{ background: AVATAR_BG_COLORS[Math.abs(bgIdx) % AVATAR_BG_COLORS.length], borderColor: roleMeta.color }}
                   >
-                    <img src={AVATAR_ICONS[Math.abs(avatarIdx) % AVATAR_ICONS.length]} alt="" className="h-8 w-8 object-contain" draggable={false} />
+                    <EmcoinImage src={AVATAR_ICONS[Math.abs(avatarIdx) % AVATAR_ICONS.length]} alt="" className="h-8 w-8 object-contain" draggable={false} />
                   </div>
                   <div className="w-full truncate px-0.5 text-center font-display text-[10px] text-[#2F76AC]">
                     {player.isMe ? 'Bạn' : player.name}
@@ -333,7 +381,7 @@ export function RevealSilencerOverlay({ players, votes, onCloseComplete }: Revea
           </div>
         )}
 
-        <CartoonButton color="green" size="md" className="w-full" onClick={close}>
+        <CartoonButton color="green" size="md" className="w-full" disabled={blocked || closing} onClick={close}>
           Đã xem
         </CartoonButton>
       </motion.div>
@@ -346,10 +394,15 @@ interface RewardProps {
   currentRound: number
   totalRounds: number
   isNarrator: boolean
+  pending?: boolean
+  canAdvance?: boolean
   onNext: () => void
 }
 
-export function RewardOverlay({ players, currentRound, totalRounds, isNarrator, onNext }: RewardProps) {
+export function RewardOverlay({ players, currentRound, totalRounds, isNarrator, pending = false, canAdvance = true, onNext }: RewardProps) {
+  const panel = useRef<HTMLDivElement>(null)
+  const { blocked, current } = usePhaseOverlayLock(pending || !canAdvance)
+  usePopupLifecycle(panel, true, { persistent: true })
   const ownPlayer = players.find(p => p.isMe) ?? players[0]
   return (
     <motion.div
@@ -359,34 +412,41 @@ export function RewardOverlay({ players, currentRound, totalRounds, isNarrator, 
       className="absolute inset-0 z-40 flex items-end justify-center bg-black/40"
     >
       <motion.div
+        ref={panel}
+        role="dialog" data-ui-panel="a1"
+        aria-label={`Tổng kết lượt ${currentRound}/${totalRounds}`}
+        aria-busy={pending}
+        tabIndex={-1}
         initial={{ y: 100 }}
         animate={{ y: 0 }}
         exit={{ y: 100 }}
-        className="w-full max-w-sm bg-white border-t-[3px] border-[var(--c-black)] rounded-t-3xl p-4 flex flex-col gap-3 max-h-[70vh] overflow-y-auto scroll-cartoon"
+        className="w-full max-w-sm bg-white border-t-[3px] border-[var(--c-black)] rounded-t-3xl p-4 flex flex-col gap-3 max-h-[70dvh] overflow-y-auto overscroll-contain scroll-cartoon [&>*]:shrink-0"
       >
         <div className="font-display text-sm">🌀 Tổng kết lượt {currentRound}/{totalRounds}</div>
 
         <CartoonCard pastel="yellow" variant="sm" className="p-3">
           <p className="font-body text-[11px] text-[var(--c-gray-dark)] leading-relaxed">
-            💚 Xu Xanh = lời ôm bạn nhận được &nbsp;·&nbsp;
-            💛 Xu Vàng = lời ôm bạn trao đi &nbsp;·&nbsp;
-            ❤️ Xu Đỏ = lòng tốt trong tim bạn
+            💚 Được yêu thương &nbsp;·&nbsp;
+            💛 Trao yêu thương &nbsp;·&nbsp;
+            ❤️ Lòng tốt vô hạn. Coin được trao theo cảm nhận, không cần dùng hết.
           </p>
         </CartoonCard>
 
         {ownPlayer && (
           <div className="px-3 py-2 card-cartoon card-cartoon-sm">
-            <div className="font-display text-sm text-[#2F76AC]">{'Điểm coin của bạn'}</div>
+            <div className="font-display text-sm text-[#2F76AC]">Coin bạn nhận trong lượt này</div>
             <div className="mt-2 flex justify-center gap-4 font-display text-sm">
               <span>{'\u{1F49A}'} {ownPlayer.coins.green}</span>
               <span>{'\u{1F49B}'} {ownPlayer.coins.yellow}</span>
               <span>{'❤️'} {ownPlayer.coins.red}</span>
             </div>
+            <p className="mt-2 font-body text-xs text-[var(--c-gray-dark)]">Đã ghi nhận và thu toàn bộ Coin. Lượt sau chia lại từ đầu.</p>
           </div>
         )}
 
         {isNarrator && (
-          <CartoonButton color="green" size="lg" className="w-full" onClick={onNext} data-testid="btn-next-round">
+          <CartoonButton color="green" size="lg" className="w-full" disabled={blocked} pending={pending}
+            onClick={() => { if (!current.current) onNext() }} data-testid="btn-next-round">
             {currentRound >= totalRounds ? '🎉 Kết thúc game' : '▶ Lượt tiếp theo'}
           </CartoonButton>
         )}
@@ -398,33 +458,48 @@ export function RewardOverlay({ players, currentRound, totalRounds, isNarrator, 
 // ─── Ended ────────────────────────────────────────────────────────────────────
 interface EndedProps {
   players: Player[]
+  pending?: boolean
+  canLeave?: boolean
   onLeave: () => void
 }
 
-export function EndedOverlay({ players, onLeave }: EndedProps) {
+export function EndedOverlay({ players, pending = false, canLeave = true, onLeave }: EndedProps) {
+  const theme = useControlTheme()
+  const branded = isBrandTheme(theme)
+  const panel = useRef<HTMLDivElement>(null)
+  const { blocked, current } = usePhaseOverlayLock(pending || !canLeave)
+  // Start at the heading, not at the sole action below the long summary.
+  usePopupLifecycle(panel, true, { persistent: true, initialFocus: 'panel' })
   const realPlayers = players.filter(p => !p.role?.includes('Bot'))
   return (
     <motion.div
+      ref={panel}
+      role="dialog" data-ui-panel="a1" data-ui-screen="ended"
+      aria-label="Hành trình kết thúc"
+      aria-busy={pending}
+      tabIndex={-1}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[var(--c-cream)] px-6 gap-5 overflow-y-auto scroll-cartoon"
+      className="absolute inset-0 z-50 flex flex-col items-center bg-[var(--c-cream)] px-5 pt-5 overflow-hidden"
     >
+      <div data-testid="ended-content" className="ended-content w-full min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-cartoon flex flex-col items-center gap-4 pb-5 [&>*]:shrink-0">
       <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} transition={{ delay: 0.2 }} className="text-center">
-        <div className="text-5xl mb-2">🫂</div>
-        <h2 className="font-display text-2xl">Hành trình kết thúc</h2>
+        <div className="text-5xl mb-2">{branded ? <HeartHandshake className="mx-auto h-12 w-12" aria-hidden="true" /> : '🫂'}</div>
+        <h2 data-ui-ink="primary" className="font-display text-2xl">Hành trình kết thúc</h2>
         <p className="font-body text-xs text-[var(--c-gray)] mt-1">Cảm ơn mọi người đã chia sẻ và lắng nghe</p>
       </motion.div>
 
       <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.4 }} className="w-full max-w-sm">
         <CartoonCard className="p-4 flex flex-col gap-2">
-          <div className="font-display text-xs text-[var(--c-gray)] mb-1">Những lời ôm của bạn</div>
+          <h3 className="font-display text-base mb-2">Coin nhận được qua các lượt</h3>
+          <p className="font-body text-xs mb-2">Ghi nhận sự sẻ chia, không phải bảng xếp hạng.</p>
           {realPlayers.map(p => (
-            <div key={p.id} className="flex items-center justify-between">
-              <span className="font-display text-sm">{p.name}{p.isMe ? ' (Bạn)' : ''}</span>
-              <div className="flex gap-3 font-display text-sm">
-                <span title="Lời ôm nhận được">💚 {p.coins.green}</span>
-                <span title="Lời ôm trao đi">💛 {p.coins.yellow}</span>
-                <span title="Lòng tốt">❤️ {p.coins.red}</span>
+            <div key={p.id} className="ended-coin-row flex items-center justify-between gap-2 py-1">
+              <span className="font-display text-sm min-w-0 break-words">{p.name}{p.isMe ? ' (Bạn)' : ''}</span>
+              <div className="flex gap-2 shrink-0 font-display text-sm">
+                <span title="Được yêu thương" aria-label={`Coin Xanh: ${p.coins.green}`} className="inline-flex items-center gap-1">{branded ? <BrandCoinIcon type="green" workshop={theme === 'kindness-workshop'} /> : '💚'} {p.coins.green}</span>
+                <span title="Trao yêu thương" aria-label={`Coin Vàng: ${p.coins.yellow}`} className="inline-flex items-center gap-1">{branded ? <BrandCoinIcon type="yellow" workshop={theme === 'kindness-workshop'} /> : '💛'} {p.coins.yellow}</span>
+                <span title="Lòng tốt vô hạn" aria-label={`Coin Đỏ: ${p.coins.red}`} className="inline-flex items-center gap-1">{branded ? <BrandCoinIcon type="red" workshop={theme === 'kindness-workshop'} /> : '❤️'} {p.coins.red}</span>
               </div>
             </div>
           ))}
@@ -433,29 +508,31 @@ export function EndedOverlay({ players, onLeave }: EndedProps) {
 
       <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.6 }} className="w-full max-w-sm">
         <CartoonCard pastel="green" className="p-4">
-          <div className="font-display text-xs text-[var(--c-gray-dark)] mb-2">Ý nghĩa đồng xu</div>
+          <details>
+          <summary className="font-display text-sm cursor-pointer py-1">Ý nghĩa đồng xu</summary>
           <div className="font-body text-xs text-[var(--c-gray-dark)] leading-relaxed">
-            💚 <b>Xu Xanh</b> — lời ôm bạn nhận được<br />
-            💛 <b>Xu Vàng</b> — lời ôm bạn trao đi<br />
-            ❤️ <b>Xu Đỏ</b> — lòng tốt vô tận trong tim bạn
+            <b>Coin Xanh — Được yêu thương</b>: trao cho Người Trao Gửi.<br />
+            <b>Coin Vàng — Trao yêu thương</b>: ghi nhận và khích lệ nhau.<br />
+            <b>Coin Đỏ — Lòng tốt vô hạn</b>: Người Trao Gửi trao cho phản hồi giúp mình được an ủi, thấu hiểu.
           </div>
+          </details>
         </CartoonCard>
       </motion.div>
 
       <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.8 }} className="w-full max-w-sm">
         <CartoonCard pastel="blue" className="p-4">
-          <div className="font-display text-xs text-[var(--c-gray-dark)] mb-2">Cùng nhau trả lời</div>
+          <h3 className="font-display text-base mb-2">Cùng nhau trả lời</h3>
           <div className="font-body text-xs text-[var(--c-gray-dark)] leading-relaxed flex flex-col gap-1">
-            <div>🌿 Hôm nay gọi tên rõ nhất cảm xúc nào?</div>
-            <div>🔍 Học được gì về bản thân?</div>
-            <div>💌 Muốn gửi lời cảm ơn đến ai?</div>
+            <div>Hôm nay gọi tên rõ nhất cảm xúc nào?</div>
+            <div>Học được gì về bản thân?</div>
+            <div>Muốn gửi lời cảm ơn đến ai?</div>
           </div>
         </CartoonCard>
       </motion.div>
 
       <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 1.0 }} className="w-full max-w-sm">
         <CartoonCard pastel="pink" className="p-4 text-center border-[3px]">
-          <div className="font-display text-xs text-[var(--c-gray-dark)] mb-2">Nghi thức kết thúc</div>
+          <h3 className="font-display text-base mb-2">Nghi thức kết thúc</h3>
           <div className="font-body text-xs text-[var(--c-gray-dark)] mb-3">
             Cả nhóm đứng thành vòng tròn, nắm tay và đồng thanh:
           </div>
@@ -465,8 +542,10 @@ export function EndedOverlay({ players, onLeave }: EndedProps) {
         </CartoonCard>
       </motion.div>
 
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }} className="w-full max-w-sm pb-8">
-        <CartoonButton color="white" className="w-full" onClick={onLeave}>Rời phòng</CartoonButton>
+      </div>
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="ended-footer w-full max-w-sm shrink-0 py-3">
+        <CartoonButton color="white" className="w-full" pending={pending} disabled={blocked}
+          onClick={() => { if (!current.current) onLeave() }}>Rời phòng</CartoonButton>
       </motion.div>
     </motion.div>
   )

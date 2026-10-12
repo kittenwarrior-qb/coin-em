@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { CartoonModal, CartoonInput, CartoonButton, CartoonCheckbox } from '@/components/cartoon'
+import { useConfirmedAction } from '@/features/game/controllers/useConfirmedAction'
+import { useControlTheme } from '@/components/cartoon/controlThemeContext'
 
 interface CardDeckSelection {
   situation: { light: boolean; medium: boolean; sensitive: boolean }
@@ -9,7 +11,7 @@ interface CardDeckSelection {
 interface CreateRoomModalProps {
   open: boolean
   onClose: () => void
-  onCreate: (userName: string, cardDecks?: CardDeckSelection) => void
+  onCreate: (userName: string, cardDecks?: CardDeckSelection) => Promise<boolean> | void
 }
 
 const DEFAULT_DECKS: CardDeckSelection = {
@@ -18,8 +20,11 @@ const DEFAULT_DECKS: CardDeckSelection = {
 }
 
 export function CreateRoomModal({ open, onClose, onCreate }: CreateRoomModalProps) {
+  const headingInk = useControlTheme() !== 'legacy' ? 'var(--brand-ink)' : '#2f76ac'
   const [userName, setUserName] = useState('')
   const [decks, setDecks] = useState<CardDeckSelection>(DEFAULT_DECKS)
+  const { pending, run, error } = useConfirmedAction('create', open)
+  const [confirmationError, setConfirmationError] = useState<string | null>(null)
 
   const toggleSituation = (key: keyof CardDeckSelection['situation']) =>
     setDecks(d => ({ ...d, situation: { ...d.situation, [key]: !d.situation[key] } }))
@@ -27,15 +32,20 @@ export function CreateRoomModal({ open, onClose, onCreate }: CreateRoomModalProp
   const toggleEmotion = (key: keyof CardDeckSelection['emotion']) =>
     setDecks(d => ({ ...d, emotion: { ...d.emotion, [key]: !d.emotion[key] } }))
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!userName.trim()) return
-    onCreate(userName.trim(), decks)
-    onClose()
+    if (await run(async isCurrent => {
+      setConfirmationError(null)
+      const result = onCreate(userName.trim(), decks)
+      const confirmed = result === undefined ? true : await result
+      if (!confirmed && isCurrent()) setConfirmationError('Chưa xác nhận tạo phòng. Tên và lựa chọn của bạn vẫn được giữ.')
+      return confirmed
+    })) onClose()
   }
 
   return (
-    <CartoonModal open={open} onClose={onClose} title="Tạo phòng" data-testid="modal-create">
-      <div className="flex flex-col gap-4">
+    <CartoonModal open={open} onClose={pending ? undefined : onClose} persistent={pending} hideClose={pending} title="Tạo phòng" data-testid="modal-create">
+      <fieldset disabled={pending} className="flex min-w-0 flex-col gap-4 border-0 p-0">
         <CartoonInput
           label="Tên của bạn"
           data-testid="input-username-create"
@@ -48,7 +58,7 @@ export function CreateRoomModal({ open, onClose, onCreate }: CreateRoomModalProp
         <div className="flex flex-col gap-3">
           {/* Situation */}
           <div>
-            <p className="font-display text-sm mb-2" style={{ color: '#2f76ac' }}>Thẻ Tình huống</p>
+            <p className="font-display text-sm mb-2" style={{ color: headingInk }}>Thẻ Tình huống</p>
             <div className="flex gap-1">
               <CartoonCheckbox label="Nhẹ"       data-testid="checkbox-situation-light"     checked={decks.situation.light}     onChange={() => toggleSituation('light')} />
               <CartoonCheckbox label="Vừa"       data-testid="checkbox-situation-medium"    checked={decks.situation.medium}    onChange={() => toggleSituation('medium')} />
@@ -58,7 +68,7 @@ export function CreateRoomModal({ open, onClose, onCreate }: CreateRoomModalProp
 
           {/* Emotion */}
           <div>
-            <p className="font-display text-sm mb-2" style={{ color: '#2f76ac' }}>Thẻ Cảm xúc</p>
+            <p className="font-display text-sm mb-2" style={{ color: headingInk }}>Thẻ Cảm xúc</p>
             <div className="flex gap-1">
               <CartoonCheckbox label="Cơ bản"   data-testid="checkbox-emotion-basic"    checked={decks.emotion.basic}    onChange={() => toggleEmotion('basic')} />
               <CartoonCheckbox label="Nhẹ"      data-testid="checkbox-emotion-light"    checked={decks.emotion.light}    onChange={() => toggleEmotion('light')} />
@@ -72,12 +82,14 @@ export function CreateRoomModal({ open, onClose, onCreate }: CreateRoomModalProp
           color="yellow"
           size="lg"
           disabled={!userName.trim()}
+          pending={pending}
           onClick={handleCreate}
           data-testid="btn-confirm-create"
         >
           Tạo phòng
         </CartoonButton>
-      </div>
+      </fieldset>
+      {(error || confirmationError) && <p role="alert" className="font-body text-sm">{error || confirmationError}</p>}
     </CartoonModal>
   )
 }

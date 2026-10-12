@@ -23,6 +23,11 @@ export type GameStep = GamePhase
 
 export type GameStatus = 'waiting' | 'playing' | 'ended'
 
+// Domain labels, never inferred from card artwork/order.
+export const GAME_ROLES = {
+  healer: 'Người Chữa Lành', guide: 'Người Dẫn Lối', silencer: 'Người Im Lặng',
+} as const
+
 export type CardCategory = 'situation' | 'emotion' | 'reflection' | 'selfcare' | 'role'
 export type EmotionSubType = 'basic' | 'light' | 'strong' | 'advanced'
 export type SituationSubType = 'light' | 'medium' | 'sensitive'

@@ -6,7 +6,8 @@
  * Trigger it by changing `runId` to a new number — each change replays the
  * animation from the start, then it auto-hides after `durationMs`.
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useReducedMotion } from 'framer-motion'
 import { useRive, Layout, Fit, Alignment } from '@rive-app/react-canvas'
 
 const RIVE_SRC = '/rive/handshake-confetti.riv'
@@ -31,15 +32,32 @@ interface PhaseCelebrationProps {
 
 export function PhaseCelebration({ runId, durationMs = 2800 }: PhaseCelebrationProps) {
   const [visible, setVisible] = useState(false)
+  const reducedMotion = useReducedMotion()
+  const skippedRun = useRef<number | null>(null)
+  const activeDeadline = useRef<{ runId: number; expires: number } | null>(null)
 
   useEffect(() => {
-    if (!runId) return
-    // Respect users who prefer reduced motion — skip the big confetti burst.
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
+    if (!runId || reducedMotion || document.hidden) { skippedRun.current = runId; setVisible(false); return }
+    if (skippedRun.current === runId) return
+    // One deadline per burst. Reconfiguration/StrictMode may rearm its remaining
+    // time, but must not extend it or replay an already completed run.
+    const now = performance.now()
+    if (activeDeadline.current?.runId !== runId) {
+      activeDeadline.current = { runId, expires: now + Math.max(0, durationMs) }
+    }
+    const remaining = activeDeadline.current.expires - now
+    if (remaining <= 0) { skippedRun.current = runId; setVisible(false); return }
     setVisible(true)
-    const timer = window.setTimeout(() => setVisible(false), durationMs)
-    return () => window.clearTimeout(timer)
-  }, [runId, durationMs])
+    const timer = window.setTimeout(() => { skippedRun.current = runId; setVisible(false) }, remaining)
+    const onVisibility = () => {
+      if (document.hidden) { skippedRun.current = runId; window.clearTimeout(timer); setVisible(false) }
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      window.clearTimeout(timer)
+      document.removeEventListener('visibilitychange', onVisibility)
+    }
+  }, [runId, durationMs, reducedMotion])
 
   if (!visible) return null
 

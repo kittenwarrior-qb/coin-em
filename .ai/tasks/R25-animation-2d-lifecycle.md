@@ -1,7 +1,7 @@
 # R25 Animation 2D lifecycle
 
 **Priority:** P1  
-**Status:** planned  
+**Status:** in progress
 **Owner:** Codex implementation  
 **Reviewer:** Claude audit  
 **Dependencies:** R17, R19, R24
@@ -123,6 +123,12 @@ Motion direction and budgets need UX approval; no reward popup before committed 
 
 ## Implementation plan
 
+Plan revision2026-10-09 — after the frozen-source short matrix completes, admit existing useBoardController and adjacent controller tests for presentation dedupe. Derive forward progression only from server phaseView.position plus room/viewer/currentRound/status, without a frontend phase-order table. Hydration/reconnect/new room/viewer/invalid projection baseline without motion; same-round rollback/revisit cannot replay completion; uninterrupted next round retains existing role-reveal celebration. Use one bounded previous-snapshot/high-water ref and the existing CELEBRATE_ON_ENTER list/local run counter. Add before-fix rollback/reentry/scope/next-round regressions. No socket/phase/role/Coin mutation, new visual/art/vendor or forged phase-instance fields. This is existing completion lifecycle, not the deferred new-character/device gate.
+
+Plan revision2026-10-09 — existing celebration deadline only: PhaseCelebration currently restarts its duration timer when durationMs changes, even after a completed run. Preserve original Rive artifact/state machine/layout and runId API; capture one monotonic deadline per run, mark completed runs skipped, and rearm remaining time rather than restarting on same-run effect reconfiguration. React StrictMode cleanup/setup must still rearm the active remaining deadline, not suppress the only timer. Add adjacent tests for mid-run duration changes, after-completion changes and StrictMode cleanup. No new character/art/vendor, gameplay/phase trigger change, per-phase completion acceptance or real Rive/device-performance claim. Apply only after the owned model/sticker browser run finishes so its source remains stable.
+
+Plan review/revision 2026-10-02 — begin only existing finite-Coin feedback lifecycle against implemented R17/R19 and read-only R24 inventory. Extend scope to GameBoard hook options and nearby tests. Replace legacy automatic-bonus popup guesses with visible committed GIVE_COIN under approved web-16-coin60/v1. Hydration, room/round/viewer changes and reconnect baseline history; duplicate/revisited phases cannot replay receipts. Presentation only, no mutation/ACK/phase authority or card asset changes. Existing reveal callback remains no-op because role/guess bonuses are zero. Character/engine/prototype/device gates remain deferred; existing Rive usage does not select a vendor. This review permits only the bounded lifecycle slice.
+
 1. Inventory the current FlipCard/fan/table/celebration/reward effects and record which confirmed projection or committed event, if any, owns each visual trigger.
 2. Define a small controller that consumes only confirmed projection plus a dedupe policy for event IDs; hydration/reconnect establishes a baseline and never replays history.
 3. Implement the engine-neutral `CharacterMotion` adapter and a static PNG/WebP adapter first; keep phase, reward and socket authority outside the adapter.
@@ -135,13 +141,39 @@ Motion direction and budgets need UX approval; no reward popup before committed 
 
 ## Implementation report
 
+2026-10-09 existing phase-completion presentation follow-up: useBoardController now tracks server phaseView.position high-water within room/viewer/round. Rollback/reentry cannot create a fresh completion burst; reconnect/new room/viewer/invalid position/missing round/status baseline without motion. Continuous adjacent new round retains existing role-reveal celebration; jumped-round history does not. Baseline/offline cancels active old-scope motion via run0, while a separate monotonic local sequence prevents recycled run IDs colliding with completed/skipped PhaseCelebration state. No phase-order table/wire/gameplay/asset changes. Constant-size refs only; deferred character/device work unchanged.
+
+2026-10-09 — existing PhaseCelebration captures one performance.now deadline per run. Same-run duration reconfiguration rearms only remaining time and completed runs stay skipped; StrictMode effect cleanup/setup preserves one timer. Original Rive URL/state machine/layout/default2800ms, hidden/reduced-motion suppression and pointer-events-none retained. No phase trigger/gameplay authority, artifact or character changes; full phase-instance dedupe and real runtime/device acceptance remain separate.
+
+2026-10-02 — Finite-Coin receipt feedback now uses only newly visible committed GIVE_COIN with current round, receipt ID, valid positive integer amount and original color under web-16-coin60/v1. Dedup uses round/receipt rather than timestamp. First hydration, reconnect, room/round/viewer/rules changes baseline logs; phase revisits and duplicate receipts do not replay. Legacy NTG/role/guess/Silencer automatic-bonus guesses and receiver-green conversion no longer generate a popup in this rules version. Reveal completion callback is a compatibility no-op, not a reward authority. No server balance or Coin contract changed.
+
+Existing confetti no longer fires on first board hydration/reconnect/terminal phase. PhaseCelebration honors reactive reduced motion, clears idle/unmount/hidden timers and does not replay a skipped run when motion/tab visibility returns. Existing Rive artifact/runtime/imagery are untouched; this does not choose a character engine. 18 receipt-hook + 4 celebration lifecycle regressions pass. Frontend-design guided preservation of approved cartoon assets and non-essential motion semantics. Character adapter/approved layered asset, lazy/error fallback, full phase-instance completion dedupe, vendor/license decision, Android/desktop profiler and physical-device prototype gates remain. No acceptance/done.
+
+Type scope extension: `fe/src/components/game/types.ts` adds optional data.requestId to the existing projected log type, matching actual CoinCycle committed GIVE_COIN receipts already consumed by useSocket; no new wire field. Test-only legacy reward fixtures now supply required actorId rather than weakening the contract. Initial build caught both omissions; corrected before re-verification.
+
 <!-- Codex updates this after implementation: changed files, invariant preserved, commands and results. -->
 
 ## QA report
 
+Observed2026-10-10 final phase-source browser matrix all11short casesPASS507.97s, including real5/10guest rollback/reentry/reconnect/room replacement plus public/PWA/showcase/admin boundaries. Original limits preserved, no app/build mutation or concurrent owned heavy suite. Reports/limits in R29; current copied clean verification runs afterwards. This does not turn mocked Rive tests into real Rive/error/device or deferred character acceptance.
+
+Final stable-phase source2026-10-09: fullFE57files623testsPASS24.81s, r25-final-phase-frontend.json; TypeScriptbuild exit0, full lint earlier exit0 and final four changed-file lint exit0 after optional-round guard. ViteproductionbuildPASS33.41s. Five controller regressions cover rollback, room/viewer/invalid/missing round, adjacent-next-round once-only, reconnect/history jumps, and cancellation with monotonic fresh run IDs; seven deadline/component tests include StrictMode/reducedmotion/hidden/unmount. Rive mocked, not real runtime/device profiler. Entire current11short browser repeat follows after source/build frozen; prior536.52s browser run is pre-phase-dedupe evidence only.
+
+Phase-dedupe pre-fix controller regression2026-10-09 **4FAIL/9PASS**, r25-phase-before.json retained: rollback, room/viewer scope, repeated next-round role entry and skipped-round hydrate replay. Initial fix focused20PASS2.71s; TypeScript correctly rejects optional currentRound assigned to numeric snapshot. Added explicit finite-positive round guard and missing-round regression, no type suppression; fifth test ensures offline/new-room cancellation and monotonic fresh run IDs. Intermediate fullFE623PASS23.26s predates this final guard/test edit; final stable-source verification is recorded separately.
+
+Final current-source2026-10-09: full ESLint0diagnostics/TypeScript build-mode exit0, ViteproductionbuildPASS28.68s. FE618/BE602 regular tests passed separately; not combined clean-install/Linux/full-browser or real Rive/device acceptance.
+
+2026-10-09 — before fix, two new duration-replay tests FAIL as expected (5PASS/2FAIL, report r25-deadline-before.json retained); after fix all7focusedPASS1.74s including StrictMode. FullFE57files618testsPASS27.40s (r25-deadline-frontend.json); Rive mocked, not real runtime/FPS proof. Read-only asset manifest80local/200faces and full573images/15516248bytes/originalhash7b15602886af3ba3832197fe99706792e56c82ffcb0a4bc6c1153800b5502ff8/missing0/decode0/reskins0PASS. TypeScript/lint/build result recorded after completion separately.
+
+Implementation verification: full frontend 17 files / 155 tests pass, no skipped; backend 40 files / 478 tests rerun passes. Both builds pass, frontend lint 0 errors/8 baseline warnings. The 22 new jsdom tests cover receipt hydration/reconnect/scope/duplicate timestamps, legacy bonus suppression, malformed/out-of-round/missing receipt/terminal/unknown rules, idle deadline, reduced-motion return, hidden return and unmount. Rive is mocked: no real runtime/error/FPS/device/brand approval claim. Audit script confirms 573 images, 15,516,248 bytes, original aggregate hash `7b15602886af3ba3832197fe99706792e56c82ffcb0a4bc6c1153800b5502ff8`, no image reskins/decode errors. Rollback is targeted UI source reversion only, without changing persisted receipt/balance/catalog data.
+
 <!-- QA owner records environment, test matrix, failures, visual/device evidence and final result. -->
 
 ## Audit report
+
+Phase-presentation self-review2026-10-09: server positions supply ordering; highestPosition never decreases within the current admitted round, so rollback cannot manufacture a completion event. Room/viewer discontinuity/reconnect/invalid optional round resets baseline and active presentation, not server state. One-step next-round continuity retains the existing eligible role-reveal burst, skipped history does not replay it. Local sequence stays monotonic even when run0 cancels motion, avoiding collision with skipped/completed run IDs. Constant-memory refs, no identity/role/Coin/phase command or new artwork. Still not device/runtime-error/new-character acceptance.
+
+2026-10-09 owner-approved self-review: durationMs must configure the next run rather than extend/replay an already-started run. Monotonic per-run deadline survives development StrictMode cleanup/setup; expiration marks the run skipped so later reconfiguration cannot remount motion. Bounded constant ref state, no server/event/Coin mutation or new artwork. Mocked Rive tests do not close real asset-error/device/prototype gates. Frontend-design skill guided preservation of existing cartoon motion and real presentation semantics, not a new visual direction.
 
 <!-- Reviewer records independent findings, unresolved risks, and approval/rework decision. -->
 

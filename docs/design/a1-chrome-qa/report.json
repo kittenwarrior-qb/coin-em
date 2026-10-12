@@ -1,0 +1,379 @@
+{
+  "browser": "147.0.7727.15",
+  "adminMocked": true,
+  "physicalDevice": false,
+  "results": [
+    {
+      "route": "/about",
+      "width": 320,
+      "height": 568,
+      "controls": [
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-cream-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/mint-blush-v2/pill-blush.png\")",
+          "ink": "rgb(32, 85, 127)"
+        }
+      ],
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "route": "/about/cards",
+      "width": 320,
+      "height": 568,
+      "controls": [
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-cream-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/mint-blush-v2/pill-blush.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        }
+      ],
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "route": "/about/story",
+      "width": 320,
+      "height": 568,
+      "controls": [
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-cream-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/mint-blush-v2/pill-blush.png\")",
+          "ink": "rgb(32, 85, 127)"
+        }
+      ],
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "route": "/cards",
+      "width": 320,
+      "height": 568,
+      "controls": [
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/circle-sky.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/circle-sky.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/circle-sky.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/circle-sky.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        }
+      ],
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "route": "/admin",
+      "width": 320,
+      "height": 568,
+      "controls": [],
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "route": "/about",
+      "width": 430,
+      "height": 932,
+      "controls": [
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-cream-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/mint-blush-v2/pill-blush.png\")",
+          "ink": "rgb(32, 85, 127)"
+        }
+      ],
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "route": "/about/cards",
+      "width": 430,
+      "height": 932,
+      "controls": [
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-cream-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/mint-blush-v2/pill-blush.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        }
+      ],
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "route": "/about/story",
+      "width": 430,
+      "height": 932,
+      "controls": [
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-cream-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/mint-blush-v2/pill-blush.png\")",
+          "ink": "rgb(32, 85, 127)"
+        }
+      ],
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "route": "/cards",
+      "width": 430,
+      "height": 932,
+      "controls": [
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/circle-sky.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/circle-sky.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/circle-sky.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/circle-sky.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        }
+      ],
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "route": "/admin",
+      "width": 430,
+      "height": 932,
+      "controls": [],
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "route": "/about",
+      "width": 1280,
+      "height": 900,
+      "controls": [
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-cream-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/mint-blush-v2/pill-blush.png\")",
+          "ink": "rgb(32, 85, 127)"
+        }
+      ],
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "route": "/about/cards",
+      "width": 1280,
+      "height": 900,
+      "controls": [
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-cream-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/mint-blush-v2/pill-blush.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        }
+      ],
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "route": "/about/story",
+      "width": 1280,
+      "height": 900,
+      "controls": [
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-cream-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/mint-blush-v2/pill-blush.png\")",
+          "ink": "rgb(32, 85, 127)"
+        }
+      ],
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "route": "/cards",
+      "width": 1280,
+      "height": 900,
+      "controls": [
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/circle-sky.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/circle-sky.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/circle-sky.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/circle-sky.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        },
+        {
+          "image": "url(\"http://127.0.0.1:5173/cartoon/buttons/themes/sky-pink-a1/pill-sky-v2.png\")",
+          "ink": "rgb(32, 85, 127)"
+        }
+      ],
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "route": "/admin",
+      "width": 1280,
+      "height": 900,
+      "controls": [],
+      "overflow": false,
+      "errors": []
+    }
+  ]
+}

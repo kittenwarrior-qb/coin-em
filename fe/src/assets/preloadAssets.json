@@ -1,0 +1,447 @@
+{
+  "version": "ui-preload-assets/v2",
+  "critical": [
+    {
+      "url": "/cartoon/ui/themes/emotion-orbit/logo-v2.webp",
+      "tag": "brand"
+    },
+    {
+      "url": "/cartoon/ui/themes/emotion-orbit/backdrop-v3.webp",
+      "tag": "brand"
+    },
+    {
+      "url": "/cartoon/ui/themes/emotion-orbit/primary-v3.webp",
+      "tag": "brand"
+    },
+    {
+      "url": "/cartoon/ui/themes/emotion-orbit/secondary-v3.webp",
+      "tag": "brand"
+    }
+  ],
+  "background": [
+    {
+      "url": "/emcoin/avatars/orbit/00.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/01.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/02.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/03.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/04.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/05.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/06.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/07.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/08.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/09.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/10.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/11.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/12.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/13.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/14.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/15.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/16.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/17.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/18.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/19.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/20.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/21.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/orbit/22.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/paper/00.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/paper/01.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/paper/02.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/paper/03.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/paper/04.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/paper/05.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/paper/06.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/paper/07.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/paper/08.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/paper/09.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/paper/10.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/paper/11.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/paper/12.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/paper/13.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/paper/14.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/paper/15.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/paper/16.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/paper/17.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/paper/18.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/paper/19.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/paper/20.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/paper/21.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/avatars/paper/22.webp",
+      "tag": "avatar"
+    },
+    {
+      "url": "/emcoin/icons/orbit/facilitator.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/storyteller.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/heal.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/lock.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/connect.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/gift.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/compass.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/check.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/arrowRight.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/arrowLeft.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/down.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/play.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/book.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/help.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/settings.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/close.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/photo.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/sound.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/mute.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/music.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/bell.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/clock.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/coin.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/surprised.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/brokenHeart.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/alert.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/repeat.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/sleep.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/spinner.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/orbit/friends.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/facilitator.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/storyteller.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/heal.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/lock.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/connect.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/gift.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/compass.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/check.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/arrowRight.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/arrowLeft.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/down.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/play.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/book.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/help.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/settings.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/close.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/photo.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/sound.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/mute.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/music.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/bell.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/clock.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/coin.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/surprised.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/brokenHeart.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/alert.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/repeat.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/sleep.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/spinner.svg",
+      "tag": "icon"
+    },
+    {
+      "url": "/emcoin/icons/paper/friends.svg",
+      "tag": "icon"
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "previewOnly": true,
+  "backendConnected": false,
+  "browser": "147.0.7727.15",
+  "results": [
+    {
+      "variant": "a1",
+      "width": 430,
+      "height": 760,
+      "footerReachable": true,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "variant": "a1",
+      "width": 320,
+      "height": 568,
+      "footerReachable": true,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "variant": "a1",
+      "width": 390,
+      "height": 400,
+      "footerReachable": true,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "variant": "a2",
+      "width": 430,
+      "height": 760,
+      "footerReachable": true,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "variant": "a2",
+      "width": 320,
+      "height": 568,
+      "footerReachable": true,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "variant": "a2",
+      "width": 390,
+      "height": 400,
+      "footerReachable": true,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "variant": "a3",
+      "width": 430,
+      "height": 760,
+      "footerReachable": true,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "variant": "a3",
+      "width": 320,
+      "height": 568,
+      "footerReachable": true,
+      "overflow": false,
+      "errors": []
+    },
+    {
+      "variant": "a3",
+      "width": 390,
+      "height": 400,
+      "footerReachable": true,
+      "overflow": false,
+      "errors": []
+    }
+  ]
+}

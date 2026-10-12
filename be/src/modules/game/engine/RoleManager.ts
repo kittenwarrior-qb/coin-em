@@ -1,4 +1,5 @@
 import { Room, Player, Role } from '../types'
+import { getRoleDeck } from './RoleDeck'
 
 export class RoleManager {
   /**
@@ -84,6 +85,9 @@ export class RoleManager {
    * Assign roles to players at game start
    */
   assignRoles(players: Player[], preferredRoles: Record<string, Role> = {}): Player[] {
+    if (players.some(p => !p.userId) || new Set(players.map(p => p.userId)).size !== players.length) {
+      throw new Error('Role assignment requires unique stable player IDs')
+    }
     const playerCount = players.length
     const roles = this.getRolesForPlayerCount(playerCount)
 
@@ -135,90 +139,8 @@ export class RoleManager {
     })
   }
 
-  /**
-   * Get roles for specific player count
-   * Based on game rules:
-   * 5 người: Quản trò, Trao Gửi, Im Lặng, Kết Nối, Gợi Mở
-   * 6 người: Quản trò, Trao Gửi, Im Lặng, Kết Nối, Gợi Mở, Dẫn Lối
-   * 7 người: Quản trò, Trao Gửi, Im Lặng, Kết Nối, Gợi Mở, Dẫn Lối, Chữa Lành
-   * 8 người: Quản trò, Trao Gửi, 2 Im Lặng, Kết Nối, Gợi Mở, Dẫn Lối, Chữa Lành
-   * 9 người: Quản trò, Trao Gửi, 2 Im Lặng, 2 Kết Nối, Gợi Mở, Dẫn Lối, Chữa Lành
-   * 10 người: Quản trò, Trao Gửi, 2 Im Lặng, 2 Kết Nối, 2 Gợi Mở, Dẫn Lối, Chữa Lành
-   */
   private getRolesForPlayerCount(count: number): Role[] {
-    switch (count) {
-      case 5:
-        return [
-          Role.NARRATOR,    // Quản trò
-          Role.SENDER,      // Trao Gửi
-          Role.SILENCER,    // Im Lặng
-          Role.CONNECTOR,   // Kết Nối
-          Role.OPENER,      // Gợi Mở
-        ]
-      
-      case 6:
-        return [
-          Role.NARRATOR,    // Quản trò
-          Role.SENDER,      // Trao Gửi
-          Role.SILENCER,    // Im Lặng
-          Role.CONNECTOR,   // Kết Nối
-          Role.OPENER,      // Gợi Mở
-          Role.GUIDE,       // Dẫn Lối
-        ]
-      
-      case 7:
-        return [
-          Role.NARRATOR,    // Quản trò
-          Role.SENDER,      // Trao Gửi
-          Role.SILENCER,    // Im Lặng
-          Role.CONNECTOR,   // Kết Nối
-          Role.OPENER,      // Gợi Mở
-          Role.GUIDE,       // Dẫn Lối
-          Role.HEALER,      // Chữa Lành
-        ]
-      
-      case 8:
-        return [
-          Role.NARRATOR,    // Quản trò
-          Role.SENDER,      // Trao Gửi
-          Role.SILENCER,    // Im Lặng 1
-          Role.SILENCER,    // Im Lặng 2
-          Role.CONNECTOR,   // Kết Nối
-          Role.OPENER,      // Gợi Mở
-          Role.GUIDE,       // Dẫn Lối
-          Role.HEALER,      // Chữa Lành
-        ]
-      
-      case 9:
-        return [
-          Role.NARRATOR,    // Quản trò
-          Role.SENDER,      // Trao Gửi
-          Role.SILENCER,    // Im Lặng 1
-          Role.SILENCER,    // Im Lặng 2
-          Role.CONNECTOR,   // Kết Nối 1
-          Role.CONNECTOR,   // Kết Nối 2
-          Role.OPENER,      // Gợi Mở
-          Role.GUIDE,       // Dẫn Lối
-          Role.HEALER,      // Chữa Lành
-        ]
-      
-      case 10:
-        return [
-          Role.NARRATOR,    // Quản trò
-          Role.SENDER,      // Trao Gửi
-          Role.SILENCER,    // Im Lặng 1
-          Role.SILENCER,    // Im Lặng 2
-          Role.CONNECTOR,   // Kết Nối 1
-          Role.CONNECTOR,   // Kết Nối 2
-          Role.OPENER,      // Gợi Mở 1
-          Role.OPENER,      // Gợi Mở 2
-          Role.GUIDE,       // Dẫn Lối
-          Role.HEALER,      // Chữa Lành
-        ]
-      
-      default:
-        throw new Error(`Invalid player count: ${count}. Must be between 5 and 10.`)
-    }
+    return getRoleDeck(count)
   }
 
   /**

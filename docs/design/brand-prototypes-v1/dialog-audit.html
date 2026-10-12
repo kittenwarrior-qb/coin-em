@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="vi">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EmCoin — kiểm tra popup và trạng thái</title>
+<style>
+body{margin:0;background:#f4f1ea;color:#183c54;font:16px/1.5 system-ui,sans-serif;padding:24px}h1{font-size:26px}p{max-width:800px}select{font:inherit;padding:10px;border-radius:8px}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;margin-top:24px}figure{margin:0}img{width:100%;max-width:430px;border:1px solid #ccc;border-radius:12px}figcaption{margin-bottom:8px;font-weight:600}a{color:#244f76}
+</style>
+<h1>Popup, thẻ đã chọn và mất kết nối</h1>
+<p>Ảnh giao diện thật từ fixture QA; dữ liệu giả lập, không kết nối server. Bộ thẻ giữ nguyên. Đây là kiểm tra bố cục và trạng thái, không phải xác nhận giống prototype 100%.</p>
+<label>Theme <select id="theme"><option value="emotion-orbit">Vòng Cảm Xúc</option><option value="kindness-workshop">Xưởng Tử Tế</option></select></label>
+<main id="grid"></main>
+<script>
+const screens=[['night-confirm','Xác nhận bảo vệ'],['phase-confirm','Xác nhận quay lại'],['muted','Thông báo im lặng'],['reflection-confirm','Xác nhận phần thưởng'],['success-toast','Thông báo thành công'],['card-preview','Thẻ đã chọn'],['offline','Bàn chơi mất kết nối']];
+function render(){document.querySelector('#grid').replaceChildren(...screens.map(([id,label])=>{const f=document.createElement('figure'),caption=document.createElement('figcaption'),img=document.createElement('img'),a=document.createElement('a');caption.textContent=label;img.src='../theme-dialog-qa/'+document.querySelector('#theme').value+'-'+id+'.png';img.alt=label;img.loading='lazy';a.href='http://127.0.0.1:5173/'+(id==='offline'?'qa-board.html?count=10&phase=give-coins&viewer=narrator&offline=1':'qa-screens.html?screen='+id)+'&theme='+document.querySelector('#theme').value;a.textContent='Mở giao diện tương tác';f.append(caption,img,a);return f}))}document.querySelector('#theme').addEventListener('change',render);render();
+</script>
+</html>

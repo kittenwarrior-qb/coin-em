@@ -8,6 +8,20 @@ import { connectRedis, redisAvailable, pubClient, subClient } from './redis'
 import { registerSocketHandlers } from './socket/handlers/index'
 import { roomRepository } from './modules/room/repository/RoomRepository'
 import { cleanupRooms, loadRooms } from './persistence'
+import { registerPublicDiagnostics } from './publicDiagnostics'
+import { OperationalAnalytics, operationalAnalyticsMiddleware } from './admin/operationalAnalytics'
+import { AdminAuth } from './admin/AdminAuth'
+import { registerAdminApi } from './admin/adminApi'
+import { closeAdminRoom } from './admin/closeRoom'
+import { roomService } from './modules/room/services/RoomService'
+import { operationDiagnostic } from './telemetry/operationalDiagnostics'
+import { registerSafeHttpErrors } from './telemetry/safeHttpErrors'
+import { CatalogStore } from './catalog/CatalogStore'
+import { pdfCatalogDraft } from './catalog/pdfDraft'
+import { mkdirSync } from 'node:fs'
+import path from 'node:path'
+import { configureRuntimeCatalog } from './catalog/runtimeCatalog'
+import { registerPublicCatalogApi } from './catalog/publicCatalogApi'
 
 const PORT = process.env.PORT || 3001
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173'
@@ -18,27 +32,35 @@ const corsOrigin = CLIENT_ORIGIN.includes(',')
   : CLIENT_ORIGIN
 
 const app = express()
+const operationalAnalytics = new OperationalAnalytics()
+let catalog: CatalogStore | undefined
+app.use(operationalAnalyticsMiddleware(operationalAnalytics))
 app.use(cors({ origin: corsOrigin }))
+registerPublicCatalogApi(app, () => catalog)
+registerAdminApi(app, {
+  auth: new AdminAuth(process.env.EMCOIN_ADMIN_PASSWORD_HASH),
+  catalog: () => catalog,
+  origin: process.env.EMCOIN_ADMIN_PASSWORD_HASH ? process.env.EMCOIN_ADMIN_ORIGIN : undefined,
+  rooms: () => roomRepository.findAll(), analytics: operationalAnalytics,
+  closeRoom: (command, authorized) => closeAdminRoom(roomRepository, command, authorized,
+    roomId => {
+      io.to(roomId).emit('room_closed', { roomId })
+      io.in(roomId).socketsLeave(roomId)
+      io.emit('rooms_list', roomService.getAvailableRooms())
+    }),
+})
 app.use(express.json())
 
-app.get('/health', (_, res) => res.json({ status: 'ok' }))
-
-app.get('/metrics', (_, res) =>
-  res.json({
-    rooms: roomRepository.count(),
-    roomDetails: roomRepository.findAll().map(r => ({
-      id: r.id,
-      status: r.status,
-      players: r.players.length,
-      lastActivity: r.lastActivity,
-      lastActivityAgo: r.lastActivity ? `${Math.round((Date.now() - r.lastActivity) / 1000)}s` : 'never',
-    })),
-    uptime: process.uptime(),
-    memory: process.memoryUsage(),
-    pid: process.pid,
-    redis: redisAvailable,
-  }),
-)
+const primaryRequired = process.env.NODE_ENV === 'production' || process.env.ROOM_STORAGE_MODE === 'redis-required'
+let startupComplete = false
+registerPublicDiagnostics(app, {
+  rooms: () => roomRepository.findAll(),
+  startupComplete: () => startupComplete,
+  primaryRequired,
+  redisAvailable: () => redisAvailable,
+  uptime: () => process.uptime(),
+})
+registerSafeHttpErrors(app)
 
 const httpServer = createServer(app)
 const io = new Server(httpServer, {
@@ -47,20 +69,21 @@ const io = new Server(httpServer, {
 
 async function start(): Promise<void> {
   const hasRedis = await connectRedis()
+  if (!hasRedis && primaryRequired) throw new Error('PRIMARY_STORAGE_UNAVAILABLE')
 
   if (hasRedis) {
     // Production path: Redis adapter + load rooms from Redis
     io.adapter(createAdapter(pubClient, subClient))
     await roomRepository.loadFromRedis()
-    console.log('✅ Redis: Connected — multi-instance mode')
+    operationDiagnostic('redis_connection', 'ok')
     
     // If Redis is empty but we have JSON backups, load them
-    if (roomRepository.count() === 0) {
-      console.log('[startup] Redis is empty, checking JSON backups...')
+    if (!primaryRequired && roomRepository.count() === 0) {
+      operationDiagnostic('room_recovery', 'fallback')
       const jsonRooms = loadRooms()
       if (jsonRooms.size > 0) {
         roomRepository.load(jsonRooms)
-        console.log(`[startup] Restored ${jsonRooms.size} room(s) from JSON backup`)
+        operationDiagnostic('room_recovery', 'fallback')
         // Save them back to Redis
         for (const room of roomRepository.findAll()) {
           roomRepository.save(room)
@@ -71,57 +94,30 @@ async function start(): Promise<void> {
     // Fallback path: no adapter, load rooms from JSON files
     const rooms = loadRooms()
     roomRepository.load(rooms)
-    console.log('⚠️  Redis: Unavailable — single-instance mode (JSON fallback)')
+    operationDiagnostic('room_recovery', 'fallback')
   }
 
-  // After restart, all sockets are gone.
-  // Clear players from waiting rooms (no one is connected anymore).
-  // Playing rooms keep their players so reconnect can work.
-  console.log(`[startup] Total rooms loaded: ${roomRepository.count()}`)
-  
-  let clearedWaitingRooms = 0
-  let deletedEmptyRooms = 0
-  
-  for (const room of roomRepository.findAll()) {
-    if (room.status === 'waiting') {
-      if (room.players.length > 0) {
-        console.log(`[startup] Clearing ${room.players.length} stale player(s) from waiting room ${room.id}`)
-        roomRepository.update(room.id, { players: [] })
-        clearedWaitingRooms++
-      }
-    } else {
-      console.log(`[startup] Keeping ${room.status} room ${room.id} with ${room.players.length} player(s) for reconnect`)
-    }
-  }
-  
-  // Remove now-empty waiting rooms
-  for (const room of roomRepository.findAll()) {
-    if (room.status === 'waiting' && room.players.length === 0) {
-      roomRepository.delete(room.id)
-      console.log(`[startup] Deleted empty waiting room ${room.id}`)
-      deletedEmptyRooms++
-    }
-  }
-  
-  console.log(`[startup] Cleanup complete: ${clearedWaitingRooms} waiting rooms cleared, ${deletedEmptyRooms} empty rooms deleted, ${roomRepository.count()} rooms remaining`)
+  // Restart is not room activity and must not erase a fresh waiting-room roster.
+  await roomRepository.drainWrites()
+  await cleanupRooms(roomRepository)
+
+  const catalogFile = process.env.EMCOIN_CATALOG_DB || path.resolve('data/catalog.sqlite')
+  mkdirSync(path.dirname(catalogFile), { recursive: true })
+  catalog = new CatalogStore(catalogFile)
+  catalog.seed(pdfCatalogDraft())
+  catalog.fillMissingContent(pdfCatalogDraft())
+  catalog.reviewMatchingSource(pdfCatalogDraft())
+  configureRuntimeCatalog(catalog)
 
   registerSocketHandlers(io)
-
-  setInterval(() => {
-    cleanupRooms(roomRepository.getRawMap()).catch(err =>
-      console.error('[Cleanup] Error:', err)
-    )
-  }, 60 * 60 * 1000)
+  startupComplete = true
 
   httpServer.listen(PORT, () => {
-    console.log(`🚀 Backend running on http://localhost:${PORT}`)
-    console.log(`✅ Game Engine: Active`)
-    console.log(`✅ Socket Handlers: Registered`)
-    console.log(`✅ Cleanup: Scheduled (every 1 hour)`)
+    operationDiagnostic('startup', 'ok')
   })
 }
 
-start().catch((err) => {
-  console.error('Failed to start server:', err)
+start().catch(() => {
+  operationDiagnostic('startup', 'failed')
   process.exit(1)
 })

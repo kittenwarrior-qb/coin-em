@@ -1,10 +1,13 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { EmcoinImage } from '@/components/cartoon/EmcoinImage'
+import { useRef, useState } from 'react'
+import { usePopupLifecycle } from '@/features/overlays/usePopupLifecycle'
+import { motion, useIsPresent } from 'framer-motion'
 import { CartoonButton } from '@/components/cartoon'
 import { AVATAR_BG_COLORS, AVATAR_ICONS } from '@/components/cartoon/avatarConfig'
 import type { Player } from './types'
 
 interface RoleRewardPickerProps {
+  pending?: boolean
   players: Player[]
   ntgPlayer?: Player
   ntgVotedIds: Set<string>
@@ -20,18 +23,24 @@ const ROLE_COLORS: Record<string, string> = {
 }
 
 const ROLE_ICONS: Record<string, string> = {
-  'Người Kết Nối': '/cartoon/icons/Magic.svg',
-  'Người Gợi Mở': '/cartoon/icons/Gift-Pink-Border.svg',
-  'Người Dẫn Lối': '/cartoon/icons/Key-Gold.svg',
+  'Người Kết Nối': '/emcoin/icons/orbit/connect.svg',
+  'Người Gợi Mở': '/emcoin/icons/orbit/gift.svg',
+  'Người Dẫn Lối': '/emcoin/icons/orbit/compass.svg',
 }
 
 export function RoleRewardPicker({
+  pending,
   players,
   ntgPlayer,
   ntgVotedIds,
   onConfirm,
   onClose,
 }: RoleRewardPickerProps) {
+  const present = useIsPresent()
+  const dialogRef = useRef<HTMLDivElement>(null)
+  // onClose advances the phase: keyboard/history dismissal must never call it.
+  usePopupLifecycle(dialogRef, present, { persistent: true })
+  const blocked = pending || !present
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [rewardNtg, setRewardNtg] = useState(true)
 
@@ -54,15 +63,17 @@ export function RoleRewardPicker({
 
   return (
     <motion.div
+      data-testid="role-reward-picker"
       className="absolute inset-0 z-[70] flex items-end justify-center overflow-hidden bg-black/55 px-4 pb-4"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.15 }}
-      onClick={onClose}
+      onClick={blocked ? undefined : onClose}
     >
       <motion.div
-        className="w-full max-w-sm overflow-hidden rounded-t-[28px] border-t-[3px] border-[var(--c-black)] bg-white p-4 shadow-[0_-5px_0_rgba(0,0,0,0.16)]"
+        ref={dialogRef} role="dialog" data-ui-panel="a1" aria-label="Đánh giá lượt chơi" tabIndex={-1} aria-busy={pending || undefined}
+        className="flex flex-col max-h-[calc(100%-16px)] w-full max-w-sm overflow-hidden rounded-t-[28px] border-t-[3px] border-[var(--c-black)] bg-white p-4 shadow-[0_-5px_0_rgba(0,0,0,0.16)] [&>*]:shrink-0"
         initial={{ y: 80 }}
         animate={{ y: 0 }}
         exit={{ y: 80 }}
@@ -70,11 +81,11 @@ export function RoleRewardPicker({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="text-center mb-4">
-          <div className="font-display text-base text-[var(--c-pink)]">Đánh giá lượt chơi</div>
+          <div data-ui-ink="primary" className="font-display text-base text-[var(--c-pink)]">Đánh giá lượt chơi</div>
           <div className="mt-0.5 font-body text-[11px] text-black/45">Ai đã hoàn thành tốt vai trò của mình?</div>
         </div>
 
-        <div className="max-h-[50dvh] space-y-2 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div className="min-h-0 !shrink max-h-[50dvh] space-y-2 overflow-y-auto overscroll-contain [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
 
           {/* NTG row — same list style, toggle ON/OFF */}
           {ntgPlayer && (() => {
@@ -84,6 +95,9 @@ export function RoleRewardPicker({
             return (
               <button
                 type="button"
+                data-ui-chrome="reward-choice"
+                aria-pressed={rewardNtg}
+                disabled={blocked}
                 onClick={() => setRewardNtg(v => !v)}
                 className={[
                   'w-full flex items-center gap-3 rounded-2xl border-2 p-3 text-left transition-all',
@@ -100,7 +114,7 @@ export function RoleRewardPicker({
                       borderColor: rewardNtg ? '#F97BB0' : '#e5e7eb',
                     }}
                   >
-                    <img
+                    <EmcoinImage
                       src={AVATAR_ICONS[Math.abs(avatarIdx) % AVATAR_ICONS.length]}
                       alt=""
                       className="h-9 w-9 object-contain"
@@ -109,7 +123,7 @@ export function RoleRewardPicker({
                   </div>
                   {rewardNtg && (
                     <motion.img
-                      src="/cartoon/icons/Checkmark-Cartoon.svg"
+                      src="/emcoin/icons/orbit/check.svg"
                       alt=""
                       initial={{ scale: 0, rotate: -18 }}
                       animate={{ scale: 1, rotate: 0 }}
@@ -139,7 +153,7 @@ export function RoleRewardPicker({
                 </div>
 
                 {/* Toggle */}
-                <div className={[
+                <div data-ui-chrome="selection-switch" className={[
                   'shrink-0 w-10 h-6 rounded-full transition-all relative border-2',
                   rewardNtg ? 'bg-[#F97BB0] border-[#F97BB0]' : 'bg-gray-200 border-gray-200',
                 ].join(' ')}>
@@ -166,6 +180,10 @@ export function RoleRewardPicker({
             return (
               <button
                 key={player.id}
+                type="button"
+                data-ui-chrome="reward-choice"
+                aria-pressed={isSelected}
+                disabled={blocked}
                 onClick={() => togglePlayer(player.id)}
                 className={[
                   'w-full rounded-2xl border-2 p-3 transition-all text-left',
@@ -183,10 +201,10 @@ export function RoleRewardPicker({
                         borderColor: isSelected ? '#4ade80' : roleColor,
                       }}
                     >
-                      <img src={AVATAR_ICONS[Math.abs(avatarIndex) % AVATAR_ICONS.length]} alt="" className="h-9 w-9 object-contain" draggable={false} />
+                      <EmcoinImage src={AVATAR_ICONS[Math.abs(avatarIndex) % AVATAR_ICONS.length]} alt="" className="h-9 w-9 object-contain" draggable={false} />
                     </div>
                     {roleIcon && (
-                      <img
+                      <EmcoinImage
                         src={roleIcon}
                         alt=""
                         className="absolute -top-1 -left-1 h-5 w-5 object-contain"
@@ -196,7 +214,7 @@ export function RoleRewardPicker({
                     )}
                     {isSelected && (
                       <motion.img
-                        src="/cartoon/icons/Checkmark-Cartoon.svg"
+                        src="/emcoin/icons/orbit/check.svg"
                         alt=""
                         initial={{ scale: 0, rotate: -18 }}
                         animate={{ scale: 1, rotate: 0 }}
@@ -245,7 +263,9 @@ export function RoleRewardPicker({
           color="green"
           size="md"
           className="mt-4 w-full"
-          onClick={() => onConfirm(Array.from(selectedIds), rewardNtg)}
+          pending={pending}
+          disabled={!present}
+          onClick={() => { if (!blocked) onConfirm(Array.from(selectedIds), rewardNtg) }}
         >
           {totalSelected > 0 ? `Xác nhận (${totalSelected} người)` : 'Xác nhận'}
         </CartoonButton>

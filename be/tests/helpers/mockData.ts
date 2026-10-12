@@ -1,9 +1,10 @@
 import { Room, Player, Role, GamePhase } from '../../src/modules/game/types'
+import { randomUUID } from 'crypto'
 
 export function createMockPlayer(overrides: Partial<Player> = {}): Player {
   return {
-    socketId: `socket-${Math.random().toString(36).substr(2, 9)}`,
-    userId: `user-${Math.random().toString(36).substr(2, 9)}`,
+    socketId: `socket-${randomUUID()}`,
+    userId: `user-${randomUUID()}`,
     name: `Player ${Math.floor(Math.random() * 1000)}`,
     coins: { red: 0, yellow: 0, green: 0 },
     ...overrides,

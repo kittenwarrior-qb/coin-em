@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { EmcoinImage } from '@/components/cartoon/EmcoinImage'
+import { useEffect, useRef, useState } from 'react'
+import { usePendingNavigationGuard } from '@/features/overlays/usePopupLifecycle'
 import { motion } from 'framer-motion'
 import {
   CartoonAvatar,
@@ -11,6 +13,8 @@ import {
   QuitConfirmModal,
 } from '@/components/cartoon'
 import { ROLE_TO_IMAGE } from '@/constants/cardImages'
+import { useControlTheme } from '@/components/cartoon/controlThemeContext'
+import { themeBackdrop, themeLogo, isBrandTheme } from '@/components/cartoon/controlThemes'
 
 interface Player {
   socketId: string
@@ -23,20 +27,28 @@ interface Player {
 }
 
 interface WaitingRoomProps {
+  roundLimit?: number | null
+  onUpdateRoundLimit?: (limit: number | null) => Promise<boolean>
+  isConnected?: boolean
+  startPending?: boolean
   roomId: string
   players: Player[]
   hostSocketId: string
   mySocketId: string
   myUserId?: string
   onStartGame: () => void
-  onLeave: () => void
+  onLeave: () => Promise<boolean> | void
   onAddFakePlayers?: () => void
-  onUpdateProfile?: (name: string, avatarIndex: number, bgIndex: number) => void
+  onUpdateProfile?: (name: string, avatarIndex: number, bgIndex: number) => Promise<boolean> | void
   onSetDebugRolePreference?: (targetUserId: string, role: string) => void
   debugRolePickerEnabled?: boolean
 }
 
 export default function WaitingRoom({
+  roundLimit = null,
+  onUpdateRoundLimit,
+  isConnected = true,
+  startPending = false,
   roomId,
   players,
   hostSocketId,
@@ -48,17 +60,35 @@ export default function WaitingRoom({
   onSetDebugRolePreference,
   debugRolePickerEnabled: serverDebugRolePickerEnabled,
 }: WaitingRoomProps) {
+  const theme = useControlTheme()
   const [showQuit, setShowQuit] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
-  const [myDisplayName, setMyDisplayName] = useState('')
+  const [roundChoice, setRoundChoice] = useState(roundLimit === null ? 'auto' : String(roundLimit))
+  const [roundPending, setRoundPending] = useState(false)
+  const [roundMessage, setRoundMessage] = useState('')
+  const roundBusy = useRef(false)
+  useEffect(() => { setRoundChoice(roundLimit === null ? 'auto' : String(roundLimit)) }, [roundLimit, roomId])
+  usePendingNavigationGuard(roundPending)
+  const desiredRounds = roundChoice === 'auto' ? null : Number(roundChoice)
+  const roundDirty = desiredRounds !== roundLimit
+  const roundValid = desiredRounds === null || (Number.isInteger(desiredRounds) && desiredRounds >= 1 && desiredRounds <= Math.min(players.length, 10))
+  const confirmedValid = roundLimit === null || (Number.isInteger(roundLimit) && roundLimit >= 1 && roundLimit <= Math.min(players.length, 10))
+  async function saveRounds() {
+    if (!onUpdateRoundLimit || roundBusy.current || !roundValid) return
+    roundBusy.current = true; setRoundPending(true); setRoundMessage('')
+    try { setRoundMessage(await onUpdateRoundLimit(desiredRounds) ? 'Đã lưu số lượt.' : 'Chưa xác nhận được số lượt. Kiểm tra cấu hình phòng rồi thử lại.') }
+    catch { setRoundMessage('Chưa xác nhận được số lượt. Thử lại đúng lựa chọn này.') }
+    finally { roundBusy.current = false; setRoundPending(false) }
+  }
 
   const myPlayer = players.find(p => p.userId === myUserId)
-  const [myAvatarIndex, setMyAvatarIndex] = useState(() => myPlayer?.avatarIndex ?? 0)
-  const [myBgIndex, setMyBgIndex] = useState(() => myPlayer?.bgIndex ?? 0)
+  const myDisplayName = myPlayer?.name ?? ''
+  const myAvatarIndex = myPlayer?.avatarIndex ?? 0
+  const myBgIndex = myPlayer?.bgIndex ?? 0
 
   const hostUserId = hostSocketId
   const isHost = myUserId === hostUserId
-  const canStart = players.length >= 5
+  const canStart = players.length >= 5 && players.length <= 10
   const MAX_PLAYERS = 10
   const canHostPickRoles = serverDebugRolePickerEnabled === true && isHost
 
@@ -115,33 +145,34 @@ export default function WaitingRoom({
   ]
 
   return (
-    <CartoonScreen data-testid="waiting-room" panel={false}>
+    <CartoonScreen data-testid="waiting-room" data-ui-screen="waiting" panel={false}>
       <div
-        className="screen-panel flex flex-col items-center justify-center"
+        className="screen-panel flex flex-col items-center overflow-y-auto pt-[88px] pb-6"
         style={{
           height: '100dvh',
-          backgroundImage: 'linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url(/capybara_wallpaper.jpg)',
+          backgroundImage: themeBackdrop(theme, 'linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url(/capybara_wallpaper.jpg)'),
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       >
         <div className="absolute top-4 left-0 right-0 flex justify-center">
-          <img src="/emcoin_logo.png" alt="EmCoin" style={{ height: 52, objectFit: 'contain', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))' }} />
+          <EmcoinImage data-ui-chrome="waiting-logo" src={themeLogo(theme)} alt="EmCoin" style={{ height: isBrandTheme(theme) ? 72 : 52, width: isBrandTheme(theme) ? 190 : undefined, objectFit: 'contain', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.15))' }} />
         </div>
 
         <div
-          className="w-full mx-4 rounded-3xl flex flex-col gap-3 px-4 py-5"
+          data-ui-chrome="waiting-panel"
+          className="w-[calc(100%-32px)] my-auto shrink-0 rounded-3xl flex flex-col gap-3 px-4 py-5"
           style={{
             maxWidth: '22rem',
-            background: 'rgba(220, 252, 231, 0.82)',
-            backdropFilter: 'blur(100px)',
+            background: theme !== 'legacy' ? 'rgba(247,252,255,.94)' : 'rgba(220, 252, 231, 0.82)',
+            backdropFilter: theme !== 'legacy' ? 'blur(12px)' : 'blur(100px)',
           }}
         >
           <div className="flex justify-center">
             <div className="inline-flex flex-col items-center gap-1 px-5 py-2 rounded-2xl bg-white/80">
-              <h2 className="font-display text-2xl leading-tight" style={{ color: '#ff6993' }}>Phòng chờ</h2>
+              <h2 className="font-display text-2xl leading-tight" style={{ color: theme !== 'legacy' ? '#A15C75' : '#ff6993' }}>Phòng chờ</h2>
               <div className="inline-flex items-center gap-1.5">
-                <span className="font-body text-xs text-[var(--c-gray)]">Room:</span>
+                <span className="font-body text-xs text-[var(--c-gray)]">Mã phòng:</span>
                 <span data-testid="room-id" className="font-display text-xs tracking-wider">{roomId}</span>
               </div>
             </div>
@@ -160,7 +191,7 @@ export default function WaitingRoom({
 
           <CartoonScrollArea
             className="flex-shrink-0"
-            style={{ height: canHostPickRoles ? 260 : 220 }}
+            style={{ height: canHostPickRoles ? 260 : isBrandTheme(theme) ? `clamp(120px, calc(100dvh - ${roundDirty || !confirmedValid || (desiredRounds !== null && desiredRounds < players.length) ? 540 : 440}px), 450px)` : 220 }}
             alwaysShowScrollbar
             data-testid="player-list"
           >
@@ -188,11 +219,16 @@ export default function WaitingRoom({
                   <motion.div
                     key={player.socketId}
                     data-testid={`waiting-player-${player.name}`}
+                    data-ui-chrome="waiting-player"
+                    role={isMe ? 'button' : undefined}
+                    tabIndex={isMe ? 0 : undefined}
+                    aria-label={isMe ? `Chỉnh hồ sơ của ${displayName}` : undefined}
+                    onKeyDown={isMe ? event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setShowProfile(true) } } : undefined}
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.04 }}
                     className="flex items-center gap-3 px-3 py-3 rounded-2xl border border-black/8 cursor-pointer"
-                    style={{ background: isMe ? 'rgba(254,240,138,0.85)' : 'rgba(255,255,255,0.7)' }}
+                    style={{ background: theme !== 'legacy' ? (isMe ? 'var(--brand-blush-soft)' : 'var(--brand-ivory)') : isMe ? 'rgba(254,240,138,0.85)' : 'rgba(255,255,255,0.7)' }}
                     onClick={isMe ? () => setShowProfile(true) : undefined}
                   >
                     <div className="relative flex-shrink-0">
@@ -200,13 +236,13 @@ export default function WaitingRoom({
                         name={player.name}
                         avatarIndex={isMe ? myAvatarIndex : (player.avatarIndex ?? idx)}
                         bgIndex={isMe ? myBgIndex : (player.bgIndex ?? idx)}
-                        size="lg"
+                        size={isBrandTheme(theme) ? 'sm' : 'lg'}
                       />
                       {isMe && (
-                        <div className="absolute pointer-events-none" style={{ bottom: -24, right: -8 }}>
+                        <div className="absolute pointer-events-none" style={{ bottom: isBrandTheme(theme) ? -4 : -24, right: -8 }}>
                           <CartoonCircleButton
                             color="purple"
-                            iconSrc="/cartoon/icons/white/Photo.png"
+                            iconSrc="/emcoin/icons/orbit/photo.svg"
                             iconSize="50%"
                             style={{ height: 24, width: 24 }}
                           />
@@ -215,7 +251,8 @@ export default function WaitingRoom({
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <div className="font-display text-base truncate leading-tight">{displayName}</div>
+                      <div className="font-display text-base break-words leading-tight">{displayName}</div>
+                      {!canHostPickRoles && isBrandTheme(theme) && (isMe || isPlayerHost) && <div className="font-body text-xs mt-1">{[isMe ? 'Bạn' : '', isPlayerHost ? 'Chủ phòng' : ''].filter(Boolean).join(' · ')}</div>}
                       {canHostPickRoles && (
                         <div className="font-body text-[10px] text-black/45 truncate">
                           {isPlayerHost ? ROLE_NARRATOR : (player.debugPreferredRole ?? 'Chưa chọn role')}
@@ -223,13 +260,13 @@ export default function WaitingRoom({
                       )}
                     </div>
 
-                    {!canHostPickRoles && isMe && (
-                      <span className="font-display text-sm" style={{ color: '#f59e0b' }}>Bạn</span>
+                    {!canHostPickRoles && !isBrandTheme(theme) && isMe && (
+                      <span data-ui-ink="accent" className="font-display text-sm" style={{ color: '#f59e0b' }}>Bạn</span>
                     )}
 
-                    {!canHostPickRoles && isPlayerHost && (
-                      <div className="flex-shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 border border-amber-300">
-                        <img src="/cartoon/icons/Crown.svg" alt="" className="w-4 h-4" />
+                    {!canHostPickRoles && !isBrandTheme(theme) && isPlayerHost && (
+                      <div data-ui-pill="cream" className="flex-shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 border border-amber-300">
+                        <EmcoinImage src="/emcoin/icons/orbit/facilitator.svg" alt="" className="w-4 h-4" />
                         <span className="font-display text-sm text-amber-700">Host</span>
                       </div>
                     )}
@@ -237,8 +274,8 @@ export default function WaitingRoom({
                     {canHostPickRoles && (
                       <div className="w-32 flex-shrink-0" onClick={e => e.stopPropagation()}>
                         {isPlayerHost ? (
-                          <div className="flex items-center justify-center gap-1 px-2 py-1 rounded-full bg-amber-100 border border-amber-300">
-                            <img src="/cartoon/icons/Crown.svg" alt="" className="w-4 h-4" />
+                          <div data-ui-pill="cream" className="flex items-center justify-center gap-1 px-2 py-1 rounded-full bg-amber-100 border border-amber-300">
+                            <EmcoinImage src="/emcoin/icons/orbit/facilitator.svg" alt="" className="w-4 h-4" />
                             <span className="font-display text-[10px] text-amber-700 truncate">Quản trò</span>
                           </div>
                         ) : (
@@ -259,13 +296,29 @@ export default function WaitingRoom({
           </CartoonScrollArea>
 
           <div className="flex flex-col gap-2">
+            <section className="rounded-2xl border border-[var(--brand-edge)] bg-[var(--brand-ivory)] p-3 font-body text-sm text-[var(--brand-ink)]" aria-label="Số lượt chơi">
+              <label className="flex items-center justify-between gap-3">Số lượt
+                <select aria-label="Số lượt chơi" value={roundChoice} onChange={event => { setRoundChoice(event.target.value); setRoundMessage('') }}
+                  disabled={!isHost || !onUpdateRoundLimit || roundPending || startPending || !isConnected}
+                  className="min-h-11 min-w-0 rounded-xl border border-[var(--brand-edge)] bg-white px-2">
+                  <option value="auto">Mỗi người một lượt ({players.length})</option>
+                  {Array.from({ length: Math.min(players.length, 10) }, (_, index) => <option key={index + 1} value={index + 1}>{index + 1} lượt</option>)}
+                  {!roundValid && <option value={roundChoice}>{roundChoice} lượt (cần chọn lại)</option>}
+                </select>
+              </label>
+              {!confirmedValid && <p role="alert" className="mt-2">Số lượt vượt số người hiện có. Quản trò cần chọn lại trước khi bắt đầu.</p>}
+              {desiredRounds !== null && desiredRounds < players.length && <p className="mt-2">Ván ngắn: không phải tất cả người chơi đều có lượt làm Người Trao Gửi.</p>}
+              {isHost && roundDirty && <CartoonButton className="mt-2 w-full" size="sm" pending={roundPending} disabled={!roundValid || !isConnected || startPending} onClick={() => void saveRounds()}>Lưu số lượt</CartoonButton>}
+              {roundMessage && <p role="status" className="mt-2">{roundMessage}</p>}
+            </section>
             {isHost ? (
               <>
                 <CartoonButton
                   color={canStart ? 'green' : 'gray'}
                   size="lg"
                   className="w-full"
-                  disabled={!canStart}
+                  pending={startPending}
+                  disabled={!canStart || !isConnected || roundPending || roundDirty || !confirmedValid}
                   onClick={onStartGame}
                   data-testid="btn-start-game"
                 >
@@ -282,7 +335,7 @@ export default function WaitingRoom({
                 Đang chờ host bắt đầu...
               </div>
             )}
-            <CartoonButton color="white" className="w-full" onClick={() => setShowQuit(true)} data-testid="btn-leave-room">
+            <CartoonButton color="white" className="w-full" disabled={roundPending} onClick={() => setShowQuit(true)} data-testid="btn-leave-room">
               Rời phòng
             </CartoonButton>
           </div>
@@ -291,7 +344,7 @@ export default function WaitingRoom({
 
       <QuitConfirmModal
         open={showQuit}
-        onConfirm={() => { setShowQuit(false); onLeave() }}
+        onConfirm={async () => { if (await onLeave() === true) { setShowQuit(false); return true } return false }}
         onCancel={() => setShowQuit(false)}
         message="Bạn có muốn rời phòng không?"
         subMessage="Bạn sẽ mất chỗ trong phòng!"
@@ -305,11 +358,9 @@ export default function WaitingRoom({
         currentName={myDisplayName || (players.find(p => p.userId === myUserId)?.name ?? '')}
         currentAvatarIndex={myAvatarIndex}
         currentBgIndex={myBgIndex}
-        onSave={(name, avatarIdx, bgIdx) => {
-          setMyDisplayName(name)
-          setMyAvatarIndex(avatarIdx)
-          setMyBgIndex(bgIdx)
-          onUpdateProfile?.(name, avatarIdx, bgIdx)
+        onSave={async (name, avatarIdx, bgIdx) => {
+          if (await onUpdateProfile?.(name, avatarIdx, bgIdx) !== true) return false
+          return true
         }}
       />
     </CartoonScreen>

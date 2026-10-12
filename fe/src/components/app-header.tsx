@@ -12,9 +12,10 @@ import {
 import { ChevronDown } from 'lucide-react'
 import { AppLogo } from './app-logo'
 import { AppSidebar } from './app-sidebar'
-import { Button, buttonVariants } from './ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
-import { appConfig, baseUrl } from '@/config/app'
+import { Button } from './ui/button'
+import { buttonVariants } from './ui/buttonVariants'
+import { Avatar, AvatarFallback } from './ui/avatar'
+import { appConfig } from '@/config/app'
 import GitHub from './icons/github'
 
 export function AppHeader() {
@@ -103,7 +104,6 @@ export function AppHeader() {
                                     variant='ghost'
                                     className='relative h-8 w-8 rounded-full cursor-pointer ml-2'>
                                     <Avatar className='h-8 w-8'>
-                                        <AvatarImage src={baseUrl + '/avatars/shadcn.jpg'} alt='shadcn' />
                                         <AvatarFallback className="rounded-lg">SC</AvatarFallback>
                                     </Avatar>
                                 </Button>

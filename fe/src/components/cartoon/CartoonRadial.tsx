@@ -4,6 +4,7 @@
  * Layers: outer dark ring → colored fill → inner bg circle → text label
  */
 import { cn } from '@/lib/utils'
+import { useControlTheme } from './controlThemeContext'
 
 type RadialColor = 'blue' | 'pink' | 'teal'
 
@@ -22,8 +23,9 @@ interface CartoonRadialProps {
 }
 
 export function CartoonRadial({ value, color = 'blue', size = 100, label, className }: CartoonRadialProps) {
+  const theme = useControlTheme()
   const clamped = Math.min(100, Math.max(0, value))
-  const c = COLORS[color]
+  const c = theme === 'mint-blush' ? { fill: '#BFEAF1', dark: '#659DC4', bg: '#F7FCFF' } : theme !== 'legacy' ? { fill: 'var(--brand-blush)', dark: 'var(--brand-primary)', bg: 'var(--brand-ivory)' } : COLORS[color]
   const r = 40
   const cx = 50
   const cy = 50
@@ -57,7 +59,7 @@ export function CartoonRadial({ value, color = 'blue', size = 100, label, classN
 
       {/* Center text */}
       <div className="relative z-10 flex flex-col items-center justify-center">
-        <span className="font-display text-white" style={{ fontSize: size * 0.18 }}>
+        <span className="font-display" style={{ fontSize: size * 0.18, color: theme !== 'legacy' ? 'var(--brand-ink)' : 'white' }}>
           {label ?? `${Math.round(clamped)}%`}
         </span>
       </div>

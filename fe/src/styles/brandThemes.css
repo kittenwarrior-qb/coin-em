@@ -1,0 +1,265 @@
+/* Two independent, owner-approved directions. Only named UI chrome is themed.
+   Cards, Coin colors, role identities and player artwork are not recolored. */
+html[data-ui-theme="emotion-orbit"] {
+  --brand-ink: #303568;
+  --brand-primary: #303568;
+  --brand-on-primary: #FFFFFF;
+  --brand-blush: #C96487;
+  --brand-blush-soft: #F3DFE8;
+  --brand-mint-soft: #E5E3F5;
+  --brand-sky-soft: #E5E3F5;
+  --brand-ivory: #F9F9FE;
+  --brand-edge: #CFCEE5;
+  --brand-muted: #62678D;
+  --brand-focus: #754078;
+  --brand-shadow: #30356820;
+  --brand-radius: 24px;
+  --brand-control-radius: 20px;
+  --brand-backdrop: url('/cartoon/ui/themes/emotion-orbit/backdrop.svg');
+}
+html[data-ui-theme="kindness-workshop"] {
+  --brand-ink: #23394B;
+  --brand-primary: #355F87;
+  --brand-on-primary: #FFFFFF;
+  --brand-blush: #DA776B;
+  --brand-blush-soft: #F2D7CB;
+  --brand-mint-soft: #E8E0C0;
+  --brand-sky-soft: #E6EAF0;
+  --brand-ivory: #F4EEDC;
+  --brand-edge: #D3C6AA;
+  --brand-muted: #586573;
+  --brand-focus: #A2463C;
+  --brand-shadow: #23394B20;
+  --brand-radius: 22px 16px 23px 18px;
+  --brand-control-radius: 16px 12px 17px 13px;
+  --brand-backdrop: url('/cartoon/ui/themes/kindness-workshop/backdrop.svg');
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) {
+  --background: var(--brand-ivory);
+  --foreground: var(--brand-ink);
+  --primary: var(--brand-primary);
+  --primary-foreground: var(--brand-on-primary);
+  --secondary: var(--brand-blush-soft);
+  --secondary-foreground: var(--brand-ink);
+  --muted: var(--brand-mint-soft);
+  --muted-foreground: var(--brand-muted);
+  --accent: var(--brand-blush-soft);
+  --accent-foreground: var(--brand-ink);
+  --border: var(--brand-edge);
+  --ring: var(--brand-focus);
+  --input: var(--brand-ivory);
+  --ui-brand-action-ink: var(--brand-ink);
+  --ui-brand-secondary-ink: var(--brand-ink);
+  --ui-brand-focus: var(--brand-focus);
+  --font-display: 'Quicksand', sans-serif;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is(body, .screen-cartoon, .screen-panel, .admin-page) {
+  background-color: var(--brand-ivory);
+  color: var(--brand-ink);
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .font-display { font-family: 'Quicksand', sans-serif; font-weight: 700; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is(button, a, input, textarea, select):focus-visible {
+  outline: 3px solid var(--brand-focus) !important;
+  outline-offset: 4px;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .game-bg::after {
+  background-image: var(--brand-backdrop);
+  opacity: 1;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .game-table-surface {
+  background: var(--brand-sky-soft);
+  border: 2px solid var(--brand-edge);
+  border-radius: var(--brand-radius) !important;
+  box-shadow: 0 4px 0 var(--brand-shadow);
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .game-table-surface > .absolute { display: none; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="waiting-panel"] { background: var(--brand-ivory) !important; outline: 1px solid var(--brand-edge); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="waiting-panel"] h2 { color: var(--brand-ink) !important; }
+/* Native surface geometry: no stretched glossy sprite or all-pill hierarchy. */
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-cartoon-surface="pill"] {
+  background: var(--brand-primary);
+  border-radius: var(--brand-control-radius);
+  min-width: 112px;
+  width: 100%;
+  box-shadow: 0 3px 0 var(--brand-shadow);
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-cartoon-surface="pill"] > img {
+  visibility: hidden;
+  max-width: 100%;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-cartoon-surface="pill"]:has(img[src$="secondary.svg"]) { background: var(--brand-blush-soft); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-cartoon-surface="pill"]:has(img[src$="quiet.svg"]) { background: var(--brand-mint-soft); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .cartoon-pill-badge {
+  background: var(--brand-blush-soft);
+  color: var(--brand-ink);
+  border: 1px solid var(--brand-edge);
+  border-radius: 10px;
+  box-shadow: none;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is(.theme-a-menu-panel, [data-ui-surface="modal"], .card-cartoon, .bubble-cartoon, .toast-cartoon, .tooltip-cartoon, [data-ui-panel="a1"], [data-ui-surface="game-popup"], .bottom-panel, .site-card, .footer-card, [data-slot="card"]) {
+  background: var(--brand-ivory);
+  color: var(--brand-ink);
+  border: 1px solid var(--brand-edge);
+  border-radius: var(--brand-radius);
+  box-shadow: 0 6px 20px var(--brand-shadow);
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-headline {
+  min-width: 0;
+  height: 44px !important;
+  background: var(--brand-mint-soft);
+  border: 1px solid var(--brand-edge);
+  border-radius: 16px;
+  box-shadow: none;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-heading {
+  top: 1px; left: 1px; right: 1px;
+  background: var(--brand-ivory);
+  border-radius: var(--brand-radius);
+  height: 70px;
+  justify-content: center;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-heading .theme-a-headline { background: none; border: 0; padding: 0; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-heading .theme-a-headline span { font-size: 26px; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-content { padding: 86px 20px 24px; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-actions { gap: 14px; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-actions > .cartoon-control {
+  width: 100%;
+  color: var(--brand-ink) !important;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-actions [data-cartoon-surface="pill"] {
+  background: var(--brand-mint-soft);
+  border: 1px solid var(--brand-edge);
+  box-shadow: none;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-actions [data-cartoon-surface="pill"]:has(img[src$="secondary.svg"]) { background: var(--brand-blush-soft); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-exit { border-color: var(--brand-edge); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-close { top: 14px; right: 14px; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is(.input-cartoon, textarea, select, input:not([type="range"]):not([type="checkbox"]):not([type="radio"])) {
+  background: var(--brand-ivory);
+  color: var(--brand-ink);
+  border-color: var(--brand-edge);
+  border-radius: 12px;
+  box-shadow: none;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is(input, textarea)::placeholder { color: var(--brand-muted); opacity: 1; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is([data-ui-ink="primary"], [data-ui-ink="accent"], [data-ui-chrome="role-label"]) { color: var(--brand-ink) !important; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is(.badge-cartoon[data-ui-badge], [data-ui-pill], [data-ui-chrome="phase-status"], [data-ui-chrome="countdown"], [data-ui-chrome="turn-status"], [data-ui-chrome="transport"]) {
+  background: var(--brand-mint-soft) !important;
+  color: var(--brand-ink) !important;
+  border: 1px solid var(--brand-edge);
+  border-radius: 12px;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is([data-ui-chrome="phase-status"], [data-ui-chrome="turn-status"]) > div { color: var(--brand-ink); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="header"] {
+  background: var(--brand-mint-soft);
+  color: var(--brand-ink);
+  border-color: var(--brand-edge);
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="header"] :is(.text-white, .text-white\/80, .text-white\/70) { color: var(--brand-ink); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is([data-ui-surface="room"], [data-ui-surface="dropdown"] > button, [data-ui-chrome="inventory-tabs"] > button, .guide-chrome-tabs button, .deck-chip, .card-chip, .deck-tabs button, .bottom-trigger, .site-nav-link) {
+  background: var(--brand-mint-soft) !important;
+  color: var(--brand-ink) !important;
+  border: 1px solid var(--brand-edge);
+  border-radius: var(--brand-control-radius);
+  box-shadow: none;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is([data-ui-surface="room"][aria-pressed="true"], [data-ui-chrome="inventory-tabs"] > button[aria-pressed="true"], .guide-chrome-tabs button[aria-pressed="true"], .deck-chip.active, .card-chip.active, .deck-tabs button.is-active, .site-nav-link[aria-current="page"]) { background: var(--brand-blush-soft) !important; border-color: var(--brand-blush); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is([data-slot="button"], .primary-action, .site-button, .site-header-play, .about-cta) {
+  background: var(--brand-primary);
+  color: var(--brand-on-primary);
+  border-color: transparent;
+  border-radius: var(--brand-control-radius);
+  box-shadow: 0 3px 0 var(--brand-shadow);
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is([data-slot="button"][data-ui-variant="secondary"], [data-slot="button"][data-ui-variant="outline"], .secondary-action) { background: var(--brand-blush-soft); color: var(--brand-ink); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-slot="button"]:is([data-ui-variant="ghost"], [data-ui-variant="link"]) { background: transparent; color: var(--brand-ink); box-shadow: none; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is(.circle-link, .side-nav-button, .right-action-btn, .preview-close, .preview-nav, .guide-chrome-close, [data-ui-chrome="circle"]) {
+  background: var(--brand-mint-soft) !important; color: var(--brand-ink) !important;
+  border: 1px solid var(--brand-edge); box-shadow: none;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is(.site-page, .about-page, .cards-page, .deck-page, .game-intro-page, .site-header, .showcase-root) {
+  --sand: var(--brand-mint-soft); --oat: var(--brand-mint-soft); --surface: var(--brand-ivory);
+  --ink: var(--brand-ink); --muted: var(--brand-muted); --line: var(--brand-edge);
+  --accent: var(--brand-blush); --terracotta: var(--brand-primary); --sage: var(--brand-sky-soft);
+  --pink: var(--brand-blush); --sky: var(--brand-sky-soft); --blue: var(--brand-primary);
+  --header-ink: var(--brand-ink); --header-accent: var(--brand-blush);
+  background-color: var(--brand-ivory);
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="home-logo"] {
+  position: relative;
+  padding: 48px 10px;
+  isolation: isolate;
+}
+html[data-ui-theme="emotion-orbit"] [data-ui-chrome="home-logo"]::before {
+  content: ''; position: absolute; inset: -22px 18px; z-index: -1;
+  border: 24px solid var(--brand-mint-soft); border-right-color: transparent;
+  border-bottom-color: var(--brand-blush-soft); border-radius: 50%; transform: rotate(-22deg);
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="home-logo"] > div {
+  position: relative;
+  background: var(--brand-primary);
+  border-radius: var(--brand-radius);
+  padding: 24px 12px;
+  box-shadow: 0 5px 0 var(--brand-shadow);
+}
+html[data-ui-theme="kindness-workshop"] :is(.theme-a-menu-panel, [data-ui-chrome="home-logo"] > div) {
+  background-image: url('/cartoon/ui/themes/kindness-workshop/paper-grain.svg');
+}
+html[data-ui-theme="kindness-workshop"] .theme-a-menu-actions > .cartoon-control { color: var(--brand-on-primary) !important; }
+html[data-ui-theme="kindness-workshop"] .theme-a-menu-actions [data-cartoon-surface="pill"] {
+  background-color: var(--brand-primary);
+  background-image: url('/cartoon/ui/themes/kindness-workshop/paper-grain.svg');
+  border-radius: 18px 10px 19px 12px;
+  border-color: var(--brand-primary);
+}
+html[data-ui-theme="kindness-workshop"] .theme-a-menu-actions [data-cartoon-surface="pill"]:has(img[src$="secondary.svg"]) {
+  background-color: var(--brand-blush);
+  border-color: var(--brand-blush);
+}
+html[data-ui-theme="kindness-workshop"] .theme-a-menu-actions [data-cartoon-surface="pill"]:has(img[src$="quiet.svg"]) {
+  background-color: var(--brand-primary);
+}
+html[data-ui-theme="kindness-workshop"] .theme-a-menu-actions > .cartoon-control:has(img[src$="secondary.svg"]) { color: var(--brand-ink) !important; }
+html[data-ui-theme="emotion-orbit"] .theme-a-menu-panel {
+  background-image: radial-gradient(circle at -24px -24px, transparent 64px, var(--brand-mint-soft) 65px 88px, transparent 89px);
+}
+html[data-ui-theme="kindness-workshop"] [data-cartoon-surface="pill"] {
+  background-image: url('/cartoon/ui/themes/kindness-workshop/paper-grain.svg');
+  border-bottom: 3px solid var(--brand-shadow);
+}
+html[data-ui-theme="kindness-workshop"] [data-ui-chrome="home-logo"]::before {
+  content: ''; position: absolute; inset: 12px -8px; z-index: -1;
+  background: var(--brand-mint-soft); border-radius: 20px 10px 24px 12px;
+  transform: rotate(-3deg); box-shadow: 0 5px 0 var(--brand-shadow);
+}
+html[data-ui-theme="kindness-workshop"] :is(.theme-a-menu-panel, .game-table-surface) {
+  border-width: 2px; border-bottom-width: 4px;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .scroll-cartoon { scrollbar-color: var(--brand-muted) var(--brand-ivory); }
+.brand-menu-label { display: flex; align-items: center; gap: 14px; width: 100%; }
+.brand-menu-label > span { flex: 1; text-align: left; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-actions [data-cartoon-surface="pill"] > span:not([data-cartoon-badge]) { padding: 0 20px; }
+@media (max-height: 600px) {
+  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="home-logo"] { padding: 20px 8px; margin-top: 32px !important; margin-bottom: 10px !important; }
+  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-content { padding-top: 76px; }
+}
+
+/* Prototype wordmarks replace the old white logo/support plate.
+   These are independent transparent assets, never a screenshot of the UI. */
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="home-logo"] > div {
+  display: block !important;
+  background: transparent;
+  background-image: none;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) #home-logo {
+  width: 100%;
+  height: auto !important;
+  filter: none !important;
+}
+html[data-ui-theme="kindness-workshop"] [data-ui-chrome="home-logo"]::before { display: none; }
+html[data-ui-theme="kindness-workshop"] [data-ui-chrome="home-logo"] { padding: 12px 0; }

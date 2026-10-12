@@ -1,0 +1,46 @@
+{
+  "synthetic": true,
+  "physicalDevice": false,
+  "results": [
+    {
+      "name": "ended",
+      "width": 320,
+      "height": 400,
+      "top": 0,
+      "bottom": {
+        "top": 797,
+        "max": 797
+      }
+    },
+    {
+      "name": "waiting",
+      "width": 320,
+      "height": 400,
+      "top": 0,
+      "bottom": {
+        "top": 218,
+        "max": 218
+      }
+    },
+    {
+      "name": "history",
+      "width": 320,
+      "height": 400,
+      "top": 0,
+      "bottom": {
+        "top": 2552,
+        "max": 2552
+      }
+    },
+    {
+      "name": "inventory",
+      "width": 320,
+      "height": 400,
+      "top": 0,
+      "bottom": {
+        "top": 12,
+        "max": 12
+      }
+    }
+  ]
+}

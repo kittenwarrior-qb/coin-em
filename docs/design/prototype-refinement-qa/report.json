@@ -1,0 +1,199 @@
+{
+  "synthetic": true,
+  "cases": 24,
+  "failures": [],
+  "results": [
+    {
+      "theme": "emotion-orbit",
+      "width": 320,
+      "height": 400,
+      "screen": "menu",
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 320,
+      "height": 400,
+      "screen": "board-6",
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 320,
+      "height": 400,
+      "screen": "board-10",
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 320,
+      "height": 400,
+      "screen": "give-picker",
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 430,
+      "height": 660,
+      "screen": "menu",
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 430,
+      "height": 660,
+      "screen": "board-6",
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 430,
+      "height": 660,
+      "screen": "board-10",
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 430,
+      "height": 660,
+      "screen": "give-picker",
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 430,
+      "height": 932,
+      "screen": "menu",
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 430,
+      "height": 932,
+      "screen": "board-6",
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 430,
+      "height": 932,
+      "screen": "board-10",
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 430,
+      "height": 932,
+      "screen": "give-picker",
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 320,
+      "height": 400,
+      "screen": "menu",
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 320,
+      "height": 400,
+      "screen": "board-6",
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 320,
+      "height": 400,
+      "screen": "board-10",
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 320,
+      "height": 400,
+      "screen": "give-picker",
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 430,
+      "height": 660,
+      "screen": "menu",
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 430,
+      "height": 660,
+      "screen": "board-6",
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 430,
+      "height": 660,
+      "screen": "board-10",
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 430,
+      "height": 660,
+      "screen": "give-picker",
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 430,
+      "height": 932,
+      "screen": "menu",
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 430,
+      "height": 932,
+      "screen": "board-6",
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 430,
+      "height": 932,
+      "screen": "board-10",
+      "issues": [],
+      "errors": []
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 430,
+      "height": 932,
+      "screen": "give-picker",
+      "issues": [],
+      "errors": []
+    }
+  ]
+}

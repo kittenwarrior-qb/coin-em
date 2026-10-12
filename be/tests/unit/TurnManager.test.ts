@@ -33,8 +33,8 @@ describe('TurnManager', () => {
       expect(turnManager.getNextPhase('reward')).toBe('role-reveal')
     })
 
-    it('should handle invalid phase gracefully', () => {
-      expect(turnManager.getNextPhase('ended')).toBe('role-reveal')
+    it('must not reopen a terminal game', () => {
+      expect(turnManager.getNextPhase('ended')).toBe('ended')
     })
   })
 

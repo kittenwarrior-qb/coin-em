@@ -14,6 +14,7 @@
  *   Text — "100%" label (optional)
  */
 import { cn } from '@/lib/utils'
+import { useControlTheme } from './controlThemeContext'
 
 type ProgressColor = 'blue' | 'green' | 'pink' | 'purple' | 'red' | 'yellow'
 
@@ -37,8 +38,9 @@ interface CartoonProgressProps extends React.HTMLAttributes<HTMLDivElement> {
 export function CartoonProgress({
   value, color = 'blue', label, showPercent, className, ...props
 }: CartoonProgressProps) {
+  const theme = useControlTheme()
   const clamped = Math.min(100, Math.max(0, value))
-  const c = FILL[color]
+  const c = theme === 'mint-blush' ? { border: '#659DC4', fill: '#BFEAF1', gradient: 'linear-gradient(180deg,#D9F7FB,#BFEAF1)' } : theme !== 'legacy' ? { border: 'var(--brand-primary)', fill: 'var(--brand-primary)', gradient: 'var(--brand-primary)' } : FILL[color]
 
   return (
     <div className={cn('flex flex-col gap-1', className)} {...props}>

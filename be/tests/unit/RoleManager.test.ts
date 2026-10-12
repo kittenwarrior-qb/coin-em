@@ -11,6 +11,45 @@ describe('RoleManager', () => {
   })
 
   describe('assignRoles', () => {
+    it.each([5, 6, 7, 8, 9, 10])('preserves stable inputs and approved preferred-role quotas for %s seats', count => {
+      const players = createMockPlayers(count)
+      const before = structuredClone(players)
+      const preferred = {
+        [players[0].userId]: Role.NARRATOR,
+        [players[1].userId]: Role.SENDER,
+        [players[2].userId]: Role.SILENCER,
+        [players[3].userId]: count >= 8 ? Role.SILENCER : Role.CONNECTOR,
+      }
+      const assigned = roleManager.assignRoles(players, preferred)
+      expect(players).toEqual(before)
+      expect(assigned.map(player => player.userId)).toEqual(before.map(player => player.userId))
+      for (const player of assigned) {
+        if (preferred[player.userId]) expect(player.role).toBe(preferred[player.userId])
+        expect(player.originalRole).toBe(player.role)
+      }
+      expect(assigned.filter(player => player.role === Role.NARRATOR)).toHaveLength(1)
+      expect(assigned.filter(player => player.role === Role.SENDER)).toHaveLength(1)
+      expect(assigned.filter(player => player.role === Role.SILENCER)).toHaveLength(count >= 8 ? 2 : 1)
+    })
+
+    it('rejects preferred-role quota overflow without mutating any seat', () => {
+      const players = createMockPlayers(10)
+      const before = structuredClone(players)
+      expect(() => roleManager.assignRoles(players, {
+        [players[0].userId]: Role.NARRATOR,
+        [players[1].userId]: Role.NARRATOR,
+      })).toThrow(`Preferred role ${Role.NARRATOR} is not available for 10 players`)
+      expect(players).toEqual(before)
+    })
+
+    it('rejects an empty stable ID without mutating input seats', () => {
+      const players = createMockPlayers(5)
+      players[2].userId = ''
+      const before = structuredClone(players)
+      expect(() => roleManager.assignRoles(players)).toThrow('unique stable player IDs')
+      expect(players).toEqual(before)
+    })
+
     it('should assign roles to 7 players', () => {
       const players = createMockPlayers(7)
       const assigned = roleManager.assignRoles(players)
@@ -110,6 +149,14 @@ describe('RoleManager', () => {
   })
 
   describe('rotateRoles', () => {
+    it.each(['isNarrator', 'isSender'] as const)('rejects missing %s without mutating the room', flag => {
+      const room = createPlayingRoom(7)
+      room.players.forEach(player => { player[flag] = false })
+      const before = structuredClone(room)
+      expect(() => roleManager.rotateRoles(room)).toThrow('Cannot find current narrator or sender')
+      expect(room).toEqual(before)
+    })
+
     it('should rotate narrator to next player', () => {
       const room = createPlayingRoom(7)
       const oldNarratorIndex = room.players.findIndex(p => p.isNarrator)

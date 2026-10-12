@@ -5,9 +5,6 @@ export const getUserId = (): string => {
   if (!userId) {
     userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     localStorage.setItem('userId', userId);
-    console.log('[userId] Generated NEW userId:', userId);
-  } else {
-    console.log('[userId] Retrieved EXISTING userId:', userId);
   }
   
   return userId;

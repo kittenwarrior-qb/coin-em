@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EmCoin · Đối chiếu prototype và UI</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f0f0f6;color:#25294e;font:16px/1.5 system-ui,sans-serif}header{padding:24px;max-width:1000px;margin:auto}h1{font-size:24px;margin:0 0 8px}p{margin:8px 0}nav{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}button,a{font:inherit}button{border:1px solid #c6c8dc;border-radius:10px;padding:10px 14px;background:white;color:#25294e;cursor:pointer}button[aria-pressed=true]{background:#303568;color:white}a{color:#4146a0}.pair{display:grid;grid-template-columns:repeat(2,minmax(0,430px));gap:24px;justify-content:center;padding:0 20px 40px}figure{margin:0;min-width:0}figcaption{font-weight:700;margin-bottom:10px}img{display:block;width:100%;height:auto;border:1px solid #d7d7e8;border-radius:8px}.notice{font-size:14px;color:#595d7a;max-width:900px}@media(max-width:560px){.pair{gap:10px;padding-inline:10px}figcaption{font-size:13px}header{padding:20px}}
+</style></head><body><header>
+<h1>EmCoin · Prototype ↔ UI đang chạy</h1>
+<p>Chọn theme và màn hình để đối chiếu cùng kích thước.</p>
+<nav id="themes"><button data-theme="b" aria-pressed="true">Vòng Cảm Xúc</button><button data-theme="c" aria-pressed="false">Xưởng Tử Tế</button></nav>
+<nav id="screens"><button data-screen="home" aria-pressed="true">Home</button><button data-screen="menu" aria-pressed="false">Menu</button><button data-screen="board" aria-pressed="false">Bàn chơi</button></nav>
+<p><a id="live" href="http://127.0.0.1:5173/qa-screens.html?screen=lobby&theme=emotion-orbit">Mở UI tương tác</a></p>
+<p class="notice">Ảnh UI: fixture QA 430×932, không kết nối phòng thật. Bàn chơi giữ avatar, thẻ và trạng thái thật của ứng dụng; không sao chép số Coin/người chơi minh họa. Đây là trang đối chiếu, chưa phải nghiệm thu giống 100% từng pixel.</p>
+</header><main class="pair"><figure><figcaption>Prototype đã duyệt</figcaption><img id="ref" src="b-home.png" alt="Prototype Vòng Cảm Xúc Home"></figure><figure><figcaption>UI đã triển khai</figcaption><img id="actual" src="live-v3/emotion-orbit-lobby.png" alt="Screenshot UI Vòng Cảm Xúc Home"></figure></main>
+<script>
+let theme='b',screen='home';const names={b:'emotion-orbit',c:'kindness-workshop'};
+function update(){document.querySelectorAll('[data-theme]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.theme===theme));document.querySelectorAll('[data-screen]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.screen===screen));document.getElementById('ref').src=theme+'-'+screen+'.png';document.getElementById('actual').src='live-v3/'+names[theme]+'-'+(screen==='home'?'lobby':screen)+'.png';document.getElementById('ref').alt='Prototype '+theme+' '+screen;document.getElementById('actual').alt='Screenshot UI '+theme+' '+screen;document.getElementById('live').href='http://127.0.0.1:5173/'+(screen==='board'?'qa-board.html?count=6&phase=hug-action':'qa-screens.html?screen=lobby')+'&theme='+names[theme];}
+document.querySelectorAll('[data-theme]').forEach(b=>b.addEventListener('click',()=>{theme=b.dataset.theme;update()}));document.querySelectorAll('[data-screen]').forEach(b=>b.addEventListener('click',()=>{screen=b.dataset.screen;update()}));
+</script></body></html>

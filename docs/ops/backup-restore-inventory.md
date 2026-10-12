@@ -24,14 +24,16 @@ make backup-fixture
 make restore-fixture
 ```
 
-Hai target tạo thư mục tạm, ghi một room fixture tối giản với `roomId`
-`fixture-room`, tính SHA-256, copy backup/restore, xác minh checksum và đọc
-được fixture sau restore. Chúng không khởi động Docker, không đụng volume,
-Redis hay network production.
+Hai target chạy cùng regression drill `be/tests/integration/recovery-fixture.test.ts`
+sau khi cài dependencies backend. Drill tạo thư mục tạm riêng, ghi fixture room
+đúng shape backend, kiểm SHA-256 của bản backup và bản restored, load qua
+`loadRooms`/`RoomRepository`, rồi đọc qua `get_room_state` bằng socket loopback thật.
+Teardown đóng server/socket, huỷ timer và dọn đúng root tạm đã cấp.
+Trên Windows không có Make có thể chạy `cd be; npx vitest run tests/integration/recovery-fixture.test.ts`.
 
-Evidence R00: backup checksum PASS; restore checksum PASS; fixture room đọc
-được PASS. RPO/RTO thực tế của production chưa được đo và không được suy ra
-từ drill này.
+Evidence local 2026-10-01: checksum và read-room qua handler PASS. Redis được mock
+trong suite này: đây là bằng chứng JSON fixture/backend read, không phải Redis crash
+recovery, production backup hay RPO/RTO. R28 vẫn phải kiểm Redis thật.
 
 ## Production procedure (deferred)
 

@@ -1,0 +1,221 @@
+{
+  "scope": "synthetic intercepted admin API; actual frontend/PDF artwork; not authentication/durable SQLite/production evidence",
+  "results": [
+    {
+      "theme": "emotion-orbit",
+      "width": 320,
+      "height": 400,
+      "mode": "list",
+      "result": "passed",
+      "overflowX": false,
+      "commands": 0
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 320,
+      "height": 400,
+      "mode": "edit",
+      "result": "passed",
+      "overflowX": false,
+      "commands": 1
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 320,
+      "height": 400,
+      "mode": "uncertain",
+      "result": "passed",
+      "overflowX": false,
+      "commands": 2
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 320,
+      "height": 400,
+      "mode": "stale",
+      "result": "passed",
+      "overflowX": false,
+      "commands": 1
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 430,
+      "height": 932,
+      "mode": "list",
+      "result": "passed",
+      "overflowX": false,
+      "commands": 0
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 430,
+      "height": 932,
+      "mode": "edit",
+      "result": "passed",
+      "overflowX": false,
+      "commands": 1
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 430,
+      "height": 932,
+      "mode": "uncertain",
+      "result": "passed",
+      "overflowX": false,
+      "commands": 2
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 430,
+      "height": 932,
+      "mode": "stale",
+      "result": "passed",
+      "overflowX": false,
+      "commands": 1
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 1280,
+      "height": 900,
+      "mode": "list",
+      "result": "passed",
+      "overflowX": false,
+      "commands": 0
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 1280,
+      "height": 900,
+      "mode": "edit",
+      "result": "passed",
+      "overflowX": false,
+      "commands": 1
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 1280,
+      "height": 900,
+      "mode": "uncertain",
+      "result": "passed",
+      "overflowX": false,
+      "commands": 2
+    },
+    {
+      "theme": "emotion-orbit",
+      "width": 1280,
+      "height": 900,
+      "mode": "stale",
+      "result": "passed",
+      "overflowX": false,
+      "commands": 1
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 320,
+      "height": 400,
+      "mode": "list",
+      "result": "passed",
+      "overflowX": false,
+      "commands": 0
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 320,
+      "height": 400,
+      "mode": "edit",
+      "result": "passed",
+      "overflowX": false,
+      "commands": 1
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 320,
+      "height": 400,
+      "mode": "uncertain",
+      "result": "passed",
+      "overflowX": false,
+      "commands": 2
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 320,
+      "height": 400,
+      "mode": "stale",
+      "result": "passed",
+      "overflowX": false,
+      "commands": 1
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 430,
+      "height": 932,
+      "mode": "list",
+      "result": "passed",
+      "overflowX": false,
+      "commands": 0
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 430,
+      "height": 932,
+      "mode": "edit",
+      "result": "passed",
+      "overflowX": false,
+      "commands": 1
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 430,
+      "height": 932,
+      "mode": "uncertain",
+      "result": "passed",
+      "overflowX": false,
+      "commands": 2
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 430,
+      "height": 932,
+      "mode": "stale",
+      "result": "passed",
+      "overflowX": false,
+      "commands": 1
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 1280,
+      "height": 900,
+      "mode": "list",
+      "result": "passed",
+      "overflowX": false,
+      "commands": 0
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 1280,
+      "height": 900,
+      "mode": "edit",
+      "result": "passed",
+      "overflowX": false,
+      "commands": 1
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 1280,
+      "height": 900,
+      "mode": "uncertain",
+      "result": "passed",
+      "overflowX": false,
+      "commands": 2
+    },
+    {
+      "theme": "kindness-workshop",
+      "width": 1280,
+      "height": 900,
+      "mode": "stale",
+      "result": "passed",
+      "overflowX": false,
+      "commands": 1
+    }
+  ]
+}

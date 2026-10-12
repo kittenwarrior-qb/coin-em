@@ -1,5 +1,9 @@
+import { EmcoinImage } from '@/components/cartoon/EmcoinImage'
 import { cn } from '@/lib/utils'
 import { AVATAR_ICONS, AVATAR_BG_COLORS } from './avatarConfig'
+import { useControlTheme } from './controlThemeContext'
+import { isBrandTheme } from './controlThemes'
+import { BrandAvatarFrame } from './BrandAvatarFrame'
 
 const MASK = 'url(/cartoon/ui/Circle-Cartoon.png)'
 const MASK_SIZE = '100% 100%'
@@ -29,6 +33,15 @@ export function CartoonAvatar({
   countdownDurationSec = 30,
   className, style, ...props
 }: CartoonAvatarProps) {
+  const theme = useControlTheme()
+  const branded = isBrandTheme(theme)
+  const workshop = theme === 'kindness-workshop'
+  const roleTones: Record<string, string> = workshop
+    ? { '#FFB830': '#e5b45d', '#FF6B9D': '#d97b6d', '#29B6F6': '#286081', '#62C76D': '#82a37b', '#7D7F8C': '#8997a4', '#3FA7F5': '#286081', '#A66CFF': '#8596a8', '#F59E42': '#e5b45d' }
+    : { '#FFB830': '#9395cd', '#FF6B9D': '#d983a2', '#29B6F6': '#555fa4', '#62C76D': '#9795ca', '#7D7F8C': '#9297b3', '#3FA7F5': '#555fa4', '#A66CFF': '#9795ca', '#F59E42': '#d983a2' }
+  const tone = roleTones[borderColor] ?? (workshop ? ['#d97b6d', '#e5b45d', '#286081', '#82a37b'][Math.abs(avatarIndex ?? colorIndex) % 4] : ['#555fa4', '#9395cd', '#d983a2'][Math.abs(avatarIndex ?? colorIndex) % 3])
+  const mask = theme !== 'legacy' ? undefined : MASK
+  const radius = theme !== 'legacy' ? '48% 52% 50% 46%' : undefined
   const aIdx = (avatarIndex ?? colorIndex) % AVATAR_ICONS.length
   const bIdx = (bgIndex ?? colorIndex) % AVATAR_BG_COLORS.length
 
@@ -44,35 +57,40 @@ export function CartoonAvatar({
 
   return (
     <div
-      className={cn('relative flex items-center justify-center flex-shrink-0', s.wrapper, className)}
+      className={cn('relative flex items-center justify-center flex-shrink-0', s.wrapper, branded && 'brand-avatar', className)}
       style={{ filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.12))', ...style }}
       aria-label={name}
       {...props}
     >
       {/* White border layer */}
       <div
+        data-ui-chrome="avatar-border"
         key={showCountdown ? countdownKey : 'static-border'}
         className={cn('absolute', showCountdown && 'avatar-countdown-border')}
         style={{
           inset: s.inset,
           background: showCountdown
             ? `conic-gradient(from 0deg, #e6f9ff 0deg var(--avatar-countdown-gap), ${countdownColor ?? borderColor} var(--avatar-countdown-gap) 360deg)`
-            : borderColor,
+            : branded ? 'transparent' : borderColor,
           '--avatar-countdown-duration': `${countdownDurationSec}s`,
-          maskImage: MASK, maskSize: MASK_SIZE,
-          WebkitMaskImage: MASK, WebkitMaskSize: MASK_SIZE,
+          borderRadius: radius,
+          maskImage: mask, maskSize: MASK_SIZE,
+          WebkitMaskImage: mask, WebkitMaskSize: MASK_SIZE,
         } as React.CSSProperties}
       />
+      {branded && <BrandAvatarFrame workshop={workshop} tone={tone} />}
       {/* Color fill */}
       <div
-        className="absolute inset-0"
+        className={cn('absolute inset-0', branded && 'brand-avatar-fill')}
         style={{
           background: bg,
-          maskImage: MASK, maskSize: MASK_SIZE,
-          WebkitMaskImage: MASK, WebkitMaskSize: MASK_SIZE,
+          borderRadius: radius,
+          boxShadow: theme !== 'legacy' ? 'inset 0 3px 0 #FFFFFF80, inset 0 -3px 0 #245F8F20' : undefined,
+          maskImage: mask, maskSize: MASK_SIZE,
+          WebkitMaskImage: mask, WebkitMaskSize: MASK_SIZE,
         }}
       />
-      <img src={icon} alt="" className={cn('relative z-10 object-contain', s.img)} draggable={false} />
+      <EmcoinImage src={icon} alt="" className={cn('relative z-10 object-contain', s.img)} draggable={false} />
     </div>
   )
 }

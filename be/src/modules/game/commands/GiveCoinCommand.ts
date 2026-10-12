@@ -1,5 +1,6 @@
 import { Room, GameAction, GameResult } from '../types'
 import { ICommand } from './base/ICommand'
+import { transferCoin } from '../services/CoinCycle'
 
 /**
  * Command: Give yellow or red coin to another player (give-coins phase)
@@ -9,6 +10,7 @@ import { ICommand } from './base/ICommand'
  */
 export class GiveCoinCommand implements ICommand {
   execute(room: Room, action: GameAction): GameResult {
+    if (room.coinCycle) return transferCoin(room, action)
     const { targetId, data } = action
     const { coinType, amount = 1 } = data || {}
 

@@ -18,7 +18,7 @@ describe('GameService', () => {
     expect(visibleNarrators[0].userId).toBe(result.room!.currentNarrator)
   })
 
-  it('should expose a role for every player after multiple round rotations', async () => {
+  it('should expose every current role to the narrator after multiple round rotations', async () => {
     const service = new GameService()
     let room = setRoomPhase(createPlayingRoom(7), 'reward')
 
@@ -26,7 +26,7 @@ describe('GameService', () => {
       const result = await service.advanceTurn(room, room.currentNarrator!)
       expect(result.success).toBe(true)
 
-      const publicState = service.getPublicState(result.room!)
+      const publicState = service.getPlayerView(result.room!, result.room!.currentNarrator!)
       expect(publicState.players.filter((player: { role?: Role }) => player.role === Role.NARRATOR)).toHaveLength(1)
       expect(publicState.players.filter((player: { role?: Role }) => player.role === Role.SENDER)).toHaveLength(1)
       expect(publicState.players.every((player: { role?: Role }) => Boolean(player.role))).toBe(true)

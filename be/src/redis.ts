@@ -1,4 +1,5 @@
 import Redis from 'ioredis'
+import { operationDiagnostic } from './telemetry/operationalDiagnostics'
 
 const REDIS_HOST = process.env.REDIS_HOST || 'localhost'
 const REDIS_PORT = parseInt(process.env.REDIS_PORT || '6379')
@@ -17,8 +18,12 @@ function createRedisClient(name: string): Redis {
     enableOfflineQueue: false,
   })
 
-  client.on('connect', () => console.log(`[Redis:${name}] Connected`))
-  client.on('error', (err) => console.error(`[Redis:${name}] Error:`, err.message))
+  client.on('connect', () => operationDiagnostic('redis_connection', 'ok'))
+  client.on('ready', () => {
+    redisAvailable = [pubClient, subClient, redisClient].every(connection => connection.status === 'ready')
+  })
+  client.on('close', () => { redisAvailable = false })
+  client.on('error', () => operationDiagnostic('redis_connection', 'failed'))
 
   return client
 }
@@ -36,8 +41,7 @@ export async function connectRedis(): Promise<boolean> {
     redisAvailable = true
     return true
   } catch (err: any) {
-    console.warn(`[Redis] Connection failed: ${err.message}`)
-    console.warn('[Redis] Running without Redis — single-instance mode, no persistence to Redis')
+    operationDiagnostic('redis_connection', 'failed')
     redisAvailable = false
     return false
   }

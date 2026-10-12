@@ -1,7 +1,9 @@
 # R04 Socket contract
 
+2026-10-03 additive leave contract: optional leave_room callback returns success only after committed waiting-seat removal/strict last-room deletion or playing/ended disconnected-seat save, subscription/auth unbinding and recipient notifications. Existing no-callback clients remain compatible; failed primary commit returns the existing guarded failure without success. Bare success ACK is sufficient for leave (the last waiting room may no longer exist); it is not a generic durable operation receipt or proof of every downstream broadcast delivery. Sixteen socket-boundary regressions pass, including five added leave cases. New client waits 5s and preserves uncertain intent instead of clearing the session on emit; deploy additive backend before/matched with any eventual new-client rollout.
+
 **Priority:** P0  
-**Status:** planned  
+**Status:** in progress
 **Owner:** Codex implementation  
 **Reviewer:** Claude audit  
 **Dependencies:** R01
@@ -63,6 +65,10 @@ Blocked bởi R01 cho luật/phase/capability; không tự đổi wire semantics
 
 ## Implementation plan
 
+Plan revision 2026-10-03 — lifecycle ACK projection: start_game/end_game success adds the already-used optional data field containing roomView for the authenticated actor/legacy member, after saveAndWait and recipient broadcast. Preserve existing success/error events and payload fields; no raw room/secret expansion or new generic envelope. Corresponding R17 caller requires the newer committed playing/ended projection. Add boundary regressions for projected commit and failed-primary no success/broadcast. This additive server change preserves old callers; new callers intentionally fail closed against a bare legacy success ACK, so matched server/client rollout is required before release.
+
+Plan revision 2026-10-02: `join_room` accepts optional initial `settings` using the existing situation/emotion group fields only for creation of an absent room. Validate/copy them before the same awaited admission commit; existing rooms cannot be overwritten by a new creator. Existing join without settings stays compatible. This closes R17's create/settings race without a new event or catalog/rule decision.
+
 1. Inventory registered server events, emitted events, ACK shapes and FE listeners from the listed handlers/hooks; mark dead or ambiguous names without deleting them.
 2. Wait for R01 to approve phase/capability semantics; define a versioned envelope, success/error ACK and projection schemas only for observed, approved behavior.
 3. Create shared runtime schemas/types and an event matrix; bind actor identity to auth context rather than payload identity.
@@ -72,7 +78,19 @@ Blocked bởi R01 cho luật/phase/capability; không tự đổi wire semantics
 
 ## Implementation report
 
-<!-- Codex updates this after implementation: changed files, invariant preserved, commands and results. -->
+### Plan revision 2026-10-12 — communication foundation
+
+Owner accepts room text/voice scope, gameplay silence/heal publishing behavior and admin-only report max7days; see `docs/ops/mobile-release-roadmap.md`. New `be/src/communication/policy.ts` bounds text500characters/recent history100, rejects foreign/disconnected/fixture sockets and ended rooms, separates gameplay mute from safety mute. Pure policy unit coverage passes; it does not issue media tokens or register chat events, does not implement report storage/TTL or alter existing response phase rules. Next transport integration must be versioned, authenticated, rate/queue/dedup bounded and invite-admission restricted; no claim chat/voice ready. Scope expansion to communication module/tests is recorded here, no deploy/signing/provider data upload.
+
+2026-10-03 settings callback: existing update_room_settings accepts an optional callback, rejects invalid/unauthorized/non-waiting input without success, and returns existing recipient roomView data only after committed saveAndWait/broadcast. No-callback clients retain legacy error/notification behavior. Focused integration tests assert exact settings/revision/private recipient projection, malformed-group rejection and failed-primary no publication. New bounded client needs this additive server capability before/matched rollout; old bare or absent ACK remains uncertain. Admission still uses its existing private session ACK followed by room_state; no new wire fields or generic durable command schema.
+
+2026-10-03 — start_game/end_game success ACK now includes the same recipient roomView used by navigation, only after awaited commit/broadcast. Existing legacy payload/event/success shapes remain compatible; data is additive, not a new envelope. Real-loopback boundary tests compare exact committed projector output, check absence of device/credential fields, verify playing→ended newer revisions/collected round, and fail primary eval before either transition confirmation/broadcast. Full backend 41 files/482 tests/build passes. Session fixture tests still cover secret/generation projection independently; lifecycle boundary fixture is legacy-member/mock Redis, not real Redis/authenticated browser end-game proof. Universal versioned schemas, durable non-Coin receipts and independent audit remain.
+
+2026-10-02 — Latest continuation: initial settings use the existing join_room event's optional settings field; only absent-room creation can apply them. Runtime parsing bounds both arrays, allowlists current groups, rejects empty/duplicate/unknown groups and copies values. Existing-room code collision cannot overwrite another room's settings. Authenticated resume of an existing seat retains its committed settings. Settings update uses the same parser and awaited revisioned primary commit. Legacy admission without settings retains defaults. Shared versioned schemas/ACK envelopes for all other events remain.
+
+2026-10-01 — Socket boundary kiểm payload roomId/name; give_coin hỗ trợ requestId/round và ACK awaited. Chưa có shared runtime schemas/envelope cho mọi event; R01 chưa được chốt toàn bộ.
+
+Evidence chung: `docs/qa/2026-10-01-implementation-progress.md`. Không đánh dấu acceptance/done khi các phần còn lại chưa đạt.
 
 ## QA report
 
