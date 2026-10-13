@@ -22,9 +22,9 @@ Local development only: append `?theme=legacy` to the app URL for Cartoon gốc,
 ## Local verification
 
 - Full backend suite: 64 files /676 tests pass, including durable password rotation, logout-during-KDF cancellation and authenticated same-origin HTTP rotation.
-- Full frontend suite before the final added expiry test:77 files /742 tests pass. Final focused Admin +catalog editor suite:22 tests pass, including pending-navigation lock and credential clearing/session expiry. Frontend ESLint and both TypeScript/production builds pass.
+- Full frontend suite before the final added expiry test:77 files /742 tests pass. Final focused Admin +catalog editor +popup lifecycle suite:29 tests pass, including pending-navigation lock and credential clearing/session expiry. Frontend ESLint and both TypeScript/production builds pass.
 - Chromium production-preview admin browser pass at320/390/1280px: login, all sidebar sections, catalog and paired-face editor, horizontal-overflow assertions, cancel/focus restore, pending Back/Escape and same-request-ID close retry. Images are public PDF source assets; requests/auth are intercepted synthetic fixtures, not proof of live cookies/deployment.
-- Screenshot/report directory: `C:/Users/Admin/AppData/Local/Temp/emcoin-admin-browser-qa-eYjIqa`. Six views per viewport:overview,analytics,database,account,catalog,card-editor. Physically inspected desktop overview, mobile overview and desktop paired-face editor.
+- Final screenshot/report directory: `C:/Users/Admin/AppData/Local/Temp/emcoin-admin-browser-qa-ALZGwd`. Six views per viewport:overview,analytics,database,account,catalog,card-editor. Visually inspected desktop overview, mobile overview and desktop paired-face editor. The final editor hides its list until returning and keeps action buttons bounded instead of stretching across the desktop.
 
 ## Release boundary
 
