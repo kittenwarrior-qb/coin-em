@@ -1,0 +1,24 @@
+{
+  "result": "passed",
+  "stage": "terminal",
+  "catalogVersion": "catalog-f40519d34526037f0f48983964c8ae27c2f0b3d2b2b35d0508f9c18e28012530",
+  "phaseVisits": 15,
+  "gifts": 3,
+  "giftTimings": [
+    {
+      "color": "Đỏ",
+      "confirmedPreviewMs": 1222
+    },
+    {
+      "color": "Xanh",
+      "confirmedPreviewMs": 1236
+    },
+    {
+      "color": "Vàng",
+      "confirmedPreviewMs": 648
+    }
+  ],
+  "ownedRoomCleaned": true,
+  "errors": [],
+  "scope": "Approved HTTPS app; five owned real guest browsers, one round, actual Redis/server/Caddy; no packet injection, device/store/load certification"
+}

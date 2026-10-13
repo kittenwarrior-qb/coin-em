@@ -23,6 +23,25 @@ async function select() {
   await screen.findByRole('button', { name: /CX-011 · Hung hăng/ })
   fireEvent.click(screen.getByRole('button', { name: /CX-011 · Hung hăng/ }))
 }
+it('searches without Vietnamese accents, filters status/category and paginates without database writes', async () => {
+  const cards = Array.from({ length: 27 }, (_, i) => ({ ...card, id: `qa-${i}`, code: `QA-${i}`, name: `Thẻ kiểm thử ${i}`,
+    sortOrder: i, category: (i % 2 ? 'situation' : 'emotion') as typeof card.category, reviewed: i % 3 === 0 }))
+  vi.mocked(catalogClient.draft).mockResolvedValue({ revision: 1, active: false, cards })
+  render(<CatalogEditor onClose={vi.fn()} />)
+  await screen.findByRole('button', { name: 'QA-0 · Thẻ kiểm thử 0' })
+  expect(screen.getAllByRole('row')).toHaveLength(11)
+  fireEvent.click(screen.getByRole('button', { name: 'Trang sau' }))
+  expect(screen.getByRole('button', { name: 'QA-10 · Thẻ kiểm thử 10' })).toBeInTheDocument()
+  fireEvent.change(screen.getByLabelText('Tìm thẻ'), { target: { value: 'kiem thu 25' } })
+  expect(screen.getByRole('button', { name: 'QA-25 · Thẻ kiểm thử 25' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Trang trước' })).toBeDisabled()
+  fireEvent.change(screen.getByLabelText('Lọc loại'), { target: { value: 'emotion' } })
+  expect(screen.getByText('Không tìm thấy thẻ. Thử đổi từ khóa hoặc bộ lọc.')).toBeInTheDocument()
+  fireEvent.change(screen.getByLabelText('Tìm thẻ'), { target: { value: '' } })
+  fireEvent.change(screen.getByLabelText('Lọc trạng thái'), { target: { value: 'reviewed' } })
+  expect(screen.getByText('5 kết quả · Trang 1/1')).toBeInTheDocument()
+  expect(catalogClient.save).not.toHaveBeenCalled()
+})
 it('edits stable identity/metadata and renders paired PDF faces without publishing gameplay', async () => {
   await select()
   expect(screen.getByAltText('Mặt sau Hung hăng')).toHaveAttribute('src', card.backImageUrl)

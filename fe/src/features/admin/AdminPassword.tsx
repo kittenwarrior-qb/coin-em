@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { CartoonButton } from '@/components/cartoon/CartoonButton'
+import { AdminButton } from './AdminButton'
 import { usePendingNavigationGuard } from '@/features/overlays/usePopupLifecycle'
 import { adminClient, AdminRequestError } from './client'
 
@@ -39,6 +39,6 @@ export function AdminPassword({ onChanged, onBusy, onExpired }: { onChanged: () 
           disabled={pending} value={field.value} onChange={event => field.setter(event.target.value)} /></label>)}
       <p className="text-sm">Ít nhất 15 ký tự. Không dùng mật khẩu Gmail hoặc VPS.</p>
       {message && <p role="alert">{message}</p>}
-      <CartoonButton type="submit" pending={pending}>Lưu mật khẩu mới</CartoonButton>
+      <AdminButton type="submit" pending={pending}>Lưu mật khẩu mới</AdminButton>
     </form></section>
 }
