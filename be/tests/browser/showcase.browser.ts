@@ -8,6 +8,9 @@ import { chromium, expect as expectUI } from '../../../e2e/node_modules/@playwri
 import { startPublicCatalogFixture } from '../helpers/publicCatalogFixture'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
+// Hosted Linux uses SwiftShader, not a physical GPU. Preserve the full-motion
+// 100-switch/restore gate; this deadline is not a product latency/FPS budget.
+const lifecycleTimeoutMs = process.platform === 'linux' ? 290_000 : 170_000
 
 test.each(['unsupported-webgl', 'switches-context-loss', 'missing-texture'] as const)('existing card art lifecycle: %s', async scenario => {
   const output = await mkdtemp(path.join(os.tmpdir(), 'emcoin-showcase-browser-qa-'))
@@ -21,13 +24,14 @@ test.each(['unsupported-webgl', 'switches-context-loss', 'missing-texture'] as c
   const errors: string[] = []
   let reportWritten = false
   const report = async () => {
-    await writeFile(path.join(output, 'report.json'), JSON.stringify({ version: 'showcase-lifecycle-qa/v2', scenario, result, stage, browser: browser?.version(), renderer,
+    await writeFile(path.join(output, 'report.json'), JSON.stringify({ version: 'showcase-lifecycle-qa/v3', scenario, result, stage, browser: browser?.version(), renderer,
+      platform: process.platform, watchdogMs: lifecycleTimeoutMs, fullMotionSwitches: scenario === 'switches-context-loss',
       roleCardSwitches: completedRoleCardSwitches, errors, backendConnected: false, catalogApiConnected: true, physicalDevice: false,
       limitations: '100 existing role-card switches only; no100 model/deck switches, FPS/device budget or GPU memory-cap claim' }, null, 2))
     reportWritten = true
   }
   // Stop only our browser/child before Vitest's outer timeout; preserve the failing stage.
-  const watchdog = setTimeout(() => { errors.push('Owned170s watchdog expired'); void browser?.close().catch(() => {}); vite.kill() }, 170_000)
+  const watchdog = setTimeout(() => { errors.push(`Owned${lifecycleTimeoutMs / 1000}s watchdog expired`); void browser?.close().catch(() => {}); vite.kill() }, lifecycleTimeoutMs)
   onTestFinished(async () => {
     clearTimeout(watchdog)
     if (!reportWritten) await report()
@@ -146,4 +150,4 @@ test.each(['unsupported-webgl', 'switches-context-loss', 'missing-texture'] as c
     await catalogApi.close()
     console.log(`Showcase browser QA: ${output}`)
   }
-})
+}, lifecycleTimeoutMs + 10_000)

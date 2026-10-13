@@ -63,6 +63,10 @@ Blocked by OQ-06/OQ-10 for release authority, RPO/RTO and host ownership.
 
 ## Implementation plan
 
+### CI environment revision 2026-10-13 — role-card deadline evidence
+
+Main CI38260199796 attempt2 passes test/lint/full-game terminal and10/11 browser cases. Retain both failed attempts. Downloaded role-card report identifies actual SwiftShader, stage100-role-card-switches,98completed switches before the170s watchdog; there is no assertion/network/context-restore failure observed before termination. Admit the same bounded Linux290s watchdog/300s outer budget used for models/stickers, keeping Windows170/180 unchanged. Preserve full-motion1280x900, all100switches, real catalog API, offline CDN restrictions, loading/fallback assertions, actual context loss/restoration and screenshots. No force clicks, skipped cases, renderer/theme/rule changes or physical-device/FPS acceptance claims. Validate exact changed source locally and through new PR/main CI before deployment; no further unchanged-source retry fishing.
+
 ### Follow-up 2026-10-12 — observed CI/runtime boundaries
 
 Downloaded failed Linux artifacts show SwiftShader: models17/100 switches, stickers100 then timeout during cached revisits. Longer deadline alone is not a product fix. Admit renderer reduced-motion path plus unit tests: no decorative wobble/slide/intro and no repeated idle GPU draws under OS reduced-motion preference; redraw real selection/textures/flip/resize/context restore, preserve geometry/materials/palette/default full-motion path and explicit auto-rotate. Asset QA records reducedMotion:true and retains all120 switches/request/restore assertions. frontend-design skill used to preserve owner-approved theme direction, no new anchor/palette/reskin.
