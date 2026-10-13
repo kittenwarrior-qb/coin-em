@@ -6,13 +6,15 @@ import { publicGuidePwa } from './pwa/build'
 import { optimizedBrandBuild } from './pwa/optimizedBrandBuild'
 
 export default defineConfig(({ mode }) => {
-  const rootEnv = loadEnv(mode, path.resolve(process.cwd(), ".."))
-  const appEnv = loadEnv(mode, process.cwd())
+  const native = process.env.VITE_NATIVE_APP === 'true'
+  const rootEnv = native ? {} : loadEnv(mode, path.resolve(process.cwd(), ".."))
+  const appEnv = native ? {} : loadEnv(mode, process.cwd())
   const env = { ...rootEnv, ...appEnv }
 
   return {
-    base: env.VITE_BASE_URL ?? "/",
-    plugins: [react(), tailwindcss(), publicGuidePwa(), optimizedBrandBuild()],
+    base: native ? '/' : env.VITE_BASE_URL ?? "/",
+    envDir: native ? false : undefined,
+    plugins: [react(), tailwindcss(), ...(native ? [] : [publicGuidePwa()]), optimizedBrandBuild()],
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),

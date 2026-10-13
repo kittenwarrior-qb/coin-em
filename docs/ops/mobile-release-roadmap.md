@@ -4,6 +4,8 @@ Ngày: 2026-10-12. Trạng thái: kế hoạch triển khai; không phải bằn
 
 ## Quyết định và bằng chứng hiện tại
 
+**Cập nhật 2026-10-13:** Native foundation Android/iOS source + bundled frontend/checks đã có; chưa APK/IPA/device/store evidence. Chi tiết và gates: `native-foundation.md`. Owner chốt `cloud.emcoin.app`; chat/micro do quản trò quản lý riêng, không bị khóa/mở theo vai trò gameplay. Đây là quyết định mới thay ghi chú game-role communication ngày 2026-10-12 bên dưới. Native-origin staging/CORS cần kiểm trước beta; chưa chọn/kích hoạt voice provider. Những số liệu/trạng thái ngày 2026-10-12 bên dưới là lịch sử, không phủ nhận scaffold mới và không trở thành chứng nhận phát hành.
+
 - Chủ dự án yêu cầu hoàn thiện web và lên Android/iOS; Android trước.
 - Chủ dự án đồng ý scope voice: phòng mời có quản trò, tự bật micro, tắt tiếng/chặn/báo cáo, không ghi âm và không ghép người lạ. Quyết định này thay phần “không micro” trong ADR ngày 2026-10-03; camera/location/contacts vẫn không được mở rộng.
 - Chưa có Google Play Console, Apple Developer hoặc Mac/dịch vụ build iOS. Không tạo tài khoản, thanh toán, ký, upload hay deploy trong bước lập kế hoạch này.

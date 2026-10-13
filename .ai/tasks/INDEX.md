@@ -36,7 +36,7 @@ Nguồn backlog: `REFACTOR_MASTER_PLAN.md` §3. Đây là bảng điều phối;
 | R29 | P1 | Browser QA suite | R17, R20, R21, R23 | in progress |
 | R30 | P1 | Load/SLO | R27, R28, R35 | in progress |
 | R31 | P1 | PWA | R17, R21, R24, R29 | in progress |
-| R32 | P2 | Capacitor native shell | R31, R30, R33 | planned |
+| R32 | P2 | Capacitor native shell | R31, R30, R33 | in progress |
 | R33 | P1 | Privacy và deletion | R05, R09, R11 | in progress |
 | R34 | P2 | Store release | R32, R33, R35, R37 | planned |
 | R35 | P1 | Monitoring | R08, R17 | in progress |
