@@ -49,9 +49,11 @@ whose stdin could be consumed by a child. Initializer stdin is closed explicitly
 Process exit0 alone is insufficient: inspect all three services, HTTPS, active
 catalog and run the owned-room browser smoke before claiming success.
 
-The initial release currently serving HTTPS is
-`0f9ecfe6cdd176fb6ee7e822b80e142fcc343c98` at `/opt/emcoin/current`.
-It publishes the canonical100-card PDF catalog before backend admission. Later
+The initial backend release is `0f9ecfe6cdd176fb6ee7e822b80e142fcc343c98`.
+The guarded web update to `f58348233d589e6d941a5b818b1d01dba549fdc6` is now
+serving HTTPS, with `/opt/emcoin/current` pointing to that web release and its
+`images.env` retaining the original backend image. Initial installation
+publishes the canonical100-card PDF catalog before backend admission. Later
 operator-script fixes do not silently change the running application's image SHA.
 This script still **refuses existing backends**: subsequent manual updates need
 an explicit compatible admission-freeze/drain/maintenance procedure. Never rerun

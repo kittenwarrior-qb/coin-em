@@ -1,5 +1,9 @@
 # Initial manual EmCoin deployment — 2026-10-13
 
+This records the first install. The subsequent guarded frontend update and
+resolved admin contrast follow-up are in `2026-10-13-web-update.md`; backend and
+Redis were not restarted. Do not treat this historical initial pointer as current.
+
 Owner explicitly replaces CI/CD deployment with manual SSH, retaining GitHub
 source and CI checks. Deploy workflow state verified `disabled_manually`.
 
