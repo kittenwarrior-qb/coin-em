@@ -53,8 +53,8 @@ export function parseAdminOverview(value: unknown): AdminOverview {
       serverErrors: http.serverErrors, durationBuckets } } }
 }
 
-async function request(path: '/overview' | '/login' | '/logout' | '/close-room', signal: AbortSignal,
-  body?: { email: string; password: string } | Record<string, never> | AdminCloseCommand): Promise<unknown> {
+async function request(path: '/overview' | '/login' | '/logout' | '/close-room' | '/change-password', signal: AbortSignal,
+  body?: { email: string; password: string } | { currentPassword: string; newPassword: string } | Record<string, never> | AdminCloseCommand): Promise<unknown> {
   const controller = new AbortController()
   const abort = () => controller.abort()
   signal.addEventListener('abort', abort, { once: true })
@@ -100,6 +100,10 @@ async function mutation(path: '/login' | '/logout', signal: AbortSignal,
 }
 
 export const adminClient = {
+  changePassword: async (currentPassword: string, newPassword: string, signal: AbortSignal) => {
+    const result = await request('/change-password', signal, { currentPassword, newPassword })
+    if (!object(result) || result.success !== true) throw new AdminRequestError(502)
+  },
   overview: async (signal: AbortSignal) => parseAdminOverview(await request('/overview', signal)),
   login: (email: string, password: string, signal: AbortSignal) => mutation('/login', signal, { email, password }),
   logout: (signal: AbortSignal) => mutation('/logout', signal, {}),

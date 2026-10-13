@@ -25,7 +25,7 @@ describe('actual loopback admin registrar, synthetic credentials only', () => {
     const app = express()
     const analytics = new OperationalAnalytics()
     app.use(operationalAnalyticsMiddleware(analytics))
-    registerAdminApi(app, { auth: new AdminAuth(enabled ? hash : undefined),
+    registerAdminApi(app, { auth: new AdminAuth(enabled ? hash : undefined, undefined, () => {}),
       origin: enabled ? origin : undefined, rooms, analytics, closeRoom, catalog: () => catalog })
     server = createServer(app)
     await new Promise<void>((resolve, reject) => {
@@ -46,6 +46,23 @@ describe('actual loopback admin registrar, synthetic credentials only', () => {
   }, body: JSON.stringify({ email: ADMIN_EMAIL, password }) })
   const overview = (cookie?: string) => fetch(`${base}/overview`, {
     headers: { 'x-emcoin-admin': '1', ...(cookie ? { cookie } : {}) },
+  })
+
+  it('requires same-origin authenticated rotation, clears cookie and revokes the old session', async () => {
+    await start()
+    const signedIn = await login()
+    const cookie = signedIn.headers.get('set-cookie')!.split(';')[0]
+    const headers = { 'x-emcoin-admin': '1', origin, cookie, 'content-type': 'application/json' }
+    const body = JSON.stringify({ currentPassword: password, newPassword: 'synthetic-replacement-password' })
+    expect((await fetch(`${base}/change-password`, { method: 'POST', headers: { ...headers, origin: 'https://outsider.test' }, body })).status).toBe(403)
+    expect((await fetch(`${base}/change-password`, { method: 'POST', headers, body: JSON.stringify({ currentPassword: password, newPassword: 'short' }) })).status).toBe(400)
+    const response = await fetch(`${base}/change-password`, { method: 'POST', headers, body })
+    expect(response.status).toBe(200)
+    expect(response.headers.get('cache-control')).toBe('no-store')
+    expect(response.headers.get('set-cookie')).toContain('__Host-emcoin-admin=;')
+    expect(await response.json()).toEqual({ success: true })
+    expect((await overview(cookie)).status).toBe(401)
+    expect((await login()).status).toBe(401)
   })
 
   it('guards actual SQLite catalog access and commits an idempotent draft edit through authenticated HTTP', async () => {

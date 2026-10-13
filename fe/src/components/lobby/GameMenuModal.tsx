@@ -11,6 +11,8 @@ import { isBrandTheme } from '@/components/cartoon/controlThemes'
 import { BrandIcon } from '@/components/cartoon/BrandIcon'
 import { OrbitMenuIcon } from '@/components/cartoon/OrbitMenuIcon'
 import { PublicCatalogBoundary } from '@/features/game/catalog/PublicCatalog'
+import { ThemeChooser } from '@/features/theme/ThemeChooser'
+import { useThemePreference } from '@/features/theme/preferenceModel'
 
 interface GameMenuModalProps {
   catalogScope?: 'public' | 'room'
@@ -37,11 +39,13 @@ export function GameMenuModal({ open, onClose, onQuit, visualStyle = 'current', 
   const [showQuitConfirm, setShowQuitConfirm] = useState(false)
   const [showSupport, setShowSupport] = useState(false)
   const [showGuide, setShowGuide] = useState(false)
+  const [showTheme, setShowTheme] = useState(false)
+  const preference = useThemePreference()
   const { pending: quitPending, run: confirmQuit, error: quitError } = useConfirmedAction('menu-quit', open && showQuitConfirm)
 
   return (
     <>
-      <CartoonModal open={open} onClose={onClose} title="Menu" appearance="menu" initialFocus={harmonized ? 'panel' : undefined} className={harmonized ? 'theme-a-menu--harmonized' : undefined}>
+      <CartoonModal open={open} onClose={onClose} hideClose={showTheme} title="Menu" appearance="menu" initialFocus={harmonized ? 'panel' : undefined} className={harmonized ? 'theme-a-menu--harmonized' : undefined}>
         <div className={themed ? 'theme-a-menu-actions' : 'flex flex-col gap-4 py-2'}>
           <CartoonButton color="green" size="lg" className="w-full" onClick={() => setShowCardDeck(true)}>
             {menuLabel('Bộ thẻ', Layers)}
@@ -81,7 +85,9 @@ export function GameMenuModal({ open, onClose, onQuit, visualStyle = 'current', 
             </CartoonButton>
           )}
         </div>
+        {!onQuit && preference && <button className="theme-menu-link" type="button" onClick={() => setShowTheme(true)}><BrandIcon name="settings" />Giao diện</button>}
       </CartoonModal>
+      <CartoonModal open={open && showTheme} onClose={() => setShowTheme(false)} title="Chọn giao diện"><ThemeChooser /></CartoonModal>
 
       <AnimatePresence>
         {showCardDeck && (

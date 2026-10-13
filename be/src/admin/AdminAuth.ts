@@ -34,7 +34,7 @@ export class AdminAuth {
   #attempts = 0
   #now: () => number
 
-  constructor(passwordHash?: string, now: () => number = () => performance.now()) {
+  constructor(passwordHash?: string, now: () => number = () => performance.now(), private persist?: (hash: string) => void) {
     this.#now = now
     this.#windowStart = now()
     if (!passwordHash) { this.#record = null; return }
@@ -74,6 +74,33 @@ export class AdminAuth {
     if (this.#now() >= this.#session.expiresAt) { this.#session = null; return false }
     if (typeof token !== 'string' || !/^[a-f0-9]{64}$/.test(token)) return false
     return timingSafeEqual(digestToken(token), this.#session.digest)
+  }
+
+  async changePassword(token: unknown, current: unknown, next: unknown): Promise<{ ok: true } | { ok: false; error: string }> {
+    if (!this.authenticate(token)) return { ok: false, error: 'ADMIN_AUTH_REQUIRED' }
+    if (!this.#record || !this.persist) return { ok: false, error: 'AUTH_UNAVAILABLE' }
+    if (this.#now() - this.#windowStart >= 60_000) { this.#windowStart = this.#now(); this.#attempts = 0 }
+    if (this.#busy || this.#attempts >= 5) return { ok: false, error: 'RATE_LIMITED' }
+    this.#attempts++
+    if (typeof current !== 'string' || !current || Buffer.byteLength(current) > 1024 ||
+        typeof next !== 'string' || next.length < 15 || Buffer.byteLength(next) > 1024 || current === next) {
+      return { ok: false, error: 'INVALID_PASSWORD_REQUEST' }
+    }
+    this.#busy = true
+    try {
+      const key = await derive(current, this.#record.salt)
+      const matches = timingSafeEqual(key, this.#record.key); key.fill(0)
+      if (!matches) return { ok: false, error: 'INVALID_CURRENT_PASSWORD' }
+      const hash = await hashAdminPassword(next)
+      // Logout, expiry or replacement while KDF runs must cancel the mutation.
+      if (!this.authenticate(token)) return { ok: false, error: 'ADMIN_AUTH_REQUIRED' }
+      this.persist(hash)
+      const match = HASH_FORMAT.exec(hash)!
+      this.#record = { salt: Buffer.from(match[1], 'hex'), key: Buffer.from(match[2], 'hex') }
+      this.#session = null
+      return { ok: true }
+    } catch { return { ok: false, error: 'AUTH_UNAVAILABLE' } }
+    finally { this.#busy = false }
   }
 
   logout(token: unknown): boolean {

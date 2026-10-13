@@ -1,0 +1,14 @@
+.theme-chooser { min-width: 0; color: var(--brand-ink, #26366d); }
+.theme-chooser legend { font-size: 22px; font-weight: 700; margin-bottom: 16px; }
+.theme-chooser-options { display: grid; gap: 12px; }
+.theme-chooser-options label { display: flex; align-items: flex-start; gap: 12px; padding: 16px; min-height: 90px; border: 1px solid var(--brand-edge, #b8bfd9); border-radius: 16px; background: var(--brand-ivory, #fff); cursor: pointer; }
+.theme-chooser-options label:has(input:checked) { outline: 2px solid var(--brand-ink, #26366d); outline-offset: 1px; }
+.theme-chooser-options input { flex: none; width: 20px; height: 20px; margin-top: 3px; accent-color: var(--brand-ink, #26366d); }
+.theme-chooser-options input:focus-visible { outline: 3px solid var(--brand-ink, #26366d); outline-offset: 3px; }
+.theme-chooser-options strong, .theme-chooser-options small { display: block; }
+.theme-chooser-options small { font-size: 13px; margin-top: 5px; }
+.theme-swatches { display: flex; gap: 6px; margin-top: 10px; }
+.theme-swatches i { width: 20px; height: 20px; border-radius: 50%; border: 1px solid #0002; }
+.theme-chooser > p { font-size: 13px; line-height: 1.6; margin-top: 16px; }
+.theme-menu-link { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 14px auto 0; padding: 8px 16px; min-height: 44px; font: inherit; color: var(--brand-ink, #26366d); text-decoration: underline; text-underline-offset: 4px; }
+.theme-menu-link svg { width: 20px; height: 20px; }

@@ -11,6 +11,7 @@ import { cleanupRooms, loadRooms } from './persistence'
 import { registerPublicDiagnostics } from './publicDiagnostics'
 import { OperationalAnalytics, operationalAnalyticsMiddleware } from './admin/operationalAnalytics'
 import { AdminAuth } from './admin/AdminAuth'
+import { AdminCredentialStore } from './admin/AdminCredentialStore'
 import { registerAdminApi } from './admin/adminApi'
 import { closeAdminRoom } from './admin/closeRoom'
 import { roomService } from './modules/room/services/RoomService'
@@ -34,11 +35,17 @@ const corsOrigin = CLIENT_ORIGIN.includes(',')
 const app = express()
 const operationalAnalytics = new OperationalAnalytics()
 let catalog: CatalogStore | undefined
+const credentialDirectory = path.dirname(process.env.EMCOIN_CATALOG_DB || path.resolve('data/catalog.sqlite'))
+let credentials: AdminCredentialStore | undefined
+if (process.env.EMCOIN_ADMIN_PASSWORD_HASH) {
+  mkdirSync(credentialDirectory, { recursive: true, mode: 0o700 })
+  credentials = new AdminCredentialStore(path.join(credentialDirectory, 'admin-credential.sqlite'), process.env.EMCOIN_ADMIN_PASSWORD_HASH)
+}
 app.use(operationalAnalyticsMiddleware(operationalAnalytics))
 app.use(cors({ origin: corsOrigin }))
 registerPublicCatalogApi(app, () => catalog)
 registerAdminApi(app, {
-  auth: new AdminAuth(process.env.EMCOIN_ADMIN_PASSWORD_HASH),
+  auth: new AdminAuth(credentials?.read(), undefined, credentials ? hash => credentials!.save(hash) : undefined),
   catalog: () => catalog,
   origin: process.env.EMCOIN_ADMIN_PASSWORD_HASH ? process.env.EMCOIN_ADMIN_ORIGIN : undefined,
   rooms: () => roomRepository.findAll(), analytics: operationalAnalytics,

@@ -3,6 +3,19 @@ import { CartoonButton } from '@/components/cartoon/CartoonButton'
 import { CartoonModal } from '@/components/cartoon/CartoonModal'
 import { adminClient, AdminRequestError, type AdminOverview, type AdminCloseCommand } from '@/features/admin/client'
 import { CatalogEditor } from '@/features/admin/CatalogEditor'
+import { BrandIcon, type BrandIconName } from '@/components/cartoon/BrandIcon'
+import { AdminPassword } from '@/features/admin/AdminPassword'
+import '@/styles/adminDesktop.css'
+import { ThemeChooser } from '@/features/theme/ThemeChooser'
+
+type Section = 'overview' | 'catalog' | 'analytics' | 'database' | 'account'
+const sections: { id: Section; label: string; icon: BrandIconName }[] = [
+  { id: 'overview', label: 'Tổng quan & phòng', icon: 'rooms' },
+  { id: 'catalog', label: 'Bộ thẻ', icon: 'cards' },
+  { id: 'analytics', label: 'Analytics', icon: 'chart' },
+  { id: 'database', label: 'Dữ liệu', icon: 'database' },
+  { id: 'account', label: 'Tài khoản', icon: 'lock' },
+]
 
 const statusLabels = { waiting: 'Đang chờ', playing: 'Đang chơi', ended: 'Đã kết thúc' }
 const number = (value: number) => value.toLocaleString('vi-VN')
@@ -29,6 +42,9 @@ export default function Admin() {
   const [closeCommand, setCloseCommand] = useState<AdminCloseCommand | null>(null)
   const [closeSubmitted, setCloseSubmitted] = useState(false)
   const [catalogOpen, setCatalogOpen] = useState(false)
+  const [section, setSection] = useState<Section>('overview')
+  const [editorBusy, setEditorBusy] = useState(false)
+  const [roomFilter, setRoomFilter] = useState('')
   const active = useRef<AbortController | null>(null)
   const mounted = useRef(false)
 
@@ -57,6 +73,7 @@ export default function Admin() {
     // Do not leave the last privileged snapshot visible while revalidating the session.
     setOverview(null)
     setCatalogOpen(false)
+    setSection('overview')
     const submittedPassword = password
     setPassword('')
     try {
@@ -94,12 +111,21 @@ export default function Admin() {
   function submit(event: FormEvent<HTMLFormElement>) { event.preventDefault(); void run('login') }
 
   return (
-    <main className="admin-page min-h-dvh bg-[var(--c-sky-mist)] px-4 py-8 font-body text-[var(--c-blue-dark)]">
-      <div className="mx-auto flex w-full max-w-[430px] flex-col gap-5">
+    <main className={`admin-page admin-desktop ${overview ? 'is-authenticated' : ''} min-h-dvh font-body text-[var(--c-blue-dark)]`}>
+      {overview && <aside className="admin-sidebar">
+        <a className="admin-brand" href="/" aria-disabled={editorBusy || pending} onClick={event => { if (editorBusy || pending) event.preventDefault() }}>EmCoin<span>Quản trị ứng dụng</span></a>
+        <nav aria-label="Quản trị EmCoin">{sections.map(item => <button key={item.id} type="button"
+          aria-current={section === item.id ? 'page' : undefined} disabled={editorBusy || pending}
+          onClick={() => { setSection(item.id); setCatalogOpen(item.id === 'catalog'); setMessage('') }}>
+          <BrandIcon name={item.icon} /><span>{item.label}</span>
+        </button>)}</nav>
+        <p>app.emcoin.cloud<br />Chỉ quản trị ứng dụng chơi.</p>
+      </aside>}
+      <div className="admin-content flex w-full flex-col gap-5">
         <header>
-          <a href="/" className="underline underline-offset-4">Về EmCoin</a>
+          <a href="/" aria-disabled={editorBusy || pending} onClick={event => { if (editorBusy || pending) event.preventDefault() }} className="underline underline-offset-4">Về EmCoin</a>
           <h1 className="mt-4 font-display text-3xl">Quản trị EmCoin</h1>
-          <p className="mt-2 text-sm">Quản lý catalog bản nháp, trạng thái phòng và số liệu vận hành. Không xem lời chia sẻ riêng, chỉnh Coin hay vai trò trong phòng.</p>
+          <p className="mt-2 text-sm">Không xem lời chia sẻ riêng, chỉnh Coin hay vai trò trong phòng. Website emcoin.cloud được quản lý riêng.</p>
         </header>
         {pending && <p role="status" aria-live="polite">Đang chờ máy chủ…</p>}
         {message && !closeCommand && <p role="alert" className={`${panel} text-[var(--c-red-dark)]`}>{message}</p>}
@@ -120,24 +146,43 @@ export default function Admin() {
         </form>}
         {!loginVisible && !overview && !pending && <CartoonButton onClick={() => void run('refresh')}>Thử lại</CartoonButton>}
         {overview && <>
-          {catalogOpen ? <CatalogEditor onClose={() => setCatalogOpen(false)} /> :
-            <CartoonButton onClick={() => setCatalogOpen(true)}>Quản lý bộ thẻ</CartoonButton>}
-          <section className={panel} aria-labelledby="admin-rooms">
+          <div className="admin-toolbar"><h2>{sections.find(item => item.id === section)?.label}</h2>
+            <div className="flex gap-3"><CartoonButton color="teal" size="md" pending={pending} disabled={editorBusy} onClick={() => void run('refresh')}>Làm mới</CartoonButton>
+            <CartoonButton color="white" size="md" pending={pending} disabled={editorBusy} onClick={() => void run('logout')}>Đăng xuất</CartoonButton></div>
+          </div>
+          {section === 'overview' && <div className="admin-stats"><article><span>Phòng hiện tại</span><strong>{number(overview.rooms.length)}</strong></article>
+            <article><span>Chỗ đang tham gia</span><strong>{number(overview.rooms.reduce((sum, room) => sum + room.seats, 0))}</strong></article>
+            <article><span>Phòng đang chơi</span><strong>{number(overview.rooms.filter(room => room.status === 'playing').length)}</strong></article></div>}
+          {catalogOpen && <CatalogEditor onBusy={setEditorBusy} onClose={() => { setEditorBusy(false); setCatalogOpen(false); setSection('overview') }} />}
+          {section === 'account' && <AdminPassword onBusy={setEditorBusy} onExpired={() => { setOverview(null); setLoginVisible(true); setSection('overview'); setMessage('Phiên đã hết hạn. Nếu vừa đổi mật khẩu, hãy đăng nhập bằng mật khẩu mới.'); setEditorBusy(false) }} onChanged={() => { setOverview(null); setLoginVisible(true); setSection('overview'); setMessage('Đã đổi mật khẩu. Hãy đăng nhập lại bằng mật khẩu mới.'); setEditorBusy(false) }} />}
+          {section === 'account' && !editorBusy && <section className={panel}><ThemeChooser /></section>}
+          {section === 'database' && <section className={panel} aria-label="Quản lý dữ liệu">
+            <h3>Các loại dữ liệu</h3><dl className="admin-data-list"><dt>Bộ thẻ · SQLite</dt><dd>Thông tin thẻ, URL hai mặt, bản nháp và phiên bản đã kiểm. Ảnh không lưu trực tiếp trong database.</dd>
+              <dt>Phòng chơi · Redis</dt><dd>Xóa sau 1 giờ không hoạt động. Không lưu nội dung phòng đã xóa và không có backup nội dung.</dd>
+              <dt>Số liệu vận hành</dt><dd>Bộ đếm trong tiến trình; đặt lại khi máy chủ khởi động lại. Không theo dõi lời chia sẻ cá nhân.</dd></dl>
+            <CartoonButton onClick={() => { setSection('catalog'); setCatalogOpen(true) }}>Quản lý bộ thẻ</CartoonButton>
+            <p className="mt-4 text-sm">Không cung cấp SQL hoặc nút xóa toàn bộ dữ liệu để tránh ảnh hưởng phòng đang chơi.</p>
+          </section>}
+          {section === 'overview' && <section className={panel} aria-labelledby="admin-rooms">
             <h2 id="admin-rooms" className="font-display text-2xl">Phòng hiện tại ({number(overview.rooms.length)})</h2>
+            <label className="admin-search">Tìm mã phòng<input type="search" value={roomFilter} onChange={event => setRoomFilter(event.target.value)} /></label>
             {overview.rooms.length === 0 ? <p className="mt-3">Không có phòng đang được lưu.</p> :
               <ul className="mt-3 divide-y divide-[var(--c-sky)]">
-                {overview.rooms.map(room => <li key={room.id} className="py-3">
+                {overview.rooms.filter(room => room.id.toLowerCase().includes(roomFilter.toLowerCase())).map(room => <li key={room.id} className="py-3 admin-room-row">
+                  <div>
                   <p className="break-all font-semibold">Phòng {room.id}</p>
                   <p>{statusLabels[room.status]} · {number(room.seats)} người</p>
                   <p className="text-sm">Phiên bản trạng thái: {number(room.revision)}</p>
+                  </div>
                   <CartoonButton size="md" color="pink" className="mt-2" aria-label={`Đóng phòng ${room.id}`}
                     disabled={catalogOpen}
                     onClick={() => { setCloseSubmitted(false); setMessage(''); setCloseCommand({ roomId: room.id, expectedRevision: room.revision,
                       requestId: crypto.randomUUID(), reason: 'operator-request' }) }}>Đóng phòng</CartoonButton>
                 </li>)}
               </ul>}
-          </section>
-          <section className={panel} aria-labelledby="admin-metrics">
+            {overview.rooms.length > 0 && !overview.rooms.some(room => room.id.toLowerCase().includes(roomFilter.toLowerCase())) && <p>Không tìm thấy phòng khớp mã này.</p>}
+          </section>}
+          {(section === 'analytics' || section === 'overview') && <section className={panel} aria-labelledby="admin-metrics">
             <h2 id="admin-metrics" className="font-display text-2xl">Vận hành máy chủ</h2>
             <p className="mt-2 text-sm">Tổng từ khi tiến trình này khởi động; đặt lại khi khởi động lại. Không phải số người truy cập.</p>
             <dl className="mt-4 grid grid-cols-[1fr_auto] gap-3 tabular-nums">
@@ -145,11 +190,11 @@ export default function Admin() {
               <dt>Lỗi yêu cầu (4xx)</dt><dd>{number(overview.analytics.http.clientErrors)}</dd>
               <dt>Lỗi máy chủ (5xx)</dt><dd>{number(overview.analytics.http.serverErrors)}</dd>
             </dl>
-          </section>
-          <div className="flex flex-wrap justify-between gap-3">
-            <CartoonButton color="teal" pending={pending} disabled={catalogOpen} onClick={() => void run('refresh')}>Làm mới</CartoonButton>
-            <CartoonButton color="white" pending={pending} disabled={catalogOpen} onClick={() => void run('logout')}>Đăng xuất</CartoonButton>
-          </div>
+            {section === 'analytics' && <div className="admin-latency"><h3>Thời gian xử lý HTTP</h3>
+              <p className="text-sm">Số yêu cầu trong từng khoảng, không phải tốc độ tải trang.</p>
+              {overview.analytics.http.durationBuckets?.map((bucket, i, buckets) => <div key={i}><span>{i === 0 ? '0' : buckets[i - 1].upperBoundMs}–{bucket.upperBoundMs ?? '∞'} ms</span><meter min={0} max={Math.max(1, overview.analytics.http.completed)} value={bucket.count} /><strong>{number(bucket.count)}</strong></div>)}
+            </div>}
+          </section>}
         </>}
       </div>
       <CartoonModal open={!!closeCommand} title="Đóng phòng?" persistent={pending} hideClose={pending}
