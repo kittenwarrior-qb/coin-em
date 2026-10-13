@@ -1,6 +1,18 @@
-.admin-page.admin-desktop { --admin-ink:#252942; --admin-accent:#514895; --admin-soft:#efedf9; --admin-edge:#dce0ec; --admin-surface:#fff; --admin-ground:#f7f8fc; --admin-danger:#a33f60; background:var(--admin-ground)!important; color:var(--admin-ink); padding:24px; font-size:14px; line-height:1.6; }
+.admin-page.admin-desktop { --admin-ink:#202738; --admin-accent:#514895; --admin-soft:#efedf9; --admin-edge:#ccd3df; --admin-surface:#fff; --admin-ground:#f3f5f9; --admin-danger:#a33f60; background:var(--admin-ground)!important; color:var(--admin-ink); padding:16px; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; font-size:14px; line-height:1.5; }
+.admin-page.admin-desktop { font-weight:400; }
+.admin-page.admin-desktop, .admin-page.admin-desktop :is(input,select,textarea,button,label,p,a,span,h1,h2,h3,td,th) { font-family:Arial,"Segoe UI",sans-serif!important; }
+.admin-page.admin-desktop :is(input,select,textarea) { font-size:14px; background:var(--admin-surface)!important; color:var(--admin-ink)!important; border-color:var(--admin-edge)!important; }
+.admin-page.admin-desktop input::placeholder { color:#647084; opacity:1; }
 html[data-ui-theme="kindness-workshop"] .admin-page.admin-desktop { --admin-ink:#203c4c; --admin-accent:#225d7c; --admin-soft:#edf3f5; --admin-edge:#deded7; --admin-surface:#fffdf8; --admin-ground:#f4f2ec; --admin-danger:#a54d42; }
 .admin-content { max-width:520px; margin:auto; min-width:0; }
+.admin-desktop.is-login { display:flex; align-items:center; justify-content:center; }
+.is-login .admin-content { max-width:440px; }
+.admin-login-heading { display:flex; align-items:center; gap:10px; padding:0 0 20px; }
+.admin-login-heading svg { width:26px; height:26px; color:var(--admin-accent); }
+.admin-page.admin-desktop .admin-login-heading h1 { margin:0; font-size:22px; font-weight:700; }
+.is-login .admin-workspace { padding:0; }
+.is-login .admin-card { padding:28px!important; }
+.is-login form .admin-button { width:100%; margin-top:4px; }
 .admin-desktop.is-authenticated { display:grid; grid-template-columns:232px minmax(0,1fr); gap:0; height:100dvh; min-height:0; overflow:hidden; }
 .is-authenticated .admin-content { max-width:none; margin:0; min-height:0; background:var(--admin-surface); border:1px solid var(--admin-edge); border-left:0; border-radius:0 20px 20px 0; overflow:hidden; }
 .admin-sidebar { display:flex; flex-direction:column; min-height:0; overflow-y:auto; background:var(--admin-surface); border:1px solid var(--admin-edge); border-radius:20px 0 0 20px; padding:28px 16px; }
@@ -104,4 +116,51 @@ html[data-ui-theme="kindness-workshop"] .admin-page.admin-desktop { --admin-ink:
   .admin-data-list { grid-template-columns:minmax(0,1fr); gap:8px; } .admin-data-list dd { margin-bottom:16px; }
   .admin-latency > div { grid-template-columns:100px minmax(0,1fr) 30px; gap:8px; }
   .admin-topbar a { display:none; } .admin-editor-actions { bottom:0; }
+}
+
+/* CRM catalog: shell and controls stay in view; only records/editor content scroll. */
+.admin-card-name { display:flex; align-items:center; gap:12px; }
+.admin-card-name img, .admin-thumb-placeholder { width:34px; height:44px; flex-shrink:0; object-fit:contain; border:1px solid var(--admin-edge); background:var(--admin-ground); border-radius:5px; }
+.admin-thumb-placeholder { display:grid; place-items:center; font-size:11px; color:var(--admin-accent); }
+.admin-table th { position:sticky; top:0; z-index:1; border-bottom:1px solid var(--admin-edge); font-size:13px; font-weight:700; }
+.admin-table td { font-size:14px; padding:8px 16px; }
+.admin-pagination label { display:flex; align-items:center; gap:8px; white-space:nowrap; }
+.admin-editor-tabs { display:flex; gap:24px; border-bottom:1px solid var(--admin-edge); }
+.admin-editor-tabs button { padding:10px 2px; font-weight:600; border-bottom:3px solid transparent; }
+.admin-editor-tabs button[aria-selected="true"] { color:var(--admin-accent); border-color:var(--admin-accent); }
+.admin-editor-body { display:grid; grid-template-columns:minmax(0,1fr) 270px; gap:24px; min-height:0; overflow:auto; padding:4px; }
+.admin-catalog-fields { display:block; min-width:0; }
+.admin-field-panel:not([hidden]) { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-content:start; }
+.admin-field-panel[hidden] { display:none; }
+.admin-field-panel label { display:grid; gap:7px; font-weight:600; }
+.admin-field-panel .admin-check { display:flex; align-items:center; gap:8px; font-size:13px; grid-column:1 / -1; }
+.admin-image-note { grid-column:1 / -1; color:#536176; font-size:13px; }
+.admin-card-faces { display:flex; flex-direction:column; align-self:start; padding:16px; gap:18px; border:1px solid var(--admin-edge); border-radius:12px; background:var(--admin-ground); }
+.admin-card-faces img { height:185px; object-fit:contain; }
+.admin-card-faces figcaption { margin-top:8px; font-weight:600; }
+.admin-editor-actions { position:static; flex-shrink:0; padding:12px 0 0; }
+.admin-catalog > .admin-button { align-self:flex-start; }
+@media(min-width:901px) {
+  .is-authenticated .admin-workspace.is-catalog-workspace { overflow:hidden; gap:14px; padding:18px 24px; }
+  .admin-workspace > .admin-catalog { flex:1; display:flex; flex-direction:column; gap:0; min-height:0; overflow:hidden; }
+  .admin-catalog .admin-catalog-caption { margin:4px 0 8px; }
+  .admin-catalog-summary { margin:6px 0; }
+  .admin-catalog .admin-table-scroll { flex:1; min-height:100px; overflow:auto; overscroll-behavior:contain; }
+  .admin-catalog .admin-pagination { flex-shrink:0; margin:12px 0; }
+  .admin-catalog .admin-release-details[open] { max-height:160px; overflow:auto; }
+  .admin-card-editor { flex:1; min-height:0; }
+  .admin-card-editor .admin-editor-body { flex:1; }
+  .admin-catalog.is-editing .admin-catalog-summary { display:none; }
+  .admin-catalog > .admin-button:last-child { margin-top:8px; }
+}
+@media(max-width:1149px) {
+  .admin-editor-body { grid-template-columns:minmax(0,1fr) 210px; gap:16px; }
+  .admin-field-panel:not([hidden]) { grid-template-columns:minmax(0,1fr); }
+}
+@media(max-width:900px) {
+  .admin-catalog .admin-table-scroll { max-height:480px; overflow:auto; }
+  .admin-editor-body { grid-template-columns:minmax(0,1fr); overflow:visible; }
+  .admin-card-faces { flex-direction:row; }
+  .admin-card-faces figure { min-width:0; flex:1; }
+  .admin-pagination { flex-wrap:wrap; }
 }

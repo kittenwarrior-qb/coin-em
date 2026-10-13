@@ -2,6 +2,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-libra
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Admin from '@/pages/Admin'
 import { ControlThemeProvider } from '@/components/cartoon/ControlThemeProvider'
+import { ThemePreferenceProvider } from '@/features/theme/ThemePreference'
 import { AdminRequestError } from '@/features/admin/client'
 
 const mocks = vi.hoisted(() => ({ overview: vi.fn(), login: vi.fn(), logout: vi.fn(), closeRoom: vi.fn(), changePassword: vi.fn() }))
@@ -14,6 +15,16 @@ beforeEach(() => { vi.resetAllMocks(); localStorage.clear(); sessionStorage.clea
 afterEach(() => { cleanup(); vi.restoreAllMocks() })
 
 describe('admin page', () => {
+  it('shows login-only content before authentication, including when theme preferences are available', async () => {
+    mocks.overview.mockRejectedValue(new AdminRequestError(401))
+    render(<ThemePreferenceProvider><Admin /></ThemePreferenceProvider>)
+    expect(await screen.findByRole('heading', { name: 'Đăng nhập' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'EmCoin Admin' })).toBeInTheDocument()
+    expect(screen.queryByRole('combobox', { name: 'Giao diện quản trị' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('navigation', { name: 'Quản trị EmCoin' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Về EmCoin' })).not.toBeInTheDocument()
+    expect(screen.queryByText(/Website emcoin.cloud/)).not.toBeInTheDocument()
+  })
   it('blocks navigation during password rotation and hides privileged data on session expiry', async () => {
     mocks.overview.mockResolvedValue(fixture)
     let reject!: (error: unknown) => void

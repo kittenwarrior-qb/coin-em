@@ -115,7 +115,7 @@ export default function Admin() {
   function submit(event: FormEvent<HTMLFormElement>) { event.preventDefault(); void run('login') }
 
   return (
-    <main className={`admin-page admin-desktop ${overview ? 'is-authenticated' : ''} min-h-dvh font-body text-[var(--c-blue-dark)]`}>
+    <main className={`admin-page admin-desktop ${overview ? 'is-authenticated' : 'is-login'} min-h-dvh font-body text-[var(--c-blue-dark)]`}>
       {overview && <aside className="admin-sidebar">
         <a className="admin-brand" href="/" aria-disabled={editorBusy || pending} onClick={event => { if (editorBusy || pending) event.preventDefault() }}>EmCoin<span>Quản trị ứng dụng</span></a>
         <nav aria-label="Quản trị EmCoin">{sections.map(item => <button key={item.id} type="button"
@@ -126,7 +126,7 @@ export default function Admin() {
         <p>app.emcoin.cloud<br />Chỉ quản trị ứng dụng chơi.</p>
       </aside>}
       <div className="admin-content flex w-full flex-col">
-        <header className="admin-topbar">
+        {overview ? <header className="admin-topbar">
           <div className="admin-topbar-tools">
           {themePreference && <label className="admin-theme-switch"><BrandIcon name="settings" /><span className="sr-only">Giao diện quản trị</span><select aria-label="Giao diện quản trị" value={isPublishedTheme(controlTheme) ? controlTheme : 'emotion-orbit'} disabled={pending}
             onChange={event => { if (isPublishedTheme(event.target.value)) themePreference.choose(event.target.value) }}><option value="emotion-orbit">Vòng Cảm Xúc</option><option value="kindness-workshop">Xưởng Tử Tế</option></select></label>}
@@ -134,8 +134,8 @@ export default function Admin() {
           </div>
           <h1 className="mt-4 font-display text-3xl">Quản trị EmCoin</h1>
           <p className="mt-2 text-sm">Không xem lời chia sẻ riêng, chỉnh Coin hay vai trò trong phòng. Website emcoin.cloud được quản lý riêng.</p>
-        </header>
-        <div className="admin-workspace">
+        </header> : <header className="admin-login-heading"><BrandIcon name="lock" /><h1>EmCoin Admin</h1></header>}
+        <div className={`admin-workspace ${catalogOpen && overview ? 'is-catalog-workspace' : ''}`}>
         {pending && <p role="status" aria-live="polite">Đang chờ máy chủ…</p>}
         {message && !closeCommand && <p role="alert" className={`${panel} text-[var(--c-red-dark)]`}>{message}</p>}
         {loginVisible && <form onSubmit={submit} className={`${panel} flex flex-col gap-4`}>
