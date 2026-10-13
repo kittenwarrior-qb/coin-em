@@ -51,5 +51,7 @@ if (mode === 'prepare') {
   const target = 'root@103.74.102.24', incoming = `/opt/emcoin/incoming/${sha}`
   run(ssh, [...options, target, `test -f /opt/emcoin/shared/.deploy-ready && install -d -m 700 ${incoming}`])
   run(scp, [...options, ...['release-images.tar.gz', 'release-config.tar.gz', 'SHA256SUMS'].map(file => path.join(release, file)), `${target}:${incoming}/`])
-  run(ssh, [...options, target, `cd ${incoming} && sha256sum -c SHA256SUMS && tar -xOzf release-config.tar.gz deploy/emcoin/deploy-release.sh | bash -s -- ${sha}`])
+  // Run a verified file, not bash -s: a child with open stdin can consume the
+  // remainder of a piped deployment script (notably compose run).
+  run(ssh, [...options, target, `cd ${incoming} && sha256sum -c SHA256SUMS && tar -xzf release-config.tar.gz deploy/emcoin/deploy-release.sh && bash deploy/emcoin/deploy-release.sh ${sha}`])
 }

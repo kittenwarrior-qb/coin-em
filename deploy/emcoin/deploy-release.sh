@@ -33,7 +33,7 @@ for release_image in "$EMCOIN_BACKEND_IMAGE" "$EMCOIN_WEB_IMAGE"; do
   test "$(docker image inspect "$release_image" --format '{{index .Config.Labels "org.opencontainers.image.revision"}}')" = "$release_sha"
 done
 docker image inspect redis:7-alpine >/dev/null
-"${compose[@]}" run --rm --no-deps backend node -e 'const {CatalogStore}=require("./dist/catalog/CatalogStore"); const {initializeFreshCatalog}=require("./dist/catalog/initializeFreshCatalog"); const store=new CatalogStore(process.env.EMCOIN_CATALOG_DB); try{console.log(JSON.stringify(initializeFreshCatalog(store)))}finally{store.close()}'
+"${compose[@]}" run --rm --no-deps backend node -e 'const {CatalogStore}=require("./dist/catalog/CatalogStore"); const {initializeFreshCatalog}=require("./dist/catalog/initializeFreshCatalog"); const store=new CatalogStore(process.env.EMCOIN_CATALOG_DB); try{console.log(JSON.stringify(initializeFreshCatalog(store)))}finally{store.close()}' < /dev/null
 "${compose[@]}" up -d --no-build --pull never
 healthy=false
 for attempt in $(seq 1 30); do
