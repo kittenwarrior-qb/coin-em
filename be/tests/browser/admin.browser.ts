@@ -39,9 +39,9 @@ test('production admin UI: bounded mobile layout, confirmation, pending Back/Esc
       vite.once('exit', code => { clearTimeout(timeout); reject(new Error(`Owned preview exited ${code}`)) })
     })
     browser = await chromium.launch({ headless: true })
-    for (const width of [320, 390, 1280, 1920, 3840]) {
+    for (const width of [320, 390, 1280, 1366, 1920, 3840]) {
       stage = `viewport-${width}`
-      const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: 'reduce' })
+      const context = await browser.newContext({ viewport: { width, height: width === 1366 ? 768 : 900 }, reducedMotion: 'reduce' })
       let authenticated = false, closed = false
       let releaseClose!: () => void
       let closeAttempt = 0
@@ -127,6 +127,8 @@ test('production admin UI: bounded mobile layout, confirmation, pending Back/Esc
       await expectUI(page.getByRole('button', { name: 'Đăng xuất', exact: true })).toBeEnabled()
       await page.getByLabel('Số dòng/trang', { exact: true }).selectOption('80')
       if (width >= 1280) {
+        const tableBox = await page.locator('.admin-table-scroll').boundingBox()
+        expect(tableBox!.height).toBeGreaterThan(page.viewportSize()!.height * .5)
         const footer = await page.locator('.admin-pagination').boundingBox()
         await page.locator('.admin-table-scroll').evaluate(node => { node.scrollTop = node.scrollHeight })
         expect(await page.locator('.admin-pagination').boundingBox()).toEqual(footer)

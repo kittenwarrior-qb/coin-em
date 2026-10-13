@@ -123,7 +123,7 @@ export default function Admin() {
           onClick={() => { setSection(item.id); setCatalogOpen(item.id === 'catalog'); setMessage('') }}>
           <BrandIcon name={item.icon} /><span>{item.label}</span>
         </button>)}</nav>
-        <p>app.emcoin.cloud<br />Chỉ quản trị ứng dụng chơi.</p>
+        <details className="admin-scope-info"><summary>Phạm vi quản trị</summary><p>Không xem lời chia sẻ riêng, chỉnh Coin hay vai trò trong phòng. Website emcoin.cloud được quản lý riêng.</p></details>
       </aside>}
       <div className="admin-content flex w-full flex-col">
         {overview ? <header className="admin-topbar">
@@ -131,11 +131,12 @@ export default function Admin() {
           {themePreference && <label className="admin-theme-switch"><BrandIcon name="settings" /><span className="sr-only">Giao diện quản trị</span><select aria-label="Giao diện quản trị" value={isPublishedTheme(controlTheme) ? controlTheme : 'emotion-orbit'} disabled={pending}
             onChange={event => { if (isPublishedTheme(event.target.value)) themePreference.choose(event.target.value) }}><option value="emotion-orbit">Vòng Cảm Xúc</option><option value="kindness-workshop">Xưởng Tử Tế</option></select></label>}
           <a href="/" aria-disabled={editorBusy || pending} onClick={event => { if (editorBusy || pending) event.preventDefault() }} className="underline underline-offset-4">Về EmCoin</a>
+          <AdminButton color="white" size="md" pending={pending} disabled={editorBusy} onClick={() => void run('refresh')}>Làm mới</AdminButton>
+          <AdminButton color="white" size="md" pending={pending} disabled={editorBusy} onClick={() => void run('logout')}>Đăng xuất</AdminButton>
           </div>
-          <h1 className="mt-4 font-display text-3xl">Quản trị EmCoin</h1>
-          <p className="mt-2 text-sm">Không xem lời chia sẻ riêng, chỉnh Coin hay vai trò trong phòng. Website emcoin.cloud được quản lý riêng.</p>
+          <h1>{sections.find(item => item.id === section)?.label}</h1>
         </header> : <header className="admin-login-heading"><BrandIcon name="lock" /><h1>EmCoin Admin</h1></header>}
-        <div className={`admin-workspace ${catalogOpen && overview ? 'is-catalog-workspace' : ''}`}>
+        <div className={`admin-workspace admin-workspace--${section} ${catalogOpen && overview ? 'is-catalog-workspace' : ''}`}>
         {pending && <p role="status" aria-live="polite">Đang chờ máy chủ…</p>}
         {message && !closeCommand && <p role="alert" className={`${panel} text-[var(--c-red-dark)]`}>{message}</p>}
         {loginVisible && <form onSubmit={submit} className={`${panel} flex flex-col gap-4`}>
@@ -155,10 +156,6 @@ export default function Admin() {
         </form>}
         {!loginVisible && !overview && !pending && <AdminButton onClick={() => void run('refresh')}>Thử lại</AdminButton>}
         {overview && <>
-          <div className="admin-toolbar"><h2>{sections.find(item => item.id === section)?.label}</h2>
-            <div className="flex gap-3"><AdminButton color="teal" size="md" pending={pending} disabled={editorBusy} onClick={() => void run('refresh')}>Làm mới</AdminButton>
-            <AdminButton color="white" size="md" pending={pending} disabled={editorBusy} onClick={() => void run('logout')}>Đăng xuất</AdminButton></div>
-          </div>
           {section === 'overview' && <div className="admin-stats"><article><span>Phòng hiện tại</span><strong>{number(overview.rooms.length)}</strong></article>
             <article><span>Chỗ đang tham gia</span><strong>{number(overview.rooms.reduce((sum, room) => sum + room.seats, 0))}</strong></article>
             <article><span>Phòng đang chơi</span><strong>{number(overview.rooms.filter(room => room.status === 'playing').length)}</strong></article></div>}

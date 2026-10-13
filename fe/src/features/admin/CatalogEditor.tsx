@@ -106,9 +106,16 @@ export function CatalogEditor({ onClose, onBusy }: { onClose: () => void; onBusy
       (reviewFilter === 'archived' ? item.archived : !item.archived && (reviewFilter === 'reviewed' ? item.reviewed : !item.reviewed))))
     .sort((a, b) => a.sortOrder - b.sortOrder || a.code.localeCompare(b.code))
   const pages = Math.max(1, Math.ceil(filtered.length / pageSize)), page = Math.min(pageIndex, pages - 1)
+  function addCard() {
+    if (!draft || locked) return
+    setEditorTab('metadata')
+    setCard({ id: crypto.randomUUID(), code: 'NEW-001', name: 'Thẻ mới', category: 'situation', group: 'light',
+      definition: '', prompt: '', sortOrder: draft.cards.length, frontImageUrl: '', backImageUrl: '', sourcePages: [], reviewed: false, archived: false })
+  }
   return <section className={`admin-card admin-catalog ${card ? 'is-editing' : ''}`} aria-labelledby="catalog-title">
-    <h2 id="catalog-title" className="font-display text-2xl">Quản lý bộ thẻ</h2>
-    <p className="admin-catalog-caption">Sửa bản nháp; chỉ áp dụng cho phòng mới sau khi phát hành.</p>
+    <div className="admin-catalog-heading"><div><h2 id="catalog-title">{card ? card.name : 'Danh sách thẻ'}</h2>
+    <p className="admin-catalog-caption">{card ? `${card.code} · ${labels[card.category]}` : 'Quản lý bản nháp; chỉ áp dụng cho phòng mới sau khi phát hành.'}</p></div>
+    {!card && draft && <AdminButton disabled={locked} onClick={addCard}>Thêm thẻ</AdminButton>}</div>
     {pending && <p role="status">Đang chờ catalog…</p>}
     {message && <p role="status" className="my-3 break-words">{message}</p>}
     {draft && <>
@@ -130,12 +137,9 @@ export function CatalogEditor({ onClose, onBusy }: { onClose: () => void; onBusy
           <td><AdminButton color="white" disabled={locked} aria-label={`${item.code} · ${item.name}`} onClick={() => { setCard({ ...item }); setEditorTab('metadata'); setMessage('') }}>Sửa</AdminButton></td></tr>)}
         {filtered.length === 0 && <tr><td colSpan={6} className="admin-table-empty">Không tìm thấy thẻ. Thử đổi từ khóa hoặc bộ lọc.</td></tr>}
         </tbody></table></div><div className="admin-pagination"><p>{filtered.length} kết quả · Trang {page + 1}/{pages}</p><label>Số dòng/trang<select aria-label="Số dòng/trang" value={pageSize} disabled={locked} onChange={event => { setPageSize(Number(event.target.value)); setPageIndex(0) }}>{[10, 25, 50, 80].map(size => <option key={size} value={size}>{size}</option>)}</select></label><div><AdminButton color="white" disabled={locked || page === 0} onClick={() => setPageIndex(page - 1)}>Trang trước</AdminButton><AdminButton color="white" disabled={locked || page + 1 >= pages} onClick={() => setPageIndex(page + 1)}>Trang sau</AdminButton></div></div></>}
-      {!card && <AdminButton disabled={locked} onClick={() => { setEditorTab('metadata'); setCard({ id: crypto.randomUUID(), code: 'NEW-001', name: 'Thẻ mới',
-        category: 'situation', group: 'light', definition: '', prompt: '', sortOrder: draft.cards.length,
-        frontImageUrl: '', backImageUrl: '', sourcePages: [], reviewed: false, archived: false }) }}>Thêm thẻ</AdminButton>}
     </>}
     {card && <div className="admin-card-editor flex flex-col gap-3">
-      <p className="break-all text-xs">ID: {card.id} · {labels[card.category]} · Trang nguồn: {card.sourcePages.join(' / ') || 'Thẻ thêm mới'}</p>
+      <p className="admin-card-source">ID: {card.id} · Trang nguồn: {card.sourcePages.join(' / ') || 'Thẻ thêm mới'}</p>
       <div className="admin-editor-tabs" role="tablist" aria-label="Chi tiết thẻ">{[['metadata', 'Thông tin'], ['content', 'Nội dung'], ['images', 'Hình ảnh']].map(([id, title]) => <button type="button" role="tab" key={id} id={`${fieldId}-tab-${id}`} aria-controls={`${fieldId}-panel-${id}`} aria-selected={editorTab === id} onClick={() => setEditorTab(id)}>{title}</button>)}</div>
       <div className="admin-editor-body">
       <fieldset disabled={pending || uncertain} className="admin-catalog-fields flex min-w-0 flex-col gap-3">
@@ -173,11 +177,11 @@ export function CatalogEditor({ onClose, onBusy }: { onClose: () => void; onBusy
           </figure>)}
         </div>
       </div>
-      <div className="admin-editor-actions">
+      <div className="admin-editor-actions"><span className="admin-save-note">Chỉ lưu bản nháp, không thay bộ thẻ đang chơi.</span>
       <AdminButton pending={pending} onClick={() => void save()}>{uncertain ? 'Thử lại đúng bản lưu' : 'Lưu bản nháp'}</AdminButton>
       <AdminButton disabled={pending || uncertain} color="white" onClick={() => setCard(null)}>Về danh sách</AdminButton>
       </div>
     </div>}
-    <AdminButton className="mt-4" color="white" disabled={locked} onClick={onClose}>Đóng quản lý thẻ</AdminButton>
+    <AdminButton className="admin-catalog-close" color="white" disabled={locked} onClick={onClose}>Đóng quản lý thẻ</AdminButton>
   </section>
 }
