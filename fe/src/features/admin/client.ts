@@ -53,7 +53,8 @@ export function parseAdminOverview(value: unknown): AdminOverview {
       serverErrors: http.serverErrors, durationBuckets } } }
 }
 
-async function request(path: '/overview' | '/login' | '/logout' | '/close-room' | '/change-password', signal: AbortSignal,
+/** Bounded same-origin admin call. Callers validate the returned shape before use. */
+export async function adminRequest(path: string, signal: AbortSignal,
   body?: { email: string; password: string } | { currentPassword: string; newPassword: string } | Record<string, never> | AdminCloseCommand): Promise<unknown> {
   const controller = new AbortController()
   const abort = () => controller.abort()
@@ -95,20 +96,20 @@ async function request(path: '/overview' | '/login' | '/logout' | '/close-room' 
 
 async function mutation(path: '/login' | '/logout', signal: AbortSignal,
   body: { email: string; password: string } | Record<string, never>) {
-  const result = await request(path, signal, body)
+  const result = await adminRequest(path, signal, body)
   if (!object(result) || result.success !== true) throw new AdminRequestError(502)
 }
 
 export const adminClient = {
   changePassword: async (currentPassword: string, newPassword: string, signal: AbortSignal) => {
-    const result = await request('/change-password', signal, { currentPassword, newPassword })
+    const result = await adminRequest('/change-password', signal, { currentPassword, newPassword })
     if (!object(result) || result.success !== true) throw new AdminRequestError(502)
   },
-  overview: async (signal: AbortSignal) => parseAdminOverview(await request('/overview', signal)),
+  overview: async (signal: AbortSignal) => parseAdminOverview(await adminRequest('/overview', signal)),
   login: (email: string, password: string, signal: AbortSignal) => mutation('/login', signal, { email, password }),
   logout: (signal: AbortSignal) => mutation('/logout', signal, {}),
   closeRoom: async (command: AdminCloseCommand, signal: AbortSignal) => {
-    const result = await request('/close-room', signal, command)
+    const result = await adminRequest('/close-room', signal, command)
     if (!object(result) || result.success !== true || typeof result.replayed !== 'boolean') throw new AdminRequestError(502)
     return { success: true as const, replayed: result.replayed }
   },

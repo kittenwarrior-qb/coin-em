@@ -4,6 +4,7 @@ import { AdminAuth, ADMIN_SESSION_MS } from './AdminAuth'
 import { OperationalAnalytics } from './operationalAnalytics'
 import { validAdminClose, type AdminCloseCommand } from './closeRoom'
 import type { CatalogStore } from '../catalog/CatalogStore'
+import { TRAFFIC_RANGES, type TrafficStore } from '../analytics/TrafficStore'
 
 const COOKIE = '__Host-emcoin-admin'
 const cookieOptions = { httpOnly: true, secure: true, sameSite: 'strict' as const, path: '/' }
@@ -20,6 +21,8 @@ export function registerAdminApi(app: Express, options: {
   auth: AdminAuth; origin?: string; rooms: () => readonly Room[]; analytics: OperationalAnalytics;
   closeRoom?: (command: AdminCloseCommand, authorized: () => boolean) => Promise<{ success: true; replayed: boolean }>;
   catalog?: () => CatalogStore | undefined;
+  traffic?: () => TrafficStore | undefined;
+  system?: () => object;
 }): void {
   let trustedOrigin: string | undefined
   if (options.origin) {
@@ -152,6 +155,22 @@ export function registerAdminApi(app: Express, options: {
       response.json({ rooms: options.rooms().map(room => ({
         id: room.id, status: room.status, seats: room.players.length, revision: room.revision ?? 0,
       })), analytics: options.analytics.snapshot() })
+    } catch { response.status(503).json({ error: 'ADMIN_UNAVAILABLE' }) }
+  })
+  // Daily anonymous totals only: visitors, page views, sources, devices and room/game counts.
+  router.get('/traffic', (request, response) => {
+    const days = Number(request.query.days ?? 30)
+    if (!(TRAFFIC_RANGES as readonly number[]).includes(days)) { response.status(400).json({ error: 'INVALID_TRAFFIC_RANGE' }); return }
+    try {
+      const traffic = options.traffic?.()
+      if (!traffic) { response.status(503).json({ error: 'TRAFFIC_UNAVAILABLE' }); return }
+      response.json(traffic.report(days))
+    } catch { response.status(503).json({ error: 'TRAFFIC_UNAVAILABLE' }) }
+  })
+  router.get('/system', (_request, response) => {
+    try {
+      if (!options.system) { response.status(503).json({ error: 'ADMIN_UNAVAILABLE' }); return }
+      response.json(options.system())
     } catch { response.status(503).json({ error: 'ADMIN_UNAVAILABLE' }) }
   })
   router.post('/close-room', async (request, response) => {

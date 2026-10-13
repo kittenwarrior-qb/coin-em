@@ -85,6 +85,13 @@ export class CatalogStore {
     return this.db.prepare('SELECT version,created_at FROM catalog_snapshot ORDER BY (version=?) DESC,created_at DESC,version LIMIT 100').all(active ?? '')
       .map(row => ({ version: row.version as string, createdAt: row.created_at as number, active: row.version === active }))
   }
+  /** Row counts for the admin storage overview; no card content. */
+  stats() {
+    const total = (table: string) => this.db.prepare(`SELECT count(*) AS total FROM ${table}`).get()!.total as number
+    const draft = this.draft()
+    return { cards: draft.cards.length, archived: draft.cards.filter(card => card.archived).length, revision: draft.revision,
+      snapshots: total('catalog_snapshot'), receipts: total('catalog_receipt'), activeVersion: this.activeVersion() }
+  }
   activeVersion(): string | null { return this.db.prepare('SELECT version FROM catalog_active WHERE id=1').get()!.version as string | null }
   readPublished(version: string) {
     return this.db.prepare('SELECT version FROM catalog_published WHERE version=?').get(version) ? this.readSnapshot(version) : null

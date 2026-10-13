@@ -11,7 +11,7 @@ export function CatalogPublisher({ revision, disabled, onBusy, onChanged }: {
   useEffect(() => {
     const controller = new AbortController()
     catalogClient.releases(controller.signal).then(value => { if (!controller.signal.aborted) setState(value) })
-      .catch(() => { if (!controller.signal.aborted) setMessage('Chưa tải được danh sách phiên bản. Đóng và mở lại quản lý thẻ để thử lại.') })
+      .catch(() => { if (!controller.signal.aborted) setMessage('Chưa tải được danh sách phiên bản. Đóng bảng này rồi mở lại để thử lại.') })
     return () => controller.abort()
   }, [revision])
   useEffect(() => () => { active.current?.abort() }, [])
@@ -40,13 +40,14 @@ export function CatalogPublisher({ revision, disabled, onBusy, onChanged }: {
       if (!controller.signal.aborted) { active.current = null; setPending(false); onBusy(!!intent.current) }
     }
   }
-  return <section className="my-4 flex min-w-0 flex-col gap-3 rounded-2xl border border-[var(--brand-edge)] p-3" aria-label="Phát hành bộ thẻ">
-    <h3 className="font-display text-lg">Phát hành bộ thẻ</h3>
-    <p className="text-sm">Chỉ áp dụng cho phòng tạo mới. Chọn phiên bản trước để quay lại; không xóa phiên bản hay ảnh của phòng hiện có.</p>
-    {message && <p role="status" className="break-words text-sm">{message}</p>}
+  const current = state?.snapshots.find(item => item.active)
+  return <section className="admin-publisher" aria-label="Phát hành bộ thẻ">
+    <h3>2. Phát hành bộ thẻ</h3>
+    <p>Chỉ áp dụng cho phòng tạo mới. Chọn phiên bản trước để quay lại; không xóa phiên bản hay ảnh của phòng hiện có.</p>
+    {message && <p role="status" className="admin-notice">{message}</p>}
     {state && <>
-      <p className="break-all text-xs">Đang áp dụng: {state.snapshots.find(item => item.active)?.version ?? 'Bộ thẻ cũ'}</p>
-      <label>Phiên bản<select className="min-h-11 w-full min-w-0 rounded-xl border bg-white px-2" value={target} disabled={disabled || pending || uncertain} onChange={event => setTarget(event.target.value)}>
+      <p className="admin-publisher-current">Đang áp dụng: <code>{current ? current.version.slice(8, 20) : 'Bộ thẻ cũ'}</code>{current && <small> · tạo {new Date(current.createdAt).toLocaleDateString('vi-VN')}</small>}</p>
+      <label>Phiên bản<select value={target} disabled={disabled || pending || uncertain} onChange={event => setTarget(event.target.value)}>
         <option value="">Chọn phiên bản</option><option value="legacy">Quay về bộ thẻ cũ</option>
         {state.snapshots.map(item => <option key={item.version} value={item.version}>Phiên bản {item.version.slice(8, 20)}{item.active ? ' · đang dùng' : ''}</option>)}
       </select></label>

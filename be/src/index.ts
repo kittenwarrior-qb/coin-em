@@ -23,6 +23,10 @@ import { mkdirSync } from 'node:fs'
 import path from 'node:path'
 import { configureRuntimeCatalog } from './catalog/runtimeCatalog'
 import { registerPublicCatalogApi } from './catalog/publicCatalogApi'
+import { TrafficStore } from './analytics/TrafficStore'
+import { registerTrackApi } from './analytics/trackApi'
+import { configureGameEvents } from './analytics/gameEvents'
+import { systemInfo } from './admin/systemInfo'
 
 const PORT = process.env.PORT || 3001
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173'
@@ -35,7 +39,10 @@ const corsOrigin = CLIENT_ORIGIN.includes(',')
 const app = express()
 const operationalAnalytics = new OperationalAnalytics()
 let catalog: CatalogStore | undefined
-const credentialDirectory = path.dirname(process.env.EMCOIN_CATALOG_DB || path.resolve('data/catalog.sqlite'))
+let traffic: TrafficStore | undefined
+const catalogFile = process.env.EMCOIN_CATALOG_DB || path.resolve('data/catalog.sqlite')
+const trafficFile = process.env.EMCOIN_TRAFFIC_DB || path.join(path.dirname(catalogFile), 'traffic.sqlite')
+const credentialDirectory = path.dirname(catalogFile)
 let credentials: AdminCredentialStore | undefined
 if (process.env.EMCOIN_ADMIN_PASSWORD_HASH) {
   mkdirSync(credentialDirectory, { recursive: true, mode: 0o700 })
@@ -44,9 +51,12 @@ if (process.env.EMCOIN_ADMIN_PASSWORD_HASH) {
 app.use(operationalAnalyticsMiddleware(operationalAnalytics))
 app.use(cors({ origin: corsOrigin }))
 registerPublicCatalogApi(app, () => catalog)
+registerTrackApi(app, () => traffic)
 registerAdminApi(app, {
   auth: new AdminAuth(credentials?.read(), undefined, credentials ? hash => credentials!.save(hash) : undefined),
   catalog: () => catalog,
+  traffic: () => traffic,
+  system: () => systemInfo({ rooms: roomRepository.findAll(), redisAvailable, catalog, catalogFile, traffic, trafficFile }),
   origin: process.env.EMCOIN_ADMIN_PASSWORD_HASH ? process.env.EMCOIN_ADMIN_ORIGIN : undefined,
   rooms: () => roomRepository.findAll(), analytics: operationalAnalytics,
   closeRoom: (command, authorized) => closeAdminRoom(roomRepository, command, authorized,
@@ -108,13 +118,19 @@ async function start(): Promise<void> {
   await roomRepository.drainWrites()
   await cleanupRooms(roomRepository)
 
-  const catalogFile = process.env.EMCOIN_CATALOG_DB || path.resolve('data/catalog.sqlite')
   mkdirSync(path.dirname(catalogFile), { recursive: true })
   catalog = new CatalogStore(catalogFile)
   catalog.seed(pdfCatalogDraft())
   catalog.fillMissingContent(pdfCatalogDraft())
   catalog.reviewMatchingSource(pdfCatalogDraft())
   configureRuntimeCatalog(catalog)
+
+  // Visitor statistics are optional: a broken statistics file must never stop the game server.
+  try {
+    mkdirSync(path.dirname(trafficFile), { recursive: true })
+    traffic = new TrafficStore(trafficFile)
+    configureGameEvents(kind => traffic?.recordEvent(kind))
+  } catch { operationDiagnostic('startup', 'degraded') }
 
   registerSocketHandlers(io)
   startupComplete = true
