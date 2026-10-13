@@ -63,6 +63,10 @@ Blocked by OQ-06/OQ-10 for release authority, RPO/RTO and host ownership.
 
 ## Implementation plan
 
+### Manual web update revision 2026-10-13
+
+Owner continues deployed-web work with manual deployment. Admit an explicit web-only update operator path and isolated tests: exact Git/image checksums and revision; require current backend filesystem/config fingerprint identical to the newly built backend image, leaving backend/Redis/catalog untouched. Refuse changed runtime.yml/Caddyfile or existing rooms before maintenance; stop only the web ingress, then recheck private backend health/room aggregates behind that admission barrier before recreating web. If a room arrived during the precheck race or HTTPS fails, restore the old web image without deleting/reseeding anything. Persist old-backend/new-web image identities; atomically promote current only after HTTPS. No general backend migration/hot-update or zero-downtime claim. Exercise failure/race/rollback in a network-disabled owned container before any use on VPS.
+
 ### Owner revision 2026-10-13 — manual deployment
 
 Release0f9ecfe passes checksums/image labels and explicitly publishes100canonical PDF cards; compose run consumes the remaining bash-stdin script, returning0 without starting services. Server inventory confirms zero containers/no current symlink. Fix operator execution to a verified extracted file, redirect initializer stdin from /dev/null; add source regressions. Resume only the already-reviewed initialized release after checking archive/config/image identity, exact active catalog and absence of existing backend; never initialize again or remove its database. Record partial execution instead of treating exit0 as deployed.

@@ -1,6 +1,7 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Admin from '@/pages/Admin'
+import { ControlThemeProvider } from '@/components/cartoon/ControlThemeProvider'
 import { AdminRequestError } from '@/features/admin/client'
 
 const mocks = vi.hoisted(() => ({ overview: vi.fn(), login: vi.fn(), logout: vi.fn(), closeRoom: vi.fn() }))
@@ -13,6 +14,15 @@ beforeEach(() => { vi.resetAllMocks(); localStorage.clear(); sessionStorage.clea
 afterEach(() => { cleanup(); vi.restoreAllMocks() })
 
 describe('admin page', () => {
+  it.each(['emotion-orbit', 'kindness-workshop'] as const)('uses readable quiet logout and preserves destructive close action in %s', async theme => {
+    mocks.overview.mockResolvedValue(fixture)
+    render(<ControlThemeProvider theme={theme}><Admin /></ControlThemeProvider>)
+    const logout = await screen.findByRole('button', { name: 'Đăng xuất' })
+    expect(logout.querySelector('img')).toHaveAttribute('src', `/cartoon/ui/themes/${theme}/quiet-v3.webp`)
+    expect(logout.style.color).toBe('var(--brand-ink)')
+    const close = screen.getByRole('button', { name: 'Đóng phòng fixture-room' })
+    expect(close.querySelector('img')).toHaveAttribute('src', `/cartoon/ui/themes/${theme}/secondary-v3.webp`)
+  })
   it('starts with a cookie-session check, then offers EmCoin password login for 401', async () => {
     mocks.overview.mockRejectedValue(new AdminRequestError(401))
     render(<Admin />)

@@ -57,11 +57,18 @@ it('embeds frontend files in the web image and routes only EmCoin with no privat
 
 it('keeps manual packaging on exact committed Git source and pinned initial-release SSH', () => {
   const manual = source('deploy/emcoin/manual-release.mjs')
-  for (const gate of ["['prepare', 'deploy']", "git', ['diff', '--name-only', 'HEAD']", "['archive', '--format=tar'", 'org.opencontainers.image.revision', 'StrictHostKeyChecking=yes', 'BatchMode=yes', 'root@103.74.102.24', 'sha256sum -c SHA256SUMS', 'deploy/emcoin/deploy-release.sh', "flags: 'wx'"]) expect(manual).toContain(gate)
+  for (const gate of ["['prepare', 'deploy', 'update-web']", "git', ['diff', '--name-only', 'HEAD']", "['archive', '--format=tar'", 'org.opencontainers.image.revision', 'StrictHostKeyChecking=yes', 'BatchMode=yes', 'root@103.74.102.24', 'sha256sum -c SHA256SUMS', "'deploy-release.sh'", "flags: 'wx'"]) expect(manual).toContain(gate)
   for (const unsafe of ['docker compose down', 'prune', 'FLUSHALL', 'StrictHostKeyChecking=no', 'GH_TOKEN', 'EMCOIN_ADMIN_PASSWORD_HASH']) expect(manual).not.toContain(unsafe)
-  expect(manual).toContain('&& bash deploy/emcoin/deploy-release.sh ${sha}')
+  expect(manual).toContain('&& bash deploy/emcoin/${driver} ${sha}')
   expect(manual).not.toContain('| bash -s')
   expect(source('deploy/emcoin/deploy-release.sh')).toContain("store.close()}' < /dev/null")
+})
+
+it('bounds manual updates to identical backend and frozen web admission without data replacement', () => {
+  const update = source('deploy/emcoin/deploy-web-update.sh')
+  for (const gate of ['flock -n', 'sha256sum -c', 'fingerprint=', '.RootFS.Layers', '.Config.Cmd', 'Backend changed: web-only update refused', 'm.rooms!==0', 'm.players!==0', 'm.redis!==true', 'stop -t 15 web', 'trap restore_web EXIT', 'up -d --no-deps --no-build --pull never web', 'mv -Tf', 'images.env']) expect(update).toContain(gate)
+  expect(update.lastIndexOf('empty_backend\n')).toBeGreaterThan(update.indexOf('stop -t 15 web'))
+  for (const unsafe of ['initializeFreshCatalog', 'down -v', 'FLUSHALL', 'prune', 'rm -rf', ' stop backend', ' stop redis']) expect(update).not.toContain(unsafe)
 })
 
 it('archives Linux shell scripts with LF even on a Windows auto-CRLF checkout', () => {

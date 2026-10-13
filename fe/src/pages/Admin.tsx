@@ -148,7 +148,7 @@ export default function Admin() {
           </section>
           <div className="flex flex-wrap justify-between gap-3">
             <CartoonButton color="teal" pending={pending} disabled={catalogOpen} onClick={() => void run('refresh')}>Làm mới</CartoonButton>
-            <CartoonButton color="pink" pending={pending} disabled={catalogOpen} onClick={() => void run('logout')}>Đăng xuất</CartoonButton>
+            <CartoonButton color="white" pending={pending} disabled={catalogOpen} onClick={() => void run('logout')}>Đăng xuất</CartoonButton>
           </div>
         </>}
       </div>
