@@ -17,7 +17,9 @@ After a UI password change, the previously generated Windows DPAPI bootstrap pas
 
 ## Theme preview instructions
 
-Local development only: append `?theme=legacy` to the app URL for Cartoon gốc, `?theme=mint-blush` for A1, `?theme=emotion-orbit` for Vòng Cảm Xúc, or `?theme=kindness-workshop` for Xưởng Tử Tế. For example http://127.0.0.1:5173/?theme=legacy (use the actual local port). Reload without the query to return to default. This is not a saved preference and is deliberately DEV-only in main.tsx. Production ignores it; no public old-theme switch is claimed. Old vendor assets must not be republished without valid rights.
+Updated implementation: Home →Menu →Giao diện and Admin →Tài khoản offer Vòng Cảm Xúc and Xưởng Tử Tế. Selection saves only the approved theme ID under `emcoin.ui-theme.v1` in localStorage. Switching keeps existing application/router/popup state; no room/socket mutation or reload. If storage is denied, the choice still applies in memory with a visible warning. In-room menus deliberately do not offer switching; choose before playing.
+
+After deployment, approved links `/?theme=emotion-orbit` and `/?theme=kindness-workshop` also select the corresponding initial theme. An explicit selection removes that override while preserving all other query/hash/history state. Old/unknown IDs are ignored in production, including invalid saved preferences. Local development retains `?theme=legacy` for Cartoon gốc and `?theme=mint-blush` for A1. These old themes are preview-only, not public selector options: expired vendor art must not be republished without valid rights.
 
 ## Local verification
 
@@ -25,6 +27,15 @@ Local development only: append `?theme=legacy` to the app URL for Cartoon gốc,
 - Full frontend suite before the final added expiry test:77 files /742 tests pass. Final focused Admin +catalog editor +popup lifecycle suite:29 tests pass, including pending-navigation lock and credential clearing/session expiry. Frontend ESLint and both TypeScript/production builds pass.
 - Chromium production-preview admin browser pass at320/390/1280px: login, all sidebar sections, catalog and paired-face editor, horizontal-overflow assertions, cancel/focus restore, pending Back/Escape and same-request-ID close retry. Images are public PDF source assets; requests/auth are intercepted synthetic fixtures, not proof of live cookies/deployment.
 - Final screenshot/report directory: `C:/Users/Admin/AppData/Local/Temp/emcoin-admin-browser-qa-ALZGwd`. Six views per viewport:overview,analytics,database,account,catalog,card-editor. Visually inspected desktop overview, mobile overview and desktop paired-face editor. The final editor hides its list until returning and keeps action buttons bounded instead of stretching across the desktop.
+
+## Release boundary
+
+## Theme-switch follow-up verification
+
+- Frontend full suite:78 files /747 tests passed; final focused preference/admin suite17 tests passed after extracting the preference model. Frontend lint has0 errors/0 warnings; frontend production build and backend TypeScript build pass.
+- Production-preview browser passed with approved theme selection/persistence at admin320/390/1280px, switching Workshop→reload→Orbit. LocalStorage contains only the approved theme preference after logout, no credentials or room metadata.
+- Real Home menu checked with a separately owned Socket.IO loopback transport (no admissions, rooms or production writes) at320×568 and390×844: selector, theme materials, Esc closes only the topmost dialog, preference survives reload, no horizontal overflow. Screenshot capture waits for exit animations to finish; the underlying menu close button is hidden while the child selector is open.
+- Final report/screenshots: `C:/Users/Admin/AppData/Local/Temp/emcoin-admin-browser-qa-StjmnY`. Home screenshots visually inspected. Earlier harness failures are retained in their separate temporary reports: a disconnected/initial polling-only transport could not reach Home because the client starts on WebSocket. No product connection guard was weakened to make the test pass.
 
 ## Release boundary
 

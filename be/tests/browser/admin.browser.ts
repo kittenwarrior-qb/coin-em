@@ -6,6 +6,9 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium, expect as expectUI } from '../../../e2e/node_modules/@playwright/test/index.mjs'
 import { pdfCatalogDraft } from '../../src/catalog/pdfDraft'
+import { createServer } from 'node:http'
+import type { AddressInfo } from 'node:net'
+import { Server as SocketServer } from 'socket.io'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
 
@@ -107,6 +110,18 @@ test('production admin UI: bounded mobile layout, confirmation, pending Back/Esc
         await page.screenshot({ path: path.join(output, `${key}-${width}.png`), fullPage: true })
       }
       await page.getByRole('button', { name: 'Tổng quan & phòng', exact: true }).click()
+      await page.getByRole('button', { name: 'Tài khoản', exact: true }).click()
+      await page.getByRole('radio', { name: /Xưởng Tử Tế/ }).check()
+      await expectUI(page.locator('html')).toHaveAttribute('data-ui-theme', 'kindness-workshop')
+      await page.screenshot({ path: path.join(output, `workshop-account-${width}.png`), fullPage: true })
+      await page.reload({ waitUntil: 'domcontentloaded' })
+      await expectUI(page.getByText('Phòng synthetic-browser-room', { exact: true })).toBeVisible()
+      await expectUI(page.locator('html')).toHaveAttribute('data-ui-theme', 'kindness-workshop')
+      await page.screenshot({ path: path.join(output, `workshop-overview-${width}.png`), fullPage: true })
+      await page.getByRole('button', { name: 'Tài khoản', exact: true }).click()
+      await page.getByRole('radio', { name: /Vòng Cảm Xúc/ }).check()
+      await expectUI(page.locator('html')).toHaveAttribute('data-ui-theme', 'emotion-orbit')
+      await page.getByRole('button', { name: 'Tổng quan & phòng', exact: true }).click()
       await page.getByRole('button', { name: 'Bộ thẻ', exact: true }).click()
       await expectUI(page.getByLabel('Tìm thẻ', { exact: true })).toBeVisible()
       await expectUI(page.getByRole('button', { name: 'Đăng xuất', exact: true })).toBeEnabled()
@@ -140,8 +155,59 @@ test('production admin UI: bounded mobile layout, confirmation, pending Back/Esc
       expect(closeCommands.at(-1)).toEqual(closeCommands.at(-2))
       await page.getByRole('button', { name: 'Đăng xuất', exact: true }).click()
       await expectUI(page.getByRole('heading', { name: 'Đăng nhập', exact: true })).toBeVisible()
-      expect(await page.evaluate(() => ({ local: localStorage.length, session: sessionStorage.length }))).toEqual({ local: 0, session: 0 })
+      expect(await page.evaluate(() => ({ keys: Object.keys(localStorage), theme: localStorage.getItem('emcoin.ui-theme.v1'), session: sessionStorage.length })))
+        .toEqual({ keys: ['emcoin.ui-theme.v1'], theme: 'emotion-orbit', session: 0 })
       await context.close()
+    }
+    stage = 'home-theme-switch'
+    // Real isolated Socket.IO transport, but no admissions, room writes or production backend.
+    const homeServer = createServer()
+    const homeSocket = new SocketServer(homeServer, { transports: ['websocket', 'polling'], allowUpgrades: false,
+      cors: { origin: new URL(base).origin, credentials: true } })
+    homeSocket.on('connection', socket => { socket.emit('rooms_list', []) })
+    await new Promise<void>(resolve => homeServer.listen(0, '127.0.0.1', resolve))
+    onTestFinished(() => new Promise<void>(resolve => homeSocket.close(() => resolve())))
+    const homeTransport = `http://127.0.0.1:${(homeServer.address() as AddressInfo).port}`
+    for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }]) {
+    const homeContext = await browser.newContext({ viewport, reducedMotion: 'reduce' })
+    await homeContext.routeWebSocket(/\/socket\.io\//, ws => {
+      const url = new URL(ws.url())
+      const peer = new WebSocket(`${homeTransport.replace('http:', 'ws:')}${url.pathname}${url.search}`)
+      const queue: (string | Buffer)[] = []
+      ws.onMessage(message => { if (peer.readyState === WebSocket.OPEN) peer.send(message); else queue.push(message) })
+      peer.onopen = () => { for (const message of queue.splice(0)) peer.send(message) }
+      peer.onmessage = event => ws.send(event.data as string)
+      peer.onclose = () => ws.close()
+      ws.onClose(() => peer.close())
+    })
+    await homeContext.route('**/*', async route => {
+      const url = new URL(route.request().url())
+      if (url.pathname === '/socket.io/') {
+        const response = await route.fetch({ url: `${homeTransport}${url.pathname}${url.search}` })
+        await route.fulfill({ response }); return
+      }
+      if (url.origin !== new URL(base).origin) { await route.abort(); return }
+      await route.continue()
+    })
+    const home = await homeContext.newPage()
+    home.on('pageerror', error => errors.push(error.message))
+    await home.goto(base, { waitUntil: 'domcontentloaded' })
+    await home.waitForTimeout(3000)
+    await home.screenshot({ path: path.join(output, `home-before-menu-${viewport.width}.png`), fullPage: true })
+    await home.getByRole('button', { name: 'Cài đặt', exact: true }).click({ timeout: 20_000 })
+    await home.getByRole('button', { name: 'Giao diện', exact: true }).click()
+    await home.getByRole('radio', { name: /Xưởng Tử Tế/ }).check()
+    await expectUI(home.locator('html')).toHaveAttribute('data-ui-theme', 'kindness-workshop')
+    expect(await home.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+    await home.screenshot({ path: path.join(output, `home-workshop-chooser-${viewport.width}.png`), fullPage: true })
+    await home.keyboard.press('Escape')
+    await expectUI(home.getByText('Chọn giao diện', { exact: true })).toHaveCount(0)
+    await expectUI(home.getByRole('button', { name: 'Giao diện', exact: true })).toBeVisible()
+    await home.screenshot({ path: path.join(output, `home-workshop-menu-${viewport.width}.png`), fullPage: true })
+    await home.keyboard.press('Escape')
+    await home.reload({ waitUntil: 'domcontentloaded' })
+    await expectUI(home.locator('html')).toHaveAttribute('data-ui-theme', 'kindness-workshop')
+    await homeContext.close()
     }
     expect(errors).toEqual([])
     result = 'passed'; stage = 'complete'
@@ -149,6 +215,8 @@ test('production admin UI: bounded mobile layout, confirmation, pending Back/Esc
     await writeFile(path.join(output, 'report.json'), JSON.stringify({ version: 'admin-browser-qa/v1', result, stage,
       browser: browser?.version(), viewports: [320, 390, 1280], errors, closeRequests: closeCommands.length,
       physicalDevice: false, backendConnected: false, authCookieProof: false,
+      homeTransport: 'isolated-loopback-socketio-no-rooms', themePreference: 'approved-ids-only-localStorage',
+      homeViewports: [{ width: 320, height: 568 }, { width: 390, height: 844 }],
       limitations: 'Production preview with intercepted synthetic HTTP only; real auth/CSRF/cookie and Redis restart evidence are separate fixtures.' }, null, 2))
     clearTimeout(watchdog); vite.kill(); await browser?.close()
     console.log(`R36 owned admin browser artifacts: ${output}`)

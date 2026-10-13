@@ -6,6 +6,7 @@ import { CatalogEditor } from '@/features/admin/CatalogEditor'
 import { BrandIcon, type BrandIconName } from '@/components/cartoon/BrandIcon'
 import { AdminPassword } from '@/features/admin/AdminPassword'
 import '@/styles/adminDesktop.css'
+import { ThemeChooser } from '@/features/theme/ThemeChooser'
 
 type Section = 'overview' | 'catalog' | 'analytics' | 'database' | 'account'
 const sections: { id: Section; label: string; icon: BrandIconName }[] = [
@@ -154,6 +155,7 @@ export default function Admin() {
             <article><span>Phòng đang chơi</span><strong>{number(overview.rooms.filter(room => room.status === 'playing').length)}</strong></article></div>}
           {catalogOpen && <CatalogEditor onBusy={setEditorBusy} onClose={() => { setEditorBusy(false); setCatalogOpen(false); setSection('overview') }} />}
           {section === 'account' && <AdminPassword onBusy={setEditorBusy} onExpired={() => { setOverview(null); setLoginVisible(true); setSection('overview'); setMessage('Phiên đã hết hạn. Nếu vừa đổi mật khẩu, hãy đăng nhập bằng mật khẩu mới.'); setEditorBusy(false) }} onChanged={() => { setOverview(null); setLoginVisible(true); setSection('overview'); setMessage('Đã đổi mật khẩu. Hãy đăng nhập lại bằng mật khẩu mới.'); setEditorBusy(false) }} />}
+          {section === 'account' && !editorBusy && <section className={panel}><ThemeChooser /></section>}
           {section === 'database' && <section className={panel} aria-label="Quản lý dữ liệu">
             <h3>Các loại dữ liệu</h3><dl className="admin-data-list"><dt>Bộ thẻ · SQLite</dt><dd>Thông tin thẻ, URL hai mặt, bản nháp và phiên bản đã kiểm. Ảnh không lưu trực tiếp trong database.</dd>
               <dt>Phòng chơi · Redis</dt><dd>Xóa sau 1 giờ không hoạt động. Không lưu nội dung phòng đã xóa và không có backup nội dung.</dd>
