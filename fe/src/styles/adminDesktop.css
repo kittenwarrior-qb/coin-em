@@ -229,7 +229,7 @@ html[data-ui-theme="kindness-workshop"] .admin-page.admin-desktop { --admin-surf
 @media(min-width:901px) {
   .is-authenticated .admin-workspace.is-catalog-workspace { padding:16px 24px; }
   body:has(.admin-desktop.is-authenticated):has(aside[aria-label="Cập nhật ứng dụng"]) .admin-scope-info { margin-bottom:150px; }
-  body:has(.admin-desktop.is-authenticated) aside[aria-label="Cập nhật ứng dụng"] { left:12px; bottom:12px; width:184px; max-width:184px; transform:none; border:1px solid #dce1e8; border-radius:6px; padding:12px; background:#fff; color:#536176; box-shadow:none; font-family:Arial,"Segoe UI",sans-serif; font-size:12px; line-height:1.5; }
+  body:has(.admin-desktop.is-authenticated) aside[aria-label="Cập nhật ứng dụng"] { left:12px; bottom:12px; width:184px; max-width:184px; transform:none; translate:none; border:1px solid #dce1e8; border-radius:6px; padding:12px; background:#fff; color:#536176; box-shadow:none; font-family:Arial,"Segoe UI",sans-serif; font-size:12px; line-height:1.5; }
   .admin-catalog .admin-catalog-summary { margin:10px 0 0; }
   .admin-catalog .admin-pagination { padding-left:170px; margin:14px 0 0; min-height:36px; }
   .admin-catalog > .admin-catalog-close:last-child { position:absolute; bottom:20px; left:20px; margin:0; }
