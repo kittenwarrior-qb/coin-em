@@ -27,6 +27,39 @@ room state. No Umami service, deleted-room archive or external backup is enabled
 
 ## Build and start after prerequisites pass
 
+### Current operator path — manual deployment, 2026-10-13
+
+Owner requests manual deployment; GitHub Deploy workflow is disabled, while CI
+checks remain enabled. Source remains managed through GitHub PRs. For a **fresh
+initial install only**, after local tests/builds/browser checks and prerequisite
+verification, invoke these from the repository root (use the configured Node22):
+
+```powershell
+$emcoinReleaseSha = git rev-parse HEAD
+node deploy/emcoin/manual-release.mjs prepare $emcoinReleaseSha
+node deploy/emcoin/manual-release.mjs deploy $emcoinReleaseSha
+```
+
+The packager archives exact committed source rather than the dirty working tree,
+builds images locally, labels them with the SHA, compresses and hashes artifacts,
+then transfers through pinned SSH to103.74.102.24. It never includes local ignored
+credentials or rebuilds on the VPS. Shell LF attributes prevent Windows Git
+archive conversion; execute a verified extracted script file, not piped `bash -s`
+whose stdin could be consumed by a child. Initializer stdin is closed explicitly.
+Process exit0 alone is insufficient: inspect all three services, HTTPS, active
+catalog and run the owned-room browser smoke before claiming success.
+
+The initial release currently serving HTTPS is
+`0f9ecfe6cdd176fb6ee7e822b80e142fcc343c98` at `/opt/emcoin/current`.
+It publishes the canonical100-card PDF catalog before backend admission. Later
+operator-script fixes do not silently change the running application's image SHA.
+This script still **refuses existing backends**: subsequent manual updates need
+an explicit compatible admission-freeze/drain/maintenance procedure. Never rerun
+fresh publication on an already initialized database, or delete volumes to retry.
+
+The direct Compose build instructions below are an earlier alternative, **not**
+the current immutable transfer path.
+
 From this directory, using the host-only `.env`:
 
 ```sh
@@ -67,7 +100,7 @@ Keep Redis, SQLite and current room/session/receipt state. Existing rooms retain
 their catalog version; changing active catalog affects only new rooms/public gallery.
 Owner opted out of room/VPS backups, so no host-loss recovery guarantee is made.
 
-## Current boundary — 2026-10-12
+## Historical boundary — 2026-10-12 (superseded by manual deployment above)
 
 Owner corrected host to **103.74.102.24**. Read-only access/inventory succeeds;
 DNS now points to this IP. Wrong host180.93.54.160 had no mutation. Correct host
