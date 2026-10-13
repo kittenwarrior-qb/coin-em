@@ -221,6 +221,8 @@ html[data-ui-theme="kindness-workshop"] .admin-page.admin-desktop { --admin-surf
 .admin-card-faces { border-radius:6px; }
 .admin-card-faces img { height:220px; }
 .admin-card-faces figcaption { color:var(--admin-muted); font-size:12px; font-weight:400; }
+.admin-face-empty { height:150px; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:12px; text-align:center; font-size:12px; color:var(--admin-muted); }
+.admin-face-empty svg { width:28px; height:28px; }
 .admin-editor-actions { justify-content:flex-end; align-items:center; gap:10px; padding-top:14px; }
 .admin-save-note { margin-right:auto; font-size:12px; color:var(--admin-muted); }
 .admin-catalog-close { margin-top:14px; }

@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { AdminButton } from './AdminButton'
+import { BrandIcon } from '@/components/cartoon/BrandIcon'
 import { usePendingNavigationGuard } from '@/features/overlays/usePopupLifecycle'
 import { catalogClient, CatalogRequestError, isCatalogImageUrl, type CatalogCard, type CatalogDraft } from './catalogClient'
 import { CatalogPublisher } from './CatalogPublisher'
@@ -171,8 +172,8 @@ export function CatalogEditor({ onClose, onBusy }: { onClose: () => void; onBusy
         </div>
       </fieldset>
         <div className="admin-card-faces grid grid-cols-2 gap-3">
-          {[['Mặt trước', card.frontImageUrl], ['Mặt sau', card.backImageUrl]].map(([name, src]) => isCatalogImageUrl(src) && <figure key={name}>
-            <img src={src} alt={`${name} ${card.name}`} className="w-full rounded-xl" loading="lazy" referrerPolicy="no-referrer" />
+          {[['Mặt trước', card.frontImageUrl], ['Mặt sau', card.backImageUrl]].map(([name, src]) => <figure key={name}>
+            {isCatalogImageUrl(src) ? <img src={src} alt={`${name} ${card.name}`} className="w-full rounded-xl" loading="lazy" referrerPolicy="no-referrer" /> : <div className="admin-face-empty"><BrandIcon name="cards" /><span>Chưa có ảnh {name.toLocaleLowerCase('vi')}</span></div>}
             <figcaption className="text-center text-sm">{name}</figcaption>
           </figure>)}
         </div>
