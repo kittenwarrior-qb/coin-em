@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { PUBLIC_SITE_PAGES } from './content/siteNavigation'
+import { usePageViewTracking } from './features/analytics/trackPageView'
 
 // All route pages are code-split so a visitor only downloads the chunk for the
 // page they land on — e.g. someone opening /about no longer pulls in the whole
@@ -22,6 +23,7 @@ function RouteFallback() {
 }
 
 export default function Router() {
+  usePageViewTracking()
   return (
     <Suspense fallback={<RouteFallback />}>
       <Routes>

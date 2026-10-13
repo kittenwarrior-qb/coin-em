@@ -7,6 +7,7 @@ import { gameService, Role } from '../../modules/game'
 import { rateLimitAction } from '../middleware/rateLimiter'
 import { phaseTimer } from '../../modules/game/PhaseTimer'
 import { inRoomQueue } from '../roomQueue'
+import { recordGameEvent } from '../../analytics/gameEvents'
 import { receivedCoinTotal } from '../../modules/game/services/CoinCycle'
 import { isCardEnabled, resolveWebCard } from '../../modules/game/services/CardCatalog'
 
@@ -65,6 +66,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
 
       // Broadcast
       operationDiagnostic('start_game', 'ok')
+      recordGameEvent('game')
       await emitRoomView(io, result.room!, 'game_started')
 
       // General phase timers stay disabled in the approved manual baseline.

@@ -9,6 +9,7 @@ import { roomView } from '../../modules/game/services/RoomView'
 import { emitRoomView } from '../emitRoomView'
 import { changeRoundLimit } from '../../modules/game/services/RoundLimit'
 import { rateLimitAction } from '../middleware/rateLimiter'
+import { recordGameEvent } from '../../analytics/gameEvents'
 
 export function registerRoomHandlers(io: Server, socket: Socket) {
   socket.on('set_round_limit', async (payload, callback) => {
@@ -167,10 +168,12 @@ export function registerRoomHandlers(io: Server, socket: Socket) {
       avatarIndex: randomAvatarIndex(), bgIndex: randomBgIndex(),
       coins: { red: 0, yellow: 0, green: 0 },
     }
+    const created = !room
     room = room ? { ...room, players: [...room.players, player], lastActivity: Date.now() }
       : roomService.createRoom(roomId, player, false)
     if (initialSettings) room = { ...room, settings: initialSettings }
     await roomRepository.saveAndWait(room)
+    if (created) recordGameEvent('room')
     socket.data.seatSession = { roomId, userId, generation: 1 }
     await socket.join(roomId)
     callback?.({ success: true, session: { roomId, userId, token: issued.token, generation: 1 } })
