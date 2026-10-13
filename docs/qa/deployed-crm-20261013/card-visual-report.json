@@ -1,0 +1,7 @@
+{
+  "result": "passed",
+  "views": [],
+  "errors": [],
+  "passwordChanged": false,
+  "scope": "Live HTTPS authenticated admin; read-only UI and local theme preferences, no catalog/room mutations"
+}

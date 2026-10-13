@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { CartoonButton } from '@/components/cartoon/CartoonButton'
+import { AdminButton } from '@/features/admin/AdminButton'
 import { CartoonModal } from '@/components/cartoon/CartoonModal'
 import { adminClient, AdminRequestError, type AdminOverview, type AdminCloseCommand } from '@/features/admin/client'
 import { CatalogEditor } from '@/features/admin/CatalogEditor'
@@ -7,6 +7,8 @@ import { BrandIcon, type BrandIconName } from '@/components/cartoon/BrandIcon'
 import { AdminPassword } from '@/features/admin/AdminPassword'
 import '@/styles/adminDesktop.css'
 import { ThemeChooser } from '@/features/theme/ThemeChooser'
+import { useThemePreference, isPublishedTheme } from '@/features/theme/preferenceModel'
+import { useControlTheme } from '@/components/cartoon/controlThemeContext'
 
 type Section = 'overview' | 'catalog' | 'analytics' | 'database' | 'account'
 const sections: { id: Section; label: string; icon: BrandIconName }[] = [
@@ -33,6 +35,8 @@ function errorMessage(error: unknown): string {
 }
 
 export default function Admin() {
+  const themePreference = useThemePreference()
+  const controlTheme = useControlTheme()
   const [overview, setOverview] = useState<AdminOverview | null>(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -111,7 +115,7 @@ export default function Admin() {
   function submit(event: FormEvent<HTMLFormElement>) { event.preventDefault(); void run('login') }
 
   return (
-    <main className={`admin-page admin-desktop ${overview ? 'is-authenticated' : ''} min-h-dvh font-body text-[var(--c-blue-dark)]`}>
+    <main className={`admin-page admin-desktop ${overview ? 'is-authenticated' : 'is-login'} min-h-dvh font-body text-[var(--c-blue-dark)]`}>
       {overview && <aside className="admin-sidebar">
         <a className="admin-brand" href="/" aria-disabled={editorBusy || pending} onClick={event => { if (editorBusy || pending) event.preventDefault() }}>EmCoin<span>Quản trị ứng dụng</span></a>
         <nav aria-label="Quản trị EmCoin">{sections.map(item => <button key={item.id} type="button"
@@ -119,14 +123,20 @@ export default function Admin() {
           onClick={() => { setSection(item.id); setCatalogOpen(item.id === 'catalog'); setMessage('') }}>
           <BrandIcon name={item.icon} /><span>{item.label}</span>
         </button>)}</nav>
-        <p>app.emcoin.cloud<br />Chỉ quản trị ứng dụng chơi.</p>
+        <details className="admin-scope-info"><summary>Phạm vi quản trị</summary><p>Không xem lời chia sẻ riêng, chỉnh Coin hay vai trò trong phòng. Website emcoin.cloud được quản lý riêng.</p></details>
       </aside>}
-      <div className="admin-content flex w-full flex-col gap-5">
-        <header>
+      <div className="admin-content flex w-full flex-col">
+        {overview ? <header className="admin-topbar">
+          <div className="admin-topbar-tools">
+          {themePreference && <label className="admin-theme-switch"><BrandIcon name="settings" /><span className="sr-only">Giao diện quản trị</span><select aria-label="Giao diện quản trị" value={isPublishedTheme(controlTheme) ? controlTheme : 'emotion-orbit'} disabled={pending}
+            onChange={event => { if (isPublishedTheme(event.target.value)) themePreference.choose(event.target.value) }}><option value="emotion-orbit">Vòng Cảm Xúc</option><option value="kindness-workshop">Xưởng Tử Tế</option></select></label>}
           <a href="/" aria-disabled={editorBusy || pending} onClick={event => { if (editorBusy || pending) event.preventDefault() }} className="underline underline-offset-4">Về EmCoin</a>
-          <h1 className="mt-4 font-display text-3xl">Quản trị EmCoin</h1>
-          <p className="mt-2 text-sm">Không xem lời chia sẻ riêng, chỉnh Coin hay vai trò trong phòng. Website emcoin.cloud được quản lý riêng.</p>
-        </header>
+          <AdminButton color="white" size="md" pending={pending} disabled={editorBusy} onClick={() => void run('refresh')}>Làm mới</AdminButton>
+          <AdminButton color="white" size="md" pending={pending} disabled={editorBusy} onClick={() => void run('logout')}>Đăng xuất</AdminButton>
+          </div>
+          <h1>{sections.find(item => item.id === section)?.label}</h1>
+        </header> : <header className="admin-login-heading"><BrandIcon name="lock" /><h1>EmCoin Admin</h1></header>}
+        <div className={`admin-workspace admin-workspace--${section} ${catalogOpen && overview ? 'is-catalog-workspace' : ''}`}>
         {pending && <p role="status" aria-live="polite">Đang chờ máy chủ…</p>}
         {message && !closeCommand && <p role="alert" className={`${panel} text-[var(--c-red-dark)]`}>{message}</p>}
         {loginVisible && <form onSubmit={submit} className={`${panel} flex flex-col gap-4`}>
@@ -142,14 +152,10 @@ export default function Admin() {
               value={password} onChange={event => setPassword(event.target.value)} disabled={pending}
               className="min-h-12 w-full rounded-xl border-2 border-[var(--c-blue)] px-3" />
           </label>
-          <CartoonButton type="submit" pending={pending}>Đăng nhập</CartoonButton>
+          <AdminButton type="submit" pending={pending}>Đăng nhập</AdminButton>
         </form>}
-        {!loginVisible && !overview && !pending && <CartoonButton onClick={() => void run('refresh')}>Thử lại</CartoonButton>}
+        {!loginVisible && !overview && !pending && <AdminButton onClick={() => void run('refresh')}>Thử lại</AdminButton>}
         {overview && <>
-          <div className="admin-toolbar"><h2>{sections.find(item => item.id === section)?.label}</h2>
-            <div className="flex gap-3"><CartoonButton color="teal" size="md" pending={pending} disabled={editorBusy} onClick={() => void run('refresh')}>Làm mới</CartoonButton>
-            <CartoonButton color="white" size="md" pending={pending} disabled={editorBusy} onClick={() => void run('logout')}>Đăng xuất</CartoonButton></div>
-          </div>
           {section === 'overview' && <div className="admin-stats"><article><span>Phòng hiện tại</span><strong>{number(overview.rooms.length)}</strong></article>
             <article><span>Chỗ đang tham gia</span><strong>{number(overview.rooms.reduce((sum, room) => sum + room.seats, 0))}</strong></article>
             <article><span>Phòng đang chơi</span><strong>{number(overview.rooms.filter(room => room.status === 'playing').length)}</strong></article></div>}
@@ -160,26 +166,24 @@ export default function Admin() {
             <h3>Các loại dữ liệu</h3><dl className="admin-data-list"><dt>Bộ thẻ · SQLite</dt><dd>Thông tin thẻ, URL hai mặt, bản nháp và phiên bản đã kiểm. Ảnh không lưu trực tiếp trong database.</dd>
               <dt>Phòng chơi · Redis</dt><dd>Xóa sau 1 giờ không hoạt động. Không lưu nội dung phòng đã xóa và không có backup nội dung.</dd>
               <dt>Số liệu vận hành</dt><dd>Bộ đếm trong tiến trình; đặt lại khi máy chủ khởi động lại. Không theo dõi lời chia sẻ cá nhân.</dd></dl>
-            <CartoonButton onClick={() => { setSection('catalog'); setCatalogOpen(true) }}>Quản lý bộ thẻ</CartoonButton>
+            <AdminButton onClick={() => { setSection('catalog'); setCatalogOpen(true) }}>Quản lý bộ thẻ</AdminButton>
             <p className="mt-4 text-sm">Không cung cấp SQL hoặc nút xóa toàn bộ dữ liệu để tránh ảnh hưởng phòng đang chơi.</p>
           </section>}
           {section === 'overview' && <section className={panel} aria-labelledby="admin-rooms">
             <h2 id="admin-rooms" className="font-display text-2xl">Phòng hiện tại ({number(overview.rooms.length)})</h2>
             <label className="admin-search">Tìm mã phòng<input type="search" value={roomFilter} onChange={event => setRoomFilter(event.target.value)} /></label>
             {overview.rooms.length === 0 ? <p className="mt-3">Không có phòng đang được lưu.</p> :
-              <ul className="mt-3 divide-y divide-[var(--c-sky)]">
-                {overview.rooms.filter(room => room.id.toLowerCase().includes(roomFilter.toLowerCase())).map(room => <li key={room.id} className="py-3 admin-room-row">
-                  <div>
-                  <p className="break-all font-semibold">Phòng {room.id}</p>
-                  <p>{statusLabels[room.status]} · {number(room.seats)} người</p>
-                  <p className="text-sm">Phiên bản trạng thái: {number(room.revision)}</p>
-                  </div>
-                  <CartoonButton size="md" color="pink" className="mt-2" aria-label={`Đóng phòng ${room.id}`}
+              <div className="admin-table-scroll"><table className="admin-table"><caption className="sr-only">Phòng hiện tại</caption><thead><tr><th>Mã phòng</th><th>Trạng thái</th><th>Người chơi</th><th>Phiên bản</th><th><span className="sr-only">Thao tác</span></th></tr></thead><tbody>
+                {overview.rooms.filter(room => room.id.toLowerCase().includes(roomFilter.toLowerCase())).map(room => <tr key={room.id}>
+                  <td className="admin-code">Phòng {room.id}</td>
+                  <td><span className="admin-status">{statusLabels[room.status]}</span></td>
+                  <td>{number(room.seats)}</td><td>{number(room.revision)}</td><td>
+                  <AdminButton size="md" color="pink" className="mt-2" aria-label={`Đóng phòng ${room.id}`}
                     disabled={catalogOpen}
                     onClick={() => { setCloseSubmitted(false); setMessage(''); setCloseCommand({ roomId: room.id, expectedRevision: room.revision,
-                      requestId: crypto.randomUUID(), reason: 'operator-request' }) }}>Đóng phòng</CartoonButton>
-                </li>)}
-              </ul>}
+                      requestId: crypto.randomUUID(), reason: 'operator-request' }) }}>Đóng phòng</AdminButton>
+                  </td></tr>)}
+              </tbody></table></div>}
             {overview.rooms.length > 0 && !overview.rooms.some(room => room.id.toLowerCase().includes(roomFilter.toLowerCase())) && <p>Không tìm thấy phòng khớp mã này.</p>}
           </section>}
           {(section === 'analytics' || section === 'overview') && <section className={panel} aria-labelledby="admin-metrics">
@@ -196,6 +200,7 @@ export default function Admin() {
             </div>}
           </section>}
         </>}
+        </div>
       </div>
       <CartoonModal open={!!closeCommand} title="Đóng phòng?" persistent={pending} hideClose={pending}
         onClose={() => { if (!active.current) setCloseCommand(null) }}>
@@ -214,8 +219,8 @@ export default function Admin() {
           {pending && <p role="status">Đang xác nhận với máy chủ…</p>}
           {!pending && message && <p role="alert">{message}</p>}
           <div className="flex flex-wrap justify-between gap-3">
-            <CartoonButton color="teal" disabled={pending} onClick={() => setCloseCommand(null)}>Hủy</CartoonButton>
-            <CartoonButton color="pink" pending={pending} onClick={() => void run('close')}>Xác nhận đóng</CartoonButton>
+            <AdminButton color="teal" disabled={pending} onClick={() => setCloseCommand(null)}>Hủy</AdminButton>
+            <AdminButton color="pink" pending={pending} onClick={() => void run('close')}>Xác nhận đóng</AdminButton>
           </div>
         </div>}
       </CartoonModal>

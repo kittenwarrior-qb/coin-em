@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { CartoonButton } from '@/components/cartoon'
+import { AdminButton } from './AdminButton'
 import { catalogClient, CatalogRequestError, type CatalogReleaseState } from './catalogClient'
 export function CatalogPublisher({ revision, disabled, onBusy, onChanged }: {
   revision: number; disabled: boolean; onBusy: (busy: boolean) => void; onChanged: () => Promise<void>
@@ -50,7 +50,7 @@ export function CatalogPublisher({ revision, disabled, onBusy, onChanged }: {
         <option value="">Chọn phiên bản</option><option value="legacy">Quay về bộ thẻ cũ</option>
         {state.snapshots.map(item => <option key={item.version} value={item.version}>Phiên bản {item.version.slice(8, 20)}{item.active ? ' · đang dùng' : ''}</option>)}
       </select></label>
-      <CartoonButton pending={pending} disabled={disabled || (!uncertain && !target)} onClick={() => void activate()}>{uncertain ? 'Thử lại đúng yêu cầu áp dụng' : 'Áp dụng cho phòng mới'}</CartoonButton>
+      <AdminButton pending={pending} disabled={disabled || (!uncertain && !target)} onClick={() => void activate()}>{uncertain ? 'Thử lại đúng yêu cầu áp dụng' : 'Áp dụng cho phòng mới'}</AdminButton>
     </>}
   </section>
 }

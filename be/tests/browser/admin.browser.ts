@@ -39,9 +39,9 @@ test('production admin UI: bounded mobile layout, confirmation, pending Back/Esc
       vite.once('exit', code => { clearTimeout(timeout); reject(new Error(`Owned preview exited ${code}`)) })
     })
     browser = await chromium.launch({ headless: true })
-    for (const width of [320, 390, 1280]) {
+    for (const width of [320, 390, 1280, 1366, 1920, 3840]) {
       stage = `viewport-${width}`
-      const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: 'reduce' })
+      const context = await browser.newContext({ viewport: { width, height: width === 1366 ? 768 : 900 }, reducedMotion: 'reduce' })
       let authenticated = false, closed = false
       let releaseClose!: () => void
       let closeAttempt = 0
@@ -75,6 +75,9 @@ test('production admin UI: bounded mobile layout, confirmation, pending Back/Esc
       page.on('pageerror', error => errors.push(error.message))
       await page.goto(`${base}admin`, { waitUntil: 'domcontentloaded' })
       await expectUI(page.getByRole('heading', { name: 'Đăng nhập', exact: true })).toBeVisible()
+      await expectUI(page.getByRole('combobox', { name: 'Giao diện quản trị', exact: true })).toHaveCount(0)
+      await expectUI(page.getByRole('navigation', { name: 'Quản trị EmCoin', exact: true })).toHaveCount(0)
+      await page.screenshot({ path: path.join(output, `login-${width}.png`), fullPage: true })
       await page.getByLabel('Email', { exact: true }).fill('synthetic@example.invalid')
       await page.getByLabel('Mật khẩu EmCoin', { exact: true }).fill('synthetic-browser-password')
       await page.getByRole('button', { name: 'Đăng nhập', exact: true }).click()
@@ -83,10 +86,17 @@ test('production admin UI: bounded mobile layout, confirmation, pending Back/Esc
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
       const box = await page.locator('main > div').boundingBox()
       expect(box!.width).toBeLessThanOrEqual(width)
-      if (width === 1280) {
+      if (width >= 1280) {
         expect(box!.width).toBeGreaterThan(800)
         const sidebar = await page.locator('.admin-sidebar').boundingBox()
-        expect(sidebar!.x + sidebar!.width).toBeLessThan(box!.x)
+        expect(Math.abs(sidebar!.x + sidebar!.width - box!.x)).toBeLessThan(1)
+        expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight + 1)).toBe(true)
+        // Reproduce the PWA utility's independent translate without triggering an update.
+        await page.evaluate(() => { const notice = document.createElement('aside'); notice.setAttribute('aria-label', 'Cập nhật ứng dụng'); notice.id = 'qa-update-notice'; notice.className = 'fixed bottom-3 left-1/2 -translate-x-1/2'; notice.textContent = 'QA layout notice'; document.body.append(notice) })
+        const noticeBox = await page.locator('#qa-update-notice').boundingBox()
+        expect(noticeBox!.x).toBeGreaterThanOrEqual(0)
+        expect(noticeBox!.x + noticeBox!.width).toBeLessThanOrEqual(208)
+        await page.locator('#qa-update-notice').evaluate(node => node.remove())
       }
       // A screenshot taken before hidden sizing images/background materials load
       // can falsely show text without its button material. Decode real assets.
@@ -94,15 +104,10 @@ test('production admin UI: bounded mobile layout, confirmation, pending Back/Esc
         await document.fonts.ready
         const images = Array.from(document.querySelectorAll<HTMLImageElement>('button img'))
         await Promise.all(images.map(image => image.decode()))
-        return images.length > 0 && images.every(image => image.naturalWidth > 0)
+        return images.every(image => image.naturalWidth > 0)
       })
       expect(assetsReady).toBe(true)
-      const logoutMaterial = await page.getByRole('button', { name: 'Đăng xuất', exact: true }).evaluate(button => {
-        const surface = button.querySelector<HTMLElement>('[data-cartoon-surface="pill"]')!
-        return { width: surface.getBoundingClientRect().width, image: getComputedStyle(surface, '::before').backgroundImage }
-      })
-      expect(logoutMaterial.width).toBeGreaterThanOrEqual(44)
-      expect(logoutMaterial.image).toContain('quiet-v3.webp')
+      await expectUI(page.getByRole('button', { name: 'Đăng xuất', exact: true })).toHaveAttribute('data-admin-tone', 'quiet')
       await page.screenshot({ path: path.join(output, `overview-${width}.png`), fullPage: true })
       for (const [label, key] of [['Analytics', 'analytics'], ['Dữ liệu', 'database'], ['Tài khoản', 'account']] as const) {
         await page.getByRole('button', { name: label, exact: true }).click()
@@ -124,10 +129,46 @@ test('production admin UI: bounded mobile layout, confirmation, pending Back/Esc
       await page.getByRole('button', { name: 'Tổng quan & phòng', exact: true }).click()
       await page.getByRole('button', { name: 'Bộ thẻ', exact: true }).click()
       await expectUI(page.getByLabel('Tìm thẻ', { exact: true })).toBeVisible()
+      expect(await page.locator('main').evaluate(node => getComputedStyle(node).fontWeight)).toBe('400')
       await expectUI(page.getByRole('button', { name: 'Đăng xuất', exact: true })).toBeEnabled()
+      await page.getByLabel('Số dòng/trang', { exact: true }).selectOption('80')
+      if (width >= 1280) {
+        const tableBox = await page.locator('.admin-table-scroll').boundingBox()
+        expect(tableBox!.height).toBeGreaterThan(page.viewportSize()!.height * .5)
+        const footer = await page.locator('.admin-pagination').boundingBox()
+        await page.locator('.admin-table-scroll').evaluate(node => { node.scrollTop = node.scrollHeight })
+        expect(await page.locator('.admin-pagination').boundingBox()).toEqual(footer)
+        expect(await page.locator('.admin-workspace').evaluate(node => node.scrollTop)).toBe(0)
+        expect(await page.locator('.admin-table-scroll').evaluate(node => node.scrollTop)).toBeGreaterThan(0)
+        await expectUI(page.getByLabel('Số dòng/trang')).toBeVisible()
+      }
+      await page.getByLabel('Số dòng/trang', { exact: true }).selectOption('10')
+      await page.locator('.admin-table-scroll').evaluate(node => { node.scrollTop = 0 })
+      await page.locator('.admin-card-name img').evaluateAll(async nodes => { await Promise.all(nodes.map(node => (node as HTMLImageElement).decode().catch(() => {}))) })
       await page.screenshot({ path: path.join(output, `catalog-${width}.png`), fullPage: true })
-      await page.getByLabel('Danh sách thẻ', { exact: true }).getByRole('button').first().click()
+      await page.getByLabel('Tìm thẻ', { exact: true }).fill('VT-007')
+      await expectUI(page.getByRole('table', { name: 'Bộ thẻ bản nháp', exact: true }).getByRole('row')).toHaveCount(2)
+      await page.getByLabel('Tìm thẻ', { exact: true }).fill('')
+      await page.locator('.admin-table-scroll').getByRole('button').first().click()
       await expectUI(page.getByLabel('Mã thẻ', { exact: true })).toBeVisible()
+      await expectUI(page.getByLabel('Mã thẻ', { exact: true })).toHaveValue('VT-001')
+      const editingName = await page.getByLabel('Tên', { exact: true }).inputValue()
+      await page.getByRole('combobox', { name: 'Giao diện quản trị', exact: true }).selectOption('kindness-workshop')
+      await expectUI(page.locator('html')).toHaveAttribute('data-ui-theme', 'kindness-workshop')
+      await expectUI(page.getByLabel('Tên', { exact: true })).toHaveValue(editingName)
+      await page.getByRole('tab', { name: 'Nội dung', exact: true }).click()
+      await expectUI(page.getByLabel('Định nghĩa', { exact: true })).toBeVisible()
+      await page.getByRole('tab', { name: 'Hình ảnh', exact: true }).click()
+      await expectUI(page.getByLabel('URL mặt trước', { exact: true })).toBeVisible()
+      await page.screenshot({ path: path.join(output, `card-images-${width}.png`), fullPage: true })
+      await page.getByRole('tab', { name: 'Thông tin', exact: true }).click()
+      if (width >= 1280) {
+        expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight + 1)).toBe(true)
+        await expectUI(page.getByRole('button', { name: 'Lưu bản nháp', exact: true })).toBeVisible()
+        const before = await page.locator('.admin-topbar').boundingBox()
+        await page.locator('.admin-workspace').evaluate(node => { node.scrollTop = node.scrollHeight })
+        expect(await page.locator('.admin-topbar').boundingBox()).toEqual(before)
+      }
       await expectUI(page.getByRole('button', { name: 'Analytics', exact: true })).toBeDisabled()
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
       await page.screenshot({ path: path.join(output, `card-editor-${width}.png`), fullPage: true })
@@ -155,8 +196,9 @@ test('production admin UI: bounded mobile layout, confirmation, pending Back/Esc
       expect(closeCommands.at(-1)).toEqual(closeCommands.at(-2))
       await page.getByRole('button', { name: 'Đăng xuất', exact: true }).click()
       await expectUI(page.getByRole('heading', { name: 'Đăng nhập', exact: true })).toBeVisible()
+      await expectUI(page.getByRole('combobox', { name: 'Giao diện quản trị', exact: true })).toHaveCount(0)
       expect(await page.evaluate(() => ({ keys: Object.keys(localStorage), theme: localStorage.getItem('emcoin.ui-theme.v1'), session: sessionStorage.length })))
-        .toEqual({ keys: ['emcoin.ui-theme.v1'], theme: 'emotion-orbit', session: 0 })
+        .toEqual({ keys: ['emcoin.ui-theme.v1'], theme: 'kindness-workshop', session: 0 })
       await context.close()
     }
     stage = 'home-theme-switch'
@@ -212,8 +254,13 @@ test('production admin UI: bounded mobile layout, confirmation, pending Back/Esc
     expect(errors).toEqual([])
     result = 'passed'; stage = 'complete'
   } finally {
+    if (result === 'failed' && browser) for (const context of browser.contexts()) for (const page of context.pages()) {
+      await page.screenshot({ path: path.join(output, 'failure.png'), fullPage: true }).catch(() => {})
+      const overflow = await page.evaluate(() => [...document.querySelectorAll('main *')].filter(node => node.getBoundingClientRect().right > innerWidth + 1).slice(0, 12).map(node => ({ tag: node.tagName, class: node.className, width: node.getBoundingClientRect().width }))).catch(() => [])
+      console.log('Synthetic layout overflow:', JSON.stringify(overflow))
+    }
     await writeFile(path.join(output, 'report.json'), JSON.stringify({ version: 'admin-browser-qa/v1', result, stage,
-      browser: browser?.version(), viewports: [320, 390, 1280], errors, closeRequests: closeCommands.length,
+      browser: browser?.version(), viewports: [320, 390, 1280, 1920, 3840], errors, closeRequests: closeCommands.length,
       physicalDevice: false, backendConnected: false, authCookieProof: false,
       homeTransport: 'isolated-loopback-socketio-no-rooms', themePreference: 'approved-ids-only-localStorage',
       homeViewports: [{ width: 320, height: 568 }, { width: 390, height: 844 }],

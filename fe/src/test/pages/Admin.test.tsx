@@ -2,6 +2,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-libra
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Admin from '@/pages/Admin'
 import { ControlThemeProvider } from '@/components/cartoon/ControlThemeProvider'
+import { ThemePreferenceProvider } from '@/features/theme/ThemePreference'
 import { AdminRequestError } from '@/features/admin/client'
 
 const mocks = vi.hoisted(() => ({ overview: vi.fn(), login: vi.fn(), logout: vi.fn(), closeRoom: vi.fn(), changePassword: vi.fn() }))
@@ -14,6 +15,16 @@ beforeEach(() => { vi.resetAllMocks(); localStorage.clear(); sessionStorage.clea
 afterEach(() => { cleanup(); vi.restoreAllMocks() })
 
 describe('admin page', () => {
+  it('shows login-only content before authentication, including when theme preferences are available', async () => {
+    mocks.overview.mockRejectedValue(new AdminRequestError(401))
+    render(<ThemePreferenceProvider><Admin /></ThemePreferenceProvider>)
+    expect(await screen.findByRole('heading', { name: 'Đăng nhập' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'EmCoin Admin' })).toBeInTheDocument()
+    expect(screen.queryByRole('combobox', { name: 'Giao diện quản trị' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('navigation', { name: 'Quản trị EmCoin' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Về EmCoin' })).not.toBeInTheDocument()
+    expect(screen.queryByText(/Website emcoin.cloud/)).not.toBeInTheDocument()
+  })
   it('blocks navigation during password rotation and hides privileged data on session expiry', async () => {
     mocks.overview.mockResolvedValue(fixture)
     let reject!: (error: unknown) => void
@@ -54,10 +65,10 @@ describe('admin page', () => {
     mocks.overview.mockResolvedValue(fixture)
     render(<ControlThemeProvider theme={theme}><Admin /></ControlThemeProvider>)
     const logout = await screen.findByRole('button', { name: 'Đăng xuất' })
-    expect(logout.querySelector('img')).toHaveAttribute('src', `/cartoon/ui/themes/${theme}/quiet-v3.webp`)
-    expect(logout.style.color).toBe('var(--brand-ink)')
+    expect(logout).toHaveAttribute('data-admin-tone', 'quiet')
+    expect(logout).toHaveClass('admin-button')
     const close = screen.getByRole('button', { name: 'Đóng phòng fixture-room' })
-    expect(close.querySelector('img')).toHaveAttribute('src', `/cartoon/ui/themes/${theme}/secondary-v3.webp`)
+    expect(close).toHaveAttribute('data-admin-tone', 'danger')
   })
   it('starts with a cookie-session check, then offers EmCoin password login for 401', async () => {
     mocks.overview.mockRejectedValue(new AdminRequestError(401))
@@ -77,7 +88,7 @@ describe('admin page', () => {
     mocks.overview.mockResolvedValue(fixture)
     render(<Admin />)
     expect(await screen.findByText('Phòng fixture-room')).toBeInTheDocument()
-    expect(screen.getByText('Đang chơi · 5 người')).toBeInTheDocument()
+    expect(screen.getByText('Đang chơi')).toBeInTheDocument()
     expect(screen.getByText('17')).toBeInTheDocument()
     expect(screen.getByText(/Không phải số người truy cập/)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /coin|vai trò/i })).not.toBeInTheDocument()

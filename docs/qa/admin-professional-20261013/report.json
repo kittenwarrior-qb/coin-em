@@ -1,0 +1,14 @@
+{
+  "result": "passed",
+  "readonly": true,
+  "cards": 100,
+  "revision": 4,
+  "pairedCardCode": "PT-014",
+  "name": "Phản tư 14",
+  "tableHeight": 702.90625,
+  "viewport": {
+    "width": 1920,
+    "height": 1080
+  },
+  "errors": []
+}

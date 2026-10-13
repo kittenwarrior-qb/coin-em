@@ -1,0 +1,98 @@
+{
+  "result": "passed",
+  "views": [
+    {
+      "theme": "emotion-orbit",
+      "section": "Tài khoản",
+      "width": 320
+    },
+    {
+      "theme": "emotion-orbit",
+      "section": "Analytics",
+      "width": 320
+    },
+    {
+      "theme": "emotion-orbit",
+      "section": "Tổng quan & phòng",
+      "width": 320
+    },
+    {
+      "theme": "kindness-workshop",
+      "section": "Tài khoản",
+      "width": 320
+    },
+    {
+      "theme": "kindness-workshop",
+      "section": "Analytics",
+      "width": 320
+    },
+    {
+      "theme": "kindness-workshop",
+      "section": "Tổng quan & phòng",
+      "width": 320
+    },
+    {
+      "theme": "emotion-orbit",
+      "section": "Tài khoản",
+      "width": 390
+    },
+    {
+      "theme": "emotion-orbit",
+      "section": "Analytics",
+      "width": 390
+    },
+    {
+      "theme": "emotion-orbit",
+      "section": "Tổng quan & phòng",
+      "width": 390
+    },
+    {
+      "theme": "kindness-workshop",
+      "section": "Tài khoản",
+      "width": 390
+    },
+    {
+      "theme": "kindness-workshop",
+      "section": "Analytics",
+      "width": 390
+    },
+    {
+      "theme": "kindness-workshop",
+      "section": "Tổng quan & phòng",
+      "width": 390
+    },
+    {
+      "theme": "emotion-orbit",
+      "section": "Tài khoản",
+      "width": 1280
+    },
+    {
+      "theme": "emotion-orbit",
+      "section": "Analytics",
+      "width": 1280
+    },
+    {
+      "theme": "emotion-orbit",
+      "section": "Tổng quan & phòng",
+      "width": 1280
+    },
+    {
+      "theme": "kindness-workshop",
+      "section": "Tài khoản",
+      "width": 1280
+    },
+    {
+      "theme": "kindness-workshop",
+      "section": "Analytics",
+      "width": 1280
+    },
+    {
+      "theme": "kindness-workshop",
+      "section": "Tổng quan & phòng",
+      "width": 1280
+    }
+  ],
+  "errors": [],
+  "passwordChanged": false,
+  "scope": "Live HTTPS authenticated admin; read-only UI and local theme preferences, no catalog/room mutations"
+}
