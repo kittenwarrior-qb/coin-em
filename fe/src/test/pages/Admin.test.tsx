@@ -4,7 +4,7 @@ import Admin from '@/pages/Admin'
 import { ControlThemeProvider } from '@/components/cartoon/ControlThemeProvider'
 import { AdminRequestError } from '@/features/admin/client'
 
-const mocks = vi.hoisted(() => ({ overview: vi.fn(), login: vi.fn(), logout: vi.fn(), closeRoom: vi.fn() }))
+const mocks = vi.hoisted(() => ({ overview: vi.fn(), login: vi.fn(), logout: vi.fn(), closeRoom: vi.fn(), changePassword: vi.fn() }))
 vi.mock('@/features/admin/client', async importOriginal => ({
   ...await importOriginal<typeof import('@/features/admin/client')>(), adminClient: mocks,
 }))
@@ -14,6 +14,42 @@ beforeEach(() => { vi.resetAllMocks(); localStorage.clear(); sessionStorage.clea
 afterEach(() => { cleanup(); vi.restoreAllMocks() })
 
 describe('admin page', () => {
+  it('blocks navigation during password rotation and hides privileged data on session expiry', async () => {
+    mocks.overview.mockResolvedValue(fixture)
+    let reject!: (error: unknown) => void
+    mocks.changePassword.mockReturnValue(new Promise((_, fail) => { reject = fail }))
+    render(<Admin />)
+    await screen.findByText('Phòng fixture-room')
+    fireEvent.click(screen.getByRole('button', { name: 'Tài khoản' }))
+    fireEvent.change(screen.getByLabelText('Mật khẩu hiện tại'), { target: { value: 'synthetic-old-password' } })
+    fireEvent.change(screen.getByLabelText('Mật khẩu mới', { exact: true }), { target: { value: 'synthetic-new-password' } })
+    fireEvent.change(screen.getByLabelText('Xác nhận mật khẩu mới'), { target: { value: 'synthetic-new-password' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Lưu mật khẩu mới' }))
+    expect(screen.getByRole('button', { name: 'Đăng xuất' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Analytics' })).toBeDisabled()
+    expect(screen.getByLabelText('Mật khẩu hiện tại')).toHaveValue('')
+    await act(async () => { reject(new AdminRequestError(401)) })
+    expect(await screen.findByRole('heading', { name: 'Đăng nhập' })).toBeInTheDocument()
+    expect(screen.queryByRole('navigation', { name: 'Quản trị EmCoin' })).not.toBeInTheDocument()
+  })
+  it('separates navigation, filters rooms and rotates password without storing secrets', async () => {
+    mocks.overview.mockResolvedValue(fixture); mocks.changePassword.mockResolvedValue(undefined)
+    render(<Admin />)
+    await screen.findByText('Phòng fixture-room')
+    fireEvent.change(screen.getByLabelText('Tìm mã phòng'), { target: { value: 'missing' } })
+    expect(screen.getByText('Không tìm thấy phòng khớp mã này.')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Analytics' }))
+    expect(screen.queryByText('Phòng fixture-room')).not.toBeInTheDocument()
+    expect(screen.getByText('Thời gian xử lý HTTP')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Tài khoản' }))
+    fireEvent.change(screen.getByLabelText('Mật khẩu hiện tại'), { target: { value: 'synthetic-old-password' } })
+    fireEvent.change(screen.getByLabelText('Mật khẩu mới', { exact: true }), { target: { value: 'synthetic-new-password' } })
+    fireEvent.change(screen.getByLabelText('Xác nhận mật khẩu mới'), { target: { value: 'synthetic-new-password' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Lưu mật khẩu mới' }))
+    expect(await screen.findByRole('heading', { name: 'Đăng nhập' })).toBeInTheDocument()
+    expect(mocks.changePassword).toHaveBeenCalledTimes(1)
+    expect(localStorage.length).toBe(0); expect(sessionStorage.length).toBe(0)
+  })
   it.each(['emotion-orbit', 'kindness-workshop'] as const)('uses readable quiet logout and preserves destructive close action in %s', async theme => {
     mocks.overview.mockResolvedValue(fixture)
     render(<ControlThemeProvider theme={theme}><Admin /></ControlThemeProvider>)

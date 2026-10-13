@@ -5,6 +5,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium, expect as expectUI } from '../../../e2e/node_modules/@playwright/test/index.mjs'
+import { pdfCatalogDraft } from '../../src/catalog/pdfDraft'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
 
@@ -50,6 +51,8 @@ test('production admin UI: bounded mobile layout, confirmation, pending Back/Esc
           headers: { 'cache-control': 'no-store' }, body: JSON.stringify(body) })
         if (url.pathname.endsWith('/login')) { authenticated = true; await reply(200, { success: true }); return }
         if (!authenticated) { await reply(401, { error: 'ADMIN_AUTH_REQUIRED' }); return }
+        if (url.pathname === '/admin/api/catalog') { await reply(200, { revision: 1, cards: pdfCatalogDraft(), active: false }); return }
+        if (url.pathname === '/admin/api/catalog/readiness') { await reply(200, { revision: 1, ready: false, snapshots: [] }); return }
         if (url.pathname.endsWith('/logout')) { authenticated = false; await reply(200, { success: true }); return }
         if (url.pathname.endsWith('/close-room')) {
           closeCommands.push(route.request().postDataJSON())
@@ -76,8 +79,12 @@ test('production admin UI: bounded mobile layout, confirmation, pending Back/Esc
       await expectUI(page.getByText('must-not-render', { exact: true })).toHaveCount(0)
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
       const box = await page.locator('main > div').boundingBox()
-      expect(box!.width).toBeLessThanOrEqual(430)
-      if (width === 1280) expect(Math.abs(box!.x + box!.width / 2 - width / 2)).toBeLessThan(2)
+      expect(box!.width).toBeLessThanOrEqual(width)
+      if (width === 1280) {
+        expect(box!.width).toBeGreaterThan(800)
+        const sidebar = await page.locator('.admin-sidebar').boundingBox()
+        expect(sidebar!.x + sidebar!.width).toBeLessThan(box!.x)
+      }
       // A screenshot taken before hidden sizing images/background materials load
       // can falsely show text without its button material. Decode real assets.
       const assetsReady = await page.evaluate(async () => {
@@ -94,6 +101,23 @@ test('production admin UI: bounded mobile layout, confirmation, pending Back/Esc
       expect(logoutMaterial.width).toBeGreaterThanOrEqual(44)
       expect(logoutMaterial.image).toContain('quiet-v3.webp')
       await page.screenshot({ path: path.join(output, `overview-${width}.png`), fullPage: true })
+      for (const [label, key] of [['Analytics', 'analytics'], ['Dữ liệu', 'database'], ['Tài khoản', 'account']] as const) {
+        await page.getByRole('button', { name: label, exact: true }).click()
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+        await page.screenshot({ path: path.join(output, `${key}-${width}.png`), fullPage: true })
+      }
+      await page.getByRole('button', { name: 'Tổng quan & phòng', exact: true }).click()
+      await page.getByRole('button', { name: 'Bộ thẻ', exact: true }).click()
+      await expectUI(page.getByLabel('Tìm thẻ', { exact: true })).toBeVisible()
+      await expectUI(page.getByRole('button', { name: 'Đăng xuất', exact: true })).toBeEnabled()
+      await page.screenshot({ path: path.join(output, `catalog-${width}.png`), fullPage: true })
+      await page.getByLabel('Danh sách thẻ', { exact: true }).getByRole('button').first().click()
+      await expectUI(page.getByLabel('Mã thẻ', { exact: true })).toBeVisible()
+      await expectUI(page.getByRole('button', { name: 'Analytics', exact: true })).toBeDisabled()
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+      await page.screenshot({ path: path.join(output, `card-editor-${width}.png`), fullPage: true })
+      await page.getByRole('button', { name: 'Về danh sách', exact: true }).click()
+      await page.getByRole('button', { name: 'Đóng quản lý thẻ', exact: true }).click()
       const open = page.getByRole('button', { name: 'Đóng phòng synthetic-browser-room', exact: true })
       await open.click()
       await expectUI(page.getByRole('dialog', { name: 'Đóng phòng?', exact: true })).toBeVisible()

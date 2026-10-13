@@ -6,7 +6,7 @@ import { CatalogPublisher } from './CatalogPublisher'
 
 const labels = { role: 'Vai trò', situation: 'Tình huống', emotion: 'Cảm xúc', reflection: 'Phản tư', selfcare: 'Bí kíp tự ôm' }
 const field = 'min-h-11 w-full rounded-xl border border-[var(--brand-edge)] bg-white px-3 text-[var(--brand-ink)]'
-export function CatalogEditor({ onClose }: { onClose: () => void }) {
+export function CatalogEditor({ onClose, onBusy }: { onClose: () => void; onBusy?: (busy: boolean) => void }) {
   const fieldId = useId()
   const [draft, setDraft] = useState<CatalogDraft | null>(null)
   const [card, setCard] = useState<CatalogCard | null>(null)
@@ -20,7 +20,14 @@ export function CatalogEditor({ onClose }: { onClose: () => void }) {
   const [snapshotUncertain, setSnapshotUncertain] = useState(false)
   const [releaseBusy, setReleaseBusy] = useState(false)
   const locked = pending || uncertain || snapshotUncertain || releaseBusy
-  usePendingNavigationGuard(locked)
+  useEffect(() => { onBusy?.(locked || card !== null) }, [locked, card, onBusy])
+  usePendingNavigationGuard(locked || card !== null)
+  useEffect(() => {
+    if (!locked && !card) return
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = '' }
+    window.addEventListener('beforeunload', warn)
+    return () => window.removeEventListener('beforeunload', warn)
+  }, [locked, card])
   useEffect(() => {
     const controller = new AbortController()
     active.current = controller
@@ -100,21 +107,21 @@ export function CatalogEditor({ onClose }: { onClose: () => void }) {
         onClick={() => void prepareSnapshot()}>{snapshotUncertain ? 'Thử lại đúng yêu cầu tạo phiên bản' : 'Đóng băng phiên bản đã kiểm'}</CartoonButton>}
       {!card && <CatalogPublisher revision={draft.revision} disabled={pending || uncertain || snapshotUncertain} onBusy={setReleaseBusy}
         onChanged={async () => { const latest = await catalogClient.draft(new AbortController().signal); setDraft(latest) }} />}
-      <label className="block">Tìm thẻ<input className={field} value={filter} onChange={event => setFilter(event.target.value)} disabled={locked} /></label>
-      <div className="my-4 max-h-56 overflow-y-auto" aria-label="Danh sách thẻ">
+      {!card && <><label className="block">Tìm thẻ<input className={field} value={filter} onChange={event => setFilter(event.target.value)} disabled={locked} /></label>
+      <div className="admin-catalog-list my-4 max-h-56 overflow-y-auto" aria-label="Danh sách thẻ">
         {draft.cards.filter(item => `${item.code} ${item.name}`.toLocaleLowerCase('vi').includes(filter.toLocaleLowerCase('vi'))).map(item =>
           <button key={item.id} type="button" disabled={locked} onClick={() => { setCard({ ...item }); setMessage('') }}
-            className="min-h-11 w-full border-b px-2 py-2 text-left focus-visible:outline-2" aria-pressed={card?.id === item.id}>
+            className="min-h-11 w-full border-b px-2 py-2 text-left focus-visible:outline-2">
             {item.code} · {item.name}{item.archived ? ' · Ngừng dùng' : ''}{item.reviewed ? ' · Đã kiểm' : ''}
           </button>)}
-      </div>
+      </div></>}
       {!card && <CartoonButton disabled={locked} onClick={() => setCard({ id: crypto.randomUUID(), code: 'NEW-001', name: 'Thẻ mới',
         category: 'situation', group: 'light', definition: '', prompt: '', sortOrder: draft.cards.length,
         frontImageUrl: '', backImageUrl: '', sourcePages: [], reviewed: false, archived: false })}>Thêm thẻ</CartoonButton>}
     </>}
     {card && <div className="flex flex-col gap-3">
       <p className="break-all text-xs">ID: {card.id} · {labels[card.category]} · Trang nguồn: {card.sourcePages.join(' / ') || 'Thẻ thêm mới'}</p>
-      <fieldset disabled={pending || uncertain} className="flex min-w-0 flex-col gap-3">
+      <fieldset disabled={pending || uncertain} className="admin-catalog-fields flex min-w-0 flex-col gap-3">
         <label>Mã thẻ<input className={field} maxLength={64} value={card.code} onChange={event => patch({ code: event.target.value })} /></label>
         <label>Tên<input className={field} maxLength={160} value={card.name} onChange={event => patch({ name: event.target.value, reviewed: false })} /></label>
         <label>Thứ tự<input className={field} type="number" min={0} max={10000} step={1} value={card.sortOrder} onChange={event => patch({ sortOrder: Number(event.target.value) })} /></label>
@@ -132,7 +139,7 @@ export function CatalogEditor({ onClose }: { onClose: () => void }) {
         <div><label htmlFor={`${fieldId}-back`}>Nội dung mặt sau</label><textarea id={`${fieldId}-back`} className={`${field} min-h-24 py-2`} maxLength={6000} value={card.faceText?.back ?? ''} onChange={event => patch({ faceText: { front: card.faceText?.front ?? '', back: event.target.value }, reviewed: false })} /></div>
         <label>URL mặt trước<input className={field} maxLength={2048} value={card.frontImageUrl} onChange={event => patch({ frontImageUrl: event.target.value, reviewed: false })} /></label>
         <label>URL mặt sau<input className={field} maxLength={2048} value={card.backImageUrl} onChange={event => patch({ backImageUrl: event.target.value, reviewed: false })} /></label>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="admin-card-faces grid grid-cols-2 gap-3">
           {[['Mặt trước', card.frontImageUrl], ['Mặt sau', card.backImageUrl]].map(([name, src]) => isCatalogImageUrl(src) && <figure key={name}>
             <img src={src} alt={`${name} ${card.name}`} className="w-full rounded-xl" loading="lazy" referrerPolicy="no-referrer" />
             <figcaption className="text-center text-sm">{name}</figcaption>

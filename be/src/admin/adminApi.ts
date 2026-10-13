@@ -73,6 +73,20 @@ export function registerAdminApi(app: Express, options: {
     response.clearCookie(COOKIE, cookieOptions)
     response.json({ success: true })
   })
+  router.post('/change-password', async (request, response) => {
+    if (!request.is('application/json') || !request.body || Array.isArray(request.body) ||
+        Object.keys(request.body).sort().join('|') !== 'currentPassword|newPassword') {
+      response.status(400).json({ error: 'INVALID_PASSWORD_REQUEST' }); return
+    }
+    const result = await options.auth.changePassword(sessionCookie(request.headers.cookie), request.body.currentPassword, request.body.newPassword)
+    if (!result.ok) {
+      const status = result.error === 'ADMIN_AUTH_REQUIRED' ? 401 : result.error === 'RATE_LIMITED' ? 429 : result.error === 'AUTH_UNAVAILABLE' ? 503 : 400
+      if (status === 429) response.setHeader('Retry-After', '60')
+      response.status(status).json({ error: result.error }); return
+    }
+    response.clearCookie(COOKIE, cookieOptions)
+    response.json({ success: true })
+  })
   router.get('/catalog', (_request, response) => {
     try {
       const catalog = options.catalog?.()
