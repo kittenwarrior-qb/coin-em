@@ -28,8 +28,6 @@ After deployment, approved links `/?theme=emotion-orbit` and `/?theme=kindness-w
 - Chromium production-preview admin browser pass at320/390/1280px: login, all sidebar sections, catalog and paired-face editor, horizontal-overflow assertions, cancel/focus restore, pending Back/Escape and same-request-ID close retry. Images are public PDF source assets; requests/auth are intercepted synthetic fixtures, not proof of live cookies/deployment.
 - Final screenshot/report directory: `C:/Users/Admin/AppData/Local/Temp/emcoin-admin-browser-qa-ALZGwd`. Six views per viewport:overview,analytics,database,account,catalog,card-editor. Visually inspected desktop overview, mobile overview and desktop paired-face editor. The final editor hides its list until returning and keeps action buttons bounded instead of stretching across the desktop.
 
-## Release boundary
-
 ## Theme-switch follow-up verification
 
 - Frontend full suite:78 files /747 tests passed; final focused preference/admin suite17 tests passed after extracting the preference model. Frontend lint has0 errors/0 warnings; frontend production build and backend TypeScript build pass.
