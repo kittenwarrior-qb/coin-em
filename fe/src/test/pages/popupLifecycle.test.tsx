@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { useRef, useState } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { CartoonModal } from '../../components/cartoon/CartoonModal'
-import { usePendingNavigationGuard, usePopupLifecycle } from '../../features/overlays/usePopupLifecycle'
+import { handlePlatformBack, usePendingNavigationGuard, usePopupLifecycle } from '../../features/overlays/usePopupLifecycle'
 
 afterEach(async () => {
   cleanup()
@@ -10,6 +10,20 @@ afterEach(async () => {
 })
 
 describe('owner-approved topmost popup lifecycle', () => {
+  it('native Back consumes pending guards and closes only an ordinary top popup', async () => {
+    const close=vi.fn()
+    function Fixture({pending,open}:{pending:boolean;open:boolean}) {
+      usePendingNavigationGuard(pending)
+      return <CartoonModal open={open} title="Native popup" onClose={close}><button>Action</button></CartoonModal>
+    }
+    const {rerender}=render(<Fixture pending={true} open={false} />)
+    expect(handlePlatformBack()).toBe(true);expect(close).not.toHaveBeenCalled()
+    rerender(<Fixture pending={false} open={false} />)
+    await waitFor(()=>expect(window.history.state?.__emcoinPopup).toBeUndefined())
+    expect(handlePlatformBack()).toBe(false)
+    rerender(<Fixture pending={false} open={true} />)
+    expect(handlePlatformBack()).toBe(true);expect(close).toHaveBeenCalledTimes(1)
+  })
   it('immediate replacement during history consumption retains original router state and connected opener', async () => {
     const url = window.location.href
     const state = { idx: 17, key: 'replacement', usr: { keep: true } }

@@ -28,6 +28,16 @@ function topDialog() {
 function navigationPending() {
   return stack.some(entry => entry.node === null)
 }
+
+/** Native Back shares the popup/pending boundary; never authorizes room exit. */
+export function handlePlatformBack(): boolean {
+  if (consuming) return true
+  const top = stack[stack.length - 1]
+  if (!top) return false
+  const options = top.options()
+  if (!navigationPending() && !options.persistent) options.onClose?.()
+  return true
+}
 function sync() {
   const top = topDialog()
   for (const entry of stack) {

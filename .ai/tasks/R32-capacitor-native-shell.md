@@ -1,7 +1,7 @@
 # R32 Capacitor native shell
 
 **Priority:** P2  
-**Status:** planned  
+**Status:** in progress
 **Owner:** Codex implementation  
 **Reviewer:** Claude audit  
 **Dependencies:** R31, R30, R33
@@ -63,6 +63,20 @@ Audience6–18 is owner-approved; do not reopen that choice. Native permission s
 
 ## Implementation plan
 
+### Owner revision2026-10-13 — native foundation admitted
+
+Owner confirms cloud.emcoin.app and independent chat/micro moderation. Admit
+native/package+lock/config, Android/iOS generated source (not release signing),
+fe platform adapters/bootstrap/pending-back bridge, adjacent tests/build tooling
+and documentation. Pin official Capacitor8 packages on Node22; bundle an owned
+copied frontend build with production HTTPS API/hash routing, no copied .env,
+no remote server.url/cleartext/debug/private worker registration. Real platform
+SDK/device/macOS/signing/store acceptance remains pending. Native foreground
+requests existing recipient-safe get_room_state when connected, otherwise normal
+token reconnect; no invented wire event, implicit room exit or blind mutation retry.
+Do not resurrect a replaced/explicitly left session. Expose background signal for
+future voice cleanup without adding media permissions or a provider now.
+
 1. Wait for OQ-08/OQ-10 signing, audience, permissions and iOS capability decisions; do not create distributable signing artifacts.
 2. Define platform adapters for lifecycle, network, safe area, back behavior, external links and R09 session storage without changing domain rules.
 3. Package the already-tested web bundle only after R31/R30/R33 gates; keep native navigation separate from web router assumptions.
@@ -72,6 +86,12 @@ Audience6–18 is owner-approved; do not reopen that choice. Native permission s
 
 ## Implementation report
 
+### Plan revision / implementation 2026-10-13 — verifiable local foundation
+
+Admit adjacent `fe/vite.config.ts` native-only dotenv/PWA boundary, `fe/scripts/build-native.mjs`, native source/check/browser scripts, bridge/socket/popup tests and `docs/ops/native-foundation.md`; these are necessary for the previously approved bundled shell. Android/iOS scaffolds generated with installed official pinned CLI (iOS SPM); no signing or SDK/device compilation. Android cleartext/backup/transfer exclusions added; no microphone or background capability. Config/asset hashes verify before sync, native manifest/worker omitted, hash routing/API fixed. Source fingerprint truthfully says working-tree; existing unrelated BE communication edits are preserved/excluded from this task.
+
+Native lifecycle/late-listener cleanup, pending Back, confirmed hydration, replaced-session suppression and unmount removal have focused regressions. Build/check and packaged guide hash-reload smoke pass. Native-origin CORS, external/app links, Android SDK configuration, iOS/Xcode, real device keyboard/safe-area/storage/audio/resume, final app icons/splash and signing/store gates remain explicit in the runbook. No native app distributable or production deployment is claimed. R32 remains in progress, not done; existing app.emcoin.cloud release is untouched.
+
 ### Plan revision 2026-10-12 — communication và mobile roadmap
 
 Owner yêu cầu roadmap Android/iOS và chốt voice trong phòng mời có quản trò, micro opt-in, mute/block/report, không recording hoặc ghép người lạ. Quyết định cũ no-micro được thay cho scope này, không mở camera/location/contacts. Owner chưa có Play Console/Apple Developer/Mac hoặc dịch vụ build iOS. Xem `docs/ops/mobile-release-roadmap.md` cho milestones, module boundaries, device evidence và setup hướng dẫn. Chat hiện có chỉ là phản hồi phase; chưa có room chat/voice/native implementation. Game-role silence/heal policy và moderation retention cần chốt trước code communication. Status vẫn planned; không ký/upload/deploy trong bước kế hoạch.
@@ -79,6 +99,12 @@ Owner yêu cầu roadmap Android/iOS và chốt voice trong phòng mời có qu�
 <!-- Codex updates this after implementation: changed files, invariant preserved, commands and results. -->
 
 ## QA report
+
+2026-10-13 isolated foundation QA: FE clean `npm ci --ignore-scripts` (network after offline-cache miss), 759 tests/79 files PASS, lint PASS, TypeScript/regular web build PASS (manifest/worker retained) and native build PASS (no manifest/worker, 597 files/34,118,075 bytes). Native policy11tests PASS; exact asset/config/manifest checks PASS; official Android/iOS(SPM) add/sync PASS. Packaged guide cold/reload/hash-route smoke at320/390px PASS with0worker registrations/page errors and production network blocked. Source digest `fd6a736ab20346199647a15349783a64a738e626699cc40784b190f83bbea228` identifies the dirty reviewed bundle, not signed platform artifacts.
+
+Initial native clean install FAILED because the pre-existing uuid override did not match its lock; lock resolved with exact package policy and clean install rerun PASS. Primary shared checkout concurrently gained unrelated admin/backend edits: total run had6admin test failures and a lint error in admin export code. Those edits were preserved, not hidden/repaired or mixed into native. Scoped foundation was isolated on `codex/native-foundation` based on `a4c4167`; no global41task green claim. Android SDK was not configured in standard preflight; no Gradle APK/Xcode/device/backup-transfer test performed. Native staging CORS and external/deep links remain before a real native gameplay gate.
+
+Regular-web production admin/Home browser matrix on the isolated source also PASS55.08s, including existing pending/idempotent/admin protections. No source backend or production setting changes were required for this local verification.
 
 <!-- QA owner records environment, test matrix, failures, visual/device evidence and final result. -->
 
