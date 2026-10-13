@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const [mode, sha] = process.argv.slice(2)
-if (!['prepare', 'deploy'].includes(mode) || !/^[a-f0-9]{40}$/.test(sha ?? '')) throw Error('Usage: node deploy/emcoin/manual-release.mjs prepare|deploy <verified 40-character commit>')
+if (!['prepare', 'deploy', 'update-web'].includes(mode) || !/^[a-f0-9]{40}$/.test(sha ?? '')) throw Error('Usage: node deploy/emcoin/manual-release.mjs prepare|deploy|update-web <verified 40-character commit>')
 const run = (bin, args, cwd = root) => execFileSync(bin, args, { cwd, stdio: 'inherit', windowsHide: true })
 const capture = (bin, args) => execFileSync(bin, args, { cwd: root, encoding: 'utf8', windowsHide: true }).trim()
 const release = path.join(root, 'tmp', 'manual-releases', sha)
@@ -53,5 +53,6 @@ if (mode === 'prepare') {
   run(scp, [...options, ...['release-images.tar.gz', 'release-config.tar.gz', 'SHA256SUMS'].map(file => path.join(release, file)), `${target}:${incoming}/`])
   // Run a verified file, not bash -s: a child with open stdin can consume the
   // remainder of a piped deployment script (notably compose run).
-  run(ssh, [...options, target, `cd ${incoming} && sha256sum -c SHA256SUMS && tar -xzf release-config.tar.gz deploy/emcoin/deploy-release.sh && bash deploy/emcoin/deploy-release.sh ${sha}`])
+  const driver = mode === 'update-web' ? 'deploy-web-update.sh' : 'deploy-release.sh'
+  run(ssh, [...options, target, `cd ${incoming} && sha256sum -c SHA256SUMS && tar -xzf release-config.tar.gz deploy/emcoin/${driver} && bash deploy/emcoin/${driver} ${sha}`])
 }

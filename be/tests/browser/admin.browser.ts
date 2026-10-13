@@ -78,6 +78,21 @@ test('production admin UI: bounded mobile layout, confirmation, pending Back/Esc
       const box = await page.locator('main > div').boundingBox()
       expect(box!.width).toBeLessThanOrEqual(430)
       if (width === 1280) expect(Math.abs(box!.x + box!.width / 2 - width / 2)).toBeLessThan(2)
+      // A screenshot taken before hidden sizing images/background materials load
+      // can falsely show text without its button material. Decode real assets.
+      const assetsReady = await page.evaluate(async () => {
+        await document.fonts.ready
+        const images = Array.from(document.querySelectorAll<HTMLImageElement>('button img'))
+        await Promise.all(images.map(image => image.decode()))
+        return images.length > 0 && images.every(image => image.naturalWidth > 0)
+      })
+      expect(assetsReady).toBe(true)
+      const logoutMaterial = await page.getByRole('button', { name: 'Đăng xuất', exact: true }).evaluate(button => {
+        const surface = button.querySelector<HTMLElement>('[data-cartoon-surface="pill"]')!
+        return { width: surface.getBoundingClientRect().width, image: getComputedStyle(surface, '::before').backgroundImage }
+      })
+      expect(logoutMaterial.width).toBeGreaterThanOrEqual(44)
+      expect(logoutMaterial.image).toContain('quiet-v3.webp')
       await page.screenshot({ path: path.join(output, `overview-${width}.png`), fullPage: true })
       const open = page.getByRole('button', { name: 'Đóng phòng synthetic-browser-room', exact: true })
       await open.click()

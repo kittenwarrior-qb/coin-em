@@ -57,6 +57,24 @@ This script still **refuses existing backends**: subsequent manual updates need
 an explicit compatible admission-freeze/drain/maintenance procedure. Never rerun
 fresh publication on an already initialized database, or delete volumes to retry.
 
+### Guarded frontend-only update
+
+After local tests/QA and GitHub merge, prepare the exact commit as above, then:
+
+```powershell
+node deploy/emcoin/manual-release.mjs update-web $emcoinReleaseSha
+```
+
+This is a bounded maintenance update, not zero downtime. It refuses any changed
+backend filesystem/execution configuration, runtime Compose/Caddy configuration,
+unready Redis/backend, or rooms present. It stops only web ingress, rechecks rooms
+behind that barrier (a racing room causes restoration), and starts only the new
+web image. Backend/Redis/catalog/room volumes are never recreated or reseeded.
+HTTPS failure restores the previous web; pointer promotion happens only after
+health/catalog HTTPS checks. Exact backend/web image identities are recorded in
+the release's `images.env`. Backend changes still require a separate tested
+compatible migration/drain path; they are not silently admitted by update-web.
+
 The direct Compose build instructions below are an earlier alternative, **not**
 the current immutable transfer path.
 
