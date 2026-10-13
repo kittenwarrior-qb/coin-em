@@ -91,6 +91,12 @@ test('production admin UI: bounded mobile layout, confirmation, pending Back/Esc
         const sidebar = await page.locator('.admin-sidebar').boundingBox()
         expect(Math.abs(sidebar!.x + sidebar!.width - box!.x)).toBeLessThan(1)
         expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight + 1)).toBe(true)
+        // Reproduce the PWA utility's independent translate without triggering an update.
+        await page.evaluate(() => { const notice = document.createElement('aside'); notice.setAttribute('aria-label', 'Cập nhật ứng dụng'); notice.id = 'qa-update-notice'; notice.className = 'fixed bottom-3 left-1/2 -translate-x-1/2'; notice.textContent = 'QA layout notice'; document.body.append(notice) })
+        const noticeBox = await page.locator('#qa-update-notice').boundingBox()
+        expect(noticeBox!.x).toBeGreaterThanOrEqual(0)
+        expect(noticeBox!.x + noticeBox!.width).toBeLessThanOrEqual(208)
+        await page.locator('#qa-update-notice').evaluate(node => node.remove())
       }
       // A screenshot taken before hidden sizing images/background materials load
       // can falsely show text without its button material. Decode real assets.
