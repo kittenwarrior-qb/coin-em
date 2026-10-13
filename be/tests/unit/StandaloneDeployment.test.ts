@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
 import path from 'node:path'
 import { expect, it } from 'vitest'
 import { pdfCatalogDraft } from '../../src/catalog/pdfDraft'
@@ -58,6 +59,13 @@ it('keeps manual packaging on exact committed Git source and pinned initial-rele
   const manual = source('deploy/emcoin/manual-release.mjs')
   for (const gate of ["['prepare', 'deploy']", "git', ['diff', '--name-only', 'HEAD']", "['archive', '--format=tar'", 'org.opencontainers.image.revision', 'StrictHostKeyChecking=yes', 'BatchMode=yes', 'root@103.74.102.24', 'sha256sum -c SHA256SUMS', 'deploy/emcoin/deploy-release.sh', "flags: 'wx'"]) expect(manual).toContain(gate)
   for (const unsafe of ['docker compose down', 'prune', 'FLUSHALL', 'StrictHostKeyChecking=no', 'GH_TOKEN', 'EMCOIN_ADMIN_PASSWORD_HASH']) expect(manual).not.toContain(unsafe)
+})
+
+it('archives Linux shell scripts with LF even on a Windows auto-CRLF checkout', () => {
+  expect(source('.gitattributes')).toContain('*.sh text eol=lf')
+  const archive = execFileSync('git', ['-c', 'core.autocrlf=true', 'archive', '--format=tar', 'HEAD', 'deploy/emcoin/deploy-release.sh'], { cwd: path.resolve(process.cwd(), '..'), windowsHide: true })
+  expect(archive.includes(Buffer.from('set -euo pipefail\n'))).toBe(true)
+  expect(archive.includes(Buffer.from('\r\n'))).toBe(false)
 })
 
 it('excludes local credentials and backend player/catalog databases from image contexts', () => {

@@ -65,6 +65,8 @@ Blocked by OQ-06/OQ-10 for release authority, RPO/RTO and host ownership.
 
 ### Owner revision 2026-10-13 — manual deployment
 
+First manual artifact8ae0948 transfers with matching checksums but Bash refuses CRLF `pipefail` on line2 before any release-directory/catalog/container mutation. Preserve that failed incoming artifact. Add explicit .gitattributes shell LF and renormalize only tracked deploy/emcoin shell scripts so Git archive is portable; rebuild labelled images/config from the corrected commit. Do not patch unverified server scripts or delete volumes to retry.
+
 Owner explicitly requests manual SSH deployment instead of CI/CD, retaining GitHub source management. Disable automatic Deploy workflow (do not disable CI checks); admit a local release packager/operator script and adjacent guards/docs. Exact committed Git source, local full tests/build/type checks and browser regressions replace the GitHub-CI deployment prerequisite by owner decision, not a hidden bypass. Preserve pinned SSH, checksums, labelled immutable images, supported OS, provisioned credentials, fresh-store publication before admission, no on-host source build, and initial-only deploy-release.sh. Later updates still require admission freeze/drain. A failed CI source-version guard was detected: update its expected v3 evidence contract and assert both platform deadlines/full-motion scope, rather than removing the guard. Never claim that this PR's failed CI passed.
 
 ### CI environment revision 2026-10-13 — role-card deadline evidence
