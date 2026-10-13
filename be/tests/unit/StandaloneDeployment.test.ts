@@ -54,6 +54,12 @@ it('embeds frontend files in the web image and routes only EmCoin with no privat
   expect(caddy).not.toMatch(/\n\s*log\s*[{\n]/)
 })
 
+it('keeps manual packaging on exact committed Git source and pinned initial-release SSH', () => {
+  const manual = source('deploy/emcoin/manual-release.mjs')
+  for (const gate of ["['prepare', 'deploy']", "git', ['diff', '--name-only', 'HEAD']", "['archive', '--format=tar'", 'org.opencontainers.image.revision', 'StrictHostKeyChecking=yes', 'BatchMode=yes', 'root@103.74.102.24', 'sha256sum -c SHA256SUMS', 'deploy/emcoin/deploy-release.sh', "flags: 'wx'"]) expect(manual).toContain(gate)
+  for (const unsafe of ['docker compose down', 'prune', 'FLUSHALL', 'StrictHostKeyChecking=no', 'GH_TOKEN', 'EMCOIN_ADMIN_PASSWORD_HASH']) expect(manual).not.toContain(unsafe)
+})
+
 it('excludes local credentials and backend player/catalog databases from image contexts', () => {
   for (const file of ['be/.dockerignore', 'fe/.dockerignore']) expect(source(file).split(/\r?\n/)).toContain('.env.*')
   const backend = source('be/.dockerignore').split(/\r?\n/)

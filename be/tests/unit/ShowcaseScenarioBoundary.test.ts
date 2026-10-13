@@ -10,7 +10,10 @@ it('isolates three complete showcase lifecycles without weakening switch or time
   }
   expect(source).toContain('index < 100')
   expect(source).toContain('completedRoleCardSwitches++')
-  expect(source).toContain("version: 'showcase-lifecycle-qa/v2', scenario")
+  expect(source).toContain("version: 'showcase-lifecycle-qa/v3', scenario")
+  expect(source).toContain("process.platform === 'linux' ? 290_000 : 170_000")
+  expect(source).toContain('lifecycleTimeoutMs + 10_000')
+  expect(source).toContain("fullMotionSwitches: scenario === 'switches-context-loss'")
   expect(source).toContain('roleCardSwitches: completedRoleCardSwitches')
   expect(source).toContain('extension.loseContext()')
   expect(source).toContain('extension.restoreContext()')

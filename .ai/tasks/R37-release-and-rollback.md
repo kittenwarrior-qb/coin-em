@@ -63,6 +63,10 @@ Blocked by OQ-06/OQ-10 for release authority, RPO/RTO and host ownership.
 
 ## Implementation plan
 
+### Owner revision 2026-10-13 — manual deployment
+
+Owner explicitly requests manual SSH deployment instead of CI/CD, retaining GitHub source management. Disable automatic Deploy workflow (do not disable CI checks); admit a local release packager/operator script and adjacent guards/docs. Exact committed Git source, local full tests/build/type checks and browser regressions replace the GitHub-CI deployment prerequisite by owner decision, not a hidden bypass. Preserve pinned SSH, checksums, labelled immutable images, supported OS, provisioned credentials, fresh-store publication before admission, no on-host source build, and initial-only deploy-release.sh. Later updates still require admission freeze/drain. A failed CI source-version guard was detected: update its expected v3 evidence contract and assert both platform deadlines/full-motion scope, rather than removing the guard. Never claim that this PR's failed CI passed.
+
 ### CI environment revision 2026-10-13 — role-card deadline evidence
 
 Main CI38260199796 attempt2 passes test/lint/full-game terminal and10/11 browser cases. Retain both failed attempts. Downloaded role-card report identifies actual SwiftShader, stage100-role-card-switches,98completed switches before the170s watchdog; there is no assertion/network/context-restore failure observed before termination. Admit the same bounded Linux290s watchdog/300s outer budget used for models/stickers, keeping Windows170/180 unchanged. Preserve full-motion1280x900, all100switches, real catalog API, offline CDN restrictions, loading/fallback assertions, actual context loss/restoration and screenshots. No force clicks, skipped cases, renderer/theme/rule changes or physical-device/FPS acceptance claims. Validate exact changed source locally and through new PR/main CI before deployment; no further unchanged-source retry fishing.
