@@ -17,10 +17,17 @@ Do not infer rights to publish participant photos or UNICEF branding from these.
 | Historical archives/storage media | any existing managed deleted-room archives and Redis AOF/volume history | no new content archives/VPS backups; no manual deletion/migration of existing archives here. Managed historical expiry checks remain bounded. AOF rewrite/volume/media/provider retention is not established by app-level key deletion. |
 | Admin authentication | fixed approved admin email, owner-configured separate EmCoin password hash, temporary session/token digest and failed-login limits | AdminAuth/HTTP API, disabled without correct configuration; Secure/HttpOnly/SameSite cookie and Origin/header checks. No public signup, Google OAuth or Gmail password. Session/analytics are process-local, not visitor profiles. |
 | Admin overview/close | room metadata/status/seat counts and fixed aggregate HTTP outcomes/timing; explicit close audited reason/receipt | allowlisted API; no private response/reflection/nickname/role/session access or direct Coin edits. Exact close receipt stored with primary marker, not merely console output. |
-| App diagnostics/analytics | closed event/outcome/version JSON; fixed HTTP outcome/duration buckets | R35 no private objects, IDs, free-form error strings, IP/path or story in app diagnostic records; sampled120attempts/minute/process. No Umami script/new tracking SDK/persistent visitor identifier. Host capture/rotation/retention/alerts remain operator configuration. |
+| Operational diagnostics/metrics | closed event/outcome/version JSON; fixed HTTP outcome/duration buckets | R35 no private objects, IDs, free-form error strings, IP/path or story in app diagnostic records; sampled120attempts/minute/process. Process-local HTTP metrics reset on restart. No Umami script or external tracking SDK. Host capture/rotation/retention/alerts remain operator configuration. |
+| Daily traffic analytics (owner-edited release2026-10-13) | allowlisted public page, referrer hostname/category, device category, daily view/visitor/room/game totals | TrafficStore SQLite; admin-authenticated reports. Daily aggregates retained400days, as currently implemented, not a legal retention approval. Public tracking endpoint processes request IP/UA in memory to compute a daily salted hash; hash retained2days for approximate deduplication. No raw IP/UA, room ID, private text or cookie is stored in this database. Salt persists in SQLite. The hash is pseudonymous, not proof of anonymity or immunity to guessing with access to the salt. No historical traffic imported on rollout. |
 | Network/CDN/support | normal requests to hosting and existing card/image CDN; owner receives voluntarily sent support email | Cloudinary URLs remain original. Providers can receive connection/request metadata; their retention and mail handling are not specified by source. Do not promise that no third party sees any data or add private room/session values to image/mail URLs. |
 
 ## Product direction versus release review
+
+2026-10-13 source follow-up: the traffic store above is already deployed with the
+owner-edited admin release; it is distinct from process-local operational
+analytics. The new immutable chat domain is NOT registered/enabled: it creates
+no production chat/report store yet. Future chat must retain existing session
+authorization, expiry/deletion and separate selected-report seven-day TTL gates.
 
 Owner currently requests no consent prompt and no individual-data deletion
 feature. That does not resolve the lawful basis, responsible controller,

@@ -23,10 +23,12 @@ describe('approved room communication boundary (not a chat/voice implementation)
     expect(communicationAccess(room(), 'active')).toEqual({ canReceive: true, canPublish: true, error: null })
     expect(communicationAccess(room({ status: 'ended' }), 'active').canReceive).toBe(false)
   })
-  it('game silence prevents publishing, healing restores it without clearing safety mute', () => {
-    expect(communicationAccess(room({ mutedPlayer: 'member' }), 'active').error).toBe('GAME_MUTED')
+  it('game silence/healing does not change communication or clear safety moderation', () => {
+    expect(COMMUNICATION_POLICY.version).toBe('room-communication/v2')
+    expect(communicationAccess(room({ mutedPlayer: 'member' }), 'active').canPublish).toBe(true)
     expect(communicationAccess(room({ mutedPlayer: null }), 'active').canPublish).toBe(true)
     expect(communicationAccess(room({ mutedPlayer: null }), 'active', ['member']).error).toBe('SAFETY_MUTED')
+    expect(communicationAccess(room({ mutedPlayer: 'member' }), 'active', ['member']).error).toBe('SAFETY_MUTED')
   })
   it('does not infer a mute from a different player or stale presentation flags', () => {
     expect(communicationAccess(room({ mutedPlayer: 'other' }), 'active').canPublish).toBe(true)

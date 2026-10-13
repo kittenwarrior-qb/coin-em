@@ -12,7 +12,9 @@ Bundled FE and lifecycle/token/link adapters with safe area/native back.
 
 ## Current evidence
 
-No native shell or platform boundary evidence.
+Bundled Android/iOS source foundation exists. Latest staging follow-up adds exact
+native-origin/seat/admin boundary evidence and Android SDK preflight. No APK/IPA,
+device test, Xcode build or store approval is claimed; see the dated QA below.
 
 ## Scope
 
@@ -63,6 +65,17 @@ Audience6–18 is owner-approved; do not reopen that choice. Native permission s
 
 ## Implementation plan
 
+### Plan revision 2026-10-13 — native-origin staging and Android preflight
+
+Owner requests continued implementation after deploying their revised admin.
+Admit `be/src/transport/origins.ts`, adjacent index wiring and owned origin tests,
+plus read-only native Android preflight/script tests and runbook updates. Merge
+the deployed admin source into the isolated native branch rather than overwrite
+the dirty primary checkout. Native gameplay origins must be an explicit flag,
+not a wildcard or an admin-origin expansion; check WebSocket handshakes too.
+Do not change production environment, install/accept SDK licenses, sign or
+submit a build. Prefer Studio JDK21 explicitly over machine JAVA_HOME25.
+
 ### Owner revision2026-10-13 — native foundation admitted
 
 Owner confirms cloud.emcoin.app and independent chat/micro moderation. Admit
@@ -99,6 +112,23 @@ Owner yêu cầu roadmap Android/iOS và chốt voice trong phòng mời có qu�
 <!-- Codex updates this after implementation: changed files, invariant preserved, commands and results. -->
 
 ## QA report
+
+2026-10-13 staging follow-up: exact web/native origin flag/config tests and real
+production-handler loopback admission/hydration/cross-room/session redaction plus
+admin-cookie/origin checks PASS30. Initial four read cases wrongly expected an
+ACK for get_room_state, timed out, and were corrected to await the existing
+room_state event without changing production read semantics. BE743tests/69files
+PASS (includes26 newly added unregistered chat-domain cases), TypeScript build
+PASS. FE759tests/79files PASS with maxWorkers4, lint and regular/native builds
+PASS. Initial default-concurrency full FE run had one asset-fingerprint timeout
+at5s; this is retained as failed, not suppressed by a larger test deadline.
+Rebuilt native bundle599files/34,167,680bytes, exact checks/Android+iOS sync and
+packaged guide browser smoke PASS. Twenty native policy/preflight tests PASS.
+Read-only SDK preflight with Studio JDK21 fails as expected: SDK/platform36/build
+tools/ADB/license record/emulator/system image absent. Machine JAVA_HOME points
+to JDK25; no global env was changed. Real native gameplay/device/store tests and
+SDK license acceptance remain pending. Production admin release994936d is not
+changed by this staging work.
 
 2026-10-13 isolated foundation QA: FE clean `npm ci --ignore-scripts` (network after offline-cache miss), 759 tests/79 files PASS, lint PASS, TypeScript/regular web build PASS (manifest/worker retained) and native build PASS (no manifest/worker, 597 files/34,118,075 bytes). Native policy11tests PASS; exact asset/config/manifest checks PASS; official Android/iOS(SPM) add/sync PASS. Packaged guide cold/reload/hash-route smoke at320/390px PASS with0worker registrations/page errors and production network blocked. Source digest `fd6a736ab20346199647a15349783a64a738e626699cc40784b190f83bbea228` identifies the dirty reviewed bundle, not signed platform artifacts.
 

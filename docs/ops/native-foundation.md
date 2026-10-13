@@ -22,9 +22,33 @@ Use Node 22+; the verified runtime is `tmp/r39-node-22.23.3/node-v22.23.3-win-x6
 4. `node native/scripts/browser-smoke.mjs` from repository root runs a local packaged guide/hash-route smoke with all production network requests blocked. It is Chromium, not Android/iOS WebView or realtime native game evidence.
 5. Open `native/android` in Android Studio to configure an SDK and build a test artifact after the gates below. Open `native/ios/App/App.xcodeproj` on a Mac for Xcode/SPM setup. Do not configure release signing/upload yet.
 
+## Native-origin staging progress — 2026-10-13
+
+- `EMCOIN_NATIVE_ORIGINS_ENABLED=true` explicitly adds only `https://localhost`
+  and `capacitor://localhost` to the gameplay allowlist. Default/`false` remains
+  web-only. Invalid values, wildcard/null origins, URL paths and credentials fail
+  configuration validation. Do not add these origins to `EMCOIN_ADMIN_ORIGIN`.
+- The Socket.IO initial handshake checks the exact Origin for polling and
+  WebSocket; CORS alone does not protect WebSocket upgrades. Originless tooling
+  remains compatible, but membership/session authorization is still mandatory.
+- An isolated loopback fixture uses real production room handlers to check
+  native admission/hydration, cross-room denial and token/hash redaction. Real
+  admin login/cookie endpoints reject native origins even when the cookie is
+  valid. These checks are transport evidence, not Android/iOS WebView evidence.
+- No production environment, compose configuration or origin was changed.
+  Enable the flag only in an owned staging process after reviewing its web
+  allowlist. Keep production/native release rollout a separately verified step.
+
 ## Local environment and missing gates
 
 - Windows has Android Studio and its bundled JDK 21.0.8. `ANDROID_HOME`/`ANDROID_SDK_ROOT` were not configured and the standard user SDK folder was not present during preflight; no alternative disks were scanned. No Gradle APK build was attempted or counted as passed.
+- `node native/scripts/android-preflight.mjs` is read-only and returns failure
+  until SDK Platform36, Build Tools35+, Platform Tools/ADB and the SDK license
+  installation record exist. Emulator additionally needs Android Emulator and
+  the API36 Google APIs x86_64 system image. Current machine JAVA_HOME selects
+  JDK25: select Studio's JDK21 for this task process, not a global overwrite.
+  Install packages and review/accept their terms yourself through Android
+  Studio → SDK Manager; the script never accepts licenses or wipes an AVD.
 - Generated Android configuration is min SDK 24, compile/target SDK 36 and Gradle 8.14.3. Install/select the matching SDK Platform and Build Tools through Android Studio's SDK Manager, reviewing its licenses yourself. Use the IDE's bundled JDK 21. [Capacitor environment setup](https://capacitorjs.com/docs/getting-started/environment-setup).
 - Generated iOS target is 15.0; Windows project generation/sync is not Xcode compilation. Mac/Xcode, Apple ownership/signing and real iPhone/iPad QA remain pending. [Capacitor iOS](https://capacitorjs.com/docs/ios).
 - **Backend origin gate:** source currently configures gameplay HTTP/Socket.IO CORS from `CLIENT_ORIGIN`; deployed configuration approves the web origin only. Native WebView origins `https://localhost` (Android) and `capacitor://localhost` (iOS) need a narrowly scoped, tested staging configuration before a real native game can pass. Do not use wildcard CORS or broaden the separate admin origin. No production origin/environment was changed in this task.

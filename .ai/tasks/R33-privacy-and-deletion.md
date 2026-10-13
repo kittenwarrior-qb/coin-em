@@ -69,6 +69,18 @@ Blocked by OQ-08/OQ-10: audience, consent, contact, retention, owner; no legal c
 
 ## Implementation plan
 
+### Plan revision 2026-10-13 — communication domain and current analytics map
+
+Owner prioritizes text chat and defers voice. Admit the unregistered immutable
+`communication/RoomChat.ts` contract/projection module, owner-approved independent
+mute policy and nearest tests. Host invitation is required; no DM/stranger chat,
+no report/voice transport or production data collection is enabled at this step.
+History/receipts/identity maps are bounded and belong to the future room snapshot;
+read/retry does not extend inactivity. Document the existing newly deployed
+analytics store accurately, including2day salted visitor hashes and400day daily
+aggregates. This is not an anonymity/legal clearance statement or new retention
+decision. Runtime/storage/report/admin/UI integration remains a separate gate.
+
 ### Plan revision 2026-10-04 — truthful source-only minimized data map
 
 Admit docs/ops/r33-data-map.md to reconcile actual browser/active Redis/legacy JSON/presence/marker/admin/volatile aggregate/redacted diagnostic/CDN/support boundaries with current owner decisions and source. No fabricated retention for proxy/CDN/mail/storage history, no anonymity/zero-collection/legal-compliance claim, no new deletion/consent endpoint or public legal policy. Document logical deletion vs physical AOF/legacy archive/operator boundaries and missing legal configuration. This is evidence preparation, not production processing approval.
@@ -83,6 +95,17 @@ Plan revision retention 2026-10-02: owner duyệt phòng inactive 1h / backup 7d
 6. Publish approved policy/support language and operational runbook with retention limitations; mark any legal or backup exception explicitly.
 
 ## Implementation report
+
+2026-10-13 follow-up: corrected policyv2 to keep gameplay silence/healing separate
+from safety moderation. Chat immutable domain has26passing unit cases covering
+host invitations/rotation, exact receipts/stale replay, expiry, bounded history,
+server-derived identity, rate limiting, recipient blocks/mute and reserved JS
+record keys. Existing roomView does not expose the new private state. No chat
+events, UI, report database or provider has been activated. The source data map now
+distinguishes daily tracking aggregates/pseudonymous2day hash from process-local
+operational metrics; raw IP/UA transit and upstream storage are not falsely
+treated as anonymous or zero collection. Report/operator/legal/device gates stay
+open; whole R33 is not done.
 
 2026-10-04 — Source-only data map added at docs/ops/r33-data-map.md after owner superseding archive decision and R35/R36 implementation. Actual guest browser credentials, active room names/roles/text/coins, Redis/session hashes, legacy active JSON, content-free markers, fixed admin auth/close audit, process-local aggregate analytics and closed sampled logs are distinguished from provider/network/operator retention. No new room-content backups or VPS backups enabled, no existing archive/data deletion or server access. Logical room expiry is not falsely represented as immediate physical deletion from all AOF/media/provider logs. Public legal policy, responsible controller/legal review for ages6–18 and actual release remain open, not independently accepted.
 

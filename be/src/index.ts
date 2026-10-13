@@ -27,14 +27,13 @@ import { TrafficStore } from './analytics/TrafficStore'
 import { registerTrackApi } from './analytics/trackApi'
 import { configureGameEvents } from './analytics/gameEvents'
 import { systemInfo } from './admin/systemInfo'
+import { gameplayOrigins, allowsGameplayOrigin } from './transport/origins'
 
 const PORT = process.env.PORT || 3001
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173'
 
-// Support multiple origins (comma-separated)
-const corsOrigin = CLIENT_ORIGIN.includes(',')
-  ? CLIENT_ORIGIN.split(',').map(o => o.trim())
-  : CLIENT_ORIGIN
+// Native is opt-in for reviewed staging; never use this list as admin authorization.
+const corsOrigin = [...gameplayOrigins(CLIENT_ORIGIN, process.env.EMCOIN_NATIVE_ORIGINS_ENABLED)]
 
 const app = express()
 const operationalAnalytics = new OperationalAnalytics()
@@ -82,6 +81,8 @@ registerSafeHttpErrors(app)
 const httpServer = createServer(app)
 const io = new Server(httpServer, {
   cors: { origin: corsOrigin, methods: ['GET', 'POST'] },
+  // WebSocket upgrades are not protected by browser CORS alone.
+  allowRequest: (request, callback) => callback(null, allowsGameplayOrigin(request.headers.origin, corsOrigin)),
 })
 
 async function start(): Promise<void> {

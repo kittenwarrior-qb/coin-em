@@ -15,3 +15,11 @@ Native shell foundation must bundle reviewed web assets, retain the existing
 guest-session and pending/overlay protections, use HTTPS/WSS, and not register
 the web service worker in native WebViews. Native microphone permission and
 provider credentials are not enabled until communication implementation/testing.
+
+## Latest execution scope
+
+Owner now prioritizes text chat and defers voice. Native staging keeps microphone
+permissions/provider deployment off. Invitation-only chat domain remains
+unregistered until transport, reporting/moderation and both-theme UI gates pass.
+SDK preflight is read-only; Android Studio JDK21 exists but the selected SDK and
+system image are absent. No SDK terms have been accepted on the owner's behalf.
