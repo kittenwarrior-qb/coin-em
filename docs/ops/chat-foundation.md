@@ -1,14 +1,15 @@
 # Chat foundation and remaining runtime gates
 
-2026-10-13. The owner now prioritizes text chat; voice is deferred, not rejected as
+Updated 2026-10-14. The owner now prioritizes text chat; voice is deferred, not rejected as
 technically impossible. No provider, microphone permission or media server has
 been enabled. This document does not certify a working end-user chat.
 
 ## Implemented domain boundary
 
 `be/src/communication/RoomChat.ts` is an immutable command/projection module, not
-registered Socket.IO handlers or frontend UI. It is deliberately not enabled on
-production while the safety and runtime pieces below are missing.
+frontend UI. Guarded Socket.IO transport and selected-report SQLite/admin API
+now exist as described below. They are deliberately not enabled on production
+while the safety/UI/device gates below are missing.
 
 - Host-only invitation activation/rotation/disable. Invitation is a cryptographic
   32-byte base64url token supplied by the caller; server persists its SHA256 hash,
@@ -33,13 +34,12 @@ production while the safety and runtime pieces below are missing.
 
 ## Required before enabling
 
-1. Register transport behind an explicit off-by-default flag; existing guarded
-   socket must authenticate seat/generation, hold the room queue through
-   `saveAndWait`, then ACK and emit the recipient projection only after commit.
-   Verify primary failure, restart/retry, concurrent commands and deletion.
-2. Add independent report storage with owner-approved maximum seven-day TTL and
-   admin-only handling. Store only selected reported content and bounded context;
-   do not log or expose all stories/chat to admin. Test pruning/auth/access.
+1. Real Redis/restart/multi-backend evidence still needs a dedicated fixture.
+   Current loopback transport uses real handlers/queues with an isolated mocked
+   room primary, not a production durability or capacity certification.
+2. Finish the report/operator UI and operating procedure. Selected-report SQLite
+   and authenticated admin endpoints are implemented; this does not prove a
+   responsible operator is available or certify legal/store compliance.
 3. Build the invitation/chat/mute/block/report UI in both approved themes, with
    pending/stale/timeout states and explicit retry. No auto-replay across a new
    connection/session, no private room content in PWA cache or analytics.
@@ -51,3 +51,55 @@ production while the safety and runtime pieces below are missing.
 Native staging work and this domain module do not mean all 41 tasks or app-store
 review are complete. Account enrollment, SDK licenses, device evidence,
 Mac/Xcode/signing and owner release decisions remain explicit external gates.
+
+## Runtime contract implemented 2026-10-14
+
+- `EMCOIN_ROOM_CHAT_ENABLED` must equal `true`; all other/unset values stay off.
+  Production compose/environment was not changed. Startup creates safety storage
+  only with the flag and configured admin credentials/origin. Unavailable/full
+  safety storage prevents new enable/join/send operations, while committed retries
+  and disable/mute/block controls remain available.
+- `get_chat_state`: payload exactly `{ roomId }`, ACK required; returns the
+  recipient projection, including `safetyAvailable` and current `canSend`.
+- `chat_command`: `{ roomId, ...ChatCommand }` with the strict version1 domain
+  fields, UUID and expected chat revision. The existing guarded socket enforces
+  membership/session generation and serializes through the primary commit. ACK
+  owns success/uncertainty; no fire-and-forget or automatic replay contract.
+- `chat_state` carries recipient history after controls; `chat_update` carries
+  room ID/revision and at most one visible new message after sends. A blocked or
+  uninvited recipient receives no sender/text. Clients must ignore old revisions
+  and hydrate gaps rather than invent missing messages. Full history is not
+  broadcast on each message. The game `room_state` projection updates room CAS
+  revision/expiry without exposing private chat state.
+- `report_chat_message`: exactly `{ roomId, messageId, requestId, reason }`, ACK
+  required. Reasons: harassment/unsafe/privacy/other. The selected message comes
+  from server history, not caller text; active invited membership is required.
+  No self/unknown-target report, arbitrary context, private role or session copy.
+- Admin `/admin/api/reports?status=open|resolved|dismissed|all` is authenticated,
+  origin/header protected and no-store, with at most50records per response.
+  `/admin/api/reports/resolve` accepts only `{ id, status, requestId }`, with exact
+  idempotent resolution and conflict handling. Existing overview/close permissions
+  are unchanged; this is not a browse-all-chat endpoint.
+
+## Selected report storage
+
+`chat-reports.sqlite` is a dedicated version1 single-host SQLite store, chmod600
+on platforms supporting these permissions. Unknown schemas fail closed rather
+than altering unrelated databases. A report contains one selected server-authored
+message plus bounded reporter/room/reason/time/status metadata, not the full room.
+Identical incidents are deduplicated across new request IDs; five new incidents
+per reporter/minute and2000retained records bound writes/storage. This limit can
+make chat unavailable until evidence expires; it is not infinite capacity.
+
+Expiry is anchored to the selected message's server timestamp plus seven days,
+so late submissions/retries/resolution cannot prolong retention or resurrect
+expired evidence. Expired rows are logically deleted on access and once/minute
+in the enabled server; SQLite WAL/media/provider physical erasure is not certified.
+Room deletion retains only these explicitly selected safety reports until expiry,
+not an archive of the room. Persistent SQLite close/reopen tests are separate
+from mocked room persistence. Multi-host report consistency is not proven.
+
+Before activation, update end-user/admin data copy to distinguish the selected
+report exception from deleted-room content, add moderation/content checks and
+run both-theme browser/device/load tests. No chat UI, Android APK/IPA or voice
+provider was shipped by this backend slice.

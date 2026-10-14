@@ -65,6 +65,17 @@ Admin identity, hosting owner and data access retention require OQ-08/OQ-10 appr
 
 ## Implementation plan
 
+### Plan revision 2026-10-14 — selected chat report exception
+
+Owner previously approved selected violation reports, admin-only and at most7days,
+then requested continuation of chat/native plans. Admit optional `/reports` and
+`/reports/resolve` in the existing authenticated registrar and adjacent real HTTP
+tests. This is selected evidence only, not a browse-room/story/chat capability.
+Keep fixed admin identity, exact web Origin/custom header/secure cookie and
+no-store guards; native origins remain denied even with a valid admin cookie.
+No Coin/role/game edits, production change or new frontend screen in this slice.
+Admin triage UI/operator workflow and disclosures remain before chat activation.
+
 ### Post-deploy screenshot correction 2026-10-13
 
 The previously reported low-contrast logout control is not a CSS defect: real admin login plus awaited button-image decode/font readiness renders the approved pink material with white text, then logout succeeds. Keep original early capture as evidence, correct QA capture timing instead of changing owner-approved theme or claim a fake UI fix. Screenshot QA must wait for decoded assets and exit-overlay DOM detachment before visual acceptance. Admin currently exposes process HTTP aggregates, not unique visitor analytics.
@@ -96,6 +107,14 @@ Plan revision2026-10-03 — owner approves restricted status/seat-count/admin-cl
 
 ## Implementation report
 
+2026-10-14: selected report list/resolve endpoints use existing auth/CSRF guards,
+strict command/filter shapes, bounded50-row response, exact resolution retry and
+sanitized errors. SQLite contains only selected server-authored evidence and
+bounded incident metadata; no role/session hashes or full room history API.
+Real loopback HTTP tests verify anonymous/foreign/native/header rejection,
+no-store, read/resolve replay/conflict and unavailable storage without leaks.
+No admin UI/deployment or independent/store acceptance is claimed.
+
 2026-10-03 — added lazy /admin page and allowlisted same-origin client with server-cookie auth, no credential/token storage, ten-second bounded requests, streamed256KiB response cap, schema validation, truthful process-local HTTP totals, clearing privileged views on revalidation/logout and unmount cancellation. Existing cartoon palette/fonts/button/modal sprites and430px-centered layout retained;320px screenshot review found cramped small close label and changed only use of the existing primitive to its medium size. No reskin. Added authenticated close-room registrar/service/repository method: session recheck inside existing room queue, fresh state, explicit revision/UUID/reason, existing Redis delete Lua atomically includes seven-day content-free audit/receipt, post-commit-only existing room_closed event, identical replay/no double emit, conflict/missing/storage-safe errors and no JSON-only admin-close fallback. Confirmation warns no content backup, consumes pending Back/Esc, keeps exact ID/revision/reason for explicit uncertain retries. Local anti-resurrection marker remains minimal; no player/card/Coin/role content is archived. Local Caddy adds only same-origin /admin/api route; shared/old Umami host blocks are not touched or deployed. Frontend-design guided real-content mobile-first composition without new asset creation.
 
 2026-10-03 — AdminAuth domain and production-shared login/logout/overview API implemented with default-disabled configuration, asynchronous salted scrypt, fixed single admin allowlist, bounded verification and single-process hashed-token session, Secure/HttpOnly/Strict host cookie, Origin/custom-header checks, no-store and scrubbed parser errors. Overview allowlists room id/status/seats/revision and volatile operational HTTP totals; no private content/names/roles/player/session data. HTTP parser scoped4KB and installed before global parser to avoid credential-bearing parse diagnostics. No signup/default secret/OAuth/VPS request/deploy. Actual frontend/admin-close audit pipeline and distributed auth are not yet implemented; stay in progress. R35 removes Umami and adds fixed-space anonymous counters, not pageview/visitor profiling.
@@ -103,6 +122,14 @@ Plan revision2026-10-03 — owner approves restricted status/seat-count/admin-cl
 <!-- Codex updates this after implementation: changed files, invariant preserved, commands and results. -->
 
 ## QA report
+
+2026-10-14: real loopback selected-report HTTP4cases PASS with actual admin KDF,
+cookie/origin/header auth and actual SQLite. Anonymous, foreign/native Origin and
+missing custom header are rejected; selected-only/no-store responses and exact
+resolution retry/conflict are checked. Malformed filters/extra actor/unknown IDs
+and unavailable/private SQLite errors stay bounded/sanitized. Full backend
+72files787tests and TypeScript build PASS. No admin report UI/live-data handling,
+production rollout, independent security/legal/device/store acceptance claimed.
 
 2026-10-08 — current production-preview admin case m4Kyph PASS9.703s within fresh9case short matrix, errors[]/six synthetic close HTTP requests, viewports320/390/1280. Existing confirmation, pending Back/Escape and same-ID retry assertions preserved. HTTP intercepted synthetic data only, no real admin/VPS action; backendConnected/authCookieProof false. Does not replace real auth/CSRF/cookie/Redis restart fixtures or release approval. No source/package/assets mutation; R29 aggregate9PASS457.35s.
 

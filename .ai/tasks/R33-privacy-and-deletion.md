@@ -69,6 +69,18 @@ Blocked by OQ-08/OQ-10: audience, consent, contact, retention, owner; no legal c
 
 ## Implementation plan
 
+### Plan revision 2026-10-14 — guarded chat/report runtime, default off
+
+Admit `socket/handlers/chatHandlers.ts`, existing guarded handler registration,
+`communication/ChatReportStore.ts`, optional production index wiring and nearest
+contract/SQLite/HTTP/socket tests. Apply the owner's seven-day admin-only selected
+report exception without storing all rooms/stories or adding a provider. Expiry
+is bounded to selected message timestamp+7days; no replay prolongation. Require
+configured safety storage before new publishing; preserve host closure and
+committed retry during outages. No environment/production/UI/signing change;
+safe rendering, pre-publication checks, operator procedure and real Redis/device
+evidence remain gates before activating user chat.
+
 ### Plan revision 2026-10-13 — communication domain and current analytics map
 
 Owner prioritizes text chat and defers voice. Admit the unregistered immutable
@@ -96,6 +108,15 @@ Plan revision retention 2026-10-02: owner duyệt phòng inactive 1h / backup 7d
 
 ## Implementation report
 
+2026-10-14: transport now uses the actual guarded socket and existing room queue,
+fresh seat/session generation checks and awaited primary commit before ACK/delta.
+Blocked recipients receive revision-only updates, not private text. Selected
+reports use versioned bounded SQLite with real file close/reopen tests, dedup,
+per-reporter limits, no-store fixed-admin APIs and prune-on-access/minute cleanup.
+Unknown schemas reject without modifying unrelated tables. Report storage failure
+disables new publishing while preserving committed retries and safety controls.
+Default flag remains off; no deployed processing change or end-user chat claim.
+
 2026-10-13 follow-up: corrected policyv2 to keep gameplay silence/healing separate
 from safety moderation. Chat immutable domain has26passing unit cases covering
 host invitations/rotation, exact receipts/stale replay, expiry, bounded history,
@@ -114,6 +135,19 @@ open; whole R33 is not done.
 <!-- Codex updates this after implementation: changed files, invariant preserved, commands and results. -->
 
 ## QA report
+
+2026-10-14: full BE72files787tests PASS with maxWorkers4 and TypeScript build
+PASS. New focused scope44tests (22actual Socket.IO/queue cases with mocked room
+primary,18real SQLite report cases including file close/reopen and unknown-schema
+preservation,4real loopback authenticated HTTP report cases). A first unset-flag
+fixture failed because its default function argument changed undefined to true;
+fixed fixture, not the production flag. Exact primary/adapter failure, same-ID
+retry, session replacement/stale generation, blocks, expiry, concurrent revision,
+strict shapes, broker gap hydration and enabled rate limit checks pass. No real
+Redis restart/multi-host capacity/browser chat UI/device/store result is claimed.
+Native20policy/preflight cases PASS; read-only SDK check remains expected failure:
+Studio JDK21 exists, SDK/platform/build tools/ADB/license record/emulator image
+are absent. No feature deployed, license accepted or new microphone capability.
 
 <!-- QA owner records environment, test matrix, failures, visual/device evidence and final result. -->
 

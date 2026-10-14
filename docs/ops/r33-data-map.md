@@ -19,15 +19,19 @@ Do not infer rights to publish participant photos or UNICEF branding from these.
 | Admin overview/close | room metadata/status/seat counts and fixed aggregate HTTP outcomes/timing; explicit close audited reason/receipt | allowlisted API; no private response/reflection/nickname/role/session access or direct Coin edits. Exact close receipt stored with primary marker, not merely console output. |
 | Operational diagnostics/metrics | closed event/outcome/version JSON; fixed HTTP outcome/duration buckets | R35 no private objects, IDs, free-form error strings, IP/path or story in app diagnostic records; sampled120attempts/minute/process. Process-local HTTP metrics reset on restart. No Umami script or external tracking SDK. Host capture/rotation/retention/alerts remain operator configuration. |
 | Daily traffic analytics (owner-edited release2026-10-13) | allowlisted public page, referrer hostname/category, device category, daily view/visitor/room/game totals | TrafficStore SQLite; admin-authenticated reports. Daily aggregates retained400days, as currently implemented, not a legal retention approval. Public tracking endpoint processes request IP/UA in memory to compute a daily salted hash; hash retained2days for approximate deduplication. No raw IP/UA, room ID, private text or cookie is stored in this database. Salt persists in SQLite. The hash is pseudonymous, not proof of anonymity or immunity to guessing with access to the salt. No historical traffic imported on rollout. |
+| Room chat (local opt-in backend, not deployed/enabled) | bounded100-message active-room history, invitation hash/admitted seats, recipient blocks, independent safety mute and bounded receipts | Existing seat/generation/queue/primary checks; recipient-only ACK/hydration/delta, no public roomView copy. Committed new chat action updates inactivity; reads/retries do not. Existing awaited room deletion removes the chat snapshot without a deleted-room content archive; Redis/legacy active JSON physical-media limits remain as above. |
+| Selected chat safety reports (local opt-in backend, not deployed/enabled) | one chosen server-authored message, pseudonymous reporter/room ID, reason/status/time and idempotency digest | Dedicated single-host SQLite; member reports and fixed-admin authenticated list/resolve only. Expiry anchored to message timestamp+7days, no extension/revival through retries/resolution. Access/startup/minute cleanup logically prunes evidence; physical WAL/media erase not certified. Five new incidents/reporter/minute and2000records cap; no whole-room archive or general admin reading permission. UI/disclosures/operator/content moderation remain before activation. |
 | Network/CDN/support | normal requests to hosting and existing card/image CDN; owner receives voluntarily sent support email | Cloudinary URLs remain original. Providers can receive connection/request metadata; their retention and mail handling are not specified by source. Do not promise that no third party sees any data or add private room/session values to image/mail URLs. |
 
 ## Product direction versus release review
 
 2026-10-13 source follow-up: the traffic store above is already deployed with the
 owner-edited admin release; it is distinct from process-local operational
-analytics. The new immutable chat domain is NOT registered/enabled: it creates
-no production chat/report store yet. Future chat must retain existing session
-authorization, expiry/deletion and separate selected-report seven-day TTL gates.
+analytics. As of that date the new immutable chat domain was not registered.
+The2026-10-14 rows above describe its now-registered local opt-in backend, still
+not deployed/enabled: no production chat/report store has been created by this
+work. Session authorization, expiry/deletion and selected-report seven-day bounds
+are tested; UI/operator/real-storage/device/privacy gates remain before activation.
 
 Owner currently requests no consent prompt and no individual-data deletion
 feature. That does not resolve the lawful basis, responsible controller,

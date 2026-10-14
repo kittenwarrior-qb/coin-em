@@ -28,6 +28,7 @@ import { registerTrackApi } from './analytics/trackApi'
 import { configureGameEvents } from './analytics/gameEvents'
 import { systemInfo } from './admin/systemInfo'
 import { gameplayOrigins, allowsGameplayOrigin } from './transport/origins'
+import { ChatReportStore } from './communication/ChatReportStore'
 
 const PORT = process.env.PORT || 3001
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173'
@@ -39,6 +40,7 @@ const app = express()
 const operationalAnalytics = new OperationalAnalytics()
 let catalog: CatalogStore | undefined
 let traffic: TrafficStore | undefined
+let chatReports: ChatReportStore | undefined
 const catalogFile = process.env.EMCOIN_CATALOG_DB || path.resolve('data/catalog.sqlite')
 const trafficFile = process.env.EMCOIN_TRAFFIC_DB || path.join(path.dirname(catalogFile), 'traffic.sqlite')
 const credentialDirectory = path.dirname(catalogFile)
@@ -55,6 +57,7 @@ registerAdminApi(app, {
   auth: new AdminAuth(credentials?.read(), undefined, credentials ? hash => credentials!.save(hash) : undefined),
   catalog: () => catalog,
   traffic: () => traffic,
+  chatReports: () => chatReports,
   system: () => systemInfo({ rooms: roomRepository.findAll(), redisAvailable, catalog, catalogFile, traffic, trafficFile }),
   origin: process.env.EMCOIN_ADMIN_PASSWORD_HASH ? process.env.EMCOIN_ADMIN_ORIGIN : undefined,
   rooms: () => roomRepository.findAll(), analytics: operationalAnalytics,
@@ -133,7 +136,17 @@ async function start(): Promise<void> {
     configureGameEvents(kind => traffic?.recordEvent(kind))
   } catch { operationDiagnostic('startup', 'degraded') }
 
-  registerSocketHandlers(io)
+  // Chat remains off by default. No safety store means no chat publishing.
+  if (process.env.EMCOIN_ROOM_CHAT_ENABLED === 'true') {
+    if (credentials && process.env.EMCOIN_ADMIN_ORIGIN) {
+      try {
+        chatReports = new ChatReportStore(path.join(credentialDirectory, 'chat-reports.sqlite'))
+        chatReports.prune()
+        setInterval(() => { try { chatReports?.prune() } catch { operationDiagnostic('startup', 'degraded') } }, 60_000).unref()
+      } catch { operationDiagnostic('startup', 'degraded') }
+    } else operationDiagnostic('startup', 'degraded')
+  }
+  registerSocketHandlers(io, { chatReports: () => chatReports })
   startupComplete = true
 
   httpServer.listen(PORT, () => {
