@@ -34,15 +34,14 @@ while the safety/UI/device gates below are missing.
 
 ## Required before enabling
 
-1. Real Redis/restart/multi-backend evidence still needs a dedicated fixture.
-   Current loopback transport uses real handlers/queues with an isolated mocked
-   room primary, not a production durability or capacity certification.
-2. Finish the report/operator UI and operating procedure. Selected-report SQLite
-   and authenticated admin endpoints are implemented; this does not prove a
-   responsible operator is available or certify legal/store compliance.
-3. Build the invitation/chat/mute/block/report UI in both approved themes, with
-   pending/stale/timeout states and explicit retry. No auto-replay across a new
-   connection/session, no private room content in PWA cache or analytics.
+1. Dedicated real Redis/restart/two-process and short100-seat chat evidence now
+   exists as described below. Sustained soak, WAN/device, production RPO/capacity
+   and separate-host safety storage are not certified by it.
+2. Report UI and a draft operating checklist exist. Owner must still designate
+   a responsible available operator and approve the pilot; this is not legal or
+   store compliance evidence. See `chat-safety-operations.md`.
+3. Invitation/chat/mute/block/report UI exists in both approved themes. Device
+   validation and staging review remain; no auto mutation replay or chat cache.
 4. Add pre-publication content checks and operator workflow/contact. A blacklist
    alone is not a complete moderation system or store compliance evidence.
 5. Run real room and browser/device tests, update disclosures, then enable in
@@ -100,7 +99,7 @@ not an archive of the room. Persistent SQLite close/reopen tests are separate
 from mocked room persistence. Multi-host report consistency is not proven.
 
 Before activation, finish public privacy/consent wording, pre-publication content
-checks/operator moderation, real Redis restart/load and physical-device tests.
+checks/operator moderation, sustained-load and physical-device tests.
 No Android APK/IPA, store approval or voice provider has been delivered.
 
 ## Frontend and operator workflow — 2026-10-14
@@ -139,3 +138,31 @@ the isolated test fixture, not real Redis proof. Admin HTTP is intercepted and
 does not certify authentication/cookies (separate backend HTTP tests cover those).
 Both themes are tested at 320/390px; report details at 1366×768. Production rate
 limits are enabled in this browser case. No production environment/data changed.
+
+## Owned real Redis and short chat load fixture — 2026-10-14
+
+Run `node be/scripts/test-real-chat.mjs` with the pinned `.nvmrc` Node and a working
+Linux Docker engine with cached `redis:7-alpine`. It accepts no target arguments,
+does not import dotenv, compiles current source, fingerprints source/dist/protocol,
+allocates labelled loopback-only Redis and two backend processes, and verifies
+ownership before removing those resources. It never uses the production VPS.
+
+The fixture covers 10 rooms/100 genuine sockets, 100 accepted chat load messages,
+unchanged Coin state, a cross-backend authenticated committed-message retry after
+backend SIGKILL, receipt/block/mute/report recovery, a two-writer revision race,
+primary outage read/write rejection, actual Redis AOF kill/restart, and room
+deletion without a chat archive. Selected evidence persists independently and
+logical seven-day pruning is checked. Same-ID retry does not refresh room activity.
+Report SQLite uses an actual file shared only on this host, not in-memory mocks.
+
+Retained failure: simultaneous initialization of an empty SQLite store encountered
+`database is locked`; moving busy_timeout earlier did not resolve it and was not
+retained as a purported fix. Final topology has a single schema initializer before
+parallel backend startup. Production remains single-backend; separate-host report
+storage and automatic scale/startup require an explicit architecture decision.
+
+The report contains mixed admission/read/mutation ACK quantiles for one short
+local run, not a production SLO or pooled workload certification. AOF uses
+appendfsync=always in the fixture, not a claim about VPS power/host loss. Synthetic
+evidence files stay only in the allocated test root; owned processes/container
+are removed. No production flag, catalog, user data or backup policy changed.

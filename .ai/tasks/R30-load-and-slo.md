@@ -12,6 +12,33 @@ Real Redis/Caddy test load harness and p95/p99/loss/convergence report.
 
 ## Current evidence
 
+### Plan revision / implementation — 2026-10-14, bounded real chat workload
+
+Owner requested continuing chat readiness. Add a dedicated short protocol fixture
+in `be/scripts/test-real-chat.mjs` / `chat-fixture-worker.cjs`: 10 rooms, 100 real
+WebSocket clients over two compiled backends, actual Redis/AOF/adapter, production
+throttles and same-host report SQLite after single schema bootstrap. It accepts
+no URL/target/env-file argument, does not contact production, and validates Docker
+ownership before cleanup. It builds current pinned source and fingerprints it.
+
+100 accepted load messages are exercised in 10 paced batches, with unchanged
+Coin state and mixed admission/read/mutation ACK latency samples. Additional
+cross-backend CAS/crash/retry and primary outage/AOF restart checks are tracked
+in R28. Report includes quantiles and explicit limitations. This is NOT a
+60-minute soak, proxy/Caddy load, WAN/device latency, full room/gameplay load,
+production capacity/SLO, zero-loss broadcast or separate-host SQLite certificate.
+Concurrent empty SQLite initialization failed and remains a recorded gate;
+single schema initialization is a prerequisite, not a claimed concurrency fix.
+No existing full-soak policy/result or R30 status is replaced by this short case.
+
+Final fixture QA: PASS (Node22.23.3, current source rebuilt). All100 seats received
+their room's10 unique deltas,1000 total, with no cross-room/duplicate load IDs in
+this bounded case.516 mixed ACK samples: p95~84.45ms, p99~109.04ms, max~169.05ms.
+These are local-run measurements only. Versioned evidence:
+docs/qa/chat-runtime-20261014/report.json (source/dist/worker/protocol hashes).
+No source/gameplay/production change or device/store certification; Docker test
+container and owned backend processes were removed, no shared container touched.
+
 Current protocol evidence includes a real loopback ten-seat/ten-round approved web-baseline fixture in R27, with controlled clock/mock Redis. This is not capacity, proxy, real-storage load or production-SLO proof. Concurrent-room capacity remains unverified.
 
 ## Scope
