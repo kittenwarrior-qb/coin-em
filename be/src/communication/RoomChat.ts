@@ -2,6 +2,7 @@ import { createHash, timingSafeEqual } from 'node:crypto'
 import type { Room } from '../modules/game/types'
 import { isRoomInactive } from '../retention'
 import { communicationAccess, COMMUNICATION_POLICY, normalizeCommunicationText } from './policy'
+import { publicationRejection } from './publicationChecks'
 
 export interface RoomChatMessage { id: string; senderId: string; senderName: string; text: string; sentAt: number }
 export interface RoomChatState {
@@ -82,6 +83,8 @@ export function applyChatCommand(room: ChatRoom, socketId: string, value: unknow
     }
     case 'send': {
       if (next.safetyMuted.includes(player.userId)) throw Error('SAFETY_MUTED')
+      const rejection = publicationRejection(command.text)
+      if (rejection) throw Error(rejection)
       const previous = own(next.lastSent, player.userId)
       if (previous !== undefined && now - previous < 1000) throw Error('CHAT_RATE_LIMITED')
       next.messages = [...next.messages, { id: command.requestId, senderId: player.userId, senderName: player.name,

@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto'
+import { randomUUID, createHash } from 'node:crypto'
 import { describe, expect, it } from 'vitest'
 import { applyChatCommand, chatView, parseChatCommand, type ChatRoom } from '../../src/communication/RoomChat'
 import { createMockRoom } from '../helpers/mockData'
@@ -18,6 +18,21 @@ function admitted() { const room = enabled(); return applyChatCommand(room, 'soc
 function send(room: ChatRoom, text = 'Mình đang lắng nghe', time = now) { return applyChatCommand(room, 'socket-1', command(room, { kind: 'send', text }), time) }
 
 describe('invitation-only immutable chat domain; no transport enabled', () => {
+  it('rejects new contact/link publications before revision, receipt, rate or activity changes', () => {
+    const room = admitted(), before = JSON.stringify(room)
+    for (const text of ['0901234567', 'qa@example.invalid', 'https://example.invalid']) expect(() => send(room, text)).toThrow(/CHAT_(CONTACT|LINK)_NOT_ALLOWED/)
+    expect(JSON.stringify(room)).toBe(before)
+    expect(send(room, 'Mình đang buồn và cần được lắng nghe').chat!.messages).toHaveLength(1)
+  })
+  it('keeps an existing committed receipt replayable without re-publication under a newer filter', () => {
+    const room = admitted(), input = command(room, { kind: 'send', text: 'qa@example.invalid' })
+    // Explicit legacy snapshot: commit happened before publication checks existed.
+    const old = send(room, 'allowed')
+    const fingerprint = createHash('sha256').update(JSON.stringify(Object.keys(input).sort().map(key => [key, input[key as keyof typeof input]]))).digest('hex')
+    old.chat!.receipts = [{ requestId: input.requestId, actorId: 'member-1', fingerprint }]
+    old.chat!.messages[0] = { ...old.chat!.messages[0], id: input.requestId, text: 'qa@example.invalid' }
+    expect(applyChatCommand(old, 'socket-1', input, now + 1000)).toBe(old)
+  })
   it('does not mutate gameplay, Coin, original input, or expose chat through existing room snapshots', () => {
     const room = fixture(), before = JSON.stringify(room)
     const next = applyChatCommand(room, 'socket-0', command(room, { kind: 'enable', invitation: invite }), now)

@@ -20,8 +20,16 @@ test('both-theme chat invitation, real guarded send/block/report and selected ad
   const vite = spawn(process.execPath, [path.join(root, 'fe/node_modules/vite/bin/vite.js'), '--host', '127.0.0.1', '--port', '0', '--clearScreen', 'false'],
     { cwd: path.join(root, 'fe'), windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'], env: { ...process.env, VITE_API_URL: server.url } })
   let browser: Awaited<ReturnType<typeof chromium.launch>> | undefined
+  let finished = false
   const errors: string[] = [], resolutions: object[] = []
   onTestFinished(async () => {
+    if (!finished && browser) {
+      let index = 0
+      for (const context of browser.contexts()) for (const page of context.pages()) {
+        await page.screenshot({ path: path.join(output, `failure-${index++}.png`), fullPage: true }).catch(() => {})
+      }
+      console.log(`Owned failed chat browser artifacts: ${output}`)
+    }
     vite.kill(); await browser?.close(); await server.close(); reports.close()
     if (oldFlag === undefined) delete process.env.EMCOIN_ROOM_CHAT_ENABLED; else process.env.EMCOIN_ROOM_CHAT_ENABLED = oldFlag
     if (oldThrottle === undefined) delete process.env.DISABLE_RATE_LIMIT; else process.env.DISABLE_RATE_LIMIT = oldThrottle
@@ -66,6 +74,12 @@ test('both-theme chat invitation, real guarded send/block/report and selected ad
     await guest.getByRole('button', { name: 'Tham gia chat', exact: true }).click()
     await ui(guest.getByLabel('Tin nhắn', { exact: true })).toBeEnabled()
     await guest.waitForTimeout(350) // Distinct new command, respect the production 250ms throttle.
+    await guest.getByLabel('Tin nhắn', { exact: true }).fill('qa@example.invalid')
+    await guest.getByRole('button', { name: 'Gửi', exact: true }).click()
+    await ui(guest.getByText(/Tin chưa được gửi\. Hãy bỏ email/)).toBeVisible()
+    await ui(guest.getByLabel('Tin nhắn', { exact: true })).toHaveValue('qa@example.invalid')
+    await ui(host.getByText('qa@example.invalid', { exact: true })).toHaveCount(0)
+    await ui(guest.getByRole('button', { name: 'Kiểm tra lại yêu cầu' })).toHaveCount(0)
     await guest.getByLabel('Tin nhắn', { exact: true }).fill('Tin thử nghiệm <script>không thực thi</script>')
     await guest.getByRole('button', { name: 'Gửi', exact: true }).click()
     await ui(host.getByText('Tin thử nghiệm <script>không thực thi</script>', { exact: true })).toBeVisible()
@@ -118,6 +132,7 @@ test('both-theme chat invitation, real guarded send/block/report and selected ad
     await context.close()
   }
   expect(resolutions).toHaveLength(2); expect(errors).toEqual([])
+  finished = true
   await writeFile(path.join(output, 'report.json'), JSON.stringify({ result: 'passed', errors, themes: ['emotion-orbit', 'kindness-workshop'],
     chatTransport: 'real-production-guarded-handlers-loopback', roomStorage: 'test-fixture-not-redis-proof', reportStorage: 'actual-in-memory-sqlite',
     adminHttp: 'intercepted-not-auth-proof', physicalDevice: false, productionModified: false }, null, 2))

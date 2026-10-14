@@ -42,8 +42,9 @@ while the safety/UI/device gates below are missing.
    store compliance evidence. See `chat-safety-operations.md`.
 3. Invitation/chat/mute/block/report UI exists in both approved themes. Device
    validation and staging review remain; no auto mutation replay or chat cache.
-4. Add pre-publication content checks and operator workflow/contact. A blacklist
-   alone is not a complete moderation system or store compliance evidence.
+4. A local pre-publication contact/link layer exists; finish semantic harm/abuse
+   handling and operator review/contact. Pattern checks alone are not a complete
+   moderation system or store compliance evidence.
 5. Run real room and browser/device tests, update disclosures, then enable in
    owned staging before any separately reviewed production rollout.
 
@@ -166,3 +167,47 @@ local run, not a production SLO or pooled workload certification. AOF uses
 appendfsync=always in the fixture, not a claim about VPS power/host loss. Synthetic
 evidence files stay only in the allocated test root; owned processes/container
 are removed. No production flag, catalog, user data or backup policy changed.
+
+## Local pre-publication contact checks — 2026-10-14
+
+`publicationChecks.ts` implements `chat-contact-check/v1` for new `send` actions
+only. Common schemes/domain-shaped links, email, Vietnam mobile/international-plus
+phone formats and bidi overrides produce closed rejection codes. Inspection uses
+NFKC, removes common zero-width separators and recognizes bracketed-at/dot forms.
+Accepted original text stays unchanged, including ordinary Unicode/emoji.
+Rejected text is not copied to logs, messages, receipts or the report store and
+does not change room activity or chat/game revisions. Receipt lookup precedes
+new checks so previously committed retries do not become new publications.
+
+Frontend maps rejection to “Tin chưa được gửi”, keeping the draft editable without
+an uncertain-retry UI. Textarea uses a stable explicit label whose accessible name
+does not include draft contents after revalidation. Both-theme browser tests cover
+rejection followed by valid sending. BE827 and FE793 regular tests, builds and
+frontend lint PASS at this source slice.
+
+Limits: these patterns do not identify every number/address, nickname, image,
+masked addresses, obfuscation or contextual abuse. No keyword ban is applied to
+emotional disclosures or requests for help. This does not provide semantic
+moderation, counselling, staffed escalation or a claim that unsafe content cannot
+appear. No external content service is used. Public notices, moderation/operator
+decisions and device/staging remain open; production chat stays off.
+
+Owner follow-up: contextual moderation is deferred for now. Generic domain-shaped
+text (including punycode), bare valid IPv4/bracketed IPv6 and bracketed-dot forms
+are denied as well; the application does not fetch URLs, resolve them, show previews
+or auto-link chat text. This is not URL reputation analysis or a malware scanner.
+
+## Open-source candidates reviewed, not installed — 2026-10-14
+
+- [DwcksDinh/bad-word-filter](https://github.com/DwcksDinh/bad-word-filter): MIT,
+  TypeScript, README describes Vietnamese/English and configurable word lists.
+  Candidate only, not audited production moderation: source needs review/testing
+  for regex statefulness, missing-list behavior, word boundaries and false positives.
+- [Wart050/Profanity-Filtering-All-languages](https://github.com/Wart050/Profanity-Filtering-All-languages):
+  README lists English/Vietnamese and zero runtime dependencies; repository shows
+  GPL-3.0, so licensing/data provenance need review before integrating or distributing.
+
+These are profanity/dictionary filters, not contextual harm classifiers or link
+security systems. A curated Vietnamese/English vocabulary with boundary/exception
+tests may fit this Node backend without an extra service, but has not been approved
+or installed. No user chat was submitted to any repository/provider in this research.

@@ -81,6 +81,19 @@ describe('real guarded room chat transport with isolated mock primary', () => {
     expect((await state(host)).data.messages).toHaveLength(1)
     expect(room().chat!.messages).toHaveLength(1)
   })
+  it('rejects contact/link publications with closed codes and no save, receipt, activity or delivery', async () => {
+    const { host, guest } = await enabled(), before = JSON.stringify(room())
+    const save = vi.spyOn(roomRepository, 'saveAndWait'), delivered: unknown[] = []
+    host.on('chat_update', value => delivered.push(value))
+    for (const [text, error] of [['qa@example.invalid', 'CHAT_CONTACT_NOT_ALLOWED'], ['https://example.invalid', 'CHAT_LINK_NOT_ALLOWED'],
+      ['090 123 4567', 'CHAT_CONTACT_NOT_ALLOWED'], ['abc\u202ecom', 'CHAT_TEXT_FORMAT_NOT_ALLOWED']]) {
+      expect(await command(guest, { kind: 'send', text })).toEqual({ success: false, error })
+    }
+    await state(host) // queued barrier, not a guessed delivery sleep
+    expect(save).not.toHaveBeenCalled(); expect(delivered).toEqual([])
+    expect(JSON.stringify(room())).toBe(before); expect(reports!.list('all').total).toBe(0)
+    expect((await command(guest, { kind: 'send', text: 'Mình buồn và muốn được lắng nghe' })).success).toBe(true)
+  })
   it('waits for primary commit before ACK or chat delivery and keeps the room queue held', async () => {
     const { host, guest } = await enabled()
     const original = roomRepository.saveAndWait.bind(roomRepository), before = JSON.stringify(room())

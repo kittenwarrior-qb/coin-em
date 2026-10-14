@@ -12,6 +12,45 @@ Data map, policy/routes, authenticated deletion/revocation, retention and log sc
 
 ## Current evidence
 
+### Plan revision / implementation — 2026-10-14, local publication contact layer
+
+Owner requested continuing toward staging. Expand scope to
+be/src/communication/publicationChecks.ts, RoomChat.ts, chatHandlers.ts and their
+tests, plus existing RoomChatPanel copy/error handling and browser/UI regressions.
+No provider, production flag, retention, game rule, card asset or package change.
+
+`chat-contact-check/v1` checks new publications locally: common scheme/domain
+links, email, Vietnam-mobile/international-plus phone patterns and bidi overrides.
+NFKC/zero-width inspection and bracketed-at/dot forms reduce simple evasion;
+approved text is NOT rewritten. This is not a complete PII/contact or semantic
+harm detector. Nicknames, images, addresses, spoken numbers, unknown domains,
+obfuscations and contextual abuse need separate handling. Emotional disclosures
+are not censored for distress/self-harm words; accepting them is not counselling
+or a guarantee of staffed escalation.
+
+Checks run after seat/admission/mute authorization and before new message, receipt,
+revision, activity or send-rate timestamp mutation. Closed errors return no
+rejected text; selected-report storage is unchanged. Existing committed receipts
+remain replayable without publishing again. Denied drafts stay editable and are
+not treated as uncertain retries. An explicit stable textarea label fixes the
+accessible-name regression exposed by the real browser rejection workflow.
+
+Final QA: BE827/73files and FE793/82files PASS; builds and frontend lint PASS.
+Both-theme owned browser case passes rejection followed by valid send, retained
+draft, no recipient leak and no uncertain-retry UI. Retained failures: initial
+www-prefix pattern missed a host (fixed); browser exact-label query failed after
+revalidation despite the visible retained draft (inspected screenshot, fixed
+label association and regression). No skipped assertion or safety bypass.
+Production remains disabled. Semantic moderation, public notices, staffing,
+staging and physical devices remain gates. See docs/ops/chat-foundation.md.
+
+Owner follow-up: defer contextual moderation for later; requested open-source
+Vietnamese/English options and no unsafe/hacker links. Link detection expanded
+to generic domain-shaped text/IDN punycode, explicit bracketed-dot obfuscation and
+valid bare IPv4/bracketed IPv6. Chat still renders plain text, never auto-links,
+fetches URLs, resolves DNS or opens previews. No malware scanner/all-evasion
+guarantee is claimed. No open-source profanity dependency installed yet.
+
 ### Implementation / QA revision — 2026-10-14, selected-report UI
 
 Added explicit in-context disclosure before chat/report submission: room chat is

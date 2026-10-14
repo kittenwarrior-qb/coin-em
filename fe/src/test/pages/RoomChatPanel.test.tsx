@@ -21,6 +21,22 @@ function setup(initial = view()) {
 }
 afterEach(cleanup)
 describe('room chat UI', () => {
+  it.each([
+    ['CHAT_CONTACT_NOT_ALLOWED', 'Hãy bỏ email hoặc số điện thoại'],
+    ['CHAT_LINK_NOT_ALLOWED', 'Chat phòng không nhận đường dẫn'],
+    ['CHAT_TEXT_FORMAT_NOT_ALLOWED', 'ký tự đổi hướng chữ'],
+  ])('treats %s as a definitive unsent draft, not an uncertain retry', async (code, copy) => {
+    const s = setup(); render(<RoomChatPanel {...s.props} />)
+    fireEvent.click(await screen.findByRole('button', { name: 'Mở chat phòng' }))
+    s.emitWithAck.mockResolvedValueOnce({ success: false, error: code })
+    fireEvent.change(screen.getByLabelText('Tin nhắn'), { target: { value: 'Bản nháp cần sửa' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Gửi' }))
+    await screen.findByText(new RegExp(copy))
+    expect(screen.getByLabelText('Tin nhắn')).toHaveValue('Bản nháp cần sửa')
+    expect(screen.getByRole('textbox', { name: 'Tin nhắn' })).toHaveAccessibleName('Tin nhắn')
+    expect(screen.queryByRole('button', { name: 'Kiểm tra lại yêu cầu' })).not.toBeInTheDocument()
+    expect(s.emitWithAck.mock.calls.filter(([event]) => event === 'chat_command')).toHaveLength(1)
+  })
   it('coalesces StrictMode hydration instead of hiding chat after a duplicate rate-limited read', async () => {
     const s = setup()
     render(<StrictMode><RoomChatPanel {...s.props} /></StrictMode>)

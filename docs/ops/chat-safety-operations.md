@@ -22,8 +22,10 @@ It does not certify legal compliance, store approval, staffing or response times
    available. Do not publish a promised response time until it is actually covered.
 2. Finish child/guardian-facing public notices and review the selected-message
    reporting exception, contact details and consent/rights process with the owner.
-3. Add and test pre-publication content checks; reporting after publication alone
-   is not a complete content-safety system. A keyword blacklist alone is insufficient.
+3. Local contact/link checks exist. Finish semantic harm/abuse handling or reviewed
+   pre-publication human moderation. Reporting and contact patterns alone are not
+   a complete content-safety system; do not claim all private/unsafe text is found
+   or censor emotional disclosures using a distress-word blacklist.
 4. Run the current browser workflow, owned Redis/restart fixture and device checks.
    Confirm the report store is initialized, writable, limited and pruned, without
    printing passwords, tokens or message bodies in diagnostic logs.
@@ -57,5 +59,5 @@ analytics intact. Never use Redis FLUSHALL, broad filesystem deletion or catalog
 reset as a chat incident procedure.
 
 The current admin list needs pagination for older resolved history beyond the
-50-record window; staffing, content filtering, physical devices and public notices
+50-record window; staffing, semantic content review, physical devices and public notices
 remain open gates, not completed by the local load evidence.

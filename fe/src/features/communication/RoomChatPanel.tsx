@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import type { Socket } from 'socket.io-client'
 import { MessageCircle, Send, ShieldCheck, Flag, RefreshCw } from 'lucide-react'
 import { CartoonButton, CartoonModal } from '@/components/cartoon'
@@ -14,6 +14,9 @@ const errorCopy = (error: unknown) => {
   if (code === 'INVALID_CHAT_INVITATION') return 'Mã mời chưa đúng hoặc quản trò đã đổi mã.'
   if (code === 'CHAT_REVISION_CONFLICT') return 'Chat vừa thay đổi. Đã tải lại; hãy kiểm tra rồi thao tác lại.'
   if (code === 'SAFETY_MUTED') return 'Quản trò đang tắt quyền gửi tin của bạn.'
+  if (code === 'CHAT_CONTACT_NOT_ALLOWED') return 'Tin chưa được gửi. Hãy bỏ email hoặc số điện thoại rồi gửi lại.'
+  if (code === 'CHAT_LINK_NOT_ALLOWED') return 'Tin chưa được gửi. Chat phòng không nhận đường dẫn; hãy bỏ link rồi gửi lại.'
+  if (code === 'CHAT_TEXT_FORMAT_NOT_ALLOWED') return 'Tin chưa được gửi do ký tự đổi hướng chữ. Hãy nhập lại nội dung bằng chữ thông thường.'
   if (code === 'CHAT_SAFETY_UNAVAILABLE' || code === 'REPORT_UNAVAILABLE') return 'Kho báo cáo chưa sẵn sàng. Chưa thể gửi tin mới.'
   return 'Yêu cầu bị từ chối. Kiểm tra trạng thái phòng trước khi thử lại.'
 }
@@ -21,6 +24,7 @@ export function RoomChatPanel({ socket, roomId, userId, connected, players, onBu
   socket: Socket; roomId: string; userId: string; connected: boolean
   players: { userId?: string; name: string; isFake?: boolean }[]; onBusy: (busy: boolean) => void
 }) {
+  const textId = useId()
   const [view, setView] = useState<ChatView | null>(null), [open, setOpen] = useState(false)
   const [text, setText] = useState(''), [invite, setInvite] = useState(''), [hostInvite, setHostInvite] = useState('')
   const [error, setError] = useState(''), [pending, setPending] = useState(false), [retry, setRetry] = useState<Operation | null>(null)
@@ -109,7 +113,7 @@ export function RoomChatPanel({ socket, roomId, userId, connected, players, onBu
         currentView.current = null; setView(null); setOpen(false); setText(''); setInvite(''); setHostInvite(''); setRetry(null); return
       }
       // Transport failures and malformed success cannot prove that a write was rolled back.
-      const definitive = /^(CHAT_RATE_LIMITED|REPORT_RATE_LIMITED|INVALID_CHAT_[A-Z_]+|INVALID_REPORT_[A-Z_]+|CHAT_REVISION_CONFLICT|CHAT_REQUEST_CONFLICT|SAFETY_MUTED|NOT_HOST|NOT_ROOM_MEMBER|ROOM_EXPIRED|GAME_ENDED|CHAT_DISABLED|CHAT_INVITATION_REQUIRED|CHAT_SAFETY_UNAVAILABLE|REPORT_EXPIRED|REPORT_REQUEST_CONFLICT|REPORT_CAPACITY_REACHED)$/.test(code)
+      const definitive = /^(CHAT_RATE_LIMITED|REPORT_RATE_LIMITED|INVALID_CHAT_[A-Z_]+|INVALID_REPORT_[A-Z_]+|CHAT_REVISION_CONFLICT|CHAT_REQUEST_CONFLICT|SAFETY_MUTED|NOT_HOST|NOT_ROOM_MEMBER|ROOM_EXPIRED|GAME_ENDED|CHAT_DISABLED|CHAT_INVITATION_REQUIRED|CHAT_SAFETY_UNAVAILABLE|CHAT_LINK_NOT_ALLOWED|CHAT_CONTACT_NOT_ALLOWED|CHAT_TEXT_FORMAT_NOT_ALLOWED|REPORT_EXPIRED|REPORT_REQUEST_CONFLICT|REPORT_CAPACITY_REACHED)$/.test(code)
       if (!definitive) { setRetry(operation); setError('Chưa xác nhận được kết quả. Kiểm tra lại đúng yêu cầu này trước khi gửi thao tác mới.') }
       else {
         setRetry(null); setError(errorCopy(failure))
@@ -132,7 +136,7 @@ export function RoomChatPanel({ socket, roomId, userId, connected, players, onBu
     <button type="button" className="room-chat-launch" aria-label="Mở chat phòng" disabled={pending} onClick={() => setOpen(true)}><MessageCircle aria-hidden="true" /><span>Chat</span></button>
     <CartoonModal open={open} title="Chat phòng" persistent={pending || !!retry} hideClose={pending || !!retry} onClose={() => { if (!pending && !retry) setOpen(false) }} className="room-chat-modal">
       <div className="room-chat-content">
-        <p className="room-chat-note"><ShieldCheck aria-hidden="true" />Chỉ người được mời. Không gửi thông tin riêng tư; bạn có thể chặn hoặc báo cáo tin nhắn.</p>
+        <p className="room-chat-note"><ShieldCheck aria-hidden="true" />Chỉ người được mời. Không gửi link, email, số điện thoại hay thông tin riêng tư. Bạn có thể chặn hoặc báo cáo tin nhắn.</p>
         {!connected && <p role="status">Mất kết nối. Chat sẽ tải lại khi mạng ổn định.</p>}
         {error && <p role="status" className="room-chat-notice">{error}</p>}
         {retry && <CartoonButton color="blue" disabled={pending || !connected} onClick={() => void execute(retry)}><RefreshCw aria-hidden="true" />Kiểm tra lại yêu cầu</CartoonButton>}
@@ -155,7 +159,7 @@ export function RoomChatPanel({ socket, roomId, userId, connected, players, onBu
             <p>Tin nhắn này sẽ được lưu cho quản trị viên, tối đa 7 ngày kể từ lúc gửi.</p>
             <CartoonButton type="submit" color="pink" disabled={blocked || !view.safetyAvailable}>Gửi báo cáo</CartoonButton><button disabled={pending || !!retry} onClick={() => setReportId('')} type="button">Hủy</button>
           </form> : <form onSubmit={event => { event.preventDefault(); if (text.trim()) command({ kind: 'send', text: text.trim() }) }}>
-            <label>Tin nhắn<textarea value={text} maxLength={500} rows={2} disabled={blocked || !view.canSend} onChange={event => setText(event.target.value)} /></label>
+            <label htmlFor={textId}>Tin nhắn</label><textarea id={textId} value={text} maxLength={500} rows={2} disabled={blocked || !view.canSend} onChange={event => setText(event.target.value)} />
             <div className="room-chat-compose"><small>{text.length}/500</small><CartoonButton type="submit" color="blue" disabled={blocked || !view.canSend || !text.trim()}><Send aria-hidden="true" />Gửi</CartoonButton></div>
           </form>}
           <details><summary>Người chơi & an toàn</summary>{players.filter(p => p.userId && p.userId !== userId && !p.isFake).map(p => <div className="room-chat-member" key={p.userId}><strong>{p.name}</strong>
