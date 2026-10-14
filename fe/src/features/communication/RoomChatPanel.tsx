@@ -16,6 +16,7 @@ const errorCopy = (error: unknown) => {
   if (code === 'SAFETY_MUTED') return 'Quản trò đang tắt quyền gửi tin của bạn.'
   if (code === 'CHAT_CONTACT_NOT_ALLOWED') return 'Tin chưa được gửi. Hãy bỏ email hoặc số điện thoại rồi gửi lại.'
   if (code === 'CHAT_LINK_NOT_ALLOWED') return 'Tin chưa được gửi. Chat phòng không nhận đường dẫn; hãy bỏ link rồi gửi lại.'
+  if (code === 'CHAT_PROFANITY_NOT_ALLOWED') return 'Tin chưa được gửi. Có từ ngữ không phù hợp; hãy sửa nội dung để tiếp tục chia sẻ.'
   if (code === 'CHAT_TEXT_FORMAT_NOT_ALLOWED') return 'Tin chưa được gửi do ký tự đổi hướng chữ. Hãy nhập lại nội dung bằng chữ thông thường.'
   if (code === 'CHAT_SAFETY_UNAVAILABLE' || code === 'REPORT_UNAVAILABLE') return 'Kho báo cáo chưa sẵn sàng. Chưa thể gửi tin mới.'
   return 'Yêu cầu bị từ chối. Kiểm tra trạng thái phòng trước khi thử lại.'
@@ -113,7 +114,7 @@ export function RoomChatPanel({ socket, roomId, userId, connected, players, onBu
         currentView.current = null; setView(null); setOpen(false); setText(''); setInvite(''); setHostInvite(''); setRetry(null); return
       }
       // Transport failures and malformed success cannot prove that a write was rolled back.
-      const definitive = /^(CHAT_RATE_LIMITED|REPORT_RATE_LIMITED|INVALID_CHAT_[A-Z_]+|INVALID_REPORT_[A-Z_]+|CHAT_REVISION_CONFLICT|CHAT_REQUEST_CONFLICT|SAFETY_MUTED|NOT_HOST|NOT_ROOM_MEMBER|ROOM_EXPIRED|GAME_ENDED|CHAT_DISABLED|CHAT_INVITATION_REQUIRED|CHAT_SAFETY_UNAVAILABLE|CHAT_LINK_NOT_ALLOWED|CHAT_CONTACT_NOT_ALLOWED|CHAT_TEXT_FORMAT_NOT_ALLOWED|REPORT_EXPIRED|REPORT_REQUEST_CONFLICT|REPORT_CAPACITY_REACHED)$/.test(code)
+      const definitive = code === 'CHAT_PROFANITY_NOT_ALLOWED' || /^(CHAT_RATE_LIMITED|REPORT_RATE_LIMITED|INVALID_CHAT_[A-Z_]+|INVALID_REPORT_[A-Z_]+|CHAT_REVISION_CONFLICT|CHAT_REQUEST_CONFLICT|SAFETY_MUTED|NOT_HOST|NOT_ROOM_MEMBER|ROOM_EXPIRED|GAME_ENDED|CHAT_DISABLED|CHAT_INVITATION_REQUIRED|CHAT_SAFETY_UNAVAILABLE|CHAT_LINK_NOT_ALLOWED|CHAT_CONTACT_NOT_ALLOWED|CHAT_TEXT_FORMAT_NOT_ALLOWED|REPORT_EXPIRED|REPORT_REQUEST_CONFLICT|REPORT_CAPACITY_REACHED)$/.test(code)
       if (!definitive) { setRetry(operation); setError('Chưa xác nhận được kết quả. Kiểm tra lại đúng yêu cầu này trước khi gửi thao tác mới.') }
       else {
         setRetry(null); setError(errorCopy(failure))

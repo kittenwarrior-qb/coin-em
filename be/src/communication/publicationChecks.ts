@@ -1,10 +1,11 @@
 import { isIP } from 'node:net'
+import { containsCuratedProfanity } from './profanityChecks'
 
 /** Conservative local contact/link checks, not semantic moderation or a PII guarantee.
  * Inspection never changes approved text, stores rejected text, or calls a provider.
  */
-export const PUBLICATION_CHECK_VERSION = 'chat-contact-check/v1'
-export type PublicationRejection = 'CHAT_LINK_NOT_ALLOWED' | 'CHAT_CONTACT_NOT_ALLOWED' | 'CHAT_TEXT_FORMAT_NOT_ALLOWED'
+export const PUBLICATION_CHECK_VERSION = 'chat-publication-check/v2'
+export type PublicationRejection = 'CHAT_LINK_NOT_ALLOWED' | 'CHAT_CONTACT_NOT_ALLOWED' | 'CHAT_TEXT_FORMAT_NOT_ALLOWED' | 'CHAT_PROFANITY_NOT_ALLOWED'
 
 export function publicationRejection(text: string): PublicationRejection | null {
   // Bidi overrides can visually disguise an address. Ordinary scripts/emoji remain allowed.
@@ -20,5 +21,6 @@ export function publicationRejection(text: string): PublicationRejection | null 
   const ipv4 = [...inspected.matchAll(/(?<![\d.])\d{1,3}(?:\.\d{1,3}){3}(?![\d.])/gu)].some(match => isIP(match[0]) === 4)
   const ipv6 = [...inspected.matchAll(/\[([a-f\d:]+)\]/giu)].some(match => isIP(match[1]) === 6)
   if (scheme.test(inspected) || /\bwww\s*\.\s*[\p{L}\p{N}]/iu.test(inspected) || domain.test(inspected) || ipv4 || ipv6) return 'CHAT_LINK_NOT_ALLOWED'
+  if (containsCuratedProfanity(text)) return 'CHAT_PROFANITY_NOT_ALLOWED'
   return null
 }

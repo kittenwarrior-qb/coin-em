@@ -25,7 +25,7 @@ describe('real guarded room chat transport with isolated mock primary', () => {
     return socket
   }
   const action = (socket: Socket, event: string, payload: object) => new Promise<any>((resolve, reject) =>
-    socket.timeout(3000).emit(event, payload, (error: Error | null, ack: unknown) => error ? reject(error) : resolve(ack)))
+    socket.timeout(3000).emit(event, payload, (error: Error | null, ack: unknown) => error ? reject(Error(`CHAT_FIXTURE_ACK_TIMEOUT_${event}`)) : resolve(ack)))
   const state = (socket: Socket) => action(socket, 'get_chat_state', { roomId })
   const room = () => roomRepository.findById(roomId)! as ChatRoom
   const input = (fields: object, revision = room().chat?.revision ?? 0) => ({ roomId, expectedRevision: revision, requestId: randomUUID(), ...fields })
@@ -86,8 +86,10 @@ describe('real guarded room chat transport with isolated mock primary', () => {
     const save = vi.spyOn(roomRepository, 'saveAndWait'), delivered: unknown[] = []
     host.on('chat_update', value => delivered.push(value))
     for (const [text, error] of [['qa@example.invalid', 'CHAT_CONTACT_NOT_ALLOWED'], ['https://example.invalid', 'CHAT_LINK_NOT_ALLOWED'],
-      ['090 123 4567', 'CHAT_CONTACT_NOT_ALLOWED'], ['abc\u202ecom', 'CHAT_TEXT_FORMAT_NOT_ALLOWED']]) {
-      expect(await command(guest, { kind: 'send', text })).toEqual({ success: false, error })
+      ['090 123 4567', 'CHAT_CONTACT_NOT_ALLOWED'], ['abc\u202ecom', 'CHAT_TEXT_FORMAT_NOT_ALLOWED'],
+      ['fuck', 'CHAT_PROFANITY_NOT_ALLOWED'], ['địt mẹ', 'CHAT_PROFANITY_NOT_ALLOWED']]) {
+      const result = await command(guest, { kind: 'send', text }).catch(() => { throw Error(`REJECTION_ACK_TIMEOUT_${error}`) })
+      expect(result).toEqual({ success: false, error })
     }
     await state(host) // queued barrier, not a guessed delivery sleep
     expect(save).not.toHaveBeenCalled(); expect(delivered).toEqual([])

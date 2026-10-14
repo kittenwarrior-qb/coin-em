@@ -25,6 +25,7 @@ describe('room chat UI', () => {
     ['CHAT_CONTACT_NOT_ALLOWED', 'Hãy bỏ email hoặc số điện thoại'],
     ['CHAT_LINK_NOT_ALLOWED', 'Chat phòng không nhận đường dẫn'],
     ['CHAT_TEXT_FORMAT_NOT_ALLOWED', 'ký tự đổi hướng chữ'],
+    ['CHAT_PROFANITY_NOT_ALLOWED', 'Có từ ngữ không phù hợp'],
   ])('treats %s as a definitive unsent draft, not an uncertain retry', async (code, copy) => {
     const s = setup(); render(<RoomChatPanel {...s.props} />)
     fireEvent.click(await screen.findByRole('button', { name: 'Mở chat phòng' }))

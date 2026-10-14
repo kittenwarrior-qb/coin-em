@@ -9,7 +9,7 @@ import { CHAT_REPORT_REASONS, type ChatReportStore } from '../../communication/C
 const errors = new Set(['NOT_ROOM_MEMBER', 'ROOM_EXPIRED', 'GAME_ENDED', 'INVALID_CHAT_COMMAND',
   'CHAT_REQUEST_CONFLICT', 'CHAT_REVISION_CONFLICT', 'CHAT_REVISION_EXHAUSTED', 'NOT_HOST', 'CHAT_DISABLED',
   'CHAT_INVITATION_REQUIRED', 'INVALID_CHAT_INVITATION', 'SAFETY_MUTED', 'CHAT_RATE_LIMITED', 'INVALID_CHAT_TARGET',
-  'CHAT_LINK_NOT_ALLOWED', 'CHAT_CONTACT_NOT_ALLOWED', 'CHAT_TEXT_FORMAT_NOT_ALLOWED'])
+  'CHAT_LINK_NOT_ALLOWED', 'CHAT_CONTACT_NOT_ALLOWED', 'CHAT_TEXT_FORMAT_NOT_ALLOWED', 'CHAT_PROFANITY_NOT_ALLOWED'])
 type Ack = (result: object) => void
 const enabled = () => process.env.EMCOIN_ROOM_CHAT_ENABLED === 'true'
 const reject = (callback: Ack | undefined, code: string) => { if (typeof callback === 'function') callback({ success: false, error: code }) }
