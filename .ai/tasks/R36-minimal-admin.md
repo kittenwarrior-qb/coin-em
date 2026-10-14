@@ -12,6 +12,37 @@ RBAC admin metadata/presence, audited close-room command and no direct coin muta
 
 ## Current evidence
 
+### Plan revision / implementation / QA — 2026-10-14, chat frontend
+
+Owner authorized continuing the guarded chat foundation with room UI and selected
+report moderation. Added the CRM “Báo cáo an toàn” section (status filters,
+loaded-record search, accurate 50-row limit, selected evidence detail and
+resolve/dismiss). Reused approved admin tokens/icons; theme/logout/navigation
+are blocked while a resolution is pending or uncertain. Same UUID is retained
+for explicit retry; 401 clears privileged data. Login remains login-only. No
+whole-room chat reader, evidence export, auto-close or direct Coin change added.
+
+Room UI reuses the current socket and two-theme modal; invite/join/send/block,
+host moderation and selected report submission have escaped text, bounded
+history, incremental revision checks, gap hydration and manual same-ID retries.
+No chat/invitation content is persisted by the frontend or sent to analytics.
+Disconnect invalidates ACK authority; replaced seats clear visible evidence.
+
+Final regular checks: FE790 /82files PASS, BE787 /72files PASS; FE lint and
+TypeScript/Vite build PASS. New31 FE tests cover clients/report workflow/chat
+including StrictMode, uncertain retry, disconnect and stale-seat boundaries.
+Owned Chromium case PASS with real guarded Socket.IO and actual in-memory
+SQLite, both themes at320/390 and admin1366x768; production throttles enabled.
+Admin HTTP is intercepted; room persistence is the test fixture, not Redis proof.
+Screenshots inspected; font density and nested search field were refined.
+
+Retained failures: old GameContainer fixture lacked socket listeners (expanded
+fixture without removing assertions); two test query/assertion APIs were fixed;
+rate-enabled browser exposed duplicate StrictMode chat hydration, fixed by
+coalescing reads and a new regression. No rate-limit bypass in final browser QA.
+Evidence/remaining gates: docs/ops/chat-foundation.md. Production flag remains
+off and no release/deploy/SDK/license/store action occurred. R36 is not globally done.
+
 Umami is not a game admin and current API does not define least-privilege operations.
 
 ## Scope

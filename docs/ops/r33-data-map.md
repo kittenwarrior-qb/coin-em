@@ -33,6 +33,13 @@ not deployed/enabled: no production chat/report store has been created by this
 work. Session authorization, expiry/deletion and selected-report seven-day bounds
 are tested; UI/operator/real-storage/device/privacy gates remain before activation.
 
+Frontend revision2026-10-14: invitation-only room UI and selected-report admin UI
+are now implemented/tested locally. In-context chat/report copy and admin data
+copy describe the selected-message seven-day exception. No chat/invitation
+content is saved in browser storage or analytics by this UI. Production remains
+disabled; public notice/consent/legal review, content/operator safety and
+real-storage/device/load gates are not resolved by these local UI checks.
+
 Owner currently requests no consent prompt and no individual-data deletion
 feature. That does not resolve the lawful basis, responsible controller,
 guardian/child-facing notices, handling of submitted text/participant photos,

@@ -15,7 +15,8 @@ vi.mock('../../hooks/useSocket', () => ({ useSocket: () => ({
   retryPendingCoin: mock.retry, coinAction: mock.coinStatus ? { status: mock.coinStatus,
     intent: { roomId: 'fixture-room', receiverUserId: 'fixture-target', coinType: 'red', amount: 2 } } : null,
   joinRoom: mock.join, updateRoomSettings: mock.settings, startGame: mock.start,
-  leaveRoom: mock.leave, clearSession: mock.clear, socket: { disconnect: mock.disconnect, connect: mock.connect },
+  leaveRoom: mock.leave, clearSession: mock.clear, socket: { disconnect: mock.disconnect, connect: mock.connect,
+    connected: false, on: vi.fn(), off: vi.fn() },
 }) }))
 vi.mock('../../utils/userId', () => ({ getUserId: () => 'fixture-guest' }))
 vi.mock('../../hooks/useAssetPreloader', () => ({ useAssetPreloader: () => ({}) }))

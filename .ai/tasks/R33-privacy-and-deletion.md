@@ -12,6 +12,21 @@ Data map, policy/routes, authenticated deletion/revocation, retention and log sc
 
 ## Current evidence
 
+### Implementation / QA revision — 2026-10-14, selected-report UI
+
+Added explicit in-context disclosure before chat/report submission: room chat is
+invitation-only, avoid private information, selected reports reach admins and
+expire seven days from message send. Admin DataPanel now describes this narrow
+exception separately from whole-room deletion/no backups. Client projections
+strip unapproved server fields; render evidence literally, do not store chat or
+invitations in browser storage, and clear views after disconnect/seat revocation.
+New chat/admin clients and UI tests are included in FE790 PASS; BE787 PASS.
+Both-theme owned Chromium flow uses real handlers but mocked room primary and
+intercepted admin HTTP. No production flag/data mutation or compliance approval.
+Public legal/guardian consent wording, pre-publication checks, operator response,
+real Redis/load and physical-device proof remain activation gates. See
+docs/ops/chat-foundation.md; this revision does not complete R33 or certify stores.
+
 Guest IDs, sessions, rooms, logs, analytics, images and backups lack documented lifecycle.
 
 ## Scope

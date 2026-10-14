@@ -2,7 +2,7 @@
 
 Updated 2026-10-14. The owner now prioritizes text chat; voice is deferred, not rejected as
 technically impossible. No provider, microphone permission or media server has
-been enabled. This document does not certify a working end-user chat.
+been enabled. Chat UI is implemented and exercised locally; production chat remains disabled.
 
 ## Implemented domain boundary
 
@@ -99,7 +99,43 @@ Room deletion retains only these explicitly selected safety reports until expiry
 not an archive of the room. Persistent SQLite close/reopen tests are separate
 from mocked room persistence. Multi-host report consistency is not proven.
 
-Before activation, update end-user/admin data copy to distinguish the selected
-report exception from deleted-room content, add moderation/content checks and
-run both-theme browser/device/load tests. No chat UI, Android APK/IPA or voice
-provider was shipped by this backend slice.
+Before activation, finish public privacy/consent wording, pre-publication content
+checks/operator moderation, real Redis restart/load and physical-device tests.
+No Android APK/IPA, store approval or voice provider has been delivered.
+
+## Frontend and operator workflow — 2026-10-14
+
+`RoomChatPanel` reuses the existing room socket and the approved two-theme modal.
+It is available in waiting/playing rooms only after an authenticated chat read;
+feature-off remains hidden. No additional socket, localStorage chat history,
+analytics message payload, link preview, upload, camera or microphone is added.
+Invitation tokens are generated with WebCrypto and retained only in component
+memory. The host can activate/rotate/disable, guests enter the invitation, and
+invited users can send, block locally, or select a message for a safety report.
+Host safety mutes do not alter gameplay silence/healing rules.
+
+Incoming messages are escaped JSX text, bounded to 100 recent records. Incremental
+updates preserve current projections; old revisions are ignored and missing
+revisions trigger a bounded hydration read. Mount/foreground/reconnect reads are
+coalesced, including React StrictMode; no mutation is automatically retried.
+Disconnect clears visible evidence and invalidates in-flight ACK authority.
+An uncertain send/control/report keeps its exact UUID/payload for explicit retry,
+blocking further chat writes and voluntary leave until confirmed. Lost browser
+memory after a full reload does not restore private chat drafts or pending commands;
+old committed messages may reappear from the authorized server projection.
+Replaced/expired/deleted seats clear chat data and controls.
+
+Admin has an authenticated “Báo cáo an toàn” section: status filters, search over
+the loaded records, accurate loaded/total counts (server returns at most 50), and
+a selected-message detail dialog. Resolution/dismissal has a stable request UUID,
+explicit same-ID retry for uncertain responses and no auto room-close/block.
+Pending/uncertain resolutions block navigation/theme/logout; auth expiry clears
+privileged evidence. DataPanel describes selected-report retention as an explicit
+exception, not a whole-room archive. No export of chat evidence was added.
+
+Local browser QA uses actual production guarded Socket.IO handlers, synthetic
+real browser guests and an actual in-memory SQLite report store. Room storage is
+the isolated test fixture, not real Redis proof. Admin HTTP is intercepted and
+does not certify authentication/cookies (separate backend HTTP tests cover those).
+Both themes are tested at 320/390px; report details at 1366×768. Production rate
+limits are enabled in this browser case. No production environment/data changed.

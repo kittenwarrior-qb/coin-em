@@ -13,10 +13,12 @@ import { usePendingNavigationGuard } from '@/features/overlays/usePopupLifecycle
 import { setPwaRoomIdle } from '@/features/pwa/updateGate'
 import { useControlTheme } from '@/components/cartoon/controlThemeContext'
 import { themeLogo } from '@/components/cartoon/controlThemes'
+import { RoomChatPanel } from '@/features/communication/RoomChatPanel'
 
 export default function GameContainer() {
   const theme = useControlTheme()
   const [connectionDelayed, setConnectionDelayed] = useState(false)
+  const [chatBusy, setChatBusy] = useState(false)
   const [connectionAttempt, setConnectionAttempt] = useState(0)
   const [forcelobby, setForceLobby] = useState(false)
   const preloadState = useAssetPreloader()
@@ -118,11 +120,12 @@ export default function GameContainer() {
   }, [joinRoom])
 
   const handleStartGame = useCallback(async () => {
-    if (!roomState) return
+    if (!roomState || chatBusy) return
     await confirmStart(() => startGame(roomState.id))
-  }, [roomState, startGame, confirmStart])
+  }, [roomState, startGame, confirmStart, chatBusy])
 
   const handleLeaveRoom = useCallback(async () => {
+    if (chatBusy) return false
     const keepResumeSession = roomState?.status === 'playing'
     if (!roomState || !await confirmLeave(() => leaveRoom(roomState.id))) return false
     clearSession({ keepStorage: keepResumeSession })
@@ -132,7 +135,7 @@ export default function GameContainer() {
       socket.connect()
     }
     return true
-  }, [clearSession, leaveRoom, roomState, socket, confirmLeave])
+  }, [clearSession, leaveRoom, roomState, socket, confirmLeave, chatBusy])
 
   const handleAddFakePlayers = useCallback(() => {
     if (!roomState) return
@@ -262,7 +265,7 @@ export default function GameContainer() {
           roundLimit={roomState.roundLimit ?? null}
           onUpdateRoundLimit={limit => updateRoundLimit(roomState.id, limit)}
           isConnected={isConnected}
-          startPending={startPending}
+          startPending={startPending || chatBusy}
           roomId={roomState.id}
           players={roomState.players}
           hostSocketId={roomState.host}
@@ -275,6 +278,8 @@ export default function GameContainer() {
           onSetDebugRolePreference={(targetUserId, role) => setDebugRolePreference(roomState.id, targetUserId, role)}
           debugRolePickerEnabled={roomState.debugRolePickerEnabled}
         />
+        {socket && <RoomChatPanel key={`${roomState.id}:${myUserId}`} socket={socket} roomId={roomState.id} userId={myUserId}
+          connected={isConnected} players={roomState.players} onBusy={setChatBusy} />}
       </>
     )
   }
@@ -290,7 +295,7 @@ export default function GameContainer() {
         mySocketId={mySocketId}
         myUserId={myUserId}
         isConnected={isConnected}
-        leavePending={leavePending}
+        leavePending={leavePending || chatBusy}
         onLeave={handleLeaveRoom}
         onUpdateProfile={handleUpdateProfile}
         nextTurn={nextTurn}
@@ -308,6 +313,8 @@ export default function GameContainer() {
         submitVote={submitVote}
         giveCoin={giveCoin}
       />
+      {socket && roomState.status !== 'ended' && <RoomChatPanel key={`${roomState.id}:${myUserId}`} socket={socket} roomId={roomState.id} userId={myUserId}
+        connected={isConnected} players={roomState.players} onBusy={setChatBusy} />}
       </>
     )
   }

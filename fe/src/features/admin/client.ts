@@ -55,7 +55,7 @@ export function parseAdminOverview(value: unknown): AdminOverview {
 
 /** Bounded same-origin admin call. Callers validate the returned shape before use. */
 export async function adminRequest(path: string, signal: AbortSignal,
-  body?: { email: string; password: string } | { currentPassword: string; newPassword: string } | Record<string, never> | AdminCloseCommand): Promise<unknown> {
+  body?: { email: string; password: string } | { currentPassword: string; newPassword: string } | Record<string, never> | AdminCloseCommand | { id: string; status: 'resolved' | 'dismissed'; requestId: string }): Promise<unknown> {
   const controller = new AbortController()
   const abort = () => controller.abort()
   signal.addEventListener('abort', abort, { once: true })
