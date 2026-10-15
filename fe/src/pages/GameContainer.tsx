@@ -258,7 +258,7 @@ export default function GameContainer() {
 
   if (gameState === 'waiting' && roomState) {
     return (
-      <>
+      <div className="game-viewport">
         {!splashGone && <AssetPreloaderScreen state={preloadState} onExited={handleSplashReady} onFullyGone={handleSplashFullyGone} />}
         {transportNotice}
         <WaitingRoom
@@ -280,13 +280,13 @@ export default function GameContainer() {
         />
         {socket && <RoomChatPanel key={`${roomState.id}:${myUserId}`} socket={socket} roomId={roomState.id} userId={myUserId}
           connected={isConnected} players={roomState.players} onBusy={setChatBusy} />}
-      </>
+      </div>
     )
   }
 
   if (gameState === 'playing' && roomState) {
     return (
-      <>
+      <div className="game-viewport">
       {transportNotice}
       <GameBoard
         key={roomState.id}
@@ -315,15 +315,15 @@ export default function GameContainer() {
       />
       {socket && roomState.status !== 'ended' && <RoomChatPanel key={`${roomState.id}:${myUserId}`} socket={socket} roomId={roomState.id} userId={myUserId}
         connected={isConnected} players={roomState.players} onBusy={setChatBusy} />}
-      </>
+      </div>
     )
   }
 
   return (
-    <>
+    <div className="game-viewport">
       {admissionAction && error && <aside role="alert" className="break-words px-4 py-3 font-body text-sm">{error}</aside>}
       {preloaderMounted && <AssetPreloaderScreen state={preloadState} onExited={handleSplashReady} onFullyGone={handleSplashFullyGone} />}
-      <div style={splashGone ? undefined : { visibility: 'hidden', pointerEvents: 'none' }}>
+      <div className="game-lobby-slot" style={splashGone ? undefined : { visibility: 'hidden', pointerEvents: 'none' }}>
         <Lobby
           key={lobbyKey}
           ready={splashGone}
@@ -340,6 +340,6 @@ export default function GameContainer() {
           onDismissResume={dismissResumeCandidate}
         />
       </div>
-    </>
+    </div>
   )
 }

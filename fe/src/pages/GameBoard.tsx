@@ -171,7 +171,7 @@ function ConfirmedGameBoard(props: GameBoardProps) {
         data-ui-night={isNight ? 'true' : 'false'}
         style={{
           width: '100%',
-          height: '100dvh',
+          height: '100%',
           overflow: 'hidden',
           backgroundImage: themeBackdrop(theme, 'url(/ingame_background.webp)'),
           backgroundSize: 'cover',

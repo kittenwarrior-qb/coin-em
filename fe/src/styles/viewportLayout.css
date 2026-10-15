@@ -1,0 +1,114 @@
+/* Viewport ownership: the game fills one screen; only its content panes scroll.
+   Public/editorial routes deliberately retain normal document scrolling. */
+.screen-cartoon {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+}
+.screen-cartoon > .screen-panel {
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
+  min-width: 0;
+}
+.game-viewport {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.game-viewport > .screen-cartoon,
+.game-viewport > .game-lobby-slot {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+}
+.game-lobby-slot > .screen-cartoon { height: 100%; }
+.game-viewport > :is([data-ui-chrome="transport"], [role="alert"]) {
+  flex-shrink: 0;
+  max-height: 40%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+/* Keep the owner's admin styling intact; only viewport ownership changes here. */
+@media (max-width: 900px) {
+  .admin-page.admin-desktop.is-authenticated {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .admin-page.is-authenticated .admin-content { flex: 1; overflow: hidden; }
+  .admin-page.is-authenticated .admin-sidebar { flex-shrink: 0; }
+  .admin-page.is-authenticated .admin-workspace { overflow: auto; }
+}
+.screen-cartoon:has(.brand-home) {
+  overflow: hidden;
+}
+.screen-panel:has(.brand-home) {
+  overflow: hidden;
+}
+.brand-home {
+  height: 100%;
+  min-height: 0;
+  aspect-ratio: auto;
+}
+.brand-home [data-ui-chrome="home-logo"] { pointer-events: none; }
+.brand-home [data-ui-chrome="home-logo"] > div { height: 100%; }
+.brand-home #home-logo { max-height: 100%; object-fit: contain; }
+.brand-home-action { min-height: 44px; }
+.brand-home-help, .brand-home-settings { width: clamp(44px, 10%, 48px); z-index: 2; }
+.screen-panel:has(.brand-home) > [data-testid="cartoon-modal-overlay"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: none;
+  padding-inline: max(12px, env(safe-area-inset-left), env(safe-area-inset-right));
+}
+
+/* Menu rows adapt to available height before introducing an internal scrollbar.
+   Body dialogs (guide/cards/forms) remain independently scrollable. */
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu {
+  height: min(620px, 100%);
+  top: auto;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-panel {
+  margin-block: clamp(68px, 12dvh, 112px) 24px;
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  display: flex;
+  scrollbar-gutter: auto;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-content {
+  padding: 8px 12px 16px;
+  width: 100%;
+  min-height: 0;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-actions {
+  gap: clamp(8px, 1.5dvh, 16px);
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-actions > button {
+  flex-shrink: 0;
+}
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-actions [data-cartoon-surface="pill"] > img {
+  height: clamp(44px, calc((100dvh - 240px) / 5), 80px);
+}
+@media (max-height: 600px) {
+  html[data-ui-theme="emotion-orbit"] .brand-home-join { top: 44%; }
+  html[data-ui-theme="emotion-orbit"] .brand-home-create { top: 61%; }
+  html[data-ui-theme="emotion-orbit"] .brand-home-guide { top: 78%; }
+  [data-testid="cartoon-modal-overlay"]:has(> .theme-a-menu) {
+    padding-top: max(16px, env(safe-area-inset-top)) !important;
+    padding-bottom: max(16px, env(safe-area-inset-bottom)) !important;
+  }
+  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-panel { margin-block: 64px 16px; }
+  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-content { padding-block: 8px; }
+  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-heading { top: 8px; }
+  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-close { top: 14px; }
+}

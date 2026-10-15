@@ -63,6 +63,20 @@ Do not invent event names, schema fields, phase transitions, card IDs, or rule o
 
 ## Implementation plan
 
+### Plan revision2026-10-15 — viewport and menu scroll repair
+
+Owner reports web/mobile shells exceeding the viewport and unnecessary menu scroll.
+Admit scoped viewport CSS, CartoonModal shell geometry, GameContainer notices only
+if evidence requires, and an owned-loopback browser regression fixture. Preserve
+both approved themes, all card/brand imagery, gameplay and pending/focus/Back rules.
+Use dvh with vh fallback; bound game/Home shells, not public editorial pages.
+Adjacent permitted files: GuideBook.tsx, WaitingRoom.tsx, GameContainer.tsx,
+dev-only ScreensPreview/BoardPreview fixtures, viewportLayout.css, nearest existing
+transport/guide unit tests and e2e/scripts/check-{viewport-scroll,overlay-reachability}.mjs.
+Long inventory/guide/room lists must retain internal scrolling and reachable CTAs;
+do not hide overflow globally to conceal unreachable content. Record baseline,
+portrait/desktop/landscape and viewport-resize results; no implicit deployment.
+
 Plan revision2026-10-08 — R29 lost-confirmation screenshot JE6Opf exposes the live transport notice squeezing text into an approximately44px column at390px when both recovery/dismiss buttons share its row. Admit ONLY GameContainer.tsx transport message layout, adjacent GameContainer.transport.test.tsx and R29 actual-browser geometry assertions. Give message a full-width flex row, keep buttons wrapping below; preserve approved cartoon palette/fonts/copy/art, pending/retry semantics and mounted board. This is a responsive defect fix, NOT R40 reskin/new visual anchor. Verify waiting/playing/ended mocked component states, actual390px message width/buttons bounds in the owned fault run, FE full tests/lint/build and disclosed browser limitations.
 
 ### Plan revision 2026-10-02 — approved fluid centered shell
@@ -78,6 +92,19 @@ Preserve existing information hierarchy, board/player/card assets and role place
 
 ## Implementation report
 
+2026-10-15 viewport repair: new isolated viewportLayout.css bounds Home/game shells
+to100dvh(vh fallback) without the fixed poster aspect ratio growing the document.
+Menu material/brand assets are preserved; rows/gaps/header margins adapt to viewport,
+including the live theme preference action. Home decorative logo no longer blocks
+Settings at short landscape sizes. Modal padding protects panel animation edges.
+GameContainer waiting/playing/lobby now own one flex viewport; connection notices
+occupy bounded space and the board receives the remainder, rather than appending
+another100dvh. Long lists/boards/dialogs remain internally scrollable. Admin mobile
+keeps viewport ownership with workspace scroll, without editing the owner's ongoing
+admin restyle. GuideBook is scoped to its containing panel, fixing480px toolbar
+overflow beyond the430px game on landscape. No gameplay, card, theme palette,
+credential, production deployment or native APK mutation.
+
 2026-10-08 — Fixed confirmed recovery-notice mobile text squeeze: message wrapper uses basis-full instead of flex-1, retaining existing parent flex-wrap so both real action buttons occupy the following row. No message/role/Coin logic, palette/typeface/font/icon/image/card/button asset change. frontend-design informed content readability and preserving real state labels, but owner-approved existing cartoon direction overrides introducing a new visual anchor; this is not R40 reskin. Three component regressions protect waiting/playing/ended notice structure and unchanged retry/dismiss callbacks. R29 controlled packet-loss scenario proves the live fix rather than CSS-only assumptions.
 
 Scope revision: include `TableBoard.tsx` inner horizontal padding only and `GiveCoinPicker.tsx` viewport-bounded scrolling/touch sizes. No card image, card renderer or game rule changes. Low-height viewports use scrolling inside the board to retain readable ten-player slots; simultaneous ten-avatar visibility is not promised where the physical height is insufficient.
@@ -85,6 +112,27 @@ Scope revision: include `TableBoard.tsx` inner horizontal padding only and `Give
 <!-- Codex updates this after implementation: changed files, invariant preserved, commands and results. -->
 
 ## QA report
+
+2026-10-15 Chromium local synthetic QA PASS381cases:195 viewport/resize across
+320x400,320x568,390x844,844x390,1440x900 and three skins;84 real popup control
+reachability checks across both approved themes;102 phase layouts(all17phases,
+10seats,sender view,three sizes,two themes). Main menu clientHeight=scrollHeight
+at every tested size, including live Giao diện link. Genuine internal scroll
+ancestors are used to reach controls; clipping with overflow:hidden does not count
+as reachability. Admin uses mocked empty metadata, not production authentication.
+FE758tests/79files PASS before final guide assertions; nearest24tests rerun PASS,
+lint and TypeScript/Vite production build PASS. Public about/cards/story normal
+document scroll preserved at390px with synthetic baseline catalog pointer.
+
+Baseline12cases failed5: desktopHome930px in900px viewport, workshop menu390px
+client/402px content. Intermediate landscape run exposed logo intercepting Settings;
+165case run found two transient popup edge overflows; reachability84case run found
+two GuideBook landscape clipping failures. These failures are retained, not waived;
+final viewport195/phase102/reachability84 have zero failures. Evidence/limitations:
+docs/qa/viewport-scroll-20261015/summary.json. Chromium simulation is not Safari,
+physical-device keyboard, native WebView or every possible popup/game state proof.
+The working tree includes preserved owner edits outside this fix; no global41task
+or clean release/deployment certification.
 
 2026-10-08 — Actual Chromium147 owned R29 MDqvvv PASS233.43s total/1case(2filtered), fault actor explicitly390×844. Previously JE6Opf screenshot had a approximately44px text column with two action buttons. After fix, actual message width358px; both buttons bounded within390px and below the message; uncertain/recovered images inspected. Actual protocol/journal recovery and all5round final receipts still pass. FE53files573tests PASS53.73s plus TypeScript/lint0diagnostics/Vitebuild30.50s PASS; assets80localchecks/200protected faces unchanged/reskins0. Mocked transport component tests are structure/behavior evidence, not geometry. Browser uses mockRedis/disabledlimiter/CDNblocked/reducedmotion/simulated viewport; no320px/zoom/keyboard/WebKit/physical-device/all-phase visual certification. Earlier broader shell/browser proofs retain their own source boundaries; task stays in progress.
 
