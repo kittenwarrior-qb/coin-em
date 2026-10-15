@@ -22,7 +22,7 @@ It does not certify legal compliance, store approval, staffing or response times
    available. Do not publish a promised response time until it is actually covered.
 2. Finish child/guardian-facing public notices and review the selected-message
    reporting exception, contact details and consent/rights process with the owner.
-3. Local contact/link checks exist. Finish semantic harm/abuse handling or reviewed
+3. Local contact/link and original bilingual profanity-seed checks exist. Finish semantic harm/abuse handling or reviewed
    pre-publication human moderation. Reporting and contact patterns alone are not
    a complete content-safety system; do not claim all private/unsafe text is found
    or censor emotional disclosures using a distress-word blacklist.
@@ -61,3 +61,14 @@ reset as a chat incident procedure.
 The current admin list needs pagination for older resolved history beyond the
 50-record window; staffing, semantic content review, physical devices and public notices
 remain open gates, not completed by the local load evidence.
+
+## Vocabulary maintenance
+
+`be/src/communication/profanityChecks.ts` is a deliberately small, original
+Vietnamese/English list, not a complete safety system. Review additions together
+with benign word-boundary/identity/emotion tests and the cold accented-input timing
+regression. Do not add ambiguous unaccented Vietnamese aliases or distress words
+without reviewing false positives. Rejections return a closed code and keep the
+draft editable; do not log rejected content to tune the list. Contextual moderation
+was deferred by the owner, not certified unnecessary. A production activation
+still requires the pilot gates above; adding words does not authorize that change.

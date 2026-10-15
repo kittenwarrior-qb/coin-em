@@ -209,5 +209,35 @@ or auto-link chat text. This is not URL reputation analysis or a malware scanner
 
 These are profanity/dictionary filters, not contextual harm classifiers or link
 security systems. A curated Vietnamese/English vocabulary with boundary/exception
-tests may fit this Node backend without an extra service, but has not been approved
-or installed. No user chat was submitted to any repository/provider in this research.
+tests fits this Node backend without an extra service. The owner subsequently
+requested implementation; the original seed below was chosen instead of either
+dependency. No user chat was submitted to any repository/provider in this research.
+
+## Original bilingual seed — verification continuation 2026-10-15
+
+Source commit `9c4a382` adds `profanityChecks.ts` (`chat-profanity-seed/v1`),
+called by `chat-publication-check/v2` before any new send commit. It uses a small
+original Vietnamese/English vocabulary, not copied third-party code or word lists.
+No package, external service, network call or additional content store is added.
+The closed `CHAT_PROFANITY_NOT_ALLOWED` error retains the editable draft without
+uncertain-retry controls. Existing receipt replay, room retention and game rules
+are unchanged; rejected text is neither persisted nor sent to other players.
+
+Normalization checks common full-width, zero-width, punctuation/spacing and
+English leet forms. Vietnamese accents are preserved to avoid treating `đu`,
+`du`, `đủ` or `đụng` as profanity. Neutral identity terms, emotional disclosures
+and help-seeking statements are in the benign regression corpus. There is no
+client-controlled exception list or dynamic user regex.
+
+Retained failure: initial Unicode-property classes repeated inside each compiled
+pattern stalled V8 on accented text, causing real Socket.IO ACK deadlines to fail.
+The source fix canonicalizes separators once and uses small classes per pattern;
+a cold accented/max-500-character regression and transport rejection cases guard
+against recurrence. ACK timeouts were not increased to conceal the failure.
+
+Limits: this is a seed vocabulary, not comprehensive Vietnamese/English moderation.
+Quoted listed words also reject; unknown insults, inserted-letter evasions,
+contextual abuse and all private-information obfuscations are not detected.
+No distress/identity blacklist, semantic classifier, malware scanner, URL reputation
+service, automatic counselling or guaranteed human response is claimed. Production
+chat remains off; notices, operator coverage, invited staging and device gates remain.

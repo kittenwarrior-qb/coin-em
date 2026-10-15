@@ -12,6 +12,36 @@ Data map, policy/routes, authenticated deletion/revocation, retention and log sc
 
 ## Current evidence
 
+### Plan revision / verification continuation — 2026-10-15, bilingual seed
+
+Owner requested implementing lightweight Vietnamese/English word filtering while
+deferring contextual moderation. Admit the original `profanityChecks.ts`, existing
+publication/transport closed errors, editable-draft UI copy and nearest unit,
+socket and browser regressions. Implementation is already in source `9c4a382`;
+this continuation verifies that commit and records limits. No new dependency,
+provider, retention, catalog, game rule, production flag or deployment change.
+
+Small original vocabulary uses normalized inspection only; accepted text remains
+unchanged. Vietnamese accents and Unicode boundaries limit false positives;
+identity, emotions, help-seeking and benign substring cases remain permitted.
+Quoted listed words reject and unknown/contextual harms remain outside coverage.
+No malware/all-evasion guarantee, legal clearance or store approval is implied.
+
+The initial per-pattern Unicode classes caused accented-input event-loop stalls
+and socket ACK failures. Source fix canonicalizes separators once, with small
+classes per compiled pattern and a cold accented/max-length regression. Keep the
+failure in the record; do not increase transport deadlines as a substitute for
+fixing runtime work. Verification evidence is recorded below after completion.
+
+Verification: BE888/74files, FE794/82files, backend TypeScript/build and frontend lint/build PASS.
+Owned browser scenario PASS for both themes at320/390px: contact/profanity rejection,
+editable draft, no recipient leak or uncertain retry, then valid send/block/report.
+Real Redis fixture PASS:10rooms/100seats,100committed load messages/1000isolated
+deltas, backend kill/replay, Redis AOF restart, CAS race, fail-closed outage and
+selected-report retention. Same-host SQLite uses one schema initializer; not a
+separate-host scale certification. See `docs/qa/chat-profanity-20261015/summary.json`.
+No production activation, public-notice/staffing sign-off, device or store approval.
+
 ### Plan revision / implementation — 2026-10-14, local publication contact layer
 
 Owner requested continuing toward staging. Expand scope to
