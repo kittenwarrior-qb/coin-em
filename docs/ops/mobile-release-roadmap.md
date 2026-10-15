@@ -2,6 +2,37 @@
 
 Ngày: 2026-10-12. Trạng thái: kế hoạch triển khai; không phải bằng chứng phát hành.
 
+## Trạng thái tiếp tục — 2026-10-16
+
+This section supersedes historical implementation-status statements below, not
+the owner decisions or release gates. The41 task briefs remain the source of task
+acceptance; having tests or a scaffold does not mark them all complete.
+
+- Room text chat, invitation/admission, blocks/host mute, selected reports/admin
+  triage and local contact/link/bilingual seed checks now exist in source. Chat
+  remains off on production; no deployed-chat or contextual-moderation claim.
+- Admin selected reports now have a strict authenticated POST search and50-row
+  pages across retained evidence, rather than only the newest50. No new whole-room
+  history reader, provider, retention or data export is introduced. R36 records QA.
+- Native Android/iOS source and exact native-origin staging checks exist. The
+  owner downloaded the CLI tools and personally accepted SDK licenses. Dedicated
+  SDK/API36, Build Tools/ADB and the EmCoin_API36 emulator are installed on D.
+  A debug APK was built and installed; a separate staging APK passed bounded
+  native HTTPS admission, five-seat room/start and foreground hydration checks.
+  See `../qa/android-native-origin-20261015/summary.json` for exact evidence and
+  retained failures. No global Java change, automatic license acceptance or
+  release-signing claim. These APKs precede the latest viewport integration.
+- No voice provider/microphone implementation is enabled. Owner currently prefers
+  text chat first; contextual moderation is deferred, not declared unnecessary.
+- No Mac/Xcode, store enrollment/signing or actual device evidence is available
+  in this continuation. No IPA/TestFlight/Play/App Store approval is claimed.
+
+Next execution order: complete the integrated web/viewport/full-game checks;
+rebuild the debug APK with the integrated UI, then emulator and named
+physical-device QA. Keep invited
+staging configuration/release approval separate from production and store upload.
+Legal/guardian notices and moderation operator coverage remain release gates.
+
 ## Quyết định và bằng chứng hiện tại
 
 **Cập nhật 2026-10-13:** Native foundation Android/iOS source + bundled frontend/checks đã có; chưa APK/IPA/device/store evidence. Chi tiết và gates: `native-foundation.md`. Owner chốt `cloud.emcoin.app`; chat/micro do quản trò quản lý riêng, không bị khóa/mở theo vai trò gameplay. Đây là quyết định mới thay ghi chú game-role communication ngày 2026-10-12 bên dưới. Native-origin staging/CORS cần kiểm trước beta; chưa chọn/kích hoạt voice provider. Những số liệu/trạng thái ngày 2026-10-12 bên dưới là lịch sử, không phủ nhận scaffold mới và không trở thành chứng nhận phát hành.

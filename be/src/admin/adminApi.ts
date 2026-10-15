@@ -116,6 +116,20 @@ export function registerAdminApi(app: Express, options: {
         .json({ error: expected ? code : 'REPORT_UNAVAILABLE' })
     }
   })
+  // Read-only POST keeps selected-evidence search terms out of URLs/access logs.
+  router.post('/reports/search', (request, response) => {
+    const body = request.body
+    if (!request.is('application/json') || !body || Array.isArray(body) || Object.keys(body).sort().join('|') !== 'offset|query|status' ||
+        !['open', 'resolved', 'dismissed', 'all'].includes(body.status) || typeof body.query !== 'string' || body.query.length > 100 ||
+        /[\u0000-\u001f\u007f]/u.test(body.query) || !Number.isSafeInteger(body.offset) || body.offset < 0 || body.offset > 2000 || body.offset % 50 !== 0) {
+      response.status(400).json({ error: 'INVALID_REPORT_QUERY' }); return
+    }
+    try {
+      const store = options.chatReports?.()
+      if (!store) { response.status(503).json({ error: 'REPORT_UNAVAILABLE' }); return }
+      response.json(store.list(body.status, Date.now(), { offset: body.offset, query: body.query }))
+    } catch { response.status(503).json({ error: 'REPORT_UNAVAILABLE' }) }
+  })
   router.get('/catalog', (_request, response) => {
     try {
       const catalog = options.catalog?.()

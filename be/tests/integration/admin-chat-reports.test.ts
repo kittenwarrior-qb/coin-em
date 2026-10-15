@@ -80,4 +80,20 @@ describe('actual admin report HTTP authentication and selected evidence only', (
     const failed = await fetch(base + '/admin/api/reports', { headers })
     expect(failed.status).toBe(503); expect(await failed.json()).toEqual({ error: 'REPORT_UNAVAILABLE' })
   })
+  it('serves authenticated paged search through a strict no-store POST body', async () => {
+    await start(); const cookie = await login(), headers = { cookie, origin, 'x-emcoin-admin': '1', 'content-type': 'application/json' }
+    for (let n = 0; n < 51; n++) store!.submit({ requestId: randomUUID(), roomId: 'old-room', reporterId: `reporter-${n}`, reason: 'unsafe',
+      message: { id: randomUUID(), senderId: 'sender', senderName: 'NGƯỜI THỬ', text: 'Selected paged evidence', sentAt: Date.now() } })
+    const read = (body: object, authHeaders = headers) => fetch(base + '/admin/api/reports/search', { method: 'POST', headers: authHeaders, body: JSON.stringify(body) })
+    const response = await read({ status: 'all', offset: 50, query: 'người thử' })
+    expect(response.status).toBe(200); expect(response.headers.get('cache-control')).toBe('no-store')
+    expect(await response.json()).toMatchObject({ total: 51, offset: 50, pageSize: 50, reports: [expect.objectContaining({ roomId: 'old-room' })] })
+    for (const body of [{ status: 'all', offset: 1, query: '' }, { status: 'all', offset: 0, query: 'x'.repeat(101) },
+      { status: 'all', offset: 0, query: '\u0000' }, { status: 'all', offset: 0, query: '', actor: 'forged' }, { status: 'all', offset: '50', query: '' }]) {
+      const rejected = await read(body); expect(rejected.status).toBe(400); expect(await rejected.json()).toEqual({ error: 'INVALID_REPORT_QUERY' })
+    }
+    expect((await read({ status: 'all', offset: 0, query: '' }, { ...headers, cookie: '' })).status).toBe(401)
+    expect((await read({ status: 'all', offset: 0, query: '' }, { ...headers, origin: 'capacitor://localhost' })).status).toBe(403)
+    expect(store!.list('all').total).toBe(52)
+  })
 })

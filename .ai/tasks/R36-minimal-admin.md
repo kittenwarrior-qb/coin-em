@@ -12,6 +12,43 @@ RBAC admin metadata/presence, audited close-room command and no direct coin muta
 
 ## Current evidence
 
+### Integrated verification — 2026-10-16
+
+The intentionally disabled editor theme switch is now tested as disabled; the
+fixture changes theme after leaving the editor. The unchanged navigation/draft
+lock is preserved. Entire non-3D short browser matrix PASS7/7 (5files,338.79s),
+including both-theme chat/report pagination and admin320/390/1280/1366/1920/3840.
+Admin E8LUan report complete/errors[];1366x768 table screenshot visually inspected.
+Integrated regular checks: BE898/74files, FE804/82files, TypeScript/lint/build PASS.
+This supersedes the unresolved fixture statement below, not the retained failure
+or the separate production auth-cookie/device/deployment gates. Source now also
+contains bounded viewport fixes from2d48a82/87c1206. Production remains unchanged.
+Focused current admin/chat follow-up also PASS2/2 in78.31s; chat host/guest draft
+and Send remain reachable at300px viewport height in both themes. This is viewport
+simulation, not a physical soft-keyboard claim.
+
+### Plan revision — 2026-10-15, searchable report pagination
+
+Continue the approved selected-report admin workflow: add bounded server-side
+search and 50-row pages across retained reports, not just the newest50. Admit
+ChatReportStore, authenticated admin registrar, reportsClient/ReportsPanel,
+adjacent tests/browser fixture and existing admin CSS pagination tokens.
+Use a strict POST read body for search terms so selected evidence is not copied
+into URLs/access logs. Keep auth/Origin/header/no-store, seven-day expiry, no
+new data source/storage/export, and exact resolution retry safeguards. Search
+only existing selected evidence/room/sender; no full-room reader. No deployment,
+production activation, game/card/theme palette/package or native licensing change.
+
+Current slice checks: BE897/74files and FE804/82files PASS; TypeScript, FE lint and
+production build PASS. Focused two-theme report browser with real in-memory SQLite
+and intercepted admin HTTP PASS, including>50resolved rows, Unicode search/reset
+and desktop/320px screenshots. Real Redis two-backend/100seat chat check PASS in
+emcoin-chat-check-1QxWGM (same-host SQLite/single schema initializer, not sustained
+capacity). Broader admin browser FAILS on an old expectation that selects a theme
+while catalog editor intentionally blocks navigation; see R29. Do not mark all
+admin QA green or deploy this unfinished slice. New source remains local pending
+that fixture/contract reconciliation; native SDK preparation is a separate commit.
+
 ### Plan revision / implementation / QA — 2026-10-14, chat frontend
 
 Owner authorized continuing the guarded chat foundation with room UI and selected

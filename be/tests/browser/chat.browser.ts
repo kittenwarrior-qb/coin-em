@@ -1,5 +1,6 @@
 import { test, expect, onTestFinished } from 'vitest'
 import { spawn } from 'node:child_process'
+import { randomUUID } from 'node:crypto'
 import { mkdtemp, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
@@ -107,10 +108,46 @@ test('both-theme chat invitation, real guarded send/block/report and selected ad
       await page.screenshot({ path: path.join(output, `${theme}-chat-${index}-${width}.png`), fullPage: true })
       const storage = await page.evaluate(() => JSON.stringify({ ...localStorage, ...sessionStorage }))
       expect(storage).not.toContain(invitation); expect(storage).not.toContain('Tin thử nghiệm')
+      // Resize simulation only: a keyboard-sized viewport must retain the draft
+      // and reach Send through genuine scrolling, not hidden ancestor scrolling.
+      const draft = page.getByLabel('Tin nhắn', { exact: true })
+      await draft.fill('Bản nháp kiểm tra vùng nhập')
+      await draft.focus()
+      await page.setViewportSize({ width, height: 300 })
+      const reachable = await page.getByRole('button', { name: 'Gửi', exact: true }).evaluate(async button => {
+        for (let parent = button.parentElement; parent; parent = parent.parentElement) {
+          if (/auto|scroll/.test(getComputedStyle(parent).overflowY)) {
+            const control = button.getBoundingClientRect(), box = parent.getBoundingClientRect()
+            parent.scrollTop += control.top - box.top - Math.max(0, (parent.clientHeight - control.height) / 2)
+          }
+        }
+        await new Promise(resolve => requestAnimationFrame(resolve))
+        const control = button.getBoundingClientRect()
+        let top = 0, bottom = innerHeight, left = 0, right = innerWidth
+        for (let parent = button.parentElement; parent; parent = parent.parentElement) {
+          const style = getComputedStyle(parent), box = parent.getBoundingClientRect()
+          if (/auto|scroll|hidden|clip/.test(style.overflowY)) { top = Math.max(top, box.top); bottom = Math.min(bottom, box.bottom) }
+          if (/auto|scroll|hidden|clip/.test(style.overflowX)) { left = Math.max(left, box.left); right = Math.min(right, box.right) }
+        }
+        const hit = document.elementFromPoint(control.x + control.width / 2, control.y + control.height / 2)
+        return control.top >= top - 1 && control.bottom <= bottom + 1 && control.left >= left - 1 && control.right <= right + 1 &&
+          !!hit && button.contains(hit) && document.documentElement.scrollHeight <= innerHeight + 1
+      })
+      expect(reachable).toBe(true)
+      await ui(draft).toHaveValue('Bản nháp kiểm tra vùng nhập')
+      await page.screenshot({ path: path.join(output, `${theme}-chat-${index}-short.png`) })
+      await page.setViewportSize({ width, height: width === 320 ? 568 : 844 })
+      await ui(draft).toHaveValue('Bản nháp kiểm tra vùng nhập')
     }
     await Promise.all(contexts.map(context => context.close()))
   }
   // Admin uses actual selected SQLite evidence but intercepted HTTP, not real auth-cookie proof.
+  for (let index = 0; index < 55; index++) {
+    const id = randomUUID(), now = Date.now()
+    reports.submit({ requestId: id, roomId: 'paged-fixture', reporterId: `fixture-${index}`, reason: 'other',
+      message: { id: randomUUID(), senderId: `sender-${index}`, senderName: `Báo cáo lưu ${index}`, text: 'Bằng chứng phân trang thử nghiệm', sentAt: now } }, now)
+    reports.resolve(id, 'resolved', randomUUID(), now)
+  }
   for (const theme of ['emotion-orbit', 'kindness-workshop']) {
     const context = await browser.newContext({ viewport: { width: 1366, height: 768 }, reducedMotion: 'reduce' })
     await context.route('**/*', async route => {
@@ -118,7 +155,11 @@ test('both-theme chat invitation, real guarded send/block/report and selected ad
       if (!['127.0.0.1', 'localhost'].includes(url.hostname)) { await route.abort(); return }
       if (!url.pathname.startsWith('/admin/api/')) { await route.continue(); return }
       let body: object
-      if (url.pathname === '/admin/api/reports') body = reports.list((url.searchParams.get('status') ?? 'open') as 'open')
+      if (url.pathname === '/admin/api/reports/search') {
+        expect(route.request().method()).toBe('POST'); expect(url.search).toBe('')
+        const query = route.request().postDataJSON()
+        body = reports.list(query.status, Date.now(), { offset: query.offset, query: query.query })
+      }
       else if (url.pathname === '/admin/api/reports/resolve') {
         const command = route.request().postDataJSON(); resolutions.push(command)
         body = reports.resolve(command.id, command.status, command.requestId)
@@ -135,12 +176,29 @@ test('both-theme chat invitation, real guarded send/block/report and selected ad
     await page.screenshot({ path: path.join(output, `${theme}-report-detail.png`), fullPage: true })
     await page.getByRole('button', { name: 'Đánh dấu đã xử lý', exact: true }).click()
     await ui(page.getByRole('dialog')).toHaveCount(0)
+    await page.getByRole('button', { name: 'Đã xử lý', exact: true }).click()
+    await ui(page.locator('.admin-reports-table tbody tr')).toHaveCount(50)
+    await ui(page.getByRole('button', { name: 'Trang sau', exact: true })).toBeVisible()
+    await page.getByRole('button', { name: 'Trang sau', exact: true }).click()
+    await ui(page.getByRole('button', { name: 'Trang sau', exact: true })).toBeDisabled()
+    await ui(page.getByRole('button', { name: 'Trang trước', exact: true })).toBeEnabled()
+    await page.getByRole('searchbox', { name: 'Tìm báo cáo' }).fill('BÁO CÁO LƯU 54')
+    await page.getByRole('button', { name: 'Tìm kiếm', exact: true }).click()
+    await ui(page.locator('.admin-reports-table tbody tr')).toHaveCount(1)
+    await ui(page.getByText('Báo cáo lưu 54', { exact: true })).toBeVisible()
+    await ui(page.getByRole('button', { name: 'Trang trước', exact: true })).toBeDisabled()
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth && document.documentElement.scrollHeight <= innerHeight + 1)).toBe(true)
+    await page.screenshot({ path: path.join(output, `${theme}-report-search.png`), fullPage: true })
+    await page.setViewportSize({ width: 320, height: 568 })
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+    await page.screenshot({ path: path.join(output, `${theme}-report-search-320.png`), fullPage: true })
     await context.close()
   }
   expect(resolutions).toHaveLength(2); expect(errors).toEqual([])
   finished = true
   await writeFile(path.join(output, 'report.json'), JSON.stringify({ result: 'passed', errors, themes: ['emotion-orbit', 'kindness-workshop'],
     chatTransport: 'real-production-guarded-handlers-loopback', roomStorage: 'test-fixture-not-redis-proof', reportStorage: 'actual-in-memory-sqlite',
-    adminHttp: 'intercepted-not-auth-proof', physicalDevice: false, productionModified: false }, null, 2))
+    adminHttp: 'intercepted-not-auth-proof', shortChatViewport: '300px height, draft retained, genuine scroll and Send hit-test; not a physical keyboard',
+    physicalDevice: false, productionModified: false }, null, 2))
   console.log(`Owned chat browser artifacts: ${output}`)
 }, 180000)

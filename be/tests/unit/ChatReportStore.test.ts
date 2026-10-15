@@ -68,6 +68,36 @@ describe('selected safety reports, persistent dedup and bounded logical retentio
     expect(() => instance.submit(evidence({ reporterId: 'overflow' }), now)).toThrow('REPORT_CAPACITY_REACHED')
     expect(instance.isAvailable(now + COMMUNICATION_POLICY.reportRetentionMs)).toBe(true)
   })
+  it('paginates all retained reports deterministically, including same-timestamp ties and resolved history', () => {
+    const instance = store(), ids: string[] = []
+    for (let n = 0; n < 103; n++) {
+      const input = evidence({ reporterId: `reporter-${n}` }); ids.push(input.requestId)
+      instance.submit(input, now); instance.resolve(input.requestId, 'resolved', randomUUID(), now)
+    }
+    const pages = [0, 50, 100].map(offset => instance.list('resolved', now, { offset }))
+    expect(pages.map(page => page.reports.length)).toEqual([50, 50, 3])
+    expect(pages.map(page => page.total)).toEqual([103, 103, 103])
+    const returned = pages.flatMap(page => page.reports.map(report => report.id))
+    expect(new Set(returned).size).toBe(103); expect(returned).toEqual(ids.sort())
+    expect(instance.list('resolved', now, { offset: 2000 }).offset).toBe(100)
+    expect(instance.list('open', now, { offset: 100 })).toMatchObject({ total: 0, offset: 0, reports: [] })
+  })
+  it('searches all selected evidence with Unicode case normalization and literal punctuation', () => {
+    const instance = store()
+    for (let n = 0; n < 51; n++) instance.submit(evidence({ reporterId: `reporter-${n}` }), now)
+    const selected = evidence({ reporterId: 'matching', roomId: 'old-room', message: { ...evidence().message, senderName: 'NGƯỜI THỬ', text: "Điều cần tìm: %_' OR 1=1 --", sentAt: now } })
+    instance.submit(selected, now)
+    for (const query of ['người thử', 'NGƯỜI THỬ'.normalize('NFD'), 'OLD-ROOM', "%_' OR 1=1 --"]) {
+      const page = instance.list('all', now, { query, offset: 50 })
+      expect(page).toMatchObject({ total: 1, offset: 0, pageSize: 50 })
+      expect(page.reports[0].id).toBe(selected.requestId)
+    }
+    expect(instance.list('all', now, { query: 'not found' }).total).toBe(0)
+    expect(instance.list('all', now + COMMUNICATION_POLICY.reportRetentionMs, { query: 'người thử', offset: 50 })).toMatchObject({ total: 0, offset: 0, reports: [] })
+  })
+  it.each([{ offset: -50 }, { offset: 1 }, { offset: 2050 }, { offset: Infinity }, { query: 'x'.repeat(101) }, { query: '\u0000' }])('rejects invalid bounded report query %j', options => {
+    expect(() => store().list('all', now, options)).toThrow('INVALID_REPORT_QUERY')
+  })
   it('resolves once with exact retry and rejects a resolution ID reused for another incident', () => {
     const instance = store(), a = evidence(), b = evidence(), resolution = randomUUID()
     instance.submit(a, now); instance.submit(b, now)

@@ -35,9 +35,12 @@ It does not certify legal compliance, store approval, staffing or response times
 
 ## Handling a report with current controls
 
-1. Open Admin → Báo cáo an toàn → Chờ xử lý. At most 50 records are loaded; search
-   covers those records, not all report history. Process open reports and refresh
-   to see the next batch. Verify room, sender, reason and expiry before deciding.
+1. Open Admin → Báo cáo an toàn → Chờ xử lý. Search covers retained selected
+   evidence (sender, room or reported text) in the chosen status; submit Tìm kiếm.
+   Each page loads at most50records. Use Trang trước/Trang sau for older evidence,
+   including resolved history. Search uses a POST body, not a URL. Verify room,
+   sender, reason and expiry before deciding. New reports/expiry can shift pages;
+   this is a live retained list, not a frozen export or archived snapshot.
 2. Open the selected evidence. Only that reported message is available, not the
    private room conversation. Do not reconstruct or export a full room history.
 3. If the room needs to stop, use the separate confirmed close-room control in
@@ -58,9 +61,8 @@ so coordinate this as an operational change. Keep rooms, catalog, credentials an
 analytics intact. Never use Redis FLUSHALL, broad filesystem deletion or catalog
 reset as a chat incident procedure.
 
-The current admin list needs pagination for older resolved history beyond the
-50-record window; staffing, semantic content review, physical devices and public notices
-remain open gates, not completed by the local load evidence.
+Staffing, semantic content review, physical devices and public notices remain
+open gates, not completed by local pagination/load evidence.
 
 ## Vocabulary maintenance
 

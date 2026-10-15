@@ -75,14 +75,24 @@ export class ChatReportStore {
       this.db.exec('COMMIT'); return { success: true as const, id: input.requestId, replayed: false }
     } catch (error) { this.db.exec('ROLLBACK'); throw error }
   }
-  list(status: 'all' | ChatReportStatus = 'open', now = Date.now()) {
+  list(status: 'all' | ChatReportStatus = 'open', now = Date.now(), options: { offset?: number; query?: string } = {}) {
     if (!['all', 'open', 'resolved', 'dismissed'].includes(status)) throw Error('INVALID_REPORT_STATUS')
+    const requested = options.offset ?? 0, query = options.query ?? ''
+    if (!Number.isSafeInteger(requested) || requested < 0 || requested > 2000 || requested % 50 !== 0 ||
+        typeof query !== 'string' || query.length > 100 || /[\u0000-\u001f\u007f]/u.test(query)) throw Error('INVALID_REPORT_QUERY')
     this.prune(now)
-    const rows = this.db.prepare('SELECT id,room_id,reporter_id,reason,message,created_at,expires_at,status,resolved_at FROM chat_report WHERE (? = ? OR status = ?) ORDER BY created_at DESC,id LIMIT 50')
+    // At most 2000 retained records; one bounded read gives consistent count/page.
+    // JS Unicode normalization avoids SQLite's ASCII-only lower()/NOCASE behavior.
+    const rows = this.db.prepare('SELECT id,room_id,reporter_id,reason,message,created_at,expires_at,status,resolved_at FROM chat_report WHERE (? = ? OR status = ?) ORDER BY created_at DESC,id LIMIT 2001')
       .all(status, 'all', status)
-    const total = this.db.prepare('SELECT count(*) AS total FROM chat_report WHERE (? = ? OR status = ?)').get(status, 'all', status)!.total as number
-    return { version: 'chat-reports/v1' as const, total, reports: rows.map(row => ({ id: row.id as string, roomId: row.room_id as string,
-      reporterId: row.reporter_id as string, reason: row.reason as ChatReportReason, message: JSON.parse(row.message as string) as RoomChatMessage,
+    if (rows.length > 2000) throw Error('REPORT_CAPACITY_REACHED')
+    const normalized = query.normalize('NFKC').toLocaleLowerCase('vi').trim()
+    const matches = rows.map(row => ({ row, evidence: JSON.parse(row.message as string) as RoomChatMessage })).filter(({ row, evidence }) =>
+      !normalized || [row.room_id as string, evidence.senderName, evidence.text]
+        .some(value => value.normalize('NFKC').toLocaleLowerCase('vi').includes(normalized)))
+    const total = matches.length, offset = Math.min(requested, Math.floor(Math.max(0, total - 1) / 50) * 50)
+    return { version: 'chat-reports/v1' as const, total, offset, pageSize: 50 as const, reports: matches.slice(offset, offset + 50).map(({ row, evidence }) => ({ id: row.id as string, roomId: row.room_id as string,
+      reporterId: row.reporter_id as string, reason: row.reason as ChatReportReason, message: evidence,
       createdAt: row.created_at as number, expiresAt: row.expires_at as number, status: row.status as ChatReportStatus, resolvedAt: row.resolved_at as number | null })) }
   }
   resolve(id: unknown, status: unknown, requestId: unknown, now = Date.now()) {
