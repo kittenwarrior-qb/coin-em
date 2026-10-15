@@ -31,7 +31,7 @@ export async function inspectAndroid(sdk, java) {
     systemImage: await exists(path.join(sdk, 'system-images/android-36/google_apis/x86_64/system.img')) }
   return { ...androidReadiness(facts), facts,
     notes: ['Read-only check; no downloads, license acceptance, global environment writes, signing or device access.',
-      'A license file is only an installation record; review/accept terms yourself in Android Studio.',
+      'A license file is only an installation record; review/accept terms yourself in SDK Manager or an interactive sdkmanager terminal.',
       'Emulator target is an owned API 36 Google APIs x86_64 AVD; do not wipe an existing AVD.'] }
 }
 

@@ -65,6 +65,19 @@ Audience6–18 is owner-approved; do not reopen that choice. Native permission s
 
 ## Implementation plan
 
+### Owner revision2026-10-15 — standalone Windows SDK/emulator preparation
+
+Owner requests setup without Studio or a phone currently available. Admit a
+project-local PowerShell helper, tests and runbook for a dedicated
+D:/Android/EmCoinSdk, reusing verified local JDK21. Download only after owner
+personally reviews/accepts Google's download terms; do not bypass the download
+agreement or synthesize license records. Verify the official ZIP SHA256, reject
+archive traversal/reparse targets and preserve any installed SDK/AVD. Package
+installation/license prompts are explicitly human-interactive. Never pipe yes,
+accept terms, toggle Windows features/reboot, wipe AVDs, contact/sign/store/deploy
+or install unrelated editor extensions. ADB/emulator acceleration/boot/APK evidence
+remain unavailable until real tools exist; scripts/tests are not installation.
+
 ### Plan revision 2026-10-13 — native-origin staging and Android preflight
 
 Owner requests continued implementation after deploying their revised admin.
@@ -112,6 +125,24 @@ Owner yêu cầu roadmap Android/iOS và chốt voice trong phòng mời có qu�
 <!-- Codex updates this after implementation: changed files, invariant preserved, commands and results. -->
 
 ## QA report
+
+2026-10-15 standalone preparation: helper syntax/default Inspect PASS in pwsh and
+Windows PowerShell5;28native tests PASS (8new helper safety cases). Real JDK21
+exists even though owner does not use the Studio IDE. Windows reports firmware
+virtualization/hypervisor; emulator acceleration is NOT verified without actual
+emulator tools. Dedicated SDK/AVD path is on D, no global env/security/driver change.
+No approved ZIP exists in Downloads; owner must personally accept/download Google
+CLI terms, then run Prepare/interactive Install. Helper validates pinned official
+SHA256, extraction paths and no-overwrite target; no SDK or emulator installed,
+no license accepted, no AVD started and no APK built. Guide:docs/ops/android-cli-windows.md.
+
+2026-10-15 read-only continuation:20native policy/preflight tests PASS. Preflight
+with process-local Android Studio JDK21 confirms Java present but SDK/platform36,
+Build Tools/ADB/license record/emulator/API36Google APIs x86_64 image absent.
+Default process JAVA_HOME still selects the wrong Java; global settings were not
+changed. Owner answered that they will install via SDK Manager and report when
+done. No downloads, accepted licenses, APK/IPA build, signing, device connection
+or production change occurred. This is an environment gate, not completion of R32.
 
 2026-10-13 staging follow-up: exact web/native origin flag/config tests and real
 production-handler loopback admission/hydration/cross-room/session redaction plus
