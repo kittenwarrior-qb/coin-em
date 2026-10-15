@@ -21,15 +21,20 @@ acceptance; having tests or a scaffold does not mark them all complete.
   native HTTPS admission, five-seat room/start and foreground hydration checks.
   See `../qa/android-native-origin-20261015/summary.json` for exact evidence and
   retained failures. No global Java change, automatic license acceptance or
-  release-signing claim. These APKs precede the latest viewport integration.
+  release-signing claim. The2026-10-16 debug candidate includes the viewport/chat/
+  admin integration, verifies its debug signature and passes packaged browser
+  smoke. It has not yet repeated actual WebView/physical-device gameplay QA;
+  earlier native-room screenshots belong to the older staging artifact.
 - No voice provider/microphone implementation is enabled. Owner currently prefers
   text chat first; contextual moderation is deferred, not declared unnecessary.
 - No Mac/Xcode, store enrollment/signing or actual device evidence is available
   in this continuation. No IPA/TestFlight/Play/App Store approval is claimed.
 
-Next execution order: complete the integrated web/viewport/full-game checks;
-rebuild the debug APK with the integrated UI, then emulator and named
-physical-device QA. Keep invited
+Integrated web checks now pass:898BE+804FE tests,7short browser cases, canonical
+PDF5/10-seat full games and463synthetic layout cases. These are local evidence,
+not a store or production certificate. Next execution order: repeat current-APK
+WebView and named physical-device QA, then complete invited staging and manual
+release gates. Keep invited
 staging configuration/release approval separate from production and store upload.
 Legal/guardian notices and moderation operator coverage remain release gates.
 

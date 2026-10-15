@@ -14,6 +14,13 @@ Mobile Chromium/WebKit + desktop Playwright projects with semantic selectors.
 
 ## Current evidence
 
+Final integrated2026-10-16 receipt:
+docs/qa/integrated-readiness-20261016/summary.json. All463synthetic layout cases
+PASS after the production-handler short/terminal suites; no owned runtime/source
+changes during each matrix. Fresh Redis/chat fixture and rebuilt debug APK also
+pass their scoped checks. This does not certify production deployment, actual
+current-APK keyboard/gameplay/device QA, WebKit/iOS or full41task acceptance.
+
 2026-10-16 integrated continuation: viewport commits b5a4669/2fabdf3 are now
 cherry-picked as2d48a82/87c1206 into the native/chat worktree. Preserved both
 RoomChatPanel and the new bounded game viewport during the only merge conflict.

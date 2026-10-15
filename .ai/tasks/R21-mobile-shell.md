@@ -12,6 +12,18 @@ Responsive board safe-area/dvh across portrait/landscape/desktop preserving 10 s
 
 ## Current evidence
 
+2026-10-16 integration: viewport commits2d48a82/87c1206 now coexist with chat and
+native staging on codex/native-staging. Fresh owned Vite5182, no source/CSS changes
+during the UI matrix:195viewport+102phase+84popup+40admin+42nested=463cases PASS.
+Roots:1P986H,E5G5Ks,3x4Xzv,BWavc8,A8Th0L under their respective emcoin temp prefixes.
+Both approved themes, legacy shell,17phases,10seats, short landscape/desktop and
+focused form shrink/restore are included; admin requests are synthetic. Inspected
+workshop1440x400 content editor shows genuine internal scrolling and reachable
+save. Actual chat host/guest also pass300px draft retention/Send hit-test in both
+themes (SAM6AS). Simulations are not real soft-keyboard/WebKit/device acceptance.
+Original art and gameplay preserved; no production update. See R29 and the
+integrated20261016 QA receipt for provenance and the separate APK build.
+
 Fixed sizes có thể che 10 người chơi/CTA trên mobile và keyboard.
 
 ## Scope

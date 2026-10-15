@@ -12,6 +12,19 @@ Real Redis/Caddy test load harness and p95/p99/loss/convergence report.
 
 ## Current evidence
 
+2026-10-16 integrated chat rerun PASS in the closed existing100seat fixture
+(3o9VM0), after local Docker recovery. Source digest9efaad9c… and full receipt in
+docs/qa/integrated-readiness-20261016/summary.json. This is integrity/local short
+workload evidence, not a new sustained soak or production sizing certificate.
+Docker start reproduced the known Inference/Secrets Engine inaccessible endpoint
+failure. Following the previously owner-approved preservation-only recovery,
+bounded graceful stop failed; force stop completed and no Desktop/backend process
+remained. Verified exact non-reparse runtime parents with only zero-byte named
+sockets; moved them recoverably to run.stale-20261016[-2] and
+docker-secrets-engine.stale-20261016[-2]. No data/volume/image deletion, reset,
+upgrade, WSL shutdown/unregister or production operation. Linux engine verified;
+fresh labelled test container was removed by its ownership-checked fixture.
+
 ### Plan revision / implementation — 2026-10-14, bounded real chat workload
 
 Owner requested continuing chat readiness. Add a dedicated short protocol fixture

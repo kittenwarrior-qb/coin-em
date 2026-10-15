@@ -12,6 +12,20 @@ Bundled FE and lifecycle/token/link adapters with safe area/native back.
 
 ## Current evidence
 
+Integrated UI debug candidate2026-10-16 built from e112693 (tracked sources clean;
+two preexisting untracked QA PNGs not packaged). Bundle600files/34,198,285bytes,
+sourceDigest433857f17fe229564398a87144a4d7d4fef47927cdced859cccb9a047f8e3066.
+Exact config/hash checks, Android sync,40native policy/helper tests and packaged
+Chromium guide/hash reload/no-worker smoke PASS. Gradle assembleDebug PASS57s;
+APK34,843,247bytes at D:/Android/EmCoinBuilds/EmCoin-debug-20261016-312acf6e.apk,
+SHA256312acf6ef10bfa9278165a53c3217d27f85820fe50759933b6825ad36122c50f.
+apksigner verify PASS(debug key); merged default manifest has normal app ID,
+cleartext/backup disabled, no QA trust config or mic/camera permission. Web build
+was restored afterward with its normal worker/manifest. Native bundle remains
+production-bound but production native origins were NOT enabled; no production
+multiplayer readiness claim. No new emulator/physical-device run on this APK.
+Earlier native-room evidence below belongs to its older artifact, not this one.
+
 Bundled Android/iOS source foundation exists. A first local Android debug APK now
 builds, verifies and installs/launches in the owned API36 emulator (2026-10-15).
 This is bounded Home/guide/Back/background smoke, not multiplayer, physical-device,

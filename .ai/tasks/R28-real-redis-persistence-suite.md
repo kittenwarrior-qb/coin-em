@@ -12,6 +12,15 @@ Dedicated real-Redis crash/fault/TTL/two-process suite.
 
 ## Current evidence
 
+2026-10-16 current integrated source rerun PASS:100sockets/10rooms/two compiled
+backends,100committed load messages/1000unique recipient deltas, SIGKILL/retry,
+two-writer CAS, primary failure, actual AOF restart and7day selected-report bounds.
+Owned fixture cleanup passed. Report emcoin-chat-check-3o9VM0; source/dist digests
+are in docs/qa/integrated-readiness-20261016/summary.json. Earlier38IyWT/Lpg6oF
+attempts failed before assertions because local Docker runtime was unavailable;
+retained, not counted as passed. No new production or separate-host/SQLite cold
+bootstrap certification; see R30 for bounded host recovery.
+
 ### Plan revision / implementation — 2026-10-14, owned chat durability
 
 Extend fixture scope to `be/scripts/test-real-chat.mjs` and
