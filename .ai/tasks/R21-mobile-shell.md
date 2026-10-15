@@ -63,6 +63,17 @@ Do not invent event names, schema fields, phase transitions, card IDs, or rule o
 
 ## Implementation plan
 
+### Plan revision2026-10-15 — follow-up nested/focus/short-height QA
+
+Continue after viewport repair with owned loopback nested menu/theme/guide/inventory
+and focused form shrink/restore checks. Admit adjacent CartoonModal geometry and
+local-only browser test additions only when a reproduced defect requires them.
+Also admit scoped admin viewport rules and an owned metadata-only admin catalog/
+editor browser test. Do not stage or rewrite the owner's ongoing admin source edits.
+Attempt Android keyboard evidence only on the owned emulator; no browser terms,
+system security, production routes or device network policy bypasses. Simulated
+viewport changes are not physical keyboard/iOS evidence. Preserve owner edits.
+
 ### Plan revision2026-10-15 — viewport and menu scroll repair
 
 Owner reports web/mobile shells exceeding the viewport and unnecessary menu scroll.
@@ -92,6 +103,19 @@ Preserve existing information hierarchy, board/player/card assets and role place
 
 ## Implementation report
 
+2026-10-15 follow-up: reproduced a short desktop catalog footer clipped below its
+fixed workspace and editor textareas taller than the remaining editor viewport.
+For desktop heights<=600px, preserve the fixed app shell but let the workspace own
+vertical scroll, with a bounded table viewport and full-height editor fields.
+Normal desktop keeps its existing fixed record table. Found a separate360px-high
+mobile document overflow: absolute sr-only filter labels had no containing block
+inside the scroll shell. Position the authenticated admin shell relatively; labels
+and screen-reader text stay intact, and document height returns526px→360px without
+adding a root/body overflow clamp. Changes remain in viewportLayout.css, not the
+owner's uncommitted admin restyle. New read-only synthetic browser checks cover
+catalog/table pagination and all three detail tabs, nested menus via Escape/Back,
+focus return and form draft preservation on300px viewport shrink/restore.
+
 2026-10-15 viewport repair: new isolated viewportLayout.css bounds Home/game shells
 to100dvh(vh fallback) without the fixed poster aspect ratio growing the document.
 Menu material/brand assets are preserved; rows/gaps/header margins adapt to viewport,
@@ -112,6 +136,20 @@ Scope revision: include `TableBoard.tsx` inner horizontal padding only and `Give
 <!-- Codex updates this after implementation: changed files, invariant preserved, commands and results. -->
 
 ## QA report
+
+2026-10-15 follow-up PASS463bounded Chromium cases on final CSS:195 viewport/resize,
+84popup reachability,102phase layouts,40mocked admin catalog/editor cases and42nested
+menu/focused-form cases. Admin covers both themes at1440x900,1440x400,1024x568,
+390x844,390x360; actual button/field rectangles must fit clipping ancestors after
+genuine internal scroll only. Nested theme/guide/inventory close via Escape and
+browser Back and return focus;300px form shrink preserves draft and reaches submit.
+FE758tests/79files, final lint/TypeScript/Vite production build PASS. Fresh CSS rerun follows an owned Vite restart, because
+the prior imported stylesheet was stale; interrupted/stale runs retained as failed.
+No owner admin file edits staged with this fix. Evidence/failures/source hashes:
+docs/qa/viewport-scroll-20261015/follow-up.json. Actual Android keyboard attempt was
+denied by tool network policy before page navigation; no bypass, browser agreement,
+or device trust change attempted. Owned emulator shut down. Keyboard simulation is
+not physical/iOS/native proof; no production deploy or APK rebuild.
 
 2026-10-15 Chromium local synthetic QA PASS381cases:195 viewport/resize across
 320x400,320x568,390x844,844x390,1440x900 and three skins;84 real popup control
