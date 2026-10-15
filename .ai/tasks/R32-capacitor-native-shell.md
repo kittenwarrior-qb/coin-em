@@ -126,6 +126,15 @@ Owner yêu cầu roadmap Android/iOS và chốt voice trong phòng mời có qu�
 
 ## QA report
 
+2026-10-15 actual CLI preparation follow-up: owner reports manually downloading
+Google Windows ZIP to D. Found D:/commandlinetools-win-15859902_latest.zip,
+155655386bytes; pinned SHA256 matches. Actual Prepare action PASS and tools are
+extracted at D:/Android/EmCoinSdk/cmdline-tools/emcoin-15859902 without overwriting
+another SDK. Started a separate visible user-interactive PowerShell Install window
+for package/license prompts; no input/terms answered by agent. Do not infer SDK,
+emulator image, acceleration, AVD boot or APK readiness until installation completes
+and real preflight/boot/build checks run. No production/store change.
+
 2026-10-15 standalone preparation: helper syntax/default Inspect PASS in pwsh and
 Windows PowerShell5;28native tests PASS (8new helper safety cases). Real JDK21
 exists even though owner does not use the Studio IDE. Windows reports firmware
