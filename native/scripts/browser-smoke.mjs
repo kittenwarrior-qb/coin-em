@@ -1,11 +1,12 @@
 import { chromium, expect } from '../../e2e/node_modules/@playwright/test/index.mjs'
 import { createServer } from 'node:http'
-import { readFile, mkdir, writeFile } from 'node:fs/promises'
+import { readFile, mkdtemp, writeFile } from 'node:fs/promises'
+import os from 'node:os'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../web')
-const output=path.resolve(root,'../../docs/qa/native-foundation-20261013')
-await mkdir(output,{recursive:true})
+// Every run owns fresh evidence; never overwrite historical or user-owned screenshots.
+const output=await mkdtemp(path.join(os.tmpdir(),'emcoin-native-browser-'))
 const mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.svg':'image/svg+xml','.webp':'image/webp','.png':'image/png','.woff2':'font/woff2','.ttf':'font/ttf','.otf':'font/otf'}
 const server=createServer(async(req,res)=>{
   try {
@@ -36,4 +37,5 @@ try {
  expect(errors).toEqual([])
  await writeFile(path.join(output,'browser-report.json'),JSON.stringify({result:'passed',scope:'packaged hash-router Chromium smoke; not Android/iOS WebView',viewports:[320,390],productionRequestsAllowed:false,workerRegistrations:0,errors},null,2))
  console.log('Native packaged guide/hash reload and no-worker browser smoke passed; no device claim.')
+ console.log(`Owned native browser artifacts: ${output}`)
 }finally{clearTimeout(watchdog);await browser.close();await new Promise(resolve=>server.close(resolve))}

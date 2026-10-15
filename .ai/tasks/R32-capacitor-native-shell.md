@@ -12,9 +12,11 @@ Bundled FE and lifecycle/token/link adapters with safe area/native back.
 
 ## Current evidence
 
-Bundled Android/iOS source foundation exists. Latest staging follow-up adds exact
-native-origin/seat/admin boundary evidence and Android SDK preflight. No APK/IPA,
-device test, Xcode build or store approval is claimed; see the dated QA below.
+Bundled Android/iOS source foundation exists. A first local Android debug APK now
+builds, verifies and installs/launches in the owned API36 emulator (2026-10-15).
+This is bounded Home/guide/Back/background smoke, not multiplayer, physical-device,
+release-signing, IPA/Xcode or store approval. Initial emulator SystemUI ANRs and
+remaining native-origin staging gates are recorded below, not waived.
 
 ## Scope
 
@@ -78,6 +80,15 @@ accept terms, toggle Windows features/reboot, wipe AVDs, contact/sign/store/depl
 or install unrelated editor extensions. ADB/emulator acceleration/boot/APK evidence
 remain unavailable until real tools exist; scripts/tests are not installation.
 
+Continuation after owner manually answered license prompts: allow installation
+retry using the existing accepted records (no prompt answered by agent), scoped
+AVD creation/start/ADB on emulator-5580, current native bundle rebuild/sync and
+Gradle assembleDebug with process-local JDK21/SDK/Gradle cache on D. No release
+signing/store/submission/production-origin changes. Keep fresh browser evidence
+in allocated temp directories, not historical screenshot paths. Debug certificate
+is not an owner release signing key. Record actual APK hash/source digest and
+bounded emulator launch evidence separately from untested gameplay/device gates.
+
 ### Plan revision 2026-10-13 — native-origin staging and Android preflight
 
 Owner requests continued implementation after deploying their revised admin.
@@ -125,6 +136,29 @@ Owner yêu cầu roadmap Android/iOS và chốt voice trong phòng mời có qu�
 <!-- Codex updates this after implementation: changed files, invariant preserved, commands and results. -->
 
 ## QA report
+
+2026-10-15 actual debug build and emulator continuation: owner reports accepting
+the SDK prompt. Existing license record used to finish package installation;
+agent did not answer new license prompts. Preflight buildReady/emulatorReady=true,
+WHPX actual accel-check PASS. Dedicated EmCoin_API36/port5580 created on D;
+existing Pixel_7/Pixel_7_2 untouched. Native600files/34194701bytes rebuilt/synced,
+exact config/receipt and fresh packaged Chromium guide smoke PASS;28native tests
+PASS. Gradle8.14.3/AGP8.13/JDK21 assembleDebug PASS109tasks in3m10s. APK34625774bytes,
+SHA256b91abfb20c6c205d3662cc0e9e4983c9e4df56d3051bcccbdc5dbf75d69034b9,
+debug v2signature verifies, id cloud.emcoin.app/min24/target36/no mic/camera.
+
+Retained failure: cold1080x2400 software-rendered first boot produced Android
+SystemUI/phone/GMS ANRs; native Home was behind a SystemUI dialog. Host driver was
+not upgraded. Selected Wait and reduced only this AVD to540x1200/density210. Home,
+60Coin guide, Android Back, Menu and Home background/resume visibly work after
+settling; no EmCoin ANR appears in the observed event buffer. First immediate
+resume capture was blank; later settled capture is retained separately. UIAutomator
+also returned a null root during a transient frame; no native accessibility/full
+performance certification. No further native room/game/chat/network/pending-mutation
+or physical-device tests performed. Emulator remains open for owner; SDK/Gradle/AVD
+files stay on D. No production native-origin change or store submission.
+Evidence:docs/qa/android-debug-20261015/summary.json. Frontend source includes local
+uncommitted R36 work, identified by bundle digest, not a clean release commit.
 
 2026-10-15 actual CLI preparation follow-up: owner reports manually downloading
 Google Windows ZIP to D. Found D:/commandlinetools-win-15859902_latest.zip,

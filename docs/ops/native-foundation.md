@@ -39,7 +39,31 @@ Use Node 22+; the verified runtime is `tmp/r39-node-22.23.3/node-v22.23.3-win-x6
   Enable the flag only in an owned staging process after reviewing its web
   allowlist. Keep production/native release rollout a separately verified step.
 
-## Local environment and missing gates
+## Actual Android debug continuation — 2026-10-15
+
+The owner manually downloaded/agreed to Google's command-line package and answered
+the package license prompt. Dedicated SDK/AVD/Gradle cache now exist on D with
+process-local JDK21. No Studio IDE, extension, driver update or Windows reboot was
+required. Current preflight and WHPX accel-check pass. See
+`docs/qa/android-debug-20261015/summary.json` for exact bundle/APK fingerprints.
+
+First `assembleDebug` succeeds and debug signature verifies. The debug APK is at
+`D:/Android/EmCoinBuilds/EmCoin-debug-20261015-b91abfb2.apk`; this is not an AAB,
+owner release key, store submission or device release approval. Emulator-5580 is
+the separate EmCoin_API36 test target. Do not wipe/modify the owner's other AVDs.
+
+Home/60Coin guide/Android Back/Menu and Home background/resume have bounded visible
+emulator evidence after reducing the owned display to540x1200/density210. First
+cold boot at1080x2400 hit SystemUI/phone/GMS ANRs under software graphics; retain
+that failure and transient resume/null-hierarchy frames. No physical-device,
+full-game/chat/pending/keyboard/accessibility or sustained performance pass is
+implied. Production native origins remain unchanged; native-origin staging and
+actual gameplay/network testing still precede beta. No IPA/Xcode/store work done.
+
+The environment notes below describe the earlier2026-10-13 preflight and remain
+historical evidence; the SDK absence there is superseded by this continuation.
+
+## Local environment and missing gates (historical 2026-10-13)
 
 - Windows has Android Studio and its bundled JDK 21.0.8. `ANDROID_HOME`/`ANDROID_SDK_ROOT` were not configured and the standard user SDK folder was not present during preflight; no alternative disks were scanned. No Gradle APK build was attempted or counted as passed.
 - `node native/scripts/android-preflight.mjs` is read-only and returns failure

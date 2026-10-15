@@ -117,5 +117,5 @@ if ($Action -eq 'Start') {
   $existing = & $emulator -list-avds
   if ($LASTEXITCODE -ne 0 -or $existing -notcontains $avdName) { throw 'Create the dedicated EmCoin_API36 AVD first.' }
   # Explicit user-run action opens the visible interactive device; never wipes user data.
-  Run-Tool $emulator @('-avd', $avdName, '-no-snapshot-load', '-no-snapshot-save', '-memory', '2048')
+  Run-Tool $emulator @('-avd', $avdName, '-port', '5580', '-no-snapshot-load', '-no-snapshot-save', '-no-metrics', '-no-audio', '-camera-back', 'none', '-camera-front', 'none', '-memory', '2560')
 }

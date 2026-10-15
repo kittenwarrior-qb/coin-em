@@ -1,0 +1,62 @@
+{
+  "date": "2026-10-15",
+  "sourceBase": "882de2d",
+  "sourceState": "working-tree including local uncommitted admin pagination; not a clean release commit",
+  "bundle": {
+    "sourceDigest": "cd59c611b4f95ed776ced823a41b613bc734acb4929f91801fc705224b4cbf21",
+    "files": 600,
+    "bytes": 34194701,
+    "configAndExactHashes": "passed",
+    "androidSync": "passed",
+    "serviceWorker": false,
+    "packagedBrowserSmoke": "passed; Chromium hash-router only, not Android WebView",
+    "browserArtifacts": "C:/Users/Admin/AppData/Local/Temp/emcoin-native-browser-CsfqkI"
+  },
+  "toolchain": {
+    "node": "22.23.3",
+    "java": "21.0.8",
+    "gradle": "8.14.3",
+    "androidGradlePlugin": "8.13.0",
+    "sdkRoot": "D:/Android/EmCoinSdk",
+    "gradleCache": "D:/Android/EmCoinGradle",
+    "nativeTests": { "passed": 28, "failed": 0 },
+    "preflight": { "buildReady": true, "emulatorReady": true },
+    "licensesAcceptedByAgent": false
+  },
+  "apk": {
+    "result": "assembleDebug passed, 109 tasks in 3m10s",
+    "path": "D:/Android/EmCoinBuilds/EmCoin-debug-20261015-b91abfb2.apk",
+    "bytes": 34625774,
+    "sha256": "b91abfb20c6c205d3662cc0e9e4983c9e4df56d3051bcccbdc5dbf75d69034b9",
+    "signature": "debug certificate; apksigner verifies APK v2 signature",
+    "applicationId": "cloud.emcoin.app",
+    "versionCode": 1,
+    "versionName": "1.0",
+    "minSdk": 24,
+    "targetSdk": 36,
+    "requestedPermissions": ["android.permission.INTERNET", "android.permission.ACCESS_NETWORK_STATE", "cloud.emcoin.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"],
+    "releaseSigning": false
+  },
+  "emulator": {
+    "avd": "EmCoin_API36",
+    "serial": "emulator-5580",
+    "image": "system-images;android-36;google_apis;x86_64",
+    "version": "37.2.12.0",
+    "acceleration": "WHPX 10.0.26200 installed and usable",
+    "graphics": "auto fell back to software; old host Vulkan driver warning, no driver update",
+    "settledDisplay": "540x1200 at density210; only owned AVD modified",
+    "metricsAudioHostCamerasDisabled": true,
+    "otherAvdsModified": false,
+    "bootCompleted": true,
+    "installation": "adb install succeeded",
+    "coldLaunch": "Status ok; cloud.emcoin.app/.MainActivity",
+    "boundedSmoke": ["Orbit Home rendered", "60Coin guide opened", "Android Back closes guide to Home", "Menu opened", "Home background/resume returns to app after settling"],
+    "artifacts": "C:/Users/Admin/AppData/Local/Temp/emcoin-android-smoke-825bd3ba287e48069c54a1e04f090a3f",
+    "retainedFailures": ["First 1080x2400 cold boot: SystemUI/phone/GMS ANRs", "Immediate resume capture blank before settled capture", "UIAutomator transient null root"],
+    "observedEmCoinAnrEvents": 0,
+    "physicalDeviceTested": false
+  },
+  "remaining": ["Native-origin staging and multiplayer/gameplay/chat tests", "Pending mutations, keyboard, expiry, network transitions and process-kill QA", "Native accessibility and performance", "Physical Android devices", "Owner release signing, notices/moderation and store accounts", "Mac/Xcode, iOS build/device/TestFlight/App Store"],
+  "productionModified": false,
+  "storeApprovalClaimed": false
+}

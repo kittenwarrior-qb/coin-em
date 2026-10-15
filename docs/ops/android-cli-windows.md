@@ -52,6 +52,11 @@ features, installs kernel drivers or reboots. Existing AVDs are not overwritten;
 no force/wipe flag is used. Start keeps its terminal occupied while the visible
 device runs; close the device to stop it.
 
+The helper reserves emulator console port5580 (`adb -s emulator-5580`), disables
+metrics/audio/host cameras and never wipes userdata. Existing Pixel_7/Pixel_7_2
+AVDs are not this test target. First cold boot can be slow under software graphics;
+do not change host GPU drivers as an automatic setup step.
+
 After package installation, tell the agent to rerun preflight with SDK root and
 JDK21 selected **for that process only**, then rebuild/sync native assets and try
 Gradle debug APK. This guide is not evidence that SDK/emulator/APK is already ready.
