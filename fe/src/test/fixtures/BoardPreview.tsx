@@ -39,9 +39,12 @@ const room: RoomState = { id: 'local-qa-only', host: 'qa-seat-0', players, statu
 const noAction = () => {} // This page cannot send a gameplay command.
 if (import.meta.env.DEV) createRoot(document.getElementById('root')!).render(<ControlThemeProvider root theme={previewControlTheme(window.location.search)}>
   <div data-testid="qa-fixture" className="fixed top-0 right-0 z-[100] rounded-bl-lg bg-white/90 px-2 font-body text-[10px]">QA local · Dữ liệu giả lập</div>
+  <div className="game-viewport">
+  {params.has('notice') && <aside data-ui-chrome="transport" className="p-4 font-body bg-white">QA: Mất kết nối. Đang nối lại; thao tác mới chưa được gửi.<button type="button" className="min-h-11 block">Đóng thông báo QA</button></aside>}
   <GameBoard roomId={room.id} roomState={room} myUserId={`qa-seat-${current}`} mySocketId={`qa-socket-${current}`} isConnected={connected}
     onLeave={noAction} nextTurn={noAction} prevTurn={noAction} nightAction={noAction} emitSelectCard={noAction}
     sendResponse={noAction} ntgVote={noAction} confirmRoleRewards={noAction} shareReflection={noAction}
     emitCardPreview={noAction} emitSituationFanState={noAction} situationPreviewCard={null} situationFanState={null}
     submitVote={noAction} giveCoin={async () => false} />
+  </div>
 </ControlThemeProvider>)

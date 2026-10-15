@@ -149,7 +149,7 @@ export default function WaitingRoom({
       <div
         className="screen-panel flex flex-col items-center overflow-y-auto pt-[88px] pb-6"
         style={{
-          height: '100dvh',
+          height: '100%',
           backgroundImage: themeBackdrop(theme, 'linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url(/capybara_wallpaper.jpg)'),
           backgroundSize: 'cover',
           backgroundPosition: 'center',

@@ -255,7 +255,7 @@ export default function GameContainer() {
 
   if (gameState === 'waiting' && roomState) {
     return (
-      <>
+      <div className="game-viewport">
         {!splashGone && <AssetPreloaderScreen state={preloadState} onExited={handleSplashReady} onFullyGone={handleSplashFullyGone} />}
         {transportNotice}
         <WaitingRoom
@@ -275,13 +275,13 @@ export default function GameContainer() {
           onSetDebugRolePreference={(targetUserId, role) => setDebugRolePreference(roomState.id, targetUserId, role)}
           debugRolePickerEnabled={roomState.debugRolePickerEnabled}
         />
-      </>
+      </div>
     )
   }
 
   if (gameState === 'playing' && roomState) {
     return (
-      <>
+      <div className="game-viewport">
       {transportNotice}
       <GameBoard
         key={roomState.id}
@@ -308,15 +308,15 @@ export default function GameContainer() {
         submitVote={submitVote}
         giveCoin={giveCoin}
       />
-      </>
+      </div>
     )
   }
 
   return (
-    <>
+    <div className="game-viewport">
       {admissionAction && error && <aside role="alert" className="break-words px-4 py-3 font-body text-sm">{error}</aside>}
       {preloaderMounted && <AssetPreloaderScreen state={preloadState} onExited={handleSplashReady} onFullyGone={handleSplashFullyGone} />}
-      <div style={splashGone ? undefined : { visibility: 'hidden', pointerEvents: 'none' }}>
+      <div className="game-lobby-slot" style={splashGone ? undefined : { visibility: 'hidden', pointerEvents: 'none' }}>
         <Lobby
           key={lobbyKey}
           ready={splashGone}
@@ -333,6 +333,6 @@ export default function GameContainer() {
           onDismissResume={dismissResumeCandidate}
         />
       </div>
-    </>
+    </div>
   )
 }

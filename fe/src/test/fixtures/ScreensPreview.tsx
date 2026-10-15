@@ -4,8 +4,8 @@ import Lobby from '@/pages/Lobby'
 import WaitingRoom from '@/pages/WaitingRoom'
 import { AssetPreloaderScreen } from '@/components/AssetPreloaderScreen'
 import { HistoryModal } from '@/features/game/components/HistoryModal'
-import { ControlThemeProvider } from '@/components/cartoon/ControlThemeProvider'
-import { previewControlTheme } from '@/components/cartoon/controlThemes'
+import { ThemePreferenceProvider } from '@/features/theme/ThemePreference'
+import '@/styles/themeChooser.css'
 import { RoleRewardPicker } from '@/components/game/RoleRewardPicker'
 import { NtgRewardPicker } from '@/components/game/NtgRewardPicker'
 import { GuessSilencerOverlay } from '@/components/game/PhaseOverlays'
@@ -48,6 +48,6 @@ const content = screen === 'loading' ? <AssetPreloaderScreen state={{ loaded: 5,
   : screen === 'waiting' ? <WaitingRoom roomId="QA-only" players={players} mySocketId="qa-socket-0" myUserId="qa-seat-0" hostSocketId="qa-seat-0" onStartGame={noAction} onLeave={noAction} />
   : screen === 'history' ? <div className="relative mx-auto h-dvh max-w-[430px] bg-[var(--brand-mint-soft)]"><HistoryModal currentRound={1} logs={logs} onClose={noAction} onPreview={noAction} /></div>
   : <Lobby ready bgDone availableRooms={rooms} onJoinRoom={noAction} onCreateRoom={noAction} onRefreshRooms={noAction} />
-if (import.meta.env.DEV) createRoot(document.getElementById('root')!).render(<ControlThemeProvider root theme={previewControlTheme(window.location.search)}>
+if (import.meta.env.DEV) createRoot(document.getElementById('root')!).render(<ThemePreferenceProvider>
   {content}<div data-testid="screen-qa-fixture" className="fixed right-0 top-0 z-[10000] bg-white/90 px-2 font-body text-[10px]">QA local · Dữ liệu giả lập</div>
-</ControlThemeProvider>)
+</ThemePreferenceProvider>)
