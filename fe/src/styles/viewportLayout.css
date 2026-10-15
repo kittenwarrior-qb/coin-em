@@ -33,6 +33,9 @@
   overscroll-behavior: contain;
 }
 /* Keep the owner's admin styling intact; only viewport ownership changes here. */
+/* Contain absolute screen-reader labels as well as visible descendants; otherwise
+   their static positions can extend the document beyond a short admin viewport. */
+.admin-page.admin-desktop.is-authenticated { position: relative; }
 @media (max-width: 900px) {
   .admin-page.admin-desktop.is-authenticated {
     display: flex;
@@ -111,4 +114,14 @@ html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .t
   html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-content { padding-block: 8px; }
   html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-heading { top: 8px; }
   html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-close { top: 14px; }
+}
+
+/* A short desktop cannot fit toolbar + useful rows + pagination at once.
+   Keep the application shell fixed and scroll its workspace, not a clipped form. */
+@media (min-width: 901px) and (max-height: 600px) {
+  .admin-page.is-authenticated .admin-workspace.is-catalog-workspace { overflow: auto; }
+  .admin-page .admin-workspace > .admin-catalog { flex: none; overflow: visible; }
+  .admin-page .admin-catalog .admin-table-scroll { flex: none; max-height: 240px; }
+  .admin-page .admin-card-editor { flex: none; }
+  .admin-page .admin-card-editor .admin-editor-body { overflow: visible; }
 }
