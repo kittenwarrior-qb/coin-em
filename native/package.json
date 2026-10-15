@@ -7,7 +7,7 @@
     "sync:android": "cap sync android",
     "sync:ios": "cap sync ios",
     "check": "node scripts/check-native.mjs",
-    "test": "node --test scripts/policy.test.mjs scripts/android-preflight.test.mjs scripts/android-cli.test.mjs",
+    "test": "node --test scripts/policy.test.mjs scripts/android-preflight.test.mjs scripts/android-cli.test.mjs scripts/staging-policy.test.mjs",
     "preflight:android": "node scripts/android-preflight.mjs"
   },
   "dependencies": {

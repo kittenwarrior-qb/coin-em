@@ -67,6 +67,28 @@ Audience6–18 is owner-approved; do not reopen that choice. Native permission s
 
 ## Implementation plan
 
+### Plan revision2026-10-15 — isolated native-origin Android QA variant
+
+Native waiting-room QA exposed a stale revision after the60s persisted presence
+lease: SeatPresence commits a new revision without projecting it to connected
+seats. Admit a targeted SeatPresence projection after successful commit and nearest
+unit regressions; preserve strict revision checks, recipient secrecy, inactivity
+policy and no-production-change boundary. Retain failed Android runs; rerun the
+one-round native flow rather than bypassing its failing save.
+
+Continue from debug install smoke. Admit a separate staging build type/id suffix,
+staging-only manifest, closed temporary bundle/TLS preparation script and opt-in
+actual Android fixture alongside existing native policy tests. HTTPS backend must
+bind127.0.0.1/random port with real guarded handlers and synthetic test storage;
+Android emulator reaches it at10.0.2.2. Generate a short-lived local CA in the owned
+temp root; only its public certificate goes into QA-only resources scoped to
+10.0.2.2, never install a host/device CA or trust all TLS. Production config/API,
+receipt policy, permissions and release/debug assets remain unchanged. Require
+explicit QA root and assembleStaging; reject mixing QA inputs into debug/release.
+No network/Origin/deployment changes on production, signing for release or stores.
+Retain source fingerprints, APK hashes, HTTPS native-origin/seat evidence and any
+failures separately from real Redis, full phases, physical-device and release QA.
+
 ### Owner revision2026-10-15 — standalone Windows SDK/emulator preparation
 
 Owner requests setup without Studio or a phone currently available. Admit a
@@ -123,6 +145,20 @@ future voice cleanup without adding media permissions or a provider now.
 
 ## Implementation report
 
+2026-10-15 native-origin continuation: separate `.staging` APK with closed owned
+temporary frontend copy, explicit Gradle QA-root gate, TLS manifest/resource source
+set and native receipt checks implemented. Opt-in Android fixture uses real guarded
+HTTPS/socket handlers, synthetic PDF catalog, four companion peers and manual ADB
+UI checkpoints. Public CA trust limited to10.0.2.2; private key never packaged and
+removed at teardown. Normal app/production config remains unchanged.
+
+Fixed the native-discovered presence revision defect in SeatPresence: after the
+persisted lease commit, broadcast the existing recipient-specific room_state view.
+Regression covers revision projection, private lease/session redaction, unchanged
+lastActivity, stale revision rejection and successful waiting-host one-round save.
+No CAS/rule/privacy/retention check weakened. Older admin/report edits remain a
+separate pending scope, not silently included in this native implementation.
+
 ### Plan revision / implementation 2026-10-13 — verifiable local foundation
 
 Admit adjacent `fe/vite.config.ts` native-only dotenv/PWA boundary, `fe/scripts/build-native.mjs`, native source/check/browser scripts, bridge/socket/popup tests and `docs/ops/native-foundation.md`; these are necessary for the previously approved bundled shell. Android/iOS scaffolds generated with installed official pinned CLI (iOS SPM); no signing or SDK/device compilation. Android cleartext/backup/transfer exclusions added; no microphone or background capability. Config/asset hashes verify before sync, native manifest/worker omitted, hash routing/API fixed. Source fingerprint truthfully says working-tree; existing unrelated BE communication edits are preserved/excluded from this task.
@@ -136,6 +172,32 @@ Owner yêu cầu roadmap Android/iOS và chốt voice trong phòng mời có qu�
 <!-- Codex updates this after implementation: changed files, invariant preserved, commands and results. -->
 
 ## QA report
+
+2026-10-15 native-origin Android QA PASS (bounded): EmCoin_API36 emulator-5580,
+540x1200/density210, headless SwiftShader/WHPX. Actual Android WebView created room,
+received four real socket companions, selected/saved1round, started5seat game,
+rendered PDF narrator role and resumed to gameplay. Server observed native Origin
+https://localhost; join/set_round_limit/start ACKs succeeded; foreground hydration
+get_room_state=1. Evidence root emcoin-native-stage-xcmPOn and versioned
+docs/qa/android-native-origin-20261015/summary.json. Backend is test-mocked primary,
+not real Redis/physical device/full-phase/pending/chat/load certification.
+
+Full BE898tests/74files and TypeScript build PASS; native40policy/helper/preflight
+tests PASS. Ordinary assembleDebug PASS with exactly unchanged SHA256b91abfb2…;
+exact default native bundle checks PASS, no QA trust configuration or extra
+permissions in normal manifest. Actual negative Gradle test rejects QA root on
+assembleDebug; earlier assembleStaging-without-root correctly denied. QA app has
+suffix.staging/target36 and no mic/camera permission. QA teardown reports server
+closed, key removed, newly installed QA app uninstalled; normal app preserved.
+
+Retained failures: unavailable emulator(kg8YUK,DJGSqq), optimizer refusing external
+outDir(q2tlIp; guard preserved), cmd wrapper syntax(xkBBgt; PowerShell fix), native
+one-round save failure(E87JDF; actual presence revision bug fixed), aborted
+diagnostic(hK2XvS; no room, not counted passed). First E87JDF screenshot had SystemUI
+ANR, dismissed Wait; intermittent UIAutomator null roots and immediate resume
+without hydration remain disclosed. Settled second foreground transition observed
+hydration; no cold-resume/performance/device green claim. No production deploy,
+store signing/submission, APK public beta, IPA or41task completion claim.
 
 2026-10-15 actual debug build and emulator continuation: owner reports accepting
 the SDK prompt. Existing license record used to finish package installation;

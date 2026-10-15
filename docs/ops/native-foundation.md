@@ -63,6 +63,42 @@ actual gameplay/network testing still precede beta. No IPA/Xcode/store work done
 The environment notes below describe the earlier2026-10-13 preflight and remain
 historical evidence; the SDK absence there is superseded by this continuation.
 
+## Owned Android native-origin QA (2026-10-15)
+
+The opt-in fixture is `be/tests/android/native-room.android.ts`, launched from `be`
+with the pinned Node22 runtime:
+`node node_modules/vitest/vitest.mjs run --config vitest.android.config.ts --maxWorkers=1`.
+It requires the existing owned EmCoin_API36 at emulator-5580, JDK21 and SDK on D;
+it never creates an account, accepts licenses or modifies production. It binds a
+random loopback HTTPS port and prints `ANDROID_QA_READY <owned-temp-root>` after
+building/installing a separate `cloud.emcoin.app.staging` (EmCoin QA).
+
+The QA bundle is built from a temporary copy of frontend sources, without dotenv,
+inherited VITE configuration or a service worker. The optimizer's output guard is
+unchanged. Only staging resources trust the short-lived public test certificate,
+only for10.0.2.2. No global/device CA or trust-all TLS is installed; debug/release
+with QA inputs is rejected. The private TLS key never enters app resources.
+
+Use ADB only on emulator-5580. Create a synthetic room in EmCoin QA, then write
+`control.json` inside the printed root with a new requestId and command
+`companions` to join four isolated HTTPS Socket.IO peers. Select/save one round
+through the actual Android UI, start, then background/resume. After verifying
+`status.json`, send a new requestId with command`stop`. The fixture asserts five
+seats, native-origin admission, a native start command and one planned round.
+It has a bounded nine-minute UI checkpoint window, not an unattended full-game bot.
+
+Each run records status/report/receipt fingerprints. On completion/failure the
+fixture removes only its newly installed QA app and private TLS key, closes its
+backend and retains public evidence; the normal app and other AVDs are untouched.
+Reports disclose mocked room primary: this does NOT certify Redis durability,
+physical devices, every phase, pending mutations, chat or store readiness.
+
+Initial runtime QA found a real revision bug: presence leases advanced room CAS
+revision without notifying active seats, causing round-limit saves after an idle
+minute to fail. The targeted fix emits the existing recipient-specific room view
+after a successful lease commit. Revision checks, privacy and inactivity are not
+relaxed. Failed attempts are retained and must not be counted as a pass.
+
 ## Local environment and missing gates (historical 2026-10-13)
 
 - Windows has Android Studio and its bundled JDK 21.0.8. `ANDROID_HOME`/`ANDROID_SDK_ROOT` were not configured and the standard user SDK folder was not present during preflight; no alternative disks were scanned. No Gradle APK build was attempted or counted as passed.
