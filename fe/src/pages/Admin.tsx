@@ -144,7 +144,7 @@ export default function Admin() {
             {themePreference && <label className="admin-theme-switch"><Palette aria-hidden="true" /><span className="sr-only">Giao diện quản trị</span>
               <select aria-label="Giao diện quản trị" value={isPublishedTheme(controlTheme) ? controlTheme : 'emotion-orbit'} disabled={blocked}
                 onChange={event => { if (isPublishedTheme(event.target.value)) themePreference.choose(event.target.value) }}>
-                <option value="emotion-orbit">Vòng Cảm Xúc</option><option value="kindness-workshop">Xưởng Tử Tế</option></select></label>}
+                <option value="emotion-orbit">Vòng Cảm Xúc</option><option value="kindness-workshop">Xưởng Tử Tế</option><option value="candy-clouds">Mây Kẹo</option></select></label>}
             <a className="admin-topbar-link" href="/" aria-disabled={blocked} onClick={leave}>Về EmCoin<ExternalLink aria-hidden="true" /></a>
             <AdminButton color="white" pending={pending} disabled={editorBusy} onClick={() => void run('refresh')}><RefreshCw aria-hidden="true" />Làm mới</AdminButton>
             <AdminButton color="white" pending={pending} disabled={editorBusy} onClick={() => void run('logout')}><LogOut aria-hidden="true" />Đăng xuất</AdminButton>

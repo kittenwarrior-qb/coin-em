@@ -25,7 +25,7 @@ async function inspect(page,selector){return page.locator(selector).evaluate(asy
   return failures
 })}
 try{
-  for(const theme of (diagnose?['emotion-orbit']:['emotion-orbit','kindness-workshop']))for(const [width,height]of (diagnose?[[390,360]]:[[1440,900],[1440,400],[1024,568],[390,844],[390,360]])){
+  for(const theme of (process.argv.includes('--candy-only')?['candy-clouds']:diagnose?['emotion-orbit']:['emotion-orbit','kindness-workshop','candy-clouds']))for(const [width,height]of (diagnose?[[390,360]]:[[1440,900],[1440,400],[1024,568],[390,844],[390,360]])){
     active={theme,width,height}
     const page=await browser.newPage({viewport:{width,height}})
     await page.route('**/*',route=>new URL(route.request().url()).origin===base.origin?route.continue():route.abort())

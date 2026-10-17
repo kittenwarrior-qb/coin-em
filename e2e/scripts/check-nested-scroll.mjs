@@ -8,7 +8,7 @@ const output = await mkdtemp(path.join(os.tmpdir(),'emcoin-nested-scroll-'))
 const browser = await chromium.launch()
 const results=[]
 try {
-  for(const theme of ['emotion-orbit','kindness-workshop']) for(const [width,height] of [[320,400],[390,844],[844,390]]) {
+  for(const theme of (process.argv.includes('--candy-only')?['candy-clouds']:['emotion-orbit','kindness-workshop','candy-clouds'])) for(const [width,height] of [[320,400],[390,844],[844,390]]) {
     const page=await browser.newPage({viewport:{width,height}})
     await page.route('**/*',route=>new URL(route.request().url()).origin===base.origin?route.continue():route.abort())
     await page.route('**/api/catalog/active',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({version:'web-card-baseline/v1'})}))

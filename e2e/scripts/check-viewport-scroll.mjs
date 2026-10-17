@@ -13,7 +13,7 @@ const browser = await chromium.launch()
 const results = []
 let active = {}
 try {
-  for (const theme of (phases ? ['emotion-orbit','kindness-workshop'] : ['emotion-orbit', 'kindness-workshop', 'legacy'])) {
+  for (const theme of (process.argv.includes('--candy-only') ? ['candy-clouds'] : phases ? ['emotion-orbit','kindness-workshop','candy-clouds'] : ['emotion-orbit', 'kindness-workshop', 'candy-clouds', 'legacy'])) {
     for (const [width, height] of (phases ? [[320,400],[390,844],[1440,900]] : baseline ? [[390,844], [1440,900]] : [[320,400], [320,568], [390,844], [844,390], [1440,900]])) {
       const page = await browser.newPage({ viewport: { width, height } })
       await page.route('**/*', route => {

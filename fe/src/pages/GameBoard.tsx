@@ -40,7 +40,7 @@ import { TurnCountdown } from '@/features/game/components/TurnCountdown';
 import { useBoardController } from "@/features/game/controllers/useBoardController";
 import type { GameBoardProps } from "@/features/game/controllers/boardTypes";
 import { useControlTheme } from '@/components/cartoon/controlThemeContext'
-import { themeBackdrop, isBrandTheme } from '@/components/cartoon/controlThemes'
+import { themeBackdrop, isBrandTheme, themeLogo } from '@/components/cartoon/controlThemes'
 import { PHASE_LABELS } from '@/stores/types'
 
 export default function GameBoard(props: GameBoardProps) {
@@ -293,7 +293,7 @@ function ConfirmedGameBoard(props: GameBoardProps) {
         {/* Player layout around center board */}
         <div data-testid="players-grid" className="game-board-scroll relative z-10 flex-1 min-h-0 mt-10">
           {isBrandTheme(theme) && <div className="brand-board-heading">
-            {theme === 'kindness-workshop' ? <EmcoinImage className="brand-board-logo" src="/cartoon/ui/themes/kindness-workshop/logo-v2.webp" alt="EmCoin" /> : <div className="brand-board-wordmark">Vòng Cảm Xúc</div>}
+            {theme !== 'emotion-orbit' ? <EmcoinImage className="brand-board-logo" src={themeLogo(theme)} alt="EmCoin" /> : <div className="brand-board-wordmark">Vòng Cảm Xúc</div>}
             <p>Lượt {currentRound}/{totalRounds}</p>
             <h1>{activePhase === 'give-coins' ? 'Trao Coin' : PHASE_LABELS[activePhase]}</h1>
             {activePhase === 'give-coins' && <div className="brand-board-caption">Trao theo cảm nhận</div>}

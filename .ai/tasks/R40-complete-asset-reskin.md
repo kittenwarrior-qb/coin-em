@@ -8,6 +8,33 @@
 
 ## Latest owner-approved correction — 2026-10-10
 
+### Owner addition2026-10-17 — Candy Clouds packaging theme
+
+Owner requests a third selectable theme based on the supplied pink/sky watercolor
+EmCoin box and turquoise/yellow coin logo. Admit `candy-clouds` to the existing
+theme registry/preference/chooser/admin selector, narrowly shared brand selectors,
+new isolated CSS/vector controls and generated original decorative background.
+Reuse the existing `public/logo.svg` unchanged: it is the supplied brand family,
+not an AI replacement. Preserve the two published themes/default, all card faces,
+Coin semantic colors, original avatar identities, gameplay and pending/Back rules.
+No production deploy or native rebuild in this visual slice. Add focused switch/
+asset tests and owned-loopback mobile/desktop/menu/gameplay/admin geometry QA.
+Generated background source/prompt and runtime optimization belong in
+docs/design/candy-clouds-theme.md. The earlier native keyboard plan remains
+separate and is not marked completed by this theme request.
+
+Verification2026-10-17: new theme geometry PASS65viewport+51phase+42popup+
+20admin+21nested=199cases. Shared baseline16cases across all4registered directions
+(including legacy) PASS. Actual three-viewport selection/reload/Back/Escape and
+return-to-Workshop PASS (FUMGJA). This found a real stale preview URL issue:
+popup history restored the initial `?theme=emotion-orbit`, overriding a newly
+persisted choice after reload (qdrWPf failed, retained). ThemePreference now strips
+only that stale override on popstate after explicit UI selection, preserving
+router state/popup IDs/other query fields and all pending guards. No default change.
+Current FE808tests/83files PASS; final lint/type/build recorded in the design note.
+Screenshots Home/menu/give-Coin inspected; original logo.svg remains unchanged.
+These are local synthetic UI checks, not production, native or all41acceptance.
+
 Compact-pill/contrast follow-up: reuse approved A1 bitmap family through horizontal three-sliced endcaps for explicit badge/tab/status/room/dropdown/navigation chrome; clear selected rectangular underlays; Host/Quản trò opt in without role/Coin recoloring. Strengthen secondary text, accent text and field edges; add non-color selected-tab underline. Targeted browser measurements on320/430/1280 join fields: text7.87, placeholder6.38, edge4.02 contrast ratios.675 frontend tests pass. Exact scope, limitations and QA in `docs/design/a1-pill-contrast.md`. No image regeneration, card/gameplay/deploy changes; no blanket accessibility certification claimed.
 
 Later button-style follow-up: owner points out straighter blue versus curved pink pills. Generated blue/cream/blush-soft siblings directly from approved pink reference; shared registry/CSS now uses versioned `sky-pink-a1/pill-*-v2.png`. Old assets retained. Exact prompts/paths and latest QA in `docs/design/a1-button-style-match.md`: 674 tests,135 screen,75 scroll,15 public/admin pass; TS/lint/build pass;594-image audit missing0/decode0; original573 hash unchanged. This is a visual family match, not guaranteed pixel-identical geometry. No card/gameplay/deploy changes.
