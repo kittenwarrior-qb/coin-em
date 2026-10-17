@@ -50,7 +50,7 @@ export function GuideBook({ onClose }: GuideBookProps) {
       aria-modal="true"
       aria-label="Hướng dẫn"
       tabIndex={-1}
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60"
+      className="absolute inset-0 z-[200] flex items-center justify-center bg-black/60"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -58,7 +58,7 @@ export function GuideBook({ onClose }: GuideBookProps) {
     >
       <motion.div
         className="flex flex-col"
-        style={{ width: '100%', maxWidth: 480, height: '100%', maxHeight: '100dvh' }}
+        style={{ width: '100%', maxWidth: '100%', height: '100%', maxHeight: '100%' }}
         onClick={e => e.stopPropagation()}
       >
 

@@ -36,6 +36,9 @@ describe('owner-approved public facts and finite Coin guide', () => {
   })
   it('opens readable rules first and keeps original illustration assets reachable unchanged', () => {
     render(<GuideBook onClose={() => {}} />)
+    const dialog = screen.getByRole('dialog', { name: 'Hướng dẫn' })
+    expect(dialog).toHaveClass('absolute')
+    expect(dialog.firstElementChild).toHaveStyle({ maxWidth: '100%', maxHeight: '100%' })
     expect(screen.getByTestId('coin-rules-guide')).toBeInTheDocument()
     expect(document.querySelector('img[src="/tutorial/1.webp"]')).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Minh họa gốc' }))

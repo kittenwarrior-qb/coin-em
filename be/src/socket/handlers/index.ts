@@ -9,8 +9,10 @@ import { roomRepository } from '../../modules/room'
 import { startAutoAdvanceScheduler } from '../AutoAdvanceScheduler'
 import { redisAvailable } from '../../redis'
 import { startSeatPresence } from '../SeatPresence'
+import { registerChatHandlers } from './chatHandlers'
+import type { ChatReportStore } from '../../communication/ChatReportStore'
 
-export function registerSocketHandlers(io: Server) {
+export function registerSocketHandlers(io: Server, options: { chatReports?: () => ChatReportStore | undefined } = {}) {
   startDisconnectedRoomCleanup(io)
   const stopAutoAdvance = startAutoAdvanceScheduler(io)
   const stopPresence = startSeatPresence(io)
@@ -91,6 +93,7 @@ export function registerSocketHandlers(io: Server) {
     registerRoomHandlers(io, guardedSocket)
     registerGameHandlers(io, guardedSocket)
     registerPlayerHandlers(io, guardedSocket)
+    registerChatHandlers(io, guardedSocket, options.chatReports)
     socket.on('disconnect', () => clearSocketRateLimits(socket.id))
   })
 

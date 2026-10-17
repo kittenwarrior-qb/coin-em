@@ -15,7 +15,8 @@ vi.mock('../../hooks/useSocket', () => ({ useSocket: () => ({
   retryPendingCoin: mock.retry, coinAction: mock.coinStatus ? { status: mock.coinStatus,
     intent: { roomId: 'fixture-room', receiverUserId: 'fixture-target', coinType: 'red', amount: 2 } } : null,
   joinRoom: mock.join, updateRoomSettings: mock.settings, startGame: mock.start,
-  leaveRoom: mock.leave, clearSession: mock.clear, socket: { disconnect: mock.disconnect, connect: mock.connect },
+  leaveRoom: mock.leave, clearSession: mock.clear, socket: { disconnect: mock.disconnect, connect: mock.connect,
+    connected: false, on: vi.fn(), off: vi.fn() },
 }) }))
 vi.mock('../../utils/userId', () => ({ getUserId: () => 'fixture-guest' }))
 vi.mock('../../hooks/useAssetPreloader', () => ({ useAssetPreloader: () => ({}) }))
@@ -54,6 +55,7 @@ describe('confirmed board transport boundary', () => {
     mock.error = 'Chưa xác nhận được lượt trao Coin. Thử lại đúng lượt trao này sẽ không trừ Coin hai lần.'
     render(<GameContainer />)
     const notice = screen.getByRole('complementary', { name: 'Trạng thái phiên chơi' })
+    expect(notice.parentElement).toHaveClass('game-viewport')
     const message = screen.getByRole('alert').parentElement!
     expect(notice).toHaveClass('flex-wrap')
     expect(message).toHaveClass('basis-full')

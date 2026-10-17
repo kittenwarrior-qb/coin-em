@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-15",
+  "scope": "Local Chromium synthetic viewport, popup reachability and phase layout regression; no production access or deployment",
+  "result": "passed-bounded-matrix",
+  "viewport": { "cases": 195, "failed": 0, "evidenceRoot": "C:/Users/Admin/AppData/Local/Temp/emcoin-viewport-scroll-jHs9hn", "themes": ["emotion-orbit", "kindness-workshop", "legacy"], "sizes": [[320,400],[320,568],[390,844],[844,390],[1440,900]], "includes": ["Home", "Menu with actual theme preference action", "create", "join", "waiting", "history", "coin picker", "role reward", "night confirmation", "card preview", "10seat board", "connection notice", "mocked admin overview", "viewport shrink and restore"] },
+  "popups": { "cases": 84, "failed": 0, "evidenceRoot": "C:/Users/Admin/AppData/Local/Temp/emcoin-overlay-reach-ZJQhxk", "method": "Real control rectangles must fit viewport and all clipping ancestors after genuine internal scroll only", "includes": ["menu", "create", "join", "guide", "history", "coin picker", "role reward", "sender reward", "guess picker", "night confirmation", "phase confirmation", "muted notice", "reflection confirmation", "card preview"] },
+  "phases": { "cases": 102, "failed": 0, "evidenceRoot": "C:/Users/Admin/AppData/Local/Temp/emcoin-viewport-scroll-1WGmsN", "coverage": "17 phases x2approved themes x3sizes,10seats,sender view" },
+  "menu": "No internal overflow at all five tested sizes in either approved theme; long dialogs/lists still scroll",
+  "validation": { "fullFrontend": "758 tests /79files passed before final guide assertions", "finalFocused": "24 guide/transport tests passed after final assertions", "lint": "passed", "typescript": "passed", "productionWebBuild": "passed, PWA assets preserved" },
+  "publicScroll": { "method": "390x844; local mocked baseline catalog pointer; scrollTo200 after route ready", "results": [{"path":"/about","scrollHeight":8683,"scrollTop":200},{"path":"/about/cards","scrollHeight":15325,"scrollTop":200},{"path":"/about/story","scrollHeight":7195,"scrollTop":200}] },
+  "retainedFailures": [
+    {"root":"emcoin-viewport-scroll-cmKqNi","cases":12,"failed":5,"reason":"Home poster aspect ratio made930px content in900px desktop; workshop menu excess12px"},
+    {"reason":"intermediate landscape Settings click intercepted by decorative logo; fixed noninteractive logo and sizing"},
+    {"root":"emcoin-viewport-scroll-A1rWRw","cases":165,"failed":2,"reason":"popup edges crossed viewport during opening; restored Home overlay horizontal inset"},
+    {"root":"emcoin-overlay-reach-b69GZM","cases":84,"failed":2,"reason":"GuideBook480px toolbar clipped by430px game ancestor on landscape; scoped overlay to panel"},
+    {"reason":"first public-scroll probe measured before lazy route ready; second probe awaited h1 on catalog-gated route without fixture and timed out; corrected with explicit route readiness and synthetic pointer"}
+  ],
+  "limitations": ["No Safari/WebKit runtime installed", "No physical keyboard/address-bar/safe-area or native WebView pass in this change", "Admin visual metadata mock is not auth/database proof", "No3D regression", "Existing owner changes outside scoped patch preserved, not committed as part of fix", "No production deploy or APK rebuild"]
+}

@@ -1,0 +1,26 @@
+{
+  "name": "emcoin-native",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "build:web": "node ../fe/scripts/build-native.mjs",
+    "sync:android": "cap sync android",
+    "sync:ios": "cap sync ios",
+    "check": "node scripts/check-native.mjs",
+    "test": "node --test scripts/policy.test.mjs scripts/android-preflight.test.mjs scripts/android-cli.test.mjs scripts/staging-policy.test.mjs",
+    "preflight:android": "node scripts/android-preflight.mjs"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.5.3",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/core": "8.5.3",
+    "@capacitor/ios": "8.5.3",
+    "@capacitor/network": "8.0.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.3"
+  },
+  "overrides": {
+    "xcode": { "uuid": "11.1.1" }
+  }
+}

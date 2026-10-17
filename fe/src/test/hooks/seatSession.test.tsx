@@ -3,12 +3,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useSocket } from '../../hooks/useSocket'
 import { useGameStore } from '../../stores/gameStore'
 import { CARD_DATA } from '@/constants/cardCatalog'
+import { notifyNativeForeground } from '@/features/platform/nativeEvents'
 
 const mock = vi.hoisted(() => ({ handlers: new Map<string, (...args: unknown[]) => void>(),
-  emit: vi.fn(), disconnect: vi.fn(), connected: true, id: 'current-socket' }))
+  emit: vi.fn(), connect: vi.fn(), disconnect: vi.fn(), connected: true, id: 'current-socket' }))
 vi.mock('socket.io-client', () => ({ io: () => ({ get id() { return mock.id },
   timeout: () => ({ emit: mock.emit }),
-  get connected() { return mock.connected }, emit: mock.emit, disconnect: mock.disconnect,
+  get connected() { return mock.connected }, emit: mock.emit, connect: mock.connect, disconnect: mock.disconnect,
   on: (event: string, callback: (...args: unknown[]) => void) => { mock.handlers.set(event, callback) },
 }) }))
 
@@ -33,7 +34,7 @@ describe('guest session frontend transport', () => {
     await act(async () => { retry[2](null, { success: true, data: { ...waiting, revision: 8, roundLimit: 1 } }); expect(await second).toBe(true) })
     expect(hook.result.current.roomState?.roundLimit).toBe(1)
   })
-  beforeEach(() => { localStorage.clear(); mock.handlers.clear(); mock.emit.mockReset(); mock.disconnect.mockReset(); mock.connected = true; mock.id = 'current-socket' })
+  beforeEach(() => { localStorage.clear(); mock.handlers.clear(); mock.emit.mockReset(); mock.connect.mockReset(); mock.disconnect.mockReset(); mock.connected = true; mock.id = 'current-socket' })
   afterEach(() => {
     cleanup()
     vi.restoreAllMocks()
@@ -51,6 +52,23 @@ describe('guest session frontend transport', () => {
     act(() => mock.handlers.get('room_state')!(phaseRoom()))
     return hook
   }
+
+  it('native foreground hydrates the confirmed seat without replaying mutations, and detaches on unmount', () => {
+    const hook=preparePhase();mock.emit.mockClear()
+    act(()=>notifyNativeForeground())
+    expect(mock.emit.mock.calls).toEqual([['get_room_state',{roomId:session.roomId}]])
+    hook.unmount();mock.emit.mockClear();act(()=>notifyNativeForeground())
+    expect(mock.emit).not.toHaveBeenCalled()
+  })
+  it('native foreground reconnects transport but never resurrects a replaced session', () => {
+    preparePhase();mock.connected=false;mock.emit.mockClear()
+    act(()=>notifyNativeForeground())
+    expect(mock.connect).toHaveBeenCalledTimes(1)
+    expect(mock.emit).not.toHaveBeenCalled()
+    act(()=>mock.handlers.get('session_replaced')!())
+    mock.connect.mockClear();act(()=>notifyNativeForeground())
+    expect(mock.connect).not.toHaveBeenCalled();expect(mock.emit).not.toHaveBeenCalled()
+  })
 
   it('applies admitted snapshots/reflections/responses without logging private fields or raw errors', () => {
     const debug = vi.spyOn(console, 'debug').mockImplementation(() => {})

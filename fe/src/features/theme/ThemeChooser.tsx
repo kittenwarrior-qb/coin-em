@@ -5,6 +5,7 @@ import { useThemePreference, type PublishedTheme } from './preferenceModel'
 const choices: { id: PublishedTheme; label: string; detail: string; colors: string[] }[] = [
   { id: 'emotion-orbit', label: 'Vòng Cảm Xúc', detail: 'Tím dịu và hồng · đường nét mềm', colors: ['#26366d', '#dcdcf8', '#d87899'] },
   { id: 'kindness-workshop', label: 'Xưởng Tử Tế', detail: 'Xanh dương và san hô · chất liệu giấy', colors: ['#195676', '#ee8173', '#e6bf71'] },
+  { id: 'candy-clouds', label: 'Mây Kẹo', detail: 'Hồng phấn và xanh trời · cảm hứng hộp thẻ EmCoin', colors: ['#F1B8D5', '#A8DCF1', '#F5C857', '#157D94'] },
 ]
 export function ThemeChooser() {
   const preference = useThemePreference()

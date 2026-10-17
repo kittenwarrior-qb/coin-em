@@ -2,6 +2,7 @@ import { Server } from 'socket.io'
 import { operationDiagnostic } from '../telemetry/operationalDiagnostics'
 import { roomRepository } from '../modules/room'
 import { inRoomQueue } from './roomQueue'
+import { emitRoomView } from './emitRoomView'
 
 export const SEAT_PRESENCE_INTERVAL_MS = 60_000
 
@@ -26,7 +27,13 @@ export function startSeatPresence(io: Server): () => Promise<void> {
           changed = true
           return { ...player, lastSeenAt: Date.now() }
         })
-        if (changed) await roomRepository.saveAndWait({ ...room, players })
+        if (changed) {
+          const updated = { ...room, players }
+          await roomRepository.saveAndWait(updated)
+          // Presence advances the same CAS revision as commands. Keep active seats
+          // current without weakening stale-command protection or exposing leases.
+          await emitRoomView(io, updated, 'room_state')
+        }
       }).catch(() => { operationDiagnostic('presence', 'failed') })
         .finally(() => running.delete(candidate.id))
       running.set(candidate.id, job)

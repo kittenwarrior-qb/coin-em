@@ -5,6 +5,7 @@ import { OperationalAnalytics } from './operationalAnalytics'
 import { validAdminClose, type AdminCloseCommand } from './closeRoom'
 import type { CatalogStore } from '../catalog/CatalogStore'
 import { TRAFFIC_RANGES, type TrafficStore } from '../analytics/TrafficStore'
+import type { ChatReportStore } from '../communication/ChatReportStore'
 
 const COOKIE = '__Host-emcoin-admin'
 const cookieOptions = { httpOnly: true, secure: true, sameSite: 'strict' as const, path: '/' }
@@ -23,6 +24,7 @@ export function registerAdminApi(app: Express, options: {
   catalog?: () => CatalogStore | undefined;
   traffic?: () => TrafficStore | undefined;
   system?: () => object;
+  chatReports?: () => ChatReportStore | undefined;
 }): void {
   let trustedOrigin: string | undefined
   if (options.origin) {
@@ -89,6 +91,44 @@ export function registerAdminApi(app: Express, options: {
     }
     response.clearCookie(COOKIE, cookieOptions)
     response.json({ success: true })
+  })
+  // Only individually selected safety evidence, never a browsing API for all chat/stories.
+  router.get('/reports', (request, response) => {
+    const status = request.query.status ?? 'open'
+    if (typeof status !== 'string' || !['open', 'resolved', 'dismissed', 'all'].includes(status)) { response.status(400).json({ error: 'INVALID_REPORT_STATUS' }); return }
+    try {
+      const store = options.chatReports?.()
+      if (!store) { response.status(503).json({ error: 'REPORT_UNAVAILABLE' }); return }
+      response.json(store.list(status as 'open' | 'resolved' | 'dismissed' | 'all'))
+    } catch { response.status(503).json({ error: 'REPORT_UNAVAILABLE' }) }
+  })
+  router.post('/reports/resolve', (request, response) => {
+    if (!request.is('application/json') || !request.body || Array.isArray(request.body) ||
+        Object.keys(request.body).sort().join('|') !== 'id|requestId|status') { response.status(400).json({ error: 'INVALID_REPORT_RESOLUTION' }); return }
+    try {
+      const store = options.chatReports?.()
+      if (!store) { response.status(503).json({ error: 'REPORT_UNAVAILABLE' }); return }
+      response.json(store.resolve(request.body.id, request.body.status, request.body.requestId))
+    } catch (error) {
+      const code = error instanceof Error ? error.message : ''
+      const expected = ['INVALID_REPORT_RESOLUTION', 'REPORT_NOT_FOUND', 'REPORT_STATUS_CONFLICT', 'REPORT_REQUEST_CONFLICT'].includes(code)
+      response.status(code === 'INVALID_REPORT_RESOLUTION' ? 400 : code === 'REPORT_NOT_FOUND' ? 404 : expected ? 409 : 503)
+        .json({ error: expected ? code : 'REPORT_UNAVAILABLE' })
+    }
+  })
+  // Read-only POST keeps selected-evidence search terms out of URLs/access logs.
+  router.post('/reports/search', (request, response) => {
+    const body = request.body
+    if (!request.is('application/json') || !body || Array.isArray(body) || Object.keys(body).sort().join('|') !== 'offset|query|status' ||
+        !['open', 'resolved', 'dismissed', 'all'].includes(body.status) || typeof body.query !== 'string' || body.query.length > 100 ||
+        /[\u0000-\u001f\u007f]/u.test(body.query) || !Number.isSafeInteger(body.offset) || body.offset < 0 || body.offset > 2000 || body.offset % 50 !== 0) {
+      response.status(400).json({ error: 'INVALID_REPORT_QUERY' }); return
+    }
+    try {
+      const store = options.chatReports?.()
+      if (!store) { response.status(503).json({ error: 'REPORT_UNAVAILABLE' }); return }
+      response.json(store.list(body.status, Date.now(), { offset: body.offset, query: body.query }))
+    } catch { response.status(503).json({ error: 'REPORT_UNAVAILABLE' }) }
   })
   router.get('/catalog', (_request, response) => {
     try {

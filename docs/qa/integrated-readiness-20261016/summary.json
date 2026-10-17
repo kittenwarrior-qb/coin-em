@@ -1,0 +1,85 @@
+{
+  "date": "2026-10-16",
+  "result": "bounded-integrated-checks-passed-not-a-release-approval",
+  "sourceCommit": "e112693c9bfccae46b9d55bf20bc94b971247784",
+  "branch": "codex/native-staging",
+  "sourceNote": "Runtime sources were frozen during each browser run. Subsequent changes are QA/operations documentation only. Two preexisting untracked guide PNGs were neither staged nor packaged.",
+  "productionModified": false,
+  "regularChecks": {
+    "backend": { "files": 74, "tests": 898, "failed": 0 },
+    "frontend": { "files": 82, "tests": 804, "failed": 0 },
+    "native": { "tests": 40, "failed": 0 },
+    "backendTypeScript": "passed",
+    "frontendLint": "passed",
+    "frontendTypeScriptAndWebBuild": "passed; ordinary worker/manifest restored after native build"
+  },
+  "browser": {
+    "engine": "Chromium147.0.7727.15, local Windows, simulated viewports",
+    "shortMatrix": { "files": 5, "passed": 7, "seconds": 338.79, "includes": ["admin", "room5/10", "PWA root/subpath", "public info", "chat/reports"] },
+    "adminCurrent": "C:/Users/Admin/AppData/Local/Temp/emcoin-admin-browser-qa-ICEMsT/report.json",
+    "focusedFollowUp": { "passed": 2, "seconds": 78.31, "chat": "C:/Users/Admin/AppData/Local/Temp/emcoin-chat-browser-SAM6AS/report.json", "coverage": "Both themes, host/guest300px height, retained draft after shrink/restore, Send genuine scroll/clip/hit-test, report pagination/search" },
+    "canonicalTerminal": {
+      "passed": 2,
+      "seconds": 834.85,
+      "explicitFilter": "^PDF; three legacy cases were outside this run and reported skipped, not accepted",
+      "fiveSeats": { "rounds": 5, "phaseVisits": 75, "gifts": 15, "receiptPreviews": 15, "errors": [], "root": "C:/Users/Admin/AppData/Local/Temp/emcoin-terminal-browser-qa-PgOpgJ", "lostAckRecovery": "hydration and unchanged same-ID wire retry, no duplicate Coin debit" },
+      "tenSeats": { "rounds": 10, "phaseVisits": 160, "gifts": 30, "receiptPreviews": 30, "errors": [], "root": "C:/Users/Admin/AppData/Local/Temp/emcoin-terminal-browser-qa-1SHx9t" },
+      "storage": "mocked room primary/temp disk; synthetic reviewed PDF draft snapshot, actual production preview and UI",
+      "terminal": "Exact all-seat balances, reload/Back/Escape and explicit leave passed"
+    },
+    "layout": {
+      "passed": 463,
+      "failed": 0,
+      "viewport195": "C:/Users/Admin/AppData/Local/Temp/emcoin-viewport-scroll-1P986H",
+      "phase102": "C:/Users/Admin/AppData/Local/Temp/emcoin-viewport-scroll-E5G5Ks",
+      "popup84": "C:/Users/Admin/AppData/Local/Temp/emcoin-overlay-reach-3x4Xzv",
+      "admin40": "C:/Users/Admin/AppData/Local/Temp/emcoin-admin-scroll-BWavc8",
+      "nested42": "C:/Users/Admin/AppData/Local/Temp/emcoin-nested-scroll-A8Th0L",
+      "scope": "Two approved themes, legacy shell,17phases/10seats, short portrait/landscape/desktop, shrink/restore, nested Esc/Back/focus. Synthetic admin HTTP is not real auth evidence.",
+      "viewportCssSha256": "b5e06d921ba8811395cd9705dd9c29a0ae1fb5bede1b3ba6426c24ac88818bfa",
+      "adminCssSha256": "0ef74ebbe0d281ba43d777acedde3bd51c2bf0c8c71b241d7402c7938ac303ff"
+    },
+    "visualInspection": ["1366x768 admin catalog", "1440x400 workshop content editor with reachable save", "five/ten-seat ended mobile", "300px chat compose"],
+    "fontDiagnostic": "Actual Chromium platform font for admin heading is SegoeUI-Bold, not a gameplay/custom font"
+  },
+  "realChat": {
+    "result": "passed",
+    "report": "C:/Users/Admin/AppData/Local/Temp/emcoin-chat-check-3o9VM0/report.json",
+    "backendSourceSha256": "9efaad9c74470426a719ab434656cfa1987a4c7e405fd097bac49f5f0a147ebf",
+    "compiledBackendSha256": "a7ce372ea0c19c5c1856129594649ebb080b91f5d8079725ee88798a8b158ac5",
+    "rooms": 10,
+    "seats": 100,
+    "acceptedMessages": 100,
+    "convergedSeats": 100,
+    "deliveredDeltas": 1000,
+    "scope": "Two compiled backends, real Redis adapter/AOF, same-host SQLite initialized once, production throttles",
+    "checks": ["SIGKILL/retry dedup", "fresh-process restoration", "two-writer CAS", "primary outage fail-closed", "AOF restart", "deleted-room no archive", "selected evidence7day expiry"],
+    "cleanup": "Owned fixture processes/container removed with ownership checks; synthetic temp evidence retained",
+    "limitation": "Short local integrity workload, not sustained production capacity/SLO or simultaneous empty SQLite startup/separate-host certification"
+  },
+  "androidDebug": {
+    "path": "D:/Android/EmCoinBuilds/EmCoin-debug-20261016-312acf6e.apk",
+    "sha256": "312acf6ef10bfa9278165a53c3217d27f85820fe50759933b6825ad36122c50f",
+    "bytes": 34843247,
+    "bundleSourceDigest": "433857f17fe229564398a87144a4d7d4fef47927cdced859cccb9a047f8e3066",
+    "bundleFiles": 600,
+    "bundleBytes": 34198285,
+    "build": "assembleDebug passed57s, exact native receipt/config and apksigner verification passed",
+    "applicationId": "cloud.emcoin.app",
+    "minSdk": 24,
+    "targetSdk": 36,
+    "api": "https://app.emcoin.cloud",
+    "manifest": "Default ID; cleartext/backup disabled; no QA trust config or extra mic/camera permission",
+    "packagedBrowserSmoke": "C:/Users/Admin/AppData/Local/Temp/emcoin-native-browser-6xBaS1; guide/hash reload/no worker passed",
+    "releaseSigning": false,
+    "currentApkDeviceTested": false,
+    "productionNativeOriginsEnabledByThisWork": false
+  },
+  "retainedFailures": [
+    { "root": "emcoin-admin-browser-qa-u8d6sE", "reason": "Earlier fixture attempted a disabled editor theme switch. Lock preserved; current fixture contract and rerun passed." },
+    { "root": "emcoin-chat-check-38IyWT", "reason": "Docker Linux engine unavailable; no runtime assertions executed" },
+    { "root": "emcoin-chat-check-Lpg6oF", "reason": "Docker Secrets Engine startup failed; no runtime assertions executed" }
+  ],
+  "dockerRecovery": "Bounded graceful stop failed, force stop completed; verified only zero-byte runtime sockets in non-reparse parent directories were recoverably moved to run.stale-20261016[-2] and docker-secrets-engine.stale-20261016[-2]. No factory reset/prune, volume/image/data removal, WSL unregister or upgrade. Docker Linux engine then verified and fresh chat workload passed.",
+  "remainingGates": ["Current-APK WebView keyboard/network/pending/full-game QA and physical Android", "iOS/Mac/Xcode/WebKit and real iPhone", "Owner-controlled store enrollment/release signing/submission", "Child/guardian notices, moderation operations and deferred contextual review", "Manual production staging/drain/deploy/rollback acceptance", "Per-task final review: this receipt does not close all41 tasks"]
+}

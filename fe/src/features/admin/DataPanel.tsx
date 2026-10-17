@@ -9,8 +9,9 @@ import { Badge, Panel } from './ui'
 import { useSystemInfo } from './useInsights'
 
 const stored = ['Thông tin thẻ, URL ảnh hai mặt, bản nháp và các phiên bản đã đóng băng', 'Mã phòng, trạng thái, số người — đến khi phòng bị xóa',
-  'Tổng lượt truy cập theo ngày: trang, nguồn, loại thiết bị', 'Mật khẩu quản trị dưới dạng băm một chiều']
-const notStored = ['Lời chia sẻ, câu trả lời hay nội dung của phòng đã xóa', 'Địa chỉ IP, cookie theo dõi hay hồ sơ người chơi',
+  'Tổng lượt truy cập theo ngày: trang, nguồn, loại thiết bị', 'Mật khẩu quản trị dưới dạng băm một chiều',
+  'Khi bật chat: tin nhắn được chọn báo cáo, tối đa 7 ngày kể từ lúc gửi; chỉ quản trị viên được xem']
+const notStored = ['Toàn bộ lịch sử phòng đã xóa (ngoại trừ tin nhắn được chọn báo cáo trong thời hạn trên)', 'Địa chỉ IP, cookie theo dõi hay hồ sơ người chơi',
   'Tệp ảnh thẻ (ảnh nằm ở kho ảnh, database chỉ giữ URL)', 'Bản sao lưu nội dung phòng']
 
 export function DataPanel({ onOpenCatalog }: { onOpenCatalog: () => void }) {

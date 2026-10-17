@@ -1,0 +1,74 @@
+/* Packaging-inspired third theme. No selectors target card faces or Coin colors. */
+html[data-ui-theme="candy-clouds"] {
+  --brand-ink: #194A60;
+  --brand-primary: #126D85;
+  --brand-on-primary: #FFFFFF;
+  --brand-blush: #BE527F;
+  --brand-blush-soft: #F9DCEB;
+  --brand-mint-soft: #EAF5FB;
+  --brand-sky-soft: #DEF0FB;
+  --brand-ivory: #FFFAFD;
+  --brand-edge: #9DBDCD;
+  --brand-muted: #4D687C;
+  --brand-focus: #A03C70;
+  --brand-shadow: #39627E20;
+  --brand-radius: 28px;
+  --brand-control-radius: 24px;
+  --brand-backdrop: url('/cartoon/ui/themes/candy-clouds/backdrop.webp');
+  --prototype-primary: url('/cartoon/ui/themes/candy-clouds/primary.svg');
+  --prototype-secondary: url('/cartoon/ui/themes/candy-clouds/secondary.svg');
+  --prototype-quiet: url('/cartoon/ui/themes/candy-clouds/quiet.svg');
+  --prototype-menu: none;
+  --prototype-table: url('/cartoon/ui/themes/candy-clouds/table.svg');
+}
+html[data-ui-theme="candy-clouds"] .brand-home {
+  background-size: cover;
+}
+html[data-ui-theme="candy-clouds"] .brand-home [data-ui-chrome="home-logo"] {
+  left: 18%; top: 15%; width: 64%; height: 29%;
+}
+html[data-ui-theme="candy-clouds"] .brand-home #home-logo {
+  width: 100%; height: 100% !important; object-fit: contain;
+  filter: drop-shadow(0 8px 14px #A87E8D19) !important;
+}
+html[data-ui-theme="candy-clouds"] .brand-home-join { top: 53%; }
+html[data-ui-theme="candy-clouds"] .brand-home-create { top: 65%; color: var(--brand-ink); }
+html[data-ui-theme="candy-clouds"] .brand-home-guide { top: 79%; }
+html[data-ui-theme="candy-clouds"] .brand-home-action::before,
+html[data-ui-theme="candy-clouds"] [data-cartoon-surface="pill"]::before { inset: 0; }
+html[data-ui-theme="candy-clouds"] [data-cartoon-surface="pill"]:has(img[src$="secondary.svg"]) { --control-material: var(--prototype-secondary); }
+html[data-ui-theme="candy-clouds"] [data-cartoon-surface="pill"]:has(img[src$="quiet.svg"]) { --control-material: var(--prototype-quiet); }
+html[data-ui-theme="candy-clouds"] .theme-a-menu {
+  background: linear-gradient(160deg, #FFFAFD, #F0F8FE);
+  border: 1px solid var(--brand-edge); border-radius: 30px;
+  box-shadow: 0 16px 50px #345A7733;
+}
+html[data-ui-theme="candy-clouds"] .theme-a-menu::before { display: none; }
+html[data-ui-theme="candy-clouds"] .theme-a-menu-panel { margin-inline: 16px; }
+html[data-ui-theme="candy-clouds"] .theme-a-menu-heading .theme-a-headline { background: transparent; border: 0; }
+html[data-ui-theme="candy-clouds"] .theme-a-menu-heading .theme-a-headline span { font-family: 'Quicksand', sans-serif; font-size: 30px; }
+html[data-ui-theme="candy-clouds"] .theme-a-menu-actions > button { color: var(--brand-ink) !important; }
+html[data-ui-theme="candy-clouds"] .theme-a-menu-actions [data-cartoon-surface="pill"] { --control-material: var(--prototype-quiet); }
+html[data-ui-theme="candy-clouds"] .theme-a-menu-actions > button:nth-child(2) [data-cartoon-surface="pill"] { --control-material: var(--prototype-secondary); }
+html[data-ui-theme="candy-clouds"] .brand-menu-label { font-family: 'Quicksand', sans-serif; font-size: 19px; }
+html[data-ui-theme="candy-clouds"] .brand-menu-icon > svg { width: 30px; height: 30px; }
+html[data-ui-theme="candy-clouds"] .game-shell { background-image: var(--brand-backdrop) !important; }
+html[data-ui-theme="candy-clouds"] .game-table-surface::before { width: calc(100% + 32px); aspect-ratio: .79; }
+html[data-ui-theme="candy-clouds"] .brand-board-logo { width: 120px; height: 86px; margin-top: -8px; }
+html[data-ui-theme="candy-clouds"] .brand-board-heading h1 { font-family: 'Quicksand', sans-serif; font-size: 28px; }
+html[data-ui-theme="candy-clouds"] .brand-board-caption { background: var(--brand-blush-soft); }
+html[data-ui-theme="candy-clouds"] .brand-player-name { border: 1px solid #B8CCD9; background: #FFFCFE; }
+html[data-ui-theme="candy-clouds"] .brand-avatar { box-shadow: 0 4px 10px #39627E20; }
+html[data-ui-theme="candy-clouds"] :is(.brand-gift-title, .ended-content h1, .ended-content h2) { font-family: 'Quicksand', sans-serif; }
+html[data-ui-theme="candy-clouds"] .brand-board-wordmark { background: var(--brand-blush-soft); }
+html[data-ui-theme="candy-clouds"] [data-ui-night="true"] .brand-board-heading :is(h1,p) { color: #FFF8FD; }
+html[data-ui-theme="candy-clouds"] :is(.admin-page.admin-desktop, .admin-overlay) {
+  --admin-accent: #126D85; --admin-accent-strong: #0C536B; --admin-soft: #E8F4FA;
+  --admin-ground: #F7F8FC;
+}
+@media (max-height: 600px) {
+  html[data-ui-theme="candy-clouds"] .brand-home [data-ui-chrome="home-logo"] { top: 12%; height: 28%; }
+  html[data-ui-theme="candy-clouds"] .brand-home-join { top: 45%; }
+  html[data-ui-theme="candy-clouds"] .brand-home-create { top: 63%; }
+  html[data-ui-theme="candy-clouds"] .brand-home-guide { top: 81%; }
+}

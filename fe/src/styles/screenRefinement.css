@@ -1,80 +1,80 @@
 /* Complete the approved satin/paper systems on secondary screens.
    Never target card images, denomination colors or role identity badges. */
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .input-cartoon {
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .input-cartoon {
   border: 1px solid var(--brand-edge);
   background: var(--brand-ivory);
   box-shadow: inset 0 1px 3px var(--brand-shadow);
 }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-surface="room"] { border-color: var(--brand-edge) !important; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="history-entry"] { background: var(--brand-sky-soft); border: 1px solid var(--brand-edge); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="history-entry"] .font-display { color: var(--brand-ink); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="history-entry"] .font-body { color: var(--brand-muted); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="reward-choice"] { background: var(--brand-ivory); border-color: var(--brand-edge); box-shadow: 0 2px 4px var(--brand-shadow); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="reward-choice"][aria-pressed="true"] { background: var(--brand-blush-soft); border-color: var(--brand-blush); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-panel="a1"] [class*="text-[#2F76AC]"] { color: var(--brand-ink); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is([data-ui-panel="a1"], [data-ui-surface="game-popup"]) :is(.text-black\/40,.text-black\/45,.text-black\/50,.text-black\/55) { color: var(--brand-muted); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-panel="a1"] { border-color: var(--brand-edge); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-ui-surface="room"] { border-color: var(--brand-edge) !important; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-ui-chrome="history-entry"] { background: var(--brand-sky-soft); border: 1px solid var(--brand-edge); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-ui-chrome="history-entry"] .font-display { color: var(--brand-ink); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-ui-chrome="history-entry"] .font-body { color: var(--brand-muted); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-ui-chrome="reward-choice"] { background: var(--brand-ivory); border-color: var(--brand-edge); box-shadow: 0 2px 4px var(--brand-shadow); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-ui-chrome="reward-choice"][aria-pressed="true"] { background: var(--brand-blush-soft); border-color: var(--brand-blush); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-ui-panel="a1"] [class*="text-[#2F76AC]"] { color: var(--brand-ink); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) :is([data-ui-panel="a1"], [data-ui-surface="game-popup"]) :is(.text-black\/40,.text-black\/45,.text-black\/50,.text-black\/55) { color: var(--brand-muted); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-ui-panel="a1"] { border-color: var(--brand-edge); }
 html[data-ui-theme="kindness-workshop"] [data-ui-chrome="history-entry"] { background: #efe3c6 url('/cartoon/ui/themes/kindness-workshop/paper-grain.svg'); border-radius: 12px 9px 14px 10px; }
 html[data-ui-theme="kindness-workshop"] [data-testid="coin-rules-guide"] { background-image: url('/cartoon/ui/themes/kindness-workshop/paper-grain.svg'); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .admin-page h1 { color: var(--brand-ink); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .admin-card { background: var(--brand-ivory); border-color: var(--brand-edge); color: var(--brand-ink); box-shadow: 0 4px 18px var(--brand-shadow); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .admin-page h1 { color: var(--brand-ink); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .admin-card { background: var(--brand-ivory); border-color: var(--brand-edge); color: var(--brand-ink); box-shadow: 0 4px 18px var(--brand-shadow); }
 html[data-ui-theme="kindness-workshop"] .admin-card { background-image: url('/cartoon/ui/themes/kindness-workshop/paper-grain.svg'); border-radius: 18px 12px 20px 14px; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .admin-card[role="alert"] { color: #a8324d; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-screen="route-loading"] { background: var(--brand-ivory); color: var(--brand-ink); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .admin-card[role="alert"] { color: #a8324d; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-ui-screen="route-loading"] { background: var(--brand-ivory); color: var(--brand-ink); }
 html[data-ui-theme="emotion-orbit"] :is(.brand-board-wordmark, .brand-board-heading h1, .brand-gift-title) { font-family: 'Quicksand', sans-serif; font-weight: 700; }
 html[data-ui-theme="emotion-orbit"] .brand-board-heading h1 { font-size: 32px; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-night="true"] .brand-board-heading > p { color: #f4f1ff; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-ui-night="true"] .brand-board-heading > p { color: #f4f1ff; }
 html[data-ui-theme="emotion-orbit"] [data-ui-night="true"] .brand-board-heading h1 { color: #f4f1ff; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is([data-ui-surface="game-popup"], [data-ui-surface="modal"]) :is([class*="text-[var(--c-black)]"], [class*="text-[#2F76AC]"], [class*="text-[var(--c-teal)]"]) { color: var(--brand-ink); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is([data-ui-surface="game-popup"], [data-ui-surface="modal"]) .font-display[class*="text-[var(--c-pink)]"] { color: var(--brand-ink); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .showcase-root { background: var(--brand-ivory); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .showcase-canvas { background: radial-gradient(ellipse at 50% 38%, var(--brand-ivory), var(--brand-sky-soft)); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .showcase-title b { color: var(--brand-ink); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) :is([data-ui-surface="game-popup"], [data-ui-surface="modal"]) :is([class*="text-[var(--c-black)]"], [class*="text-[#2F76AC]"], [class*="text-[var(--c-teal)]"]) { color: var(--brand-ink); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) :is([data-ui-surface="game-popup"], [data-ui-surface="modal"]) .font-display[class*="text-[var(--c-pink)]"] { color: var(--brand-ink); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .showcase-root { background: var(--brand-ivory); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .showcase-canvas { background: radial-gradient(ellipse at 50% 38%, var(--brand-ivory), var(--brand-sky-soft)); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .showcase-title b { color: var(--brand-ink); }
 html[data-ui-theme="kindness-workshop"] .showcase-canvas { background: var(--brand-ivory) url('/cartoon/ui/themes/kindness-workshop/paper-grain.svg'); }
 @media(max-width:360px) { html[data-ui-theme="emotion-orbit"] .brand-board-heading h1 { font-size: 28px; } }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="reward-choice"][aria-pressed="true"] [data-ui-chrome="selection-switch"] { background: var(--brand-blush); border-color: var(--brand-blush); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .brand-coin-types button[data-coin-type="red"][aria-pressed="true"] { background: var(--brand-blush-soft); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .brand-coin-types button[data-coin-type="yellow"][aria-pressed="true"] { background: #fff5dc; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .site-brand-mark { width: 128px; height: 52px; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .site-brand-mark img { width: 128px; height: 52px; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is(.deck-page, .game-intro-page, .about-page) { font-family: 'Quicksand', sans-serif; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is(.deck-page, .game-intro-page, .about-page) :is(h1,h2,h3) { font-family: 'Quicksand', sans-serif; font-weight: 700; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-ui-chrome="reward-choice"][aria-pressed="true"] [data-ui-chrome="selection-switch"] { background: var(--brand-blush); border-color: var(--brand-blush); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .brand-coin-types button[data-coin-type="red"][aria-pressed="true"] { background: var(--brand-blush-soft); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .brand-coin-types button[data-coin-type="yellow"][aria-pressed="true"] { background: #fff5dc; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .site-brand-mark { width: 128px; height: 52px; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .site-brand-mark img { width: 128px; height: 52px; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) :is(.deck-page, .game-intro-page, .about-page) { font-family: 'Quicksand', sans-serif; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) :is(.deck-page, .game-intro-page, .about-page) :is(h1,h2,h3) { font-family: 'Quicksand', sans-serif; font-weight: 700; }
 html[data-ui-theme="emotion-orbit"] :is(.deck-page, .game-intro-page) { background: radial-gradient(ellipse at 10% 0, #f3dfe855, transparent 38%), linear-gradient(#f3f1ff, #f9f9fe 45%); }
 html[data-ui-theme="kindness-workshop"] :is(.deck-page, .game-intro-page) { background: var(--brand-ivory) url('/cartoon/ui/themes/kindness-workshop/paper-grain.svg'); }
 /* About embeds a legacy wildcard font lock; only approved brand themes override it. */
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .about-page,
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .about-page * { font-family: 'Quicksand', sans-serif !important; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .about-page,
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .about-page * { font-family: 'Quicksand', sans-serif !important; }
 
 /* User-facing density: clear choices, rather than poster-sized forms. */
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="waiting-panel"] {
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-ui-chrome="waiting-panel"] {
   margin-block: 12px; max-width: 24rem !important; background-color: var(--brand-ivory) !important;
 }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="waiting-player"] {
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-ui-chrome="waiting-player"] {
   padding: 10px 12px; gap: 14px; min-height: 64px; cursor: default;
 }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="waiting-player"][role="button"] { cursor: pointer; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="waiting-player"]:focus-visible { outline: 3px solid var(--brand-primary); outline-offset: -3px; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="waiting-player"] .font-body { color: var(--brand-muted); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-testid="give-coin-dialog"] { max-width: 410px; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .brand-recipient-heading { order: 2; color: var(--brand-ink); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .brand-coin-recipients {
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-ui-chrome="waiting-player"][role="button"] { cursor: pointer; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-ui-chrome="waiting-player"]:focus-visible { outline: 3px solid var(--brand-primary); outline-offset: -3px; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-ui-chrome="waiting-player"] .font-body { color: var(--brand-muted); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-testid="give-coin-dialog"] { max-width: 410px; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .brand-recipient-heading { order: 2; color: var(--brand-ink); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .brand-coin-recipients {
   grid-template-columns: 1fr; max-height: 24dvh; scrollbar-width: thin; scrollbar-color: var(--brand-primary) transparent;
   scroll-padding-block: 8px; padding: 3px;
 }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .brand-coin-recipients > button { min-height: 60px; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .brand-coin-types button { min-height: 64px; font-family: 'Quicksand', sans-serif; font-weight: 700; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="reward-choice"] .font-display { font-family: 'Quicksand', sans-serif; font-weight: 700; font-size: 13px; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="reward-choice"] span.font-display { font-size: 11px; line-height: 1.4; color: var(--brand-ink) !important; background-color: var(--brand-sky-soft) !important; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .brand-coin-recipients > button { min-height: 60px; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .brand-coin-types button { min-height: 64px; font-family: 'Quicksand', sans-serif; font-weight: 700; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-ui-chrome="reward-choice"] .font-display { font-family: 'Quicksand', sans-serif; font-weight: 700; font-size: 13px; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-ui-chrome="reward-choice"] span.font-display { font-size: 11px; line-height: 1.4; color: var(--brand-ink) !important; background-color: var(--brand-sky-soft) !important; }
 html[data-ui-theme="kindness-workshop"] [data-ui-chrome="reward-choice"] {
   background-image: url('/cartoon/ui/themes/kindness-workshop/paper-grain.svg'); border-radius: 10px 15px 9px 13px;
 }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-screen="ended"] {
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-ui-screen="ended"] {
   border: 0; border-radius: 0; box-shadow: none; color: var(--brand-ink);
   padding-top: max(20px, env(safe-area-inset-top));
 }
 .ended-content > * { flex-shrink: 0; }
 .ended-footer { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .ended-content .font-body { font-size: 13px; line-height: 1.6; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .ended-content .font-body { font-size: 13px; line-height: 1.6; }
 .ended-coin-row .brand-coin-icon { width: 20px; height: 20px; }
 .ended-coin-row { font-variant-numeric: tabular-nums; border-bottom: 1px solid var(--brand-edge, #ddd); }
 .ended-coin-row:last-child { border-bottom: 0; }
@@ -84,10 +84,10 @@ img[src*="/emcoin/avatars/"] { border-radius: 50%; object-fit: cover; }
 .brand-avatar > img[src*="/emcoin/avatars/"] { width: 82%; height: 82%; }
 /* The dialog itself receives initial focus; do not draw a browser-default black frame. */
 [data-ui-screen="ended"]:focus { outline: none; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .ended-content h3 { color: var(--brand-ink); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-testid="inventory-scroll"] { scrollbar-gutter: stable; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .ended-content h3 { color: var(--brand-ink); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-testid="inventory-scroll"] { scrollbar-gutter: stable; }
 @media (min-height: 700px) {
-  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .game-player-layout:is([data-player-count="9"], [data-player-count="10"]) { min-height: 600px; }
-  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .game-player-layout:is([data-player-count="9"], [data-player-count="10"]) .game-player-side .brand-avatar { width: 52px; height: 52px; }
-  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .game-player-layout:is([data-player-count="9"], [data-player-count="10"]) .game-player-side .brand-player-role:not(:has(.brand-player-role-label)) { min-height: 16px; height: 16px; padding: 0; }
+  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .game-player-layout:is([data-player-count="9"], [data-player-count="10"]) { min-height: 600px; }
+  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .game-player-layout:is([data-player-count="9"], [data-player-count="10"]) .game-player-side .brand-avatar { width: 52px; height: 52px; }
+  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .game-player-layout:is([data-player-count="9"], [data-player-count="10"]) .game-player-side .brand-player-role:not(:has(.brand-player-role-label)) { min-height: 16px; height: 16px; padding: 0; }
 }

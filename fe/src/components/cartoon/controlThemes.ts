@@ -27,6 +27,15 @@ function brandControls(id: string, label: string): ControlTheme {
 export const CONTROL_THEMES = {
   'emotion-orbit': brandControls('emotion-orbit', 'Vòng Cảm Xúc'),
   'kindness-workshop': brandControls('kindness-workshop', 'Xưởng Tử Tế'),
+  'candy-clouds': {
+    label: 'Mây Kẹo',
+    pills: Object.fromEntries(['green', 'blue', 'teal', 'pink', 'orange', 'purple', 'white', 'cream', 'blush-soft'].map(color => {
+      const tone = ['pink', 'orange', 'purple'].includes(color) ? 'secondary' : ['white', 'cream', 'blush-soft'].includes(color) ? 'quiet' : 'primary'
+      return [color, { src: `/cartoon/ui/themes/candy-clouds/${tone}.svg`, textColor: tone === 'primary' ? 'var(--brand-on-primary)' : 'var(--brand-ink)' }]
+    })),
+    circles: Object.fromEntries(['blue', 'blue-teal', 'red', 'yellow', 'violet', 'purple', 'gray', 'dark', 'brown', 'bordeaux', 'light', 'neutral', 'white', 'transparent'].map(color => [color, { src: '/cartoon/ui/themes/candy-clouds/circle.svg', textColor: 'var(--brand-ink)' }])),
+    spriteShadow: 'drop-shadow(0 3px 2px var(--brand-shadow))',
+  },
   legacy: { label: 'Cartoon gốc', pills: {}, circles: {}, spriteShadow: 'drop-shadow(0 6px 4px rgba(0,0,0,0.18))' },
   'mint-blush': {
     label: 'A1 Sky–Pink',
@@ -51,7 +60,7 @@ export type ControlThemeId = keyof typeof CONTROL_THEMES
 export const DEFAULT_CONTROL_THEME: ControlThemeId = 'emotion-orbit'
 
 export function isBrandTheme(theme: ControlThemeId) {
-  return theme === 'emotion-orbit' || theme === 'kindness-workshop'
+  return theme === 'emotion-orbit' || theme === 'kindness-workshop' || theme === 'candy-clouds'
 }
 
 /** Only new non-card art has material variants. Never rewrite arbitrary image URLs. */
@@ -61,6 +70,7 @@ export function themeArtUrl(theme: ControlThemeId, src: string | undefined) {
 
 /** Owner-approved theme wordmarks; card identities remain independent. */
 export function themeLogo(theme: ControlThemeId) {
+  if (theme === 'candy-clouds') return '/logo.svg'
   return isBrandTheme(theme) ? `/cartoon/ui/themes/${theme}/logo-v2.webp` : '/emcoin_logo.png'
 }
 
@@ -94,6 +104,7 @@ export const A_DECOR = {
 } as const
 
 export function themeBackdrop(theme: ControlThemeId, legacy: string) {
+  if (theme === 'candy-clouds') return 'url(/cartoon/ui/themes/candy-clouds/backdrop.webp)'
   if (isBrandTheme(theme)) return `url(/cartoon/ui/themes/${theme}/backdrop-v3.webp)`
   return theme === 'mint-blush' ? `url(${A_DECOR.backdrop})` : legacy
 }

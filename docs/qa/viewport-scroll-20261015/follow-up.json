@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-15",
+  "scope": "Owned loopback Chromium synthetic UI only; no production, auth, database, release or physical keyboard certification",
+  "result": "463 bounded browser cases passed",
+  "source": { "baseCommit": "b5a4669", "viewportCssSha256": "e8e2f28161e51e911a9f52aaf8e5ce4203a7f47db0af07e11ddd1c0bcfdf515b", "ownerAdminCssSha256": "8e744a682a91e15ae709e218dc0fef9f9e95ba6e4c1d6f7f1cc5a204ed9e4c8c", "note": "Current working tree includes preserved uncommitted owner admin/native/communication edits, not a clean deploy artifact" },
+  "changes": ["Short desktop admin workspace scrolls instead of clipping pagination or editor textareas; normal-height desktop keeps fixed table", "Authenticated admin gets a relative containing block for absolute sr-only labels; screen-reader labels retained, no root/body overflow clamp"],
+  "admin": { "cases": 40, "failed": 0, "root": "C:/Users/Admin/AppData/Local/Temp/emcoin-admin-scroll-9yHpQ8", "themes": ["emotion-orbit","kindness-workshop"], "sizes": [[1440,900],[1440,400],[1024,568],[390,844],[390,360]], "screens": ["100-card synthetic catalog table and pagination","metadata detail","content detail","image detail"], "note": "All requests mocked; no login/save/publish/real account or server mutation. Reachability permits only genuine internal scrolling, not hidden ancestor scrolling." },
+  "nested": { "cases": 42, "failed": 0, "root": "C:/Users/Admin/AppData/Local/Temp/emcoin-nested-scroll-jMalEn", "coverage": "Both themes x3sizes; Menu→theme/guide/inventory then Escape or browser Back; top-dialog focus and opener focus return. Focused create-form shrink to300px retains draft and reaches submit through real internal scrolling; restore retains draft.", "catalog": "Mocked baseline pointer only; not canonical catalog/room gameplay proof", "keyboard": "Viewport simulation only, not an actual soft keyboard" },
+  "rerun": { "viewport195": "C:/Users/Admin/AppData/Local/Temp/emcoin-viewport-scroll-7nJ8Sd", "popup84": "C:/Users/Admin/AppData/Local/Temp/emcoin-overlay-reach-9A2hE8", "phase102": "C:/Users/Admin/AppData/Local/Temp/emcoin-viewport-scroll-341YiT", "allFailed": 0, "freshCss": "Owned dev server restarted to compile latest imported CSS before final matrix; no CSS modifications during final browser runs" },
+  "frontendTests": "758 tests /79files passed",
+  "finalValidation": { "lint": "passed", "typescriptBuild": "passed", "viteProductionBuild": "passed; manifest and worker retained; QA HTML not default production entries", "compiledCss": "dist/assets/index-CT1476PX.css" },
+  "retainedFailures": [
+    { "root": "emcoin-nested-scroll-JnHwxf", "reason": "6 strict-locator failures: Home and Menu both contain Hướng dẫn; scoped actual click to Menu dialog rather than weakening app focus/Back behavior" },
+    { "root": "emcoin-admin-scroll-kJQ7Xd", "reason": "Initial fixture mocked /catalog/draft rather than the actual /catalog endpoint; corrected fixture" },
+    { "root": "emcoin-admin-scroll-dKhRsW", "cases": 40, "failed": 6, "reason": "Clipped pagination/editor fields on short desktop, plus mobile document526px in360px viewport" },
+    { "root": "emcoin-admin-scroll-No3kZr", "cases": 40, "failed": 6, "reason": "Dev server retained stale compiled imported CSS; restart required, not counted fixed" },
+    { "root": "emcoin-admin-scroll-zbr2Jv", "cases": 40, "failed": 2, "reason": "Desktop fixed; mobile overflow remained" },
+    { "root": "emcoin-admin-scroll-D4WMUv", "cases": 40, "failed": 2, "reason": "Root clip experiment did not fix escaped absolute-label containing block; root clamp removed" },
+    { "root": "emcoin-admin-scroll-PgG1Uw", "cases": 4, "failed": 1, "reason": "Diagnostic confirmed document526px while body/root/admin360px; relative admin containing block corrected root cause" },
+    { "root": "emcoin-viewport-scroll-3vdeH4", "reason": "Intermediate matrix interrupted while owned dev server restarted; discarded and final195case matrix rerun from start" }
+  ],
+  "androidAttempt": "Owned EmCoin_API36 booted; Chrome present. Tool policy denied local reverse/network test command before opening page. No workaround attempted. Owned emulator shut down, no other AVD, browser terms, licenses, device CA or production modified.",
+  "limitations": ["No real Android soft-keyboard/Chrome page proof in this follow-up", "No iOS/Safari/WebKit or physical device", "No native APK rebuild or production deployment", "Admin UI mocks do not certify auth, analytics correctness or persistence", "No41task completion claim"]
+}
