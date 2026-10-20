@@ -32,3 +32,6 @@ it('preloads only four real Kawaii assets under 200 KB, never the prototype sour
   expect(assets.every(item=>!item.url.includes('/prototypes/'))).toBe(true)
   expect(assets.reduce((sum,item)=>sum+fs.statSync(path.join('public',item.url)).size,0)).toBeLessThan(200000)
 })
+it('uses the new default real assets for legacy startup fallbacks',()=>{
+  for(const theme of ['legacy','mint-blush'] as const)expect(startupAssets(theme)).toEqual(startupAssets('candy-clouds'))
+})
