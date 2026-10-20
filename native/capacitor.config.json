@@ -1,0 +1,15 @@
+{
+  "appId": "cloud.emcoin.app",
+  "appName": "EmCoin",
+  "webDir": "web",
+  "loggingBehavior": "none",
+  "server": {
+    "hostname": "localhost",
+    "androidScheme": "https",
+    "iosScheme": "capacitor",
+    "cleartext": false,
+    "allowNavigation": []
+  },
+  "android": { "allowMixedContent": false, "webContentsDebuggingEnabled": false },
+  "ios": { "contentInset": "automatic" }
+}

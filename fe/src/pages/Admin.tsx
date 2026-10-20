@@ -7,6 +7,7 @@ import { AdminPassword } from '@/features/admin/AdminPassword'
 import { OverviewPanel } from '@/features/admin/OverviewPanel'
 import { AnalyticsPanel } from '@/features/admin/AnalyticsPanel'
 import { DataPanel } from '@/features/admin/DataPanel'
+import { ReportsPanel } from '@/features/admin/ReportsPanel'
 import { AdminDialog, Panel } from '@/features/admin/ui'
 import { formatNumber } from '@/features/admin/format'
 import '@/styles/adminDesktop.css'
@@ -14,11 +15,12 @@ import { ThemeChooser } from '@/features/theme/ThemeChooser'
 import { useThemePreference, isPublishedTheme } from '@/features/theme/preferenceModel'
 import { useControlTheme } from '@/components/cartoon/controlThemeContext'
 
-type Section = 'overview' | 'catalog' | 'analytics' | 'database' | 'account'
+type Section = 'overview' | 'catalog' | 'analytics' | 'database' | 'account' | 'reports'
 const groups: { title: string; items: { id: Section; label: string; icon: LucideIcon; description: string }[] }[] = [
   { title: 'Vận hành', items: [
     { id: 'overview', label: 'Tổng quan & phòng', icon: LayoutDashboard, description: 'Phòng đang mở, người tham gia và tình trạng máy chủ.' },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3, description: 'Lưu lượng truy cập, nguồn khách và hoạt động chơi.' }] },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3, description: 'Lưu lượng truy cập, nguồn khách và hoạt động chơi.' },
+    { id: 'reports', label: 'Báo cáo an toàn', icon: ShieldCheck, description: 'Bằng chứng được người chơi chọn báo cáo và tình trạng xử lý.' }] },
   { title: 'Nội dung', items: [
     { id: 'catalog', label: 'Bộ thẻ', icon: Layers, description: 'Chỉnh sửa bản nháp, kiểm nội dung và phát hành cho phòng mới.' }] },
   { title: 'Hệ thống', items: [
@@ -140,9 +142,9 @@ export default function Admin() {
           <div className="admin-topbar-title"><h1>{current.label}</h1><p>{current.description}</p></div>
           <div className="admin-topbar-tools">
             {themePreference && <label className="admin-theme-switch"><Palette aria-hidden="true" /><span className="sr-only">Giao diện quản trị</span>
-              <select aria-label="Giao diện quản trị" value={isPublishedTheme(controlTheme) ? controlTheme : 'emotion-orbit'} disabled={pending}
+              <select aria-label="Giao diện quản trị" value={isPublishedTheme(controlTheme) ? controlTheme : 'emotion-orbit'} disabled={blocked}
                 onChange={event => { if (isPublishedTheme(event.target.value)) themePreference.choose(event.target.value) }}>
-                <option value="emotion-orbit">Vòng Cảm Xúc</option><option value="kindness-workshop">Xưởng Tử Tế</option></select></label>}
+                <option value="emotion-orbit">Vòng Cảm Xúc</option><option value="kindness-workshop">Xưởng Tử Tế</option><option value="candy-clouds">Mây Kẹo</option></select></label>}
             <a className="admin-topbar-link" href="/" aria-disabled={blocked} onClick={leave}>Về EmCoin<ExternalLink aria-hidden="true" /></a>
             <AdminButton color="white" pending={pending} disabled={editorBusy} onClick={() => void run('refresh')}><RefreshCw aria-hidden="true" />Làm mới</AdminButton>
             <AdminButton color="white" pending={pending} disabled={editorBusy} onClick={() => void run('logout')}><LogOut aria-hidden="true" />Đăng xuất</AdminButton>
@@ -172,6 +174,7 @@ export default function Admin() {
             {section === 'analytics' && <AnalyticsPanel http={overview.analytics.http} />}
             {section === 'catalog' && <CatalogEditor onBusy={setEditorBusy} />}
             {section === 'database' && <DataPanel onOpenCatalog={() => setSection('catalog')} />}
+            {section === 'reports' && <ReportsPanel onBusy={setEditorBusy} onExpired={() => expire('Phiên đã hết hạn. Hãy đăng nhập lại để xem báo cáo.')} />}
             {section === 'account' && <>
               <AdminPassword onBusy={setEditorBusy} onExpired={() => expire('Phiên đã hết hạn. Nếu vừa đổi mật khẩu, hãy đăng nhập bằng mật khẩu mới.')}
                 onChanged={() => expire('Đã đổi mật khẩu. Hãy đăng nhập lại bằng mật khẩu mới.')} />

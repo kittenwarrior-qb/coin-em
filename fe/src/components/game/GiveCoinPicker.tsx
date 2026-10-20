@@ -9,6 +9,7 @@ import { BrandIcon } from '@/components/cartoon/BrandIcon'
 import { useControlTheme } from '@/components/cartoon/controlThemeContext'
 import { isBrandTheme } from '@/components/cartoon/controlThemes'
 import { BrandCoinIcon } from './BrandCoinIcon'
+import { KawaiiGift } from '@/components/kawaii/KawaiiGift'
 
 interface GiveCoinPickerProps {
   players: Player[]
@@ -81,6 +82,10 @@ export function GiveCoinPicker({ players, myPlayer, onGiveCoin, onClose, finiteC
   const coinSrc = coinType === 'yellow' ? '/coins/vang.png' : coinType === 'green' ? '/coins/xanh.png' : '/coins/do.png'
   const coinLabel = coinType === 'yellow' ? 'vàng' : coinType === 'green' ? 'xanh' : 'đỏ'
   const availableTypes: CoinType[] = finiteCycle ? (myPlayer?.isSender ? ['red'] : ['green', 'yellow']) : ['yellow', 'red']
+
+  if(theme==='candy-clouds')return <KawaiiGift dialogRef={dialogRef} types={availableTypes} coin={coinType} chooseCoin={chooseCoinType} max={type=>type==='red'?redMax:type==='green'?greenMax:yellowMax}
+    amount={safeAmount} setAmount={setAmount} targets={giftablePlayers} target={selectedPlayer} chooseTarget={setSelectedPlayer} locked={locked} pending={pending}
+    canGive={canGive} give={()=>void handleConfirm()} close={onClose} success={successName} again={()=>setSuccessName(null)} error={error}/>
 
   return (
     <motion.div

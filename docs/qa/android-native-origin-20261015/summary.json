@@ -1,0 +1,52 @@
+{
+  "date": "2026-10-15",
+  "result": "bounded-native-room-flow-passed",
+  "scope": "API36 Android WebView, real guarded HTTPS and Socket.IO handlers, mocked room primary; not Redis durability or a full game",
+  "productionModified": false,
+  "device": { "avd": "EmCoin_API36", "serial": "emulator-5580", "display": "540x1200 density210", "graphics": "headless SwiftShader, WHPX" },
+  "applicationId": "cloud.emcoin.app.staging",
+  "origin": "https://localhost",
+  "backend": "random loopback HTTPS reached through emulator10.0.2.2; test-only scoped public CA",
+  "apkSha256": "799183f5b1d1a91e0c37e0d9de0a2c2cda40c3066601f7d0a6b286a5c6e9dc4b",
+  "frontendSourceDigest": "cd59c611b4f95ed776ced823a41b613bc734acb4929f91801fc705224b4cbf21",
+  "sourceNote": "Frontend bundle includes separately pending local admin work; digest identifies copied sources, not a clean release commit. Backend includes targeted presence projection fix.",
+  "catalog": "in-memory synthetic reviewed PDF draft snapshot, original card assets unchanged",
+  "checkpoints": [
+    "actual native HTTPS admission and room creation",
+    "five real connected seats: Android host and four isolated Socket.IO companions",
+    "Android selector bounded to five seats; select and save one round",
+    "native set_round_limit ACK success after waiting-room idle interval",
+    "native start_game ACK success with one-round playing state",
+    "PDF narrator role face rendered in Android WebView",
+    "role overlay acknowledged and gameplay board rendered",
+    "Android Home/background then HOT resume; native get_room_state observed"
+  ],
+  "nativeCommands": { "join_room": 1, "reconnect_room": 0, "get_room_state": 1, "set_round_limit": 1, "start_game": 1 },
+  "cleanup": { "serverClosed": true, "privateKeyRemoved": true, "qaAppUninstalled": true, "normalAppPreserved": true },
+  "validation": {
+    "backend": "898 tests /74files and TypeScript build passed",
+    "native": "40 policy/helper/preflight tests passed",
+    "ordinaryDebug": "assembleDebug passed, identical prior APK SHA256 b91abfb20c6c205d3662cc0e9e4983c9e4df56d3051bcccbdc5dbf75d69034b9",
+    "defaultManifest": "normal app ID, cleartext/backup disabled, no QA networkSecurityConfig, no extra mic/camera permissions",
+    "negativeBuildGuard": "assembleDebug with QA root rejected before packaging; assembleStaging without root rejected",
+    "bundle": "exact production-bound default receipt/config/assets check passed"
+  },
+  "evidenceRoot": "C:/Users/Admin/AppData/Local/Temp/emcoin-native-stage-xcmPOn",
+  "screenshots": ["home.png", "waiting.png", "one-round-saved.png", "role-reveal.png", "resume.png"],
+  "retainedFailures": [
+    { "rootSuffix": "kg8YUK", "stage": "prepare", "reason": "owned emulator not running" },
+    { "rootSuffix": "q2tlIp", "stage": "build", "reason": "optimizer correctly rejected external outDir; corrected to isolated frontend copy without weakening guard" },
+    { "rootSuffix": "xkBBgt", "stage": "build", "reason": "cmd wrapper syntax rejected Gradle invocation; replaced with PowerShell wrapper" },
+    { "rootSuffix": "DJGSqq", "stage": "prepare", "reason": "emulator unavailable; restarted owned VM headless" },
+    { "rootSuffix": "E87JDF", "stage": "native UI", "reason": "round save failed after idle presence increment; fixture asserted waiting instead of playing; actual defect fixed with recipient-safe post-commit projection" },
+    { "rootSuffix": "hK2XvS", "stage": "native UI", "reason": "diagnostic run stopped before room creation; retained as failed, not passed" }
+  ],
+  "limitations": [
+    "System UI ANR observed on first runtime screenshot in E87JDF; Wait dismissed it, no EmCoin crash inferred",
+    "UIAutomator intermittently returned null root; screenshots and server command evidence used, no accessibility pass",
+    "First immediate Home/resume yielded no hydration command; settled second foreground transition yielded get_room_state=1",
+    "No force-kill/reconnect-token, pending mutation, offline, chat, sustained performance or every-phase test",
+    "Long synthetic companion labels wrap heavily in narrow gameplay name plates; no all-screen polish certification",
+    "No physical Android/iOS, release signing, AAB/IPA, Play Console, TestFlight or store approval"
+  ]
+}

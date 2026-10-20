@@ -14,6 +14,55 @@ Mobile Chromium/WebKit + desktop Playwright projects with semantic selectors.
 
 ## Current evidence
 
+Final integrated2026-10-16 receipt:
+docs/qa/integrated-readiness-20261016/summary.json. All463synthetic layout cases
+PASS after the production-handler short/terminal suites; no owned runtime/source
+changes during each matrix. Fresh Redis/chat fixture and rebuilt debug APK also
+pass their scoped checks. This does not certify production deployment, actual
+current-APK keyboard/gameplay/device QA, WebKit/iOS or full41task acceptance.
+
+2026-10-16 integrated continuation: viewport commits b5a4669/2fabdf3 are now
+cherry-picked as2d48a82/87c1206 into the native/chat worktree. Preserved both
+RoomChatPanel and the new bounded game viewport during the only merge conflict.
+Regular checks PASS: BE898/74files, FE804/82files, BE TypeScript, FE lint and
+TypeScript/Vite production build. The non-3D short matrix now PASS5files/7cases
+in338.79s with original deadlines. The admin fixture now asserts the theme lock
+while a card is open and switches only after returning to the list; no safety
+lock removed or timeout enlarged. Admin evidence E8LUan is complete/errors[];
+1366x768 catalog screenshot visually inspected (fixed table/pagination, thumbnails,
+compact neutral CRM shell). Earlier failed u8d6sE remains retained below.
+
+Plan revision2026-10-16: extend current integrated verification with canonical
+PDF5/10-seat terminal cases (explicit `-t '^PDF'`; three legacy cases are outside
+this bounded run, not passed), then existing viewport/overlay/nested/admin matrix.
+Hold source/build stable during each run and retain failures. No production,
+actual soft-keyboard, WebKit/physical device or41-task acceptance is implied.
+
+Canonical terminal continuation PASS2cases in834.85s (three legacy cases explicitly
+filtered, not accepted). Five seats completed5rounds/75phase visits/15gifts and
+receipts; ten seats completed10rounds/160phase visits/30gifts and receipts. Every
+seat converged to the exact ended ledger; reload/Back/Escape and explicit leave
+passed. Five-seat lost ACK/projection cases recovered by hydration and identical
+same-ID retry, notice text356px at390px; no duplicate Coin debit. Both reports
+complete/errors[]: emcoin-terminal-browser-qa-PgOpgJ and1SHx9t. Mock room primary,
+reviewed synthetic PDF snapshot, actual UI/production preview; not Redis/device.
+Both ended390px screenshots visually inspected.
+
+Focused chat/admin follow-up PASS2/2 in78.31s after adding a chat300px-height
+regression: host/guest in both themes retain textarea drafts after shrink/restore,
+reach Send through only actual scroll containers, and pass visible hit-testing
+without document overflow. Report emcoin-chat-browser-SAM6AS discloses simulation,
+not an actual keyboard. No message sent by this resize check, no capability added.
+
+2026-10-15 non-3D short continuation:6/7cases PASS, one admin case FAIL in367.31s.
+Preserve failure at emcoin-admin-browser-qa-u8d6sE/report.json (local temp root):
+viewport320 catalog editor tries selecting the intentionally disabled admin theme
+switch; locator.selectOption times out30s. CatalogEditor reports busy whenever a
+card editor is open. No timeout enlarged, fixture skipped, or safety lock removed.
+Room5/10, PWA root/subpath, public info and chat/report case passed in this bounded
+run; not all-phase/3D/device/WebKit/store acceptance. A fixture/contract correction
+and repeat admin proof remain before this short matrix is green.
+
 Final leave continuation 2026-10-03: owned authenticated 5/10-guest Chromium scenarios pass 62.454s/121.520s, zero skips/page errors. Real menu intentional leave, retained lobby recovery candidate and explicit resume complete with all final seats night, in addition to existing create/profile/start/navigation/offline/reload/tab-replacement coverage. Reports: `C:/Users/Admin/AppData/Local/Temp/emcoin-room-browser-qa-gfB3DA/report.json`, `C:/Users/Admin/AppData/Local/Temp/emcoin-room-browser-qa-3pCqgI/report.json`. Chromium147.0.7727.15; random loopback/temp root/mock Redis, rate limiter disabled, blocked CDN, reduced motion, simulated 390×844/1280×900. No source/build mutation during run. Not full-phase/device/WebKit/browser end or Coin-loss/durable/Linux CI/independent sign-off. Regular suites BE489/FE292 pass; image/card hashes unchanged.
 
 Current selectors/fake player coverage and mobile evidence are insufficient.
@@ -66,6 +115,16 @@ Do not invent event names, schema fields, phase transitions, card IDs, or rule o
 WebKit/device availability and approved rule fixtures must be confirmed; do not substitute fake players for real contexts.
 
 ## Implementation plan
+
+Verification continuation2026-10-15 — freeze runtime/build after R36 searchable
+report pagination. Run the owned non-3D short browser files:room-ui,admin,pwa,
+public-info,chat. Preserve existing assertions/deadlines, random loopback and
+synthetic storage; do not use production or present intercepted admin HTTP as
+cookie proof. terminal.browser and3D suites are outside this bounded short run,
+not silently counted as passed. New report case checks both themes/desktop+320,
+older-than50 resolved evidence, Unicode search, exact POST body/no URL query,
+pagination reset and no document overflow. Record failures and artifact paths;
+do not certify full41tasks, physical devices, WebKit or store release.
 
 Verification continuation2026-10-10 — after R26 post-texture closed-renderer guard passes625FEtests/lint/typecheck/build36.75s and both actual-model/sticker cases60.47sPASS, run all11short cases using existing command with only terminal.browser.ts excluded. Original case bounds/assertions/owned fixture isolation/renderer reporting retained; no app/build/heavy-suite changes while running. Earlier623-source all11/clean/Linux results remain separately scoped. This is local Chromium/simulated viewport/mock room storage proof, not WebKit/device/fullLinuxCI/store/release acceptance.
 

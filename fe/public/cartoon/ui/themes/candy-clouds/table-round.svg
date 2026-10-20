@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" fill="none">
+<defs><radialGradient id="surface" cx=".44" cy=".35" r=".7"><stop stop-color="#FBFDFF"/><stop offset="1" stop-color="#E8F3FB"/></radialGradient><linearGradient id="rim" x2="600" y2="600" gradientUnits="userSpaceOnUse"><stop stop-color="#C1E3F2"/><stop offset="1" stop-color="#DBEAF8"/></linearGradient></defs>
+<circle cx="300" cy="304" r="219" fill="#A9C8DB" opacity=".15"/>
+<circle cx="300" cy="300" r="216" fill="url(#surface)" stroke="#FFFFFF" stroke-width="4"/>
+<circle cx="300" cy="300" r="235" pathLength="100" stroke="url(#rim)" stroke-width="27" stroke-linecap="round" stroke-dasharray="19 6" transform="rotate(-80 300 300)"/>
+<circle cx="300" cy="300" r="235" pathLength="100" stroke="#E9B5CF" stroke-width="27" stroke-linecap="round" stroke-dasharray="19 81" stroke-dashoffset="-50" transform="rotate(-80 300 300)"/>
+<circle cx="300" cy="300" r="202" stroke="#B3D3E4" stroke-width="1.5" stroke-dasharray="4 7"/>
+<circle cx="300" cy="300" r="270" pathLength="100" stroke="#9FC5D9" stroke-width="1.2" stroke-dasharray="21 4" transform="rotate(-82 300 300)"/>
+<circle cx="542" cy="182" r="6" fill="#E7B6CE"/><circle cx="86" cy="464" r="5" fill="#ACD5E9"/>
+</svg>

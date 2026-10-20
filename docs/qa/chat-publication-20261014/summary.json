@@ -1,0 +1,24 @@
+{
+  "version": "chat-publication-qa/v1",
+  "result": "passed",
+  "policy": "chat-contact-check/v1",
+  "backendTests": { "passed": 827, "files": 73 },
+  "frontendTests": { "passed": 793, "files": 82 },
+  "frontendLint": "passed",
+  "frontendBuild": "passed",
+  "backendBuild": "passed",
+  "browser": { "result": "passed", "themes": ["emotion-orbit", "kindness-workshop"], "adminHttp": "intercepted", "roomPrimary": "isolated mock", "physicalDevice": false },
+  "realRuntime": {
+    "result": "passed",
+    "artifact": "C:/Users/Admin/AppData/Local/Temp/emcoin-chat-check-bOSt8h/report.json",
+    "rooms": 10, "seats": 100, "acceptedLoadMessages": 100, "convergedSeats": 100, "deliveredLoadDeltas": 1000,
+    "backendSource": "d937bd5f32c50c89196bf7a60e64c596982665f029004530166def3d634e4e66",
+    "compiledBackend": "91a9e5a04523e97efb6c511ce3a7a9604fac1dccacce69c2ff507df4db8710e3",
+    "schemaBootstrap": "single initializer before two same-host backends",
+    "capacityCertification": false
+  },
+  "productionModified": false,
+  "externalModerationProvider": false,
+  "profanityDependencyInstalled": false,
+  "limitations": "Local contact/link patterns only, not semantic moderation, complete PII detection, malware scanning, physical-device or store approval. Contextual moderation deferred by owner."
+}

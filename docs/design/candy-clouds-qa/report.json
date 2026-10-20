@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-17",
+  "theme": "candy-clouds",
+  "label": "Mây Kẹo",
+  "result": "local-ui-checks-passed",
+  "sourceBase": "d551df1",
+  "productionModified": false,
+  "nativeRebuilt": false,
+  "frontend": { "files": 83, "tests": 808, "failed": 0, "lint": "passed", "typescript": "passed", "productionBuild": "passed" },
+  "geometry": {
+    "cases": 199,
+    "failed": 0,
+    "viewport65": "emcoin-viewport-scroll-jGWe1i",
+    "phase51": "emcoin-viewport-scroll-LsUGHm",
+    "popup42": "emcoin-overlay-reach-WNmqWG",
+    "admin20": "emcoin-admin-scroll-GVkzzn",
+    "nested21": "emcoin-nested-scroll-gfR1PA",
+    "scope": "Local Chromium/synthetic fixtures. Geometry precedes history-only correction; final CSS is identical. Not real gameplay commands/auth/device or a release approval.",
+    "cssSha256": "5ec2d413167d0310fbf942ec23685f43c482a2bab45af920e6928d268210dc73"
+  },
+  "afterHistoryCorrection": {
+    "crossThemeSwitch": { "passed": 3, "errors": [], "root": "emcoin-candy-switch-FUMGJA", "scope": "320x400,390x844,1440x900; actual Back/Escape, reload, saved Candy choice, return to Workshop" },
+    "allThemeBaseline": { "passed": 16, "failed": 0, "root": "emcoin-viewport-scroll-0ZTpb8" },
+    "nestedBackEscape": { "passed": 21, "failed": 0, "root": "emcoin-nested-scroll-m5Yge3" }
+  },
+  "retainedFailures": [
+    { "root": "emcoin-candy-switch-qdrWPf", "reason": "Stale explicit preview query returned through popup history and overrode saved choice after reload; corrected without changing router/popup state or navigation authority" },
+    { "scope": "Initial unit fixtures", "reason": "Animated jsdom visibility, pre-popup state expectation and asynchronous popup cleanup were corrected; final current full suite passed" }
+  ],
+  "assets": {
+    "originalLogo": "/logo.svg",
+    "logoUnmodifiedSha256": "c6dcda158f4a6ed0a990a8f5517d276ceefa817728bb963c659a19325ca7bb4a",
+    "background": "/cartoon/ui/themes/candy-clouds/backdrop.webp",
+    "backgroundBytes": 57214,
+    "backgroundSha256": "6b68688bd3fb70e8e8a73a61ecb0715e301c832bbaabd923cfe60159921f74a5",
+    "backgroundGeneration": "Built-in imagegen; exact prompt and original path in ../candy-clouds-theme.md",
+    "controls": "Original code-native SVG primary/secondary/quiet/circle/table",
+    "cardArtAndCoinSemantics": "unchanged"
+  }
+}

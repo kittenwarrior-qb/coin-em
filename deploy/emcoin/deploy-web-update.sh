@@ -2,6 +2,8 @@
 set -euo pipefail
 sha=${1:?Verified release SHA required}
 [[ "$sha" =~ ^[a-f0-9]{40}$ ]] || exit 1
+mode=${2:-paired}
+[[ "$mode" = paired || "$mode" = ui-only ]] || exit 1
 root=/opt/emcoin
 incoming="$root/incoming/$sha"
 next="$root/releases/$sha"
@@ -25,13 +27,19 @@ backend=$(docker inspect emcoin-backend-1 --format '{{.Config.Image}}')
 web=$(docker inspect emcoin-web-1 --format '{{.Config.Image}}')
 [[ "$backend" =~ ^emcoin/backend:[a-f0-9]{40}$ ]] && [[ "$web" =~ ^emcoin/web:[a-f0-9]{40}$ ]]
 docker load -i "$incoming/release-images.tar.gz"
-for image in "emcoin/backend:$sha" "emcoin/web:$sha"; do
+images=("emcoin/web:$sha")
+if test "$mode" = paired; then images+=("emcoin/backend:$sha"); fi
+for image in "${images[@]}"; do
   test "$(docker image inspect "$image" --format '{{index .Config.Labels "org.opencontainers.image.revision"}}')" = "$sha"
 done
 # Only web code may change. Compare filesystem AND execution config without
 # reading container environment (which contains the admin password hash).
 fingerprint='{{json .RootFS.Layers}} {{json .Config.Env}} {{json .Config.Cmd}} {{json .Config.Entrypoint}} {{json .Config.WorkingDir}} {{json .Config.User}} {{json .Config.Healthcheck}} {{json .Config.ExposedPorts}} {{json .Config.Volumes}} {{json .Config.StopSignal}} {{json .Config.Shell}} {{.Architecture}} {{.Os}}'
-test "$(docker image inspect "$backend" --format "$fingerprint")" = "$(docker image inspect "emcoin/backend:$sha" --format "$fingerprint")" || { echo 'Backend changed: web-only update refused'; exit 1; }
+if test "$mode" = paired; then
+  test "$(docker image inspect "$backend" --format "$fingerprint")" = "$(docker image inspect "emcoin/backend:$sha" --format "$fingerprint")" || { echo 'Backend changed: web-only update refused'; exit 1; }
+fi
+# ui-only ships web only. Compose retains the running backend image explicitly;
+# no backend build, recreation, catalog publication or migration is performed.
 empty_backend() {
   docker exec emcoin-backend-1 node -e 'Promise.all([fetch("http://127.0.0.1:3001/health"),fetch("http://127.0.0.1:3001/metrics")]).then(async([h,r])=>{const m=await r.json();if(!h.ok||!r.ok||m.redis!==true||m.rooms!==0||m.players!==0)throw Error("Rooms present or storage not ready");console.log("Empty healthy backend verified")}).catch(()=>{console.error("Admission/room gate refused update");process.exitCode=1})' < /dev/null
 }

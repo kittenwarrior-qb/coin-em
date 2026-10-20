@@ -6,6 +6,7 @@ import { useGameStore } from '../stores/gameStore'
 import type { CardData, GamePhase } from '../stores/types'
 import type { PhaseView } from '@/components/game/types'
 import { cardIdentity } from '@/features/game/selectors/cardIdentity'
+import { subscribeNativeForeground } from '@/features/platform/nativeEvents'
 
 const SOCKET_URL = import.meta.env.VITE_API_URL ?? window.location.origin
 const SESSION_KEY = 'emcoin_session'
@@ -272,6 +273,7 @@ export function useSocket(): UseSocketReturn {
   const [admissionAction, setAdmissionAction] = useState<'pending' | 'uncertain' | 'rejected' | null>(null)
   // A confirmed intentional exit keeps recovery credentials, not an automatic re-entry.
   const intentionallyDetached = useRef(false)
+  const replacedSession = useRef(false)
   const roomStateRef = useRef<RoomState | null>(null)
   const admittedRoomRef = useRef<string | null>(null)
   const [currentSocketId, setCurrentSocketId] = useState<string>('')
@@ -335,6 +337,7 @@ export function useSocket(): UseSocketReturn {
       previousSession.sessionToken === ack.session.token
     admittedRoomRef.current = roomId
     intentionallyDetached.current = false
+    replacedSession.current = false
     try {
     saveSession({ roomId, userName: name, userId: ack.session.userId, deviceId: getDeviceId(),
       sessionToken: ack.session.token, oldSocketId: socketRef.current?.id,
@@ -410,6 +413,15 @@ export function useSocket(): UseSocketReturn {
     })
 
     socketRef.current = socket
+    const detachNative = subscribeNativeForeground(() => {
+      if (socketRef.current !== socket || replacedSession.current || intentionallyDetached.current || admissionRequest.current) return
+      const session = loadSession()
+      if (socket.connected) {
+        if (session?.sessionToken && roomStateRef.current?.id === session.roomId) {
+          socket.emit('get_room_state', { roomId: session.roomId })
+        }
+      } else socket.connect() // Existing connect handler owns token validation.
+    })
     
     // Set initial socket ID if available
     if (socket.id) {
@@ -445,6 +457,7 @@ export function useSocket(): UseSocketReturn {
     })
 
     socket.on('session_replaced', () => {
+      replacedSession.current = true
       admissionRequest.current = null
       setAdmissionAction(null)
       reconnectPending.current = false
@@ -647,6 +660,7 @@ export function useSocket(): UseSocketReturn {
 
     // Cleanup
     return () => {
+      detachNative()
       admissionRequest.current = null
       socket.disconnect()
     }

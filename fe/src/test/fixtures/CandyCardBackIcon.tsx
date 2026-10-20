@@ -1,0 +1,2 @@
+/** Original code-native card/heart mark, matching the approved 24px stroke family. */
+export function CandyCardBackIcon(){return <svg viewBox="0 0 32 36" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m18 5 9 2a2 2 0 0 1 1.5 2.5L23 30l-8-2"/><rect x="5" y="5" width="18" height="26" rx="3" transform="rotate(-9 14 18)" fill="#fff"/><path d="M14 22s-6-4-6-7a3 3 0 0 1 6-1 3 3 0 0 1 6 1c0 3-6 7-6 7Z" fill="currentColor" stroke="none"/></svg>}

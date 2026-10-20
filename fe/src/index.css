@@ -4,6 +4,9 @@
 @import "./styles/prototypeFidelity.css";
 @import "./styles/gameplayFidelity.css";
 @import "./styles/screenRefinement.css";
+@import "./styles/viewportLayout.css";
+@import "./styles/candyCloudsTheme.css";
+@import "./styles/kawaiiTheme.css";
 
 /* Only migrated, non-card controls opt in. No global/game palette override. */
 .cartoon-control[data-control-theme="mint-blush"]:focus-visible {

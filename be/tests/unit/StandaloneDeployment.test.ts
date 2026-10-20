@@ -57,9 +57,11 @@ it('embeds frontend files in the web image and routes only EmCoin with no privat
 
 it('keeps manual packaging on exact committed Git source and pinned initial-release SSH', () => {
   const manual = source('deploy/emcoin/manual-release.mjs')
-  for (const gate of ["['prepare', 'deploy', 'update-web']", "git', ['diff', '--name-only', 'HEAD']", "['archive', '--format=tar'", 'org.opencontainers.image.revision', 'StrictHostKeyChecking=yes', 'BatchMode=yes', 'root@103.74.102.24', 'sha256sum -c SHA256SUMS', "'deploy-release.sh'", "flags: 'wx'"]) expect(manual).toContain(gate)
+  for (const gate of ["'prepare-ui', 'update-ui'", "git', ['diff', '--name-only', 'HEAD'", "['archive', '--format=tar'", 'org.opencontainers.image.revision', 'StrictHostKeyChecking=yes', 'BatchMode=yes', 'root@103.74.102.24', 'sha256sum -c SHA256SUMS', "'deploy-release.sh'", "flags: 'wx'"]) expect(manual).toContain(gate)
   for (const unsafe of ['docker compose down', 'prune', 'FLUSHALL', 'StrictHostKeyChecking=no', 'GH_TOKEN', 'EMCOIN_ADMIN_PASSWORD_HASH']) expect(manual).not.toContain(unsafe)
-  expect(manual).toContain('&& bash deploy/emcoin/${driver} ${sha}')
+  expect(manual).toContain('&& bash deploy/emcoin/${driver} ${sha}${uiOnly ?')
+  expect(manual).toContain("if (uiOnly && index === 0) continue")
+  expect(manual).toContain("uiOnly ? [`emcoin/web:${sha}`]")
   expect(manual).not.toContain('| bash -s')
   expect(source('deploy/emcoin/deploy-release.sh')).toContain("store.close()}' < /dev/null")
 })

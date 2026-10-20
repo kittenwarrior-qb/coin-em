@@ -54,8 +54,8 @@ describe('Independent brand themes', () => {
   it('accepts registered preview IDs only and retains the current default', () => {
     expect(previewControlTheme('?theme=emotion-orbit')).toBe('emotion-orbit')
     expect(previewControlTheme('?theme=kindness-workshop')).toBe('kindness-workshop')
-    expect(previewControlTheme('?theme=__proto__')).toBe('emotion-orbit')
-    expect(previewControlTheme('?theme=unknown')).toBe('emotion-orbit')
+    expect(previewControlTheme('?theme=__proto__')).toBe('candy-clouds')
+    expect(previewControlTheme('?theme=unknown')).toBe('candy-clouds')
     expect(themeLogo('legacy')).toBe('/emcoin_logo.png')
   })
 })

@@ -1,0 +1,11 @@
+{
+  "result": "passed",
+  "scope": "packaged hash-router Chromium smoke; not Android/iOS WebView",
+  "viewports": [
+    320,
+    390
+  ],
+  "productionRequestsAllowed": false,
+  "workerRegistrations": 0,
+  "errors": []
+}

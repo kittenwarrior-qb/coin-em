@@ -153,8 +153,9 @@ test('production admin UI: bounded mobile layout, confirmation, pending Back/Esc
       await expectUI(page.getByLabel('Mã thẻ', { exact: true })).toBeVisible()
       await expectUI(page.getByLabel('Mã thẻ', { exact: true })).toHaveValue('VT-001')
       const editingName = await page.getByLabel('Tên', { exact: true }).inputValue()
-      await page.getByRole('combobox', { name: 'Giao diện quản trị', exact: true }).selectOption('kindness-workshop')
-      await expectUI(page.locator('html')).toHaveAttribute('data-ui-theme', 'kindness-workshop')
+      // An open editor owns a draft: navigation and theme changes stay locked.
+      await expectUI(page.getByRole('combobox', { name: 'Giao diện quản trị', exact: true })).toBeDisabled()
+      await expectUI(page.locator('html')).toHaveAttribute('data-ui-theme', 'emotion-orbit')
       await expectUI(page.getByLabel('Tên', { exact: true })).toHaveValue(editingName)
       await page.getByRole('tab', { name: 'Nội dung', exact: true }).click()
       await expectUI(page.getByLabel('Định nghĩa', { exact: true })).toBeVisible()
@@ -173,6 +174,8 @@ test('production admin UI: bounded mobile layout, confirmation, pending Back/Esc
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
       await page.screenshot({ path: path.join(output, `card-editor-${width}.png`), fullPage: true })
       await page.getByRole('button', { name: 'Về danh sách', exact: true }).click()
+      await page.getByRole('combobox', { name: 'Giao diện quản trị', exact: true }).selectOption('kindness-workshop')
+      await expectUI(page.locator('html')).toHaveAttribute('data-ui-theme', 'kindness-workshop')
       await page.getByRole('button', { name: 'Phát hành', exact: true }).click()
       await expectUI(page.getByRole('dialog', { name: 'Phiên bản và phát hành', exact: true })).toBeVisible()
       await page.screenshot({ path: path.join(output, `catalog-release-${width}.png`), fullPage: true })
@@ -265,7 +268,7 @@ test('production admin UI: bounded mobile layout, confirmation, pending Back/Esc
       console.log('Synthetic layout overflow:', JSON.stringify(overflow))
     }
     await writeFile(path.join(output, 'report.json'), JSON.stringify({ version: 'admin-browser-qa/v1', result, stage,
-      browser: browser?.version(), viewports: [320, 390, 1280, 1920, 3840], errors, closeRequests: closeCommands.length,
+      browser: browser?.version(), viewports: [320, 390, 1280, 1366, 1920, 3840], errors, closeRequests: closeCommands.length,
       physicalDevice: false, backendConnected: false, authCookieProof: false,
       homeTransport: 'isolated-loopback-socketio-no-rooms', themePreference: 'approved-ids-only-localStorage',
       homeViewports: [{ width: 320, height: 568 }, { width: 390, height: 844 }],

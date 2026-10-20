@@ -1,0 +1,41 @@
+{
+  "version": "real-chat-check/v1",
+  "result": "passed",
+  "node": "v22.23.3",
+  "runId": "emcoin-chat-check-38b32fb4-c252-4122-8929-5192d1ef307a",
+  "topology": "Two compiled production backend processes, real Redis adapter, owned loopback AOF-always Redis, shared same-host SQLite",
+  "schemaBootstrap": "Single schema initializer before parallel backend startup; simultaneous empty SQLite bootstrap is not certified",
+  "rateLimitsDisabled": false,
+  "rooms": 10,
+  "seats": 100,
+  "acceptedLoadMessages": 100,
+  "assertions": [
+    "100 genuine sockets admitted across two backends with invitation checks",
+    "All 100 seats receive exactly their room’s 10 unique load deltas through real Redis adapter",
+    "100 bounded load messages committed; Coin/game state unchanged",
+    "Backend SIGKILL and cross-backend authenticated same-ID retry do not duplicate message",
+    "Fresh backend restores chat receipts, blocks/mutes and selected SQLite evidence",
+    "Concurrent two-backend chat revision race commits exactly one candidate",
+    "Real primary outage fails closed, never falls back to local room writes",
+    "Actual Redis AOF kill/restart preserves chat and receipt replay in fresh process",
+    "Deleted room retains no chat archive; selected evidence is separately bounded to seven days"
+  ],
+  "limitations": "Short local chat workload, not sustained soak/SLO, production RPO, WAN/device or separate-host SQLite certification.",
+  "sourceHashes": {
+    "backendSource": "3d06b36999e254ddc17bcc2e2ed0299caf543c3c5fafe9468ece3d1579f9d369",
+    "compiledBackend": "477a27cd801bd65228b90a73ca417dc8449c3723454679cdc33ac711937c2b4a",
+    "fixtureWorker": "1ecfb5b081c2ea43a0414e0ca2bc6b3066490e30e16730e219d9cdbe077d1f4e",
+    "protocol": "8a6b716acfc91276012d5d5589d6013c8889ad97cdd32d9fb0ebb4e5cfb741ce"
+  },
+  "convergedSeats": 100,
+  "deliveredLoadDeltas": 1000,
+  "ackLatencyMs": {
+    "scope": "mixed admission/read/mutation ACKs, this short run only",
+    "samples": 516,
+    "p50": 43.856400000000576,
+    "p95": 84.44900000000052,
+    "p99": 109.03769999999895,
+    "max": 169.05359999999928
+  },
+  "cleanup": "Owned processes/container removed; synthetic evidence files retained in allocated temp root only"
+}

@@ -12,6 +12,45 @@ Dedicated real-Redis crash/fault/TTL/two-process suite.
 
 ## Current evidence
 
+2026-10-16 current integrated source rerun PASS:100sockets/10rooms/two compiled
+backends,100committed load messages/1000unique recipient deltas, SIGKILL/retry,
+two-writer CAS, primary failure, actual AOF restart and7day selected-report bounds.
+Owned fixture cleanup passed. Report emcoin-chat-check-3o9VM0; source/dist digests
+are in docs/qa/integrated-readiness-20261016/summary.json. Earlier38IyWT/Lpg6oF
+attempts failed before assertions because local Docker runtime was unavailable;
+retained, not counted as passed. No new production or separate-host/SQLite cold
+bootstrap certification; see R30 for bounded host recovery.
+
+### Plan revision / implementation — 2026-10-14, owned chat durability
+
+Extend fixture scope to `be/scripts/test-real-chat.mjs` and
+`chat-fixture-worker.cjs`, using compiled current production modules, no dotenv
+or external target. The owner requested continuing chat release readiness.
+The runner builds pinned source and records source/dist/protocol hashes before
+allocating a labelled loopback-only Redis container and two local backends with
+real Redis adapter and same-host SQLite. No production/package/catalog changes.
+
+Real execution passed 100 actual sockets/10 rooms, committed message retry after
+backend SIGKILL on the other backend, preserved receipt/history/block/mute state,
+two-writer chat CAS (exactly one accepted candidate), primary outage read/write
+rejection, actual AOF kill/restart with fresh process, no deletion chat archive,
+and separately retained/pruned selected reports. Reads/replays do not refresh
+room activity. This is short fixture evidence, not a production RPO or soak.
+
+Retained startup failure: simultaneous empty SQLite bootstrap can lock. Earlier
+busy_timeout setting did not resolve it and was reverted; no backend source fix
+is falsely certified. The final runner initializes schema once before parallel
+backend startup. Separate-host reports/automatic startup scaling remain open.
+Owned processes/container are removed with label checks; synthetic files stay in
+the allocated temp root only. Details and remaining gates are in
+docs/ops/chat-foundation.md and chat-safety-operations.md. R28 stays in progress.
+
+Final current protocol run PASS: nine runtime assertions,516 real ACK samples,
+1000 load deliveries converged. Evidence/source hashes are versioned in
+docs/qa/chat-runtime-20261014/report.json. Syntax checks and pinned TypeScript
+build PASS. Backend runtime source was not changed by this slice; earlier regular
+BE787/FE790 results are not presented as newly rerun here. No production deployment.
+
 Global mock cannot prove durability, receipts, restore or race behavior.
 
 ## Scope

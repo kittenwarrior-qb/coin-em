@@ -1,7 +1,11 @@
 /** Shared hand-rounded silhouette/stroke family; no embedded labels or action state. */
 import type { CSSProperties } from 'react'
+import { useControlTheme } from './controlThemeContext'
+import { CandyIcon } from './CandyIcon'
 export type BrandIconName = 'cards' | 'box' | 'book' | 'headset' | 'gift' | 'chevron' | 'close' | 'settings' | 'help' | 'chart' | 'rooms' | 'database' | 'lock'
 export function BrandIcon({ name, className = '', style }: { name: BrandIconName; className?: string; style?: CSSProperties }) {
+  const theme = useControlTheme()
+  if (theme === 'candy-clouds') return <CandyIcon name={name} className={className} style={style} />
   const paths = {
     chart: <><path d="M7 6v30h30M14 27V18M23 27V10M32 27V14" /></>,
     rooms: <><path d="M7 37V7h28v30M14 37V14h14v23" /><circle cx="24" cy="26" r="1.5" fill="currentColor" /></>,

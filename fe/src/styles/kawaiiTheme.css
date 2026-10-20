@@ -1,0 +1,374 @@
+/* Approved Kawaii direction. Scoped to Mây Kẹo; card faces and game rules are untouched. */
+html[data-ui-theme=candy-clouds]{--brand-ink:#345d6b;--brand-primary:#c3e6f0;--brand-on-primary:#345d6b;--brand-blush-soft:#f2c7da;--brand-ivory:#f8fcff;--brand-muted:#648192;--brand-edge:#bfd6e2;--brand-focus:#477b96;--brand-radius:24px;--brand-control-radius:14px}
+html[data-ui-theme=candy-clouds] :is(.font-body,.font-display,.screen-panel){font-family:Quicksand,sans-serif}
+html[data-ui-theme=candy-clouds] .screen-panel{background-color:#e8f7ff}
+html[data-ui-theme=candy-clouds] .screen-panel:has(>.kawaii-home){overflow:hidden}
+.kawaii-home{height:100%;min-height:0;position:relative;isolation:isolate;container-type:size;display:flex;align-items:center;justify-content:center;background:#e8f7ff;overflow:clip;color:#345d6b}
+.kawaii-home-tools{position:absolute;top:max(18px,env(safe-area-inset-top));left:18px;right:18px;display:flex;justify-content:space-between;z-index:2}
+.kawaii-home-tools>button,.kawaii-tool{width:42px;height:42px;display:grid;place-items:center;border:1px solid #8098aa;border-radius:12px;background:#f9fdff;box-shadow:0 3px 0 #afcbd8;color:#345d6b;flex-shrink:0}
+.kawaii-home-tools>button:last-child{background:#fbe4ef;box-shadow:0 3px 0 #c8a8b9}
+.kawaii-home-tools svg,.kawaii-tool svg{width:23px;height:23px;stroke-width:1.8}
+.kawaii-home-core{width:100%;display:flex;flex-direction:column;align-items:center;gap:clamp(28px,6cqh,60px);padding:55px 30px 110px;z-index:1}
+.kawaii-logo{position:relative;width:min(88%,330px);padding:0;background:none;border:0;cursor:pointer;touch-action:manipulation;border-radius:24px}
+.kawaii-logo-float{position:relative;display:block}
+.kawaii-logo-float>img{filter:drop-shadow(0 3px 1px #567e8e30) drop-shadow(0 10px 8px #6497ac26)}
+.kawaii-logo:after{content:'';position:absolute;left:27%;right:27%;bottom:-13px;height:10px;border-radius:50%;background:#7ba4b933;filter:blur(5px);pointer-events:none}
+.kawaii-logo:active .kawaii-logo-float>img{filter:drop-shadow(0 2px 1px #567e8e38) drop-shadow(0 4px 5px #6497ac26)}
+.kawaii-motion-toggle{position:absolute;z-index:2;right:16px;bottom:max(12px,env(safe-area-inset-bottom));width:36px;height:36px;display:grid;place-items:center;border:1px solid #b6cfdd;border-radius:12px;background:#fff9;box-shadow:0 2px 0 #c5dbe566;color:#52778d;cursor:pointer}
+.kawaii-motion-toggle>svg{width:16px;height:16px;stroke-width:1.8}
+.kawaii-logo img{display:block;width:100%;height:auto!important;max-height:32cqh;object-fit:contain}
+.kawaii-home-actions{width:min(100%,270px);display:grid;gap:25px}
+.kawaii-button{position:relative;isolation:isolate;min-height:66px;display:grid;grid-template-columns:28px 1fr 28px;align-items:center;column-gap:8px;padding:0 17px;border:1px solid #7cabb9;border-radius:16px;background:#c3e6f0;box-shadow:0 3px 0 #91b7c4;color:#345d6b;font:700 23px/1.2 Quicksand,sans-serif}
+.kawaii-button:before{content:'';position:absolute;inset:0;z-index:-1;border:14px solid transparent;border-image:url('/cartoon/ui/themes/candy-clouds/button-teal.png') 100 fill / 14px stretch;opacity:.28;filter:saturate(.65) brightness(1.1);pointer-events:none}
+.kawaii-button.pink{background:#f2c7da;border-color:#c293aa;box-shadow:0 3px 0 #c7a1b4}
+.kawaii-button.pink:before{border-image-source:url('/cartoon/ui/themes/candy-clouds/button-pink.png')}
+.kawaii-button>svg{width:23px;height:23px;stroke-width:1.8}
+.kawaii-button>span{text-align:center}
+.kawaii-button:active{translate:0 1px}
+.kawaii-resume{background:none;border:0;text-decoration:underline;text-underline-offset:4px;font-size:12px;line-height:1.4;padding:5px;color:#52778d}
+.kawaii-clouds{position:absolute;bottom:0;left:0;width:100%;height:22cqh;pointer-events:none;z-index:0}
+/* Use the same nine-slice material for real controls, with disabled/pending semantics intact. */
+html[data-ui-theme=candy-clouds] [data-cartoon-surface=pill]{isolation:isolate;min-height:42px;width:100%;border:1px solid #8db7c4!important;border-radius:14px;background:#c3e6f0!important;box-shadow:0 3px 0 #9dbfcb!important}
+html[data-ui-theme=candy-clouds] [data-cartoon-surface=pill]>img{opacity:0;max-height:44px;min-height:38px}
+html[data-ui-theme=candy-clouds] [data-cartoon-surface=pill]:before{content:'';position:absolute;inset:0;z-index:-1;border:14px solid transparent;border-image:url('/cartoon/ui/themes/candy-clouds/button-teal.png') 100 fill / 14px stretch;opacity:.28;filter:saturate(.65) brightness(1.1);background:none;transform:none;border-radius:inherit}
+html[data-ui-theme=candy-clouds] [data-cartoon-surface=pill]>span:not([data-cartoon-badge]){font-family:Quicksand,sans-serif;font-size:14px;line-height:1.25;white-space:normal;color:#345d6b!important;text-shadow:none}
+html[data-ui-theme=candy-clouds] [data-kawaii-tone=pink] [data-cartoon-surface=pill],html[data-ui-theme=candy-clouds] [data-kawaii-tone=orange] [data-cartoon-surface=pill]{background:#f2c7da!important;border-color:#c293aa!important;box-shadow:0 3px 0 #c7a1b4!important}
+html[data-ui-theme=candy-clouds] [data-kawaii-tone=pink] [data-cartoon-surface=pill]:before,html[data-ui-theme=candy-clouds] [data-kawaii-tone=orange] [data-cartoon-surface=pill]:before{border-image-source:url('/cartoon/ui/themes/candy-clouds/button-pink.png')}
+html[data-ui-theme=candy-clouds] .cartoon-control:disabled{opacity:1}
+html[data-ui-theme=candy-clouds] .cartoon-control:disabled [data-cartoon-surface=pill]{background:#e1edf3!important;border-color:#c4d6df!important;box-shadow:0 2px 0 #cadce5!important;color:#8197a3}
+html[data-ui-theme=candy-clouds] .cartoon-control:disabled [data-cartoon-surface=pill]>span{color:#8197a3!important}
+html[data-ui-theme=candy-clouds] .cartoon-control:disabled [data-cartoon-surface=pill]:before{opacity:.04}
+html[data-ui-theme=candy-clouds] [data-kawaii-shape=tool]{border:1px solid #a6c1d2;border-radius:12px;background:#f5fbff;box-shadow:0 2px 0 #bad4e1}
+html[data-ui-theme=candy-clouds] [data-kawaii-shape=tool]>img{opacity:0}
+html[data-ui-theme=candy-clouds] [data-kawaii-shape=tool]:before{display:none}
+html[data-ui-theme=candy-clouds] [data-kawaii-shape=tool]:disabled{color:#8a9da9;background:#e7f0f6;box-shadow:none}
+html[data-ui-theme=candy-clouds] button:focus{outline:none}
+html[data-ui-theme=candy-clouds][data-kawaii-input=pointer] button:focus{outline:none!important}
+html[data-ui-theme=candy-clouds][data-kawaii-input=keyboard] button:focus-visible{outline:2px solid #344c70!important;outline-offset:3px}
+/* Board shell: header and action dock never share a scroll owner with the seats. */
+html[data-ui-theme=candy-clouds] .game-shell{container-type:size;gap:8px!important;padding:8px!important;background:radial-gradient(ellipse at 90% 4%,#fff0f7,transparent 45%),#e8f7ff!important}
+html[data-ui-theme=candy-clouds] .game-board-scroll{margin-top:40px;overflow:visible;padding:0;gap:6px}
+html[data-ui-theme=candy-clouds] .brand-board-heading{height:100px;flex-shrink:0;padding:0 4px 5px;display:flex;flex-direction:column;align-items:center;gap:3px}
+html[data-ui-theme=candy-clouds] .brand-board-logo{height:45px;width:70px;margin:0;object-fit:contain}
+html[data-ui-theme=candy-clouds] .brand-board-heading>p{font-size:11px;line-height:1.2;color:#567c8f}
+html[data-ui-theme=candy-clouds] .brand-board-heading h1{font-size:clamp(19px,5.5cqw,28px);line-height:1.15;padding:0 0 7px;color:#345d6b;letter-spacing:-.6px}
+.kawaii-board{flex:1;min-height:0;min-width:0;display:flex;flex-direction:column;gap:7px;container-type:size}
+.kawaii-focused{flex:1;min-height:0;display:grid;grid-template-rows:minmax(0,1.08fr) minmax(0,1fr);gap:9px}
+.kawaii-center{min-height:0;min-width:0;overflow:clip;border:2px solid #fff;border-radius:22px;background:linear-gradient(140deg,#fcfeff,#f0faff 68%,#fff0f7);box-shadow:0 0 0 1px #c1deea,0 3px 0 #c4dfeb65;container-type:size}
+.kawaii-board.compact>.kawaii-center{flex:1}
+.kawaii-round{min-height:0;flex:1;display:grid;grid-template-rows:82px minmax(0,1fr) 82px;gap:4px}
+.kawaii-seat-top,.kawaii-seat-bottom{display:flex;justify-content:center;align-items:center;min-height:0}
+.kawaii-orbit{min-height:0;display:grid;grid-template-columns:66px minmax(0,1fr) 66px;gap:3px;align-items:center}
+.kawaii-seat-side{height:100%;min-height:0;display:flex;flex-direction:column;justify-content:space-around;align-items:center}
+.kawaii-round .kawaii-center{width:min(100%,calc(100cqh - 180px));aspect-ratio:1;border-radius:50%;border:6px solid #bedfeb;border-bottom-color:#efc6d9;box-shadow:inset 0 0 0 4px #fff;justify-self:center}
+.kawaii-seat{min-width:0;min-height:0;display:flex;justify-content:center}
+.kawaii-roster{flex:1;min-height:0;display:flex;flex-direction:column;gap:7px;padding:10px 5px;border:2px solid #fff;border-radius:22px;background:linear-gradient(140deg,#fcfeff,#f0faff 68%,#fff0f7);box-shadow:0 0 0 1px #c1deea,0 3px 0 #c4dfeb65}
+.kawaii-roster-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0}
+.kawaii-roster-heading h2{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;line-height:1.3;color:#4d7589}
+.kawaii-roster-heading h2>svg{width:15px;height:15px}
+.kawaii-roster-heading nav{display:flex;align-items:center;gap:7px}
+.kawaii-roster-heading nav button{width:28px;height:28px;border:1px solid #b9d3e1;border-radius:9px;background:#fff;display:grid;place-items:center}
+.kawaii-roster-heading nav button svg{width:15px;height:15px}
+.kawaii-roster-heading nav button:disabled{opacity:.35}
+.kawaii-roster-grid{min-height:0;flex:1;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:4px 2px;align-items:center}
+.kawaii-roster.paged .kawaii-roster-grid{grid-template-rows:minmax(0,1fr)}
+.kawaii-tabs{display:flex;gap:6px;flex-shrink:0;min-width:0}
+.kawaii-tabs>button{flex:1;min-width:0;min-height:34px;padding:5px 8px;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid #d0e1e9;border-radius:11px;background:#f5fbfe;color:#658394;font-size:11px;font-weight:700}
+.kawaii-tabs>button svg{width:15px;height:15px}
+.kawaii-tabs>button[aria-pressed=true]{background:#cceaf3;color:#345d6b;border-color:#96bdcd;box-shadow:0 2px 0 #b7d5e2}
+html[data-ui-theme=candy-clouds] .kawaii-board .brand-player-token{position:relative;min-height:0;max-width:100%;gap:1px}
+html[data-ui-theme=candy-clouds] .kawaii-board .brand-avatar{width:clamp(32px,13cqw,54px)!important;height:clamp(32px,13cqw,54px)!important;box-shadow:0 2px 0 #c6dce6}
+html[data-ui-theme=candy-clouds] .kawaii-board .brand-player-role{order:3;min-height:12px!important;height:12px!important;max-width:100%;padding:0!important;width:auto!important}
+html[data-ui-theme=candy-clouds] .kawaii-board .brand-player-role-label{font-size:8px;line-height:1.15;border:0;background:none;padding:0;max-width:60px;text-align:center}
+html[data-ui-theme=candy-clouds] .kawaii-board .brand-player-name{font-size:10px!important;max-width:66px;min-width:0!important;width:auto!important;padding:2px 4px;margin:0!important;border-radius:8px;background:#fff;color:#345d6b!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-shadow:0 2px 0 #d2e5ed}
+html[data-ui-theme=candy-clouds] .kawaii-roster.paged .brand-avatar{width:30px!important;height:30px!important}
+html[data-ui-theme=candy-clouds] .kawaii-board .game-table-surface{border-radius:inherit!important;background:none!important;overflow:visible!important}
+html[data-ui-theme=candy-clouds] .kawaii-board .game-table-surface>div.absolute{display:none}
+html[data-ui-theme=candy-clouds] .kawaii-board .game-table-content{padding:10px 8px;gap:8px;height:100%;display:flex;flex-direction:column-reverse;justify-content:center}
+html[data-ui-theme=candy-clouds] .kawaii-board [data-ui-chrome=table-card-area]{flex:1;min-height:0;max-height:none;margin:0;background:none}
+html[data-ui-theme=candy-clouds] .kawaii-board [data-ui-chrome=table-card-area]:before{display:none}
+html[data-ui-theme=candy-clouds] .kawaii-board [data-ui-card-size]{width:clamp(24px,22cqw,94px);max-height:100%;min-width:0}
+html[data-ui-theme=candy-clouds] .kawaii-board [data-ui-chrome=card-placeholder]{border:1px solid #bbd5e3;border-radius:11px;background:#eff9ff;box-shadow:0 3px 0 #d1e6f0}
+html[data-ui-theme=candy-clouds] .kawaii-board [data-ui-chrome=turn-status]{background:transparent;border:0;padding:2px;box-shadow:none}
+html[data-ui-theme=candy-clouds] .kawaii-board [data-ui-chrome=turn-status] .font-display{font-size:11px;color:#53798d}
+html[data-ui-theme=candy-clouds] .kawaii-board [data-ui-chrome=turn-status] .font-body{font-size:10px}
+.kawaii-game-dock{position:relative;z-index:12;flex-shrink:0;display:flex;flex-direction:column;gap:5px;padding:7px 52px 8px;border:1px solid #fff;border-radius:20px;background:#f8fcff;box-shadow:0 -2px 8px #9abccc15}
+html[data-ui-theme=candy-clouds] .kawaii-game-dock [data-ui-chrome=phase-nav]{display:flex;gap:8px;padding:0;background:none;justify-content:space-between}
+html[data-ui-theme=candy-clouds] .kawaii-game-dock [data-ui-chrome=phase-nav]>div{order:0;grid-column:auto;grid-row:auto}
+html[data-ui-theme=candy-clouds] .kawaii-game-dock [data-ui-chrome=phase-nav] .font-body{display:block}
+html[data-ui-theme=candy-clouds] .kawaii-game-dock p{font-size:10px;line-height:1.35}
+html[data-ui-theme=candy-clouds] [data-ui-night=true] .kawaii-center{background:radial-gradient(circle,#f8fcff,#e7f1fa)}
+html[data-ui-theme=candy-clouds] [data-ui-night=true] .kawaii-game-dock [data-ui-chrome=phase-nav] :is(.font-body,.font-display,.candy-facilitator-label){color:#345d6b}
+/* Waiting room uses the same player grid, with round changes still acknowledged by the server. */
+.kawaii-waiting{container-type:size;height:100%;min-height:0;display:flex;flex-direction:column;gap:10px;padding:14px 10px 10px;background:radial-gradient(ellipse at 90% 4%,#fff0f7,transparent 45%),#e8f7ff;overflow:clip;color:#345d6b}
+.kawaii-waiting>header{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0}
+.kawaii-waiting>header>.kawaii-tool{position:absolute;left:3px;top:0}
+.kawaii-waiting>header>img{width:72px;height:55px;object-fit:contain}
+.kawaii-waiting h1{font-size:22px;line-height:1.2;font-weight:700;text-align:center}
+.kawaii-waiting>header p{font-size:12px;text-align:center;margin-top:4px}
+.kawaii-waiting-body{flex:1;min-height:0;container-type:size}
+.kawaii-waiting-roster,.kawaii-waiting-settings{height:100%;min-height:0;border:2px solid #fff;border-radius:22px;background:linear-gradient(140deg,#fcfeff,#f0faff 68%,#fff0f7);box-shadow:0 0 0 1px #c1deea,0 3px 0 #c4dfeb65;padding:12px 6px;display:flex;flex-direction:column;gap:12px}
+.kawaii-waiting-roster .kawaii-roster-grid{flex:1;max-height:400px;margin:auto 0}
+.kawaii-waiting-person{min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px}
+.kawaii-waiting-person>button{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;max-width:100%;background:none;padding:0;color:#345d6b}
+.kawaii-waiting-person>button:disabled{opacity:1;cursor:default}
+.kawaii-waiting-person b{font-size:10px;line-height:1.25;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kawaii-waiting-person small{font-size:8px;color:#648192}
+.kawaii-waiting-person .brand-avatar{width:clamp(32px,13cqw,62px)!important;height:clamp(32px,13cqw,62px)!important}
+.kawaii-empty-seat{min-width:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:7px;color:#7e9aa9}
+.kawaii-empty-seat svg{padding:8px;width:40px;height:40px;border:1px dashed #bfd5df;border-radius:50%;background:#f5fbff}
+.kawaii-empty-seat small{font-size:9px}
+.kawaii-waiting-roster.paged .kawaii-roster-grid{grid-template-rows:minmax(0,1fr)}
+.kawaii-waiting-settings{justify-content:center;gap:12px;padding:18px}
+.kawaii-waiting-settings h2{font-size:17px;font-weight:700}
+.kawaii-waiting-settings label{display:grid;gap:6px;font-size:13px;font-weight:700}
+.kawaii-waiting-settings select{height:40px;min-width:0;max-width:100%;border:1px solid #b6cfdd;border-radius:12px;background:#fff;padding:8px;font-size:13px}
+.kawaii-waiting-settings p{font-size:12px;line-height:1.5}
+.kawaii-waiting>footer{flex-shrink:0;padding:6px;display:grid;gap:6px;text-align:center;font-size:13px}
+.kawaii-layout-choices{display:grid;gap:8px}
+.kawaii-layout-choices>p{font-size:13px;font-weight:700}
+.kawaii-layout-choices>button{display:flex;flex-direction:column;gap:3px;padding:10px 12px;border:1px solid #cfdee8;border-radius:13px;background:#fff;text-align:left;font-size:13px}
+.kawaii-layout-choices>button[aria-pressed=true]{background:#e7f5fc;border-color:#75aac3;box-shadow:inset 0 0 0 2px #fff}
+.kawaii-layout-choices small{font-size:11px;color:#608095}
+/* Shared live modal family. Lifecycle, pending guards and focus trapping stay in CartoonModal. */
+html[data-ui-theme=candy-clouds] .kawaii-modal{border:1px solid #9ecbdc;border-radius:25px;background:#effaff;box-shadow:0 4px 0 #8bbacc,0 18px 50px #24455b35;overflow:clip;padding:0;max-width:380px!important}
+html[data-ui-theme=candy-clouds] .kawaii-modal-title{position:relative;top:auto;left:auto;right:auto;display:flex;justify-content:flex-start;flex-shrink:0;padding:20px 54px 10px 22px;pointer-events:none}
+html[data-ui-theme=candy-clouds] .kawaii-modal-title>.theme-a-headline{height:auto!important;background:none;border:0;box-shadow:none;border-radius:0;padding:0;min-height:28px}
+html[data-ui-theme=candy-clouds] .kawaii-modal-title .font-display{font:700 23px/1.2 Quicksand,sans-serif;white-space:normal;padding:0;color:#28546b}
+html[data-ui-theme=candy-clouds] .kawaii-modal [data-ui-surface=modal]{max-height:none;border:0;border-image:none;margin:0;padding:0;background:linear-gradient(#effaff,#f8fcff 65%,#fff2f8);border-radius:0;box-shadow:none;min-height:0}
+html[data-ui-theme=candy-clouds] .kawaii-modal [data-ui-modal-content]{padding:6px 22px 22px}
+html[data-ui-theme=candy-clouds] .kawaii-modal-close{top:16px!important;right:16px!important}
+html[data-ui-theme=candy-clouds] .kawaii-modal-close>.cartoon-control{width:32px!important;height:32px!important;border-radius:10px;background:#fff0f6;border-color:#b9a8bf;box-shadow:0 2px 0 #d5b4c7}
+html[data-ui-theme=candy-clouds] .kawaii-modal.theme-a-menu{height:auto!important;min-height:0}
+html[data-ui-theme=candy-clouds] .kawaii-modal .theme-a-menu-actions{gap:13px;padding:0;display:flex;flex-direction:column}
+html[data-ui-theme=candy-clouds] .kawaii-modal .brand-menu-label{width:100%;font-size:17px;display:grid;grid-template-columns:24px 1fr 24px;gap:8px;align-items:center}
+html[data-ui-theme=candy-clouds] .kawaii-modal .brand-menu-icon{border:0;background:none;width:24px;height:24px;display:grid;place-items:center}
+html[data-ui-theme=candy-clouds] .kawaii-modal .brand-menu-icon svg{width:22px;height:22px}
+html[data-ui-theme=candy-clouds] .kawaii-modal .brand-menu-text{text-align:center}
+html[data-ui-theme=candy-clouds] .kawaii-modal .brand-menu-label>svg:last-child{display:none}
+html[data-ui-theme=candy-clouds] .kawaii-modal .theme-menu-link{margin:12px auto 0;padding:7px 14px;min-height:34px;border-radius:11px;font-size:13px}
+html[data-ui-theme=candy-clouds] .kawaii-modal .theme-a-menu-exit{padding-top:10px;margin-top:0}
+html[data-ui-theme=candy-clouds] .input-cartoon{background:#fff;border:1px solid #b6cfdd;border-radius:12px;box-shadow:inset 0 2px 3px #56788a0b;font-family:Quicksand,sans-serif}
+html[data-ui-theme=candy-clouds] .room-chat-launch{border:1px solid #a6c1d2;border-radius:12px;background:#e7f5fc;box-shadow:0 2px 0 #bad4e1;color:#345d6b}
+html[data-ui-theme=candy-clouds] .room-chat-messages>li.is-self{background:#fdebf4;border-color:#ebcbdc}
+@media(max-height:620px){
+ .kawaii-home-core{gap:22px;padding:50px 25px 65px}.kawaii-logo{max-width:190px}.kawaii-home-actions{width:min(100%,225px);gap:18px}.kawaii-button{min-height:57px;font-size:21px}.kawaii-clouds{height:95px}
+ html[data-ui-theme=candy-clouds] .brand-board-heading{height:83px}.kawaii-game-dock{padding:5px 7px;gap:4px}
+ .kawaii-waiting{gap:7px;padding:8px}.kawaii-waiting>header>img{height:38px}.kawaii-waiting h1{font-size:19px}
+}
+@media(max-height:450px){
+ .kawaii-home-core{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:45px 30px 25px}.kawaii-logo{width:100%;max-width:180px;justify-self:center}.kawaii-logo img{max-height:55cqh}.kawaii-home-actions{width:100%;gap:15px}.kawaii-button{min-height:49px;font-size:18px;padding:0 10px;grid-template-columns:24px 1fr 24px}.kawaii-resume{grid-column:2;font-size:10px}.kawaii-clouds{height:48px}.kawaii-home-tools{top:8px;left:10px;right:10px}.kawaii-home-tools>button{width:34px;height:34px}
+ html[data-ui-theme=candy-clouds] .brand-board-heading{height:44px;display:grid;grid-template-columns:48px 1fr;grid-template-rows:14px 26px;padding:0 30px;gap:0 6px}.brand-board-heading .brand-board-logo{grid-row:1/3}html[data-ui-theme=candy-clouds] .brand-board-heading h1{font-size:17px;padding:0}html[data-ui-theme=candy-clouds] .brand-board-heading h1:after{display:none}html[data-ui-theme=candy-clouds] .brand-board-logo{height:35px;width:45px}
+ .kawaii-tabs>button{min-height:29px;padding:3px 6px}.kawaii-roster{padding:5px;gap:4px}.kawaii-game-dock{flex-direction:row;align-items:center}.kawaii-game-dock>fieldset{display:contents}.kawaii-game-dock [data-ui-chrome=phase-nav]{flex:1;min-width:0}.kawaii-game-dock>.cartoon-control,.kawaii-game-dock>fieldset>.cartoon-control{flex:1;min-width:0}
+ html[data-ui-theme=candy-clouds] .kawaii-board.compact .game-table-content{flex-direction:row;align-items:center;padding:6px;gap:8px}html[data-ui-theme=candy-clouds] .kawaii-board.compact .game-table-content>div:first-child{max-width:37%;font-size:10px}html[data-ui-theme=candy-clouds] .kawaii-board.compact [data-ui-chrome=table-card-area]{height:100%}html[data-ui-theme=candy-clouds] .kawaii-board.compact [data-ui-card-size]{width:clamp(22px,11cqh,52px)}
+ .kawaii-waiting>header{height:43px;display:grid;grid-template-columns:42px 1fr;justify-content:center;gap:8px;padding:0 50px}.kawaii-waiting>header>img{height:36px;width:45px}.kawaii-waiting h1{font-size:17px}.kawaii-waiting>header p{font-size:10px;margin:0}.kawaii-waiting-settings{padding:9px 12px;gap:5px;display:grid;grid-template-columns:1fr 1fr;align-items:center}.kawaii-waiting-settings h2{font-size:13px}.kawaii-waiting-settings p{font-size:10px;line-height:1.3}.kawaii-waiting-settings select{height:34px;font-size:11px}.kawaii-waiting-settings label{font-size:11px;gap:3px}.kawaii-waiting-person .brand-avatar{width:32px!important;height:32px!important}.kawaii-waiting-person b{font-size:9px}.kawaii-waiting-person small{font-size:8px}.kawaii-empty-seat svg{width:30px;height:30px;padding:5px}.kawaii-waiting-roster{padding:5px;gap:5px}
+ html[data-ui-theme=candy-clouds] .kawaii-modal-title{padding:12px 48px 6px 16px}html[data-ui-theme=candy-clouds] .kawaii-modal-title .font-display{font-size:20px}html[data-ui-theme=candy-clouds] .kawaii-modal-close{top:10px!important;right:12px!important}html[data-ui-theme=candy-clouds] .kawaii-modal [data-ui-modal-content]{padding:4px 16px 14px}html[data-ui-theme=candy-clouds] .kawaii-modal .theme-a-menu-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+}
+@media(prefers-reduced-motion:no-preference){
+ .kawaii-logo-float{animation:kawaii-levitate 6s ease-in-out infinite}
+ .kawaii-logo:after{animation:kawaii-ground-shadow 6s ease-in-out infinite}
+ .kawaii-cloud-back{animation:kawaii-cloud-slide 24s ease-in-out infinite alternate}
+ .kawaii-cloud-front{animation:kawaii-cloud-slide 32s ease-in-out -9s infinite alternate-reverse}
+ .kawaii-home[data-motion-paused=true] :is(.kawaii-logo-float,.kawaii-cloud-back,.kawaii-cloud-front),.kawaii-home[data-motion-paused=true] .kawaii-logo:after{animation-play-state:paused}
+ @keyframes kawaii-levitate{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+ @keyframes kawaii-ground-shadow{0%,100%{transform:scaleX(1);opacity:1}50%{transform:scaleX(.88);opacity:.65}}
+ @keyframes kawaii-cloud-slide{from{transform:translateX(-20px)}to{transform:translateX(20px)}}
+ .kawaii-home-actions>.kawaii-button{animation:kawaii-arrive 420ms 90ms both}.kawaii-home-actions>.kawaii-button:nth-child(2){animation-delay:150ms}.kawaii-logo{animation:kawaii-brand-arrive 480ms both}.kawaii-home button{transition:filter 120ms ease,translate 100ms ease}
+ @keyframes kawaii-arrive{0%{opacity:0;translate:0 -5px}65%{opacity:1;translate:0 0}83%{translate:0 -1.5px}100%{opacity:1;translate:0 0}}
+ @keyframes kawaii-brand-arrive{0%{opacity:0;scale:.975}65%{opacity:1;scale:1.012}85%{scale:.998}100%{opacity:1;scale:1}}
+}
+@media(prefers-reduced-motion:reduce){.kawaii-home button{transition:none}.kawaii-button:active{translate:none}}
+
+/* Prototype interaction fidelity: single-pass shine, icon lift and menu cadence.
+   Only optical layers move; no added layout space or perpetual idle bounce. */
+html[data-ui-theme=candy-clouds] :is(.kawaii-button,[data-cartoon-surface=pill]):after{content:'';position:absolute;inset:1px;border-radius:inherit;pointer-events:none;opacity:0;background:linear-gradient(110deg,transparent 38%,#ffffff80 50%,transparent 62%);background-size:250% 100%;background-position:100% 0}
+@media(prefers-reduced-motion:no-preference){
+ html[data-ui-theme=candy-clouds] :is(.kawaii-button>svg,.brand-menu-icon,.kawaii-home-tools svg){transition:transform 160ms ease-out;transform-origin:center}
+ html[data-ui-theme=candy-clouds] .kawaii-button:active{box-shadow:0 1px 0 #91b7c4}
+ html[data-ui-theme=candy-clouds] .kawaii-button.pink:active{box-shadow:0 1px 0 #c7a1b4}
+ html[data-ui-theme=candy-clouds] :is(.kawaii-button:active,.cartoon-control:not(:disabled):active>[data-cartoon-surface=pill]):after,
+ html[data-ui-theme=candy-clouds][data-kawaii-input=keyboard] :is(.kawaii-button:focus-visible,.cartoon-control:not(:disabled):focus-visible>[data-cartoon-surface=pill]):after{animation:kawaii-button-sheen 420ms ease-out}
+ html[data-ui-theme=candy-clouds] .kawaii-modal .theme-a-menu-actions>.cartoon-control{animation:kawaii-menu-reveal 220ms ease-out backwards}
+ html[data-ui-theme=candy-clouds] .kawaii-modal .theme-a-menu-actions>.cartoon-control:nth-child(2){animation-delay:35ms}
+ html[data-ui-theme=candy-clouds] .kawaii-modal .theme-a-menu-actions>.cartoon-control:nth-child(3){animation-delay:70ms}
+ html[data-ui-theme=candy-clouds] .kawaii-modal .theme-a-menu-actions>.cartoon-control:nth-child(4){animation-delay:105ms}
+ @keyframes kawaii-button-sheen{0%{background-position:100% 0;opacity:0}25%{opacity:.55}100%{background-position:0 0;opacity:0}}
+ @keyframes kawaii-menu-reveal{from{opacity:0;translate:0 3px}to{opacity:1;translate:0 0}}
+ html[data-ui-theme=candy-clouds] .kawaii-catalog [data-testid=inventory-scroll]>.grid>div{animation:kawaii-card-deal 260ms ease-out backwards}
+ html[data-ui-theme=candy-clouds] .kawaii-catalog [data-testid=inventory-scroll]>.grid>div:nth-child(2){animation-delay:45ms}
+ html[data-ui-theme=candy-clouds] .kawaii-catalog [data-testid=inventory-scroll]>.grid>div:nth-child(3){animation-delay:90ms}
+ @keyframes kawaii-card-deal{from{opacity:0;translate:0 5px;scale:.98}to{opacity:1;translate:0 0;scale:1}}
+}
+@media(prefers-reduced-motion:no-preference) and (hover:hover) and (pointer:fine){
+ html[data-ui-theme=candy-clouds] :is(.kawaii-button:hover,.cartoon-control:not(:disabled):hover>[data-cartoon-surface=pill]):after{animation:kawaii-button-sheen 420ms ease-out}
+ html[data-ui-theme=candy-clouds] .kawaii-button:hover:not(:active)>svg,
+ html[data-ui-theme=candy-clouds] .cartoon-control:hover:not(:disabled):not(:active) .brand-menu-icon{transform:translateY(-1px) rotate(-3deg)}
+ html[data-ui-theme=candy-clouds] .kawaii-home-tools>button:hover:not(:active)>svg{transform:rotate(-6deg)}
+ html[data-ui-theme=candy-clouds] .kawaii-home button:hover{filter:brightness(1.025)}
+}
+@media(prefers-reduced-motion:reduce){
+ html[data-ui-theme=candy-clouds] :is(.kawaii-button,.kawaii-logo,.kawaii-button>svg,.brand-menu-icon,.kawaii-home-tools svg,.kawaii-button:after,[data-cartoon-surface=pill]:after,.theme-a-menu-actions>.cartoon-control){animation:none!important;transition:none!important}
+}
+
+/* Paginated live chat and real catalog, not scrollable demo screenshots. */
+html[data-ui-theme=candy-clouds] .kawaii-chat-modal{height:min(580px,calc(100dvh - 80px))}
+html[data-ui-theme=candy-clouds] .kawaii-chat-modal [data-ui-surface=modal]{flex:1;overflow:clip}
+html[data-ui-theme=candy-clouds] .kawaii-chat-modal [data-ui-modal-content]{height:100%;min-height:0;padding:4px 16px 16px}
+.kawaii-chat-body{height:100%;min-height:0;display:flex;flex-direction:column;gap:10px;color:#345d6b;font:500 13px/1.45 Quicksand,sans-serif}
+.kawaii-chat-body .kawaii-tabs{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.kawaii-chat-body .kawaii-tabs>button{font-size:11px;min-height:30px}
+.kawaii-chat-conversation{flex:1;min-height:0;display:flex;align-items:center}
+.kawaii-chat-bubble{width:100%;min-width:0;padding:12px;border:1px solid #d6e7ef;border-radius:17px 17px 17px 5px;background:#fff;box-shadow:0 2px 0 #dceaf2}
+.kawaii-chat-bubble.self{background:#fdebf4;border-color:#ebcbdc;border-radius:17px 17px 5px 17px;box-shadow:0 2px 0 #edd8e4}
+.kawaii-chat-bubble>header{display:flex;align-items:center;gap:8px;font-size:11px;min-width:0}
+.kawaii-chat-bubble>header>b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kawaii-chat-bubble time{margin-left:auto;font-size:10px;color:#7390a0;white-space:nowrap}
+.kawaii-chat-bubble p{margin:8px 0;overflow-wrap:anywhere;white-space:normal;font-size:13px;line-height:1.5}
+.kawaii-chat-bubble footer{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.kawaii-chat-bubble footer button{display:flex;align-items:center;gap:5px;font-size:10px;color:#7390a0;background:none}
+.kawaii-chat-bubble footer svg{width:12px;height:12px}
+.kawaii-chat-bubble footer small{font-size:9px;color:#7390a0}
+.kawaii-chat-pages{display:flex;align-items:center;justify-content:center;gap:14px;flex-shrink:0;min-height:32px}
+.kawaii-chat-pages>button{width:30px;height:30px;border:1px solid #b8d3e2;background:#f5fbff;border-radius:10px;box-shadow:0 2px 0 #c9dfe9;display:grid;place-items:center}
+.kawaii-chat-pages>button svg{width:17px;height:17px}.kawaii-chat-pages>button:disabled{opacity:.4;box-shadow:none}
+.kawaii-chat-pages small{font-size:10px;color:#638296}
+.kawaii-chat-privacy{font-size:10px;line-height:1.4;color:#718a9a;display:flex;align-items:center;gap:7px}
+.kawaii-chat-privacy svg{width:14px;height:14px;flex-shrink:0}
+.kawaii-chat-empty{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;width:100%;text-align:center}
+.kawaii-chat-empty>svg{width:34px;height:34px;color:#86a6ba}
+.kawaii-chat-state{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:12px}
+.kawaii-chat-state>form{display:grid;gap:10px}
+.kawaii-chat-state label{display:grid;gap:6px;font-size:12px;font-weight:700}
+.kawaii-chat-state :is(input,select,textarea){min-width:0;width:100%;border:1px solid #b6cfdd;border-radius:12px;padding:9px 11px;background:#fff;font:500 13px/1.4 Quicksand,sans-serif;color:#345d6b}
+.kawaii-chat-state textarea{height:88px;resize:none;overflow:clip;word-break:break-all;overflow-wrap:anywhere}
+.kawaii-chat-state p{font-size:12px;line-height:1.5}
+.kawaii-chat-notice{padding:8px;border:1px solid #d8afc4;background:#fff1f7;border-radius:11px;font-size:11px;line-height:1.4;overflow-wrap:anywhere}
+.kawaii-chat-state-link{min-height:24px;flex-shrink:0;padding:3px 6px;border:1px solid #d8afc4;border-radius:8px;background:#fff1f7;font-size:9px;line-height:1.3;color:#7b5269}
+html[data-ui-theme=candy-clouds] .kawaii-catalog [data-ui-surface=modal]{border:1px solid #9ecbdc;border-radius:24px;background:linear-gradient(#effaff,#f8fcff 65%,#fff2f8);box-shadow:0 4px 0 #8bbacc}
+html[data-ui-theme=candy-clouds] .kawaii-catalog [data-ui-surface=modal]>div{height:min(540px,calc(100dvh - 48px));margin:0!important;padding:18px;max-height:calc(100dvh - 48px)!important}
+html[data-ui-theme=candy-clouds] .kawaii-catalog h2{font:700 23px/1.2 Quicksand,sans-serif;text-align:left;margin:0 0 14px}
+html[data-ui-theme=candy-clouds] .kawaii-catalog [data-testid=inventory-scroll]{flex:1;min-height:0;height:auto!important;max-height:none!important;overflow:clip;padding:12px 0}
+html[data-ui-theme=candy-clouds] .kawaii-catalog [data-testid=inventory-scroll]>div{height:100%;grid-template-rows:minmax(0,1fr);gap:10px}
+html[data-ui-theme=candy-clouds] .kawaii-catalog [data-testid=inventory-scroll]>div>div{min-height:0;justify-content:center;gap:7px}
+html[data-ui-theme=candy-clouds] .kawaii-catalog [data-testid=inventory-scroll] button{max-height:calc(100% - 40px);max-width:100%;width:auto;border-radius:9px;border:1px solid #cbdce5;box-shadow:0 3px 0 #d5e6ed}
+html[data-ui-theme=candy-clouds] .kawaii-catalog [data-testid=inventory-scroll] span{font-size:10px;line-height:1.3;max-width:100%}
+@media(max-height:620px){.kawaii-game-dock{padding-inline:50px}}
+@media(max-height:450px){
+ html[data-ui-theme=candy-clouds] .kawaii-chat-modal{height:calc(100dvh - 28px);max-height:100%!important}
+ .kawaii-chat-body{gap:5px;font-size:11px}.kawaii-chat-body .kawaii-tabs{grid-template-columns:repeat(4,minmax(0,1fr));gap:3px}.kawaii-chat-body .kawaii-tabs>button{font-size:10px;min-height:28px;padding:3px}
+ .kawaii-chat-bubble{padding:7px 10px}.kawaii-chat-bubble p{font-size:12px;line-height:1.4;margin:4px 0}.kawaii-chat-bubble>header{font-size:10px}.kawaii-chat-privacy{font-size:9px;line-height:1.3}.kawaii-chat-empty{gap:7px}.kawaii-chat-empty>svg{width:25px;height:25px}.kawaii-chat-pages{min-height:27px;gap:10px}.kawaii-chat-pages>button{width:26px;height:26px}
+ .kawaii-chat-state{gap:6px}.kawaii-chat-state label{gap:4px;font-size:11px}.kawaii-chat-state textarea{height:60px;padding:5px 9px;line-height:17px}.kawaii-chat-state p{font-size:10px;line-height:1.3}
+ html[data-ui-theme=candy-clouds] .kawaii-catalog [data-ui-surface=modal]>div{height:calc(100dvh - 24px);max-height:calc(100dvh - 24px)!important;padding:12px}
+ html[data-ui-theme=candy-clouds] .kawaii-catalog h2{font-size:19px;margin-bottom:7px}
+ html[data-ui-theme=candy-clouds] .kawaii-catalog [data-testid=inventory-scroll]{padding:6px 0}
+ html[data-ui-theme=candy-clouds] .kawaii-catalog [data-ui-chrome=inventory-tabs] button{font-size:10px;padding-block:5px}
+}
+html[data-ui-theme=candy-clouds] .kawaii-history{align-items:center;padding:12px}
+html[data-ui-theme=candy-clouds] .kawaii-history [data-testid=history-log-panel]{max-height:calc(100dvh - 32px);border:1px solid #9ecbdc;border-radius:24px;background:#effaff;box-shadow:0 4px 0 #8bbacc}
+html[data-ui-theme=candy-clouds] .kawaii-history [data-ui-chrome=header]{border:0;background:none;padding:14px 18px;color:#345d6b}
+html[data-ui-theme=candy-clouds] .kawaii-history [data-testid=history-log-scroll]{overflow:clip;max-height:none;padding:8px 18px}
+html[data-ui-theme=candy-clouds] .kawaii-history [data-ui-chrome=history-entry]{background:#f9fdff;border:1px solid #d5e5ee;border-radius:14px}
+html[data-ui-theme=candy-clouds] .kawaii-history [data-ui-chrome=history-entry] button{height:32px;width:auto;padding:5px 10px;border:1px solid #b7d4e3;border-radius:10px;background:#e8f6fc;font-size:11px}
+html[data-ui-theme=candy-clouds] .kawaii-history>.motion-div{color:#345d6b}
+html[data-ui-theme=candy-clouds] .kawaii-history .kawaii-chat-pages{margin:8px 0 14px}
+.kawaii-gift-overlay{position:absolute;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:14px;background:#24455b77}
+.kawaii-gift{width:min(100%,380px);max-height:100%;min-height:0;border:1px solid #9ecbdc;border-radius:25px;background:linear-gradient(#effaff,#f8fcff 65%,#fff2f8);box-shadow:0 4px 0 #8bbacc,0 18px 50px #24455b35;color:#345d6b}
+html[data-ui-theme=candy-clouds] .kawaii-gift{border:1px solid #9ecbdc;border-radius:25px;background:linear-gradient(#effaff,#f8fcff 65%,#fff2f8);box-shadow:0 4px 0 #8bbacc,0 18px 50px #24455b35}
+.kawaii-gift>header{padding:18px 20px 10px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.kawaii-gift h2{font:700 23px/1.2 Quicksand,sans-serif}
+.kawaii-gift>header>.kawaii-tool{width:32px;height:32px;border-radius:10px;background:#fff0f6}
+.kawaii-gift-body{padding:4px 20px 22px;display:flex;flex-direction:column;gap:14px;min-width:0;font:500 13px/1.45 Quicksand,sans-serif}
+.kawaii-gift-step{font-size:11px;color:#648192}
+.kawaii-gift-coins{display:flex;gap:10px;justify-content:center}
+.kawaii-gift-coins>button{flex:1;min-width:0;max-width:120px;display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;border:1px solid #d0e2eb;border-radius:15px;background:#fff;box-shadow:0 2px 0 #d5e6ef}
+.kawaii-gift-coins>button[aria-pressed=true]{background:#e5f4fa;border-color:#8db5c9;outline:1px solid #8db5c9}
+.kawaii-gift-coins>button:disabled{opacity:.4}
+.kawaii-gift-coins svg{width:42px;height:42px}.kawaii-gift-coins small{font-size:10px;color:#648192}
+.kawaii-gift-body>label{display:grid;gap:6px;font-size:12px;font-weight:700}
+.kawaii-gift-body select{width:100%;min-width:0;padding:8px 10px;height:40px;border:1px solid #b6cfdd;border-radius:12px;background:#fff;font-size:13px;color:#345d6b}
+.kawaii-gift-summary{display:flex;align-items:center;justify-content:center;gap:10px;min-width:0}.kawaii-gift-summary>svg{width:42px;height:42px;flex-shrink:0}.kawaii-gift-summary span{overflow-wrap:anywhere}
+.kawaii-gift-quantity{display:flex;align-items:center;justify-content:center;gap:25px}.kawaii-gift-quantity b{font-size:26px}
+.kawaii-gift-actions{display:flex;gap:10px}.kawaii-gift-actions>*{flex:1;min-width:0}
+html[data-ui-theme=candy-clouds] .kawaii-modal.theme-a-menu [data-ui-modal-content]{height:auto!important;padding-bottom:20px}
+html[data-ui-theme=candy-clouds] .kawaii-entry-join fieldset{gap:8px}
+html[data-ui-theme=candy-clouds] :is(.kawaii-entry-join,.kawaii-entry-create) .input-cartoon{height:40px;font-size:13px;padding:8px 12px}
+html[data-ui-theme=candy-clouds] .kawaii-entry-join [data-ui-surface=room]{padding:8px 12px}
+html[data-ui-theme=candy-clouds] :is(.kawaii-entry-join,.kawaii-entry-create) label{font-size:12px}
+html[data-ui-theme=candy-clouds] .kawaii-modal .theme-chooser legend{font-size:16px;margin-bottom:10px}
+html[data-ui-theme=candy-clouds] .kawaii-modal .theme-chooser-options{gap:8px}
+html[data-ui-theme=candy-clouds] .kawaii-modal .theme-chooser-options label{min-height:0;padding:9px 11px;gap:9px}
+html[data-ui-theme=candy-clouds] .kawaii-modal .theme-chooser-options strong{font-size:13px}
+html[data-ui-theme=candy-clouds] .kawaii-modal .theme-chooser-options small{font-size:10px;line-height:1.4;margin-top:3px}
+html[data-ui-theme=candy-clouds] .kawaii-modal .theme-swatches{gap:4px;margin-top:5px}
+html[data-ui-theme=candy-clouds] .kawaii-modal .theme-swatches i{width:13px;height:13px}
+html[data-ui-theme=candy-clouds] .kawaii-modal .theme-chooser>p{font-size:10px;line-height:1.4;margin-top:10px}
+@media(max-height:450px){
+ .kawaii-gift>header{padding:12px 16px 6px}.kawaii-gift h2{font-size:21px}.kawaii-gift-body{padding:3px 16px 16px;gap:9px}.kawaii-gift-coins>button{padding:6px;gap:3px}.kawaii-gift-coins svg{width:32px;height:32px}.kawaii-gift-coins b{font-size:12px}
+ html[data-ui-theme=candy-clouds] .kawaii-entry-create fieldset{gap:8px}
+ .kawaii-entry-decks>div>p{font-size:12px;margin-bottom:3px}
+ .kawaii-entry-decks button[data-testid^=checkbox]{margin-top:2px;gap:3px}
+ .kawaii-entry-decks button[data-testid^=checkbox]>div{width:27px!important;height:27px!important}
+ .kawaii-entry-decks button[data-testid^=checkbox]>span{font-size:9px}
+}
+@media(min-width:480px) and (max-height:450px){
+ html[data-ui-theme=candy-clouds] .kawaii-modal .theme-chooser-options{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+ html[data-ui-theme=candy-clouds] .kawaii-modal .theme-chooser-options label{gap:5px;padding:7px;flex-direction:column}
+ html[data-ui-theme=candy-clouds] .kawaii-modal .theme-chooser-options input{width:16px;height:16px;margin:0}
+ .kawaii-entry-decks{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+ html[data-ui-theme=candy-clouds] .kawaii-entry-join fieldset:has([data-ui-surface=room]){display:grid;grid-template-columns:1fr 1fr;gap:8px 12px}
+ .kawaii-entry-join fieldset>nav{grid-column:1/-1}
+ .kawaii-entry-join fieldset:has([data-ui-surface=room])>div:nth-child(2){grid-column:1;grid-row:2/4}
+ .kawaii-entry-join fieldset:has([data-ui-surface=room])>div:nth-child(3){grid-column:2;grid-row:2}
+ .kawaii-entry-join fieldset:has([data-ui-surface=room])>button{grid-column:2;grid-row:3}
+ .kawaii-gift-body:has(.kawaii-gift-coins){display:grid;grid-template-columns:1fr 1fr;gap:8px 14px}.kawaii-gift-step{grid-column:1/-1}.kawaii-gift-coins{grid-row:2/4}.kawaii-gift-coins>button{padding:8px 6px}.kawaii-gift-body select{height:36px}
+}
+.kawaii-profile-body{display:flex;flex-direction:column;gap:12px;min-width:0}
+.kawaii-profile-preview{display:flex;align-items:center;gap:14px;padding:10px 0;min-width:0}
+.kawaii-profile-preview>img{width:78px;height:90px;object-fit:contain;border:2px solid #fff;border-radius:20px;flex-shrink:0}
+.kawaii-profile-preview>div{flex:1;min-width:0}.kawaii-profile-preview p{font-size:12px;margin-top:6px}
+.kawaii-profile-avatars{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,68px);gap:8px}
+.kawaii-profile-avatars>button{min-width:0;display:grid;place-items:center;padding:5px;border:1px solid #d0e2eb;border-radius:14px;background:#fff;box-shadow:0 2px 0 #d5e6ef}
+.kawaii-profile-avatars>button[aria-pressed=true]{background:#e5f4fa;border-color:#8db5c9;outline:1px solid #8db5c9}
+.kawaii-profile-avatars img{max-width:100%;height:54px;object-fit:contain}
+.kawaii-profile-colors{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:9px;padding:8px 2px}
+.kawaii-profile-colors>button{aspect-ratio:1;border:1px solid #b9cbd8;border-radius:10px;min-width:0}
+.kawaii-profile-colors>button[aria-pressed=true]{outline:2px solid #477b96;outline-offset:2px}
+.kawaii-profile-colors>label{display:grid;gap:4px;font-size:8px;min-width:0}.kawaii-profile-colors input{width:100%;height:24px;min-width:0;cursor:pointer}
+.kawaii-guide{background:#24455b77}
+.kawaii-guide>div{width:calc(100% - 24px)!important;max-width:420px!important;height:min(520px,calc(100% - 24px))!important;border:1px solid #9ecbdc;border-radius:24px;overflow:clip;background:linear-gradient(#effaff,#f8fcff 65%,#fff2f8);box-shadow:0 4px 0 #8bbacc;color:#345d6b}
+.kawaii-guide .guide-chrome-tabs button{color:#345d6b;border:1px solid #c6deea;background:#f5fbff;border-radius:11px;min-height:34px}
+.kawaii-guide .guide-chrome-tabs button[aria-pressed=true]{background:#cceaf3!important;border-color:#96bdcd}
+.kawaii-guide .guide-chrome-close{border:1px solid #b9a8bf;border-radius:10px;background:#fff0f6;color:#345d6b!important;width:32px;height:32px;box-shadow:0 2px 0 #d5b4c7}
+.kawaii-guide .guide-chrome-close svg{width:19px;height:19px}
+.kawaii-rules{height:100%;min-height:0;display:flex;flex-direction:column;gap:12px;padding:8px 20px 20px}
+.kawaii-rules>div{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:16px}
+.kawaii-rules h2{font:700 21px/1.3 Quicksand,sans-serif}
+.kawaii-rules p{font:500 14px/1.65 Quicksand,sans-serif}
+.kawaii-rules>div>small{font-size:10px;line-height:1.4}
+@media(max-height:450px){
+ .kawaii-profile-body{gap:8px}.kawaii-profile-avatars{grid-template-rows:repeat(2,48px);gap:6px}.kawaii-profile-avatars img{height:38px}.kawaii-profile-preview>img{width:55px;height:64px}.kawaii-profile-preview{padding:3px 0}
+ html[data-ui-theme=candy-clouds] .kawaii-modal .theme-swatches{display:none}
+ .kawaii-rules{padding:5px 16px 12px;gap:7px}.kawaii-rules>div{gap:9px}.kawaii-rules h2{font-size:17px}.kawaii-rules p{font-size:12px;line-height:1.5}
+}
+@media(min-width:480px) and (max-height:450px){.kawaii-profile-avatars{grid-template-columns:repeat(6,minmax(0,1fr));grid-template-rows:54px}.kawaii-profile-avatars img{height:42px}}
+@media(min-width:480px) and (max-height:450px){.kawaii-layout-choices{grid-template-columns:1fr 1fr}}
+html[data-ui-theme=candy-clouds] .own-role-panel{height:min(620px,calc(100% - 28px));max-height:calc(100% - 28px);padding:16px;gap:9px;border:1px solid #9ecbdc;border-radius:24px;background:linear-gradient(#effaff,#f8fcff 65%,#fff2f8);overflow:clip;box-shadow:0 4px 0 #8bbacc;color:#345d6b}
+html[data-ui-theme=candy-clouds] .own-role-panel>[data-ui-chrome=header] .font-display{font-size:21px;color:#345d6b}
+html[data-ui-theme=candy-clouds] .own-role-panel>[data-ui-chrome=header] .font-body{font-size:11px;color:#648192}
+html[data-ui-theme=candy-clouds] .own-role-panel>div:nth-child(2){flex:1!important;min-height:0;container-type:size;padding:6px;gap:8px}
+html[data-ui-theme=candy-clouds] .own-role-panel>div:nth-child(2)>div:first-child{width:min(70%,calc((100cqh - 40px)*.62),250px)!important}
+html[data-ui-theme=candy-clouds] .own-role-panel [data-ui-chrome=role-label]{font-size:14px;color:#345d6b}
+@media(max-height:300px){
+ html[data-ui-theme=candy-clouds] .kawaii-chat-modal{height:calc(100dvh - 20px)}
+ html[data-ui-theme=candy-clouds] .kawaii-chat-modal .kawaii-modal-title{padding:8px 48px 5px 14px}
+ html[data-ui-theme=candy-clouds] .kawaii-chat-modal .kawaii-modal-title .theme-a-headline{min-height:24px}
+ html[data-ui-theme=candy-clouds] .kawaii-chat-modal [data-ui-modal-content]{padding:3px 12px 10px}
+ .kawaii-chat-body{gap:4px}.kawaii-chat-state{gap:5px}.kawaii-chat-state textarea{height:44px;padding:4px 8px;font-size:11px;line-height:16px}.kawaii-chat-state label{gap:3px;font-size:10px}.kawaii-chat-state p{font-size:9px}
+ html[data-ui-theme=candy-clouds] .kawaii-chat-modal [data-cartoon-surface=pill]{min-height:34px}
+ html[data-ui-theme=candy-clouds] .kawaii-chat-modal [data-cartoon-surface=pill]>img{height:32px;min-height:32px;max-height:32px}
+ html[data-ui-theme=candy-clouds] .kawaii-chat-modal [data-cartoon-surface=pill]>span{font-size:11px}
+ .kawaii-chat-bubble{padding:5px 8px}.kawaii-chat-bubble p{font-size:11px;line-height:1.3}.kawaii-chat-bubble time{font-size:8px}.kawaii-chat-privacy{font-size:8px;line-height:1.25}
+ .kawaii-gift-body:has(.kawaii-gift-coins){display:grid;grid-template-columns:1fr 1fr;gap:6px 10px}.kawaii-gift-coins{grid-row:2/4}.kawaii-gift-body select{height:34px}
+ .kawaii-profile-preview>img{width:44px;height:50px}.kawaii-profile-body{gap:6px}
+ html[data-ui-theme=candy-clouds] :is(.kawaii-entry-create,.kawaii-entry-join,.kawaii-profile) .input-cartoon{height:34px}
+}

@@ -11,7 +11,7 @@ import { protectedCardAssets } from '@/assets/protectedCardAssets'
 import { useControlTheme } from '@/components/cartoon/controlThemeContext'
 import { themePanel } from '@/components/cartoon/controlThemes'
 import { isBrandTheme } from '@/components/cartoon/controlThemes'
-import { X } from 'lucide-react'
+import { X, ArrowLeft, ArrowRight } from 'lucide-react'
 import { CardFaceImage } from './CardFaceImage'
 import { cardImageFit, pdfCardAspect } from '@/features/game/catalog/cardImageLayout'
 
@@ -56,6 +56,7 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedE
   const [emotionSub, setEmotionSub]     = useState<EmotionSubType>('basic')
   const [preview, setPreview]           = useState<CardData | null>(null)
   const [previewDir, setPreviewDir]     = useState<1 | -1>(1)
+  const [pages,setPages]=useState<Record<string,number>>({})
   const [pending, setPending] = useState(false)
   const pendingRef = useRef(false)
   const dialogRef = useRef<HTMLDivElement>(null)
@@ -82,6 +83,9 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedE
     CARD_DATA[activeTab as 'reflection' | 'selfcare']
 
   const previewIndex = preview ? cards.findIndex(c => c.id === preview.id) : -1
+  const deckKey=`${activeTab}:${effectiveSituationSub}:${effectiveEmotionSub}`
+  const pageCount=Math.max(1,Math.ceil(cards.length/3)),page=Math.min(pages[deckKey]??0,pageCount-1)
+  const visibleCards=theme==='candy-clouds'?cards.slice(page*3,page*3+3):cards
   const previewAssets = preview ? protectedCardAssets(preview.id) ?? preview : null
 
   const navigatePreview = (dir: 1 | -1) => {
@@ -114,7 +118,7 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedE
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/65"
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/65 ${theme==='candy-clouds'?'kawaii-catalog':''}`}
       transition={{ duration: 0.15 }}
       onClick={pending ? undefined : onClose}
     >
@@ -213,7 +217,7 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedE
               style={{ height: isBrandTheme(theme) ? undefined : '60dvh', maxHeight: '60dvh' }}
             >
               <div className={`grid ${isBrandTheme(theme) ? 'grid-cols-3 gap-3' : 'grid-cols-4 gap-2'}`}>
-                {cards.map((card, index) => (
+                {visibleCards.map((card, index) => (
                   <div key={card.id} className="flex flex-col items-center gap-1">
                     <motion.button
                       aria-label={card.id}
@@ -236,6 +240,8 @@ export function CardInventory({ onClose, onSelectCard, allowedCategory, allowedE
                 ))}
               </div>
             </div>
+
+            {theme==='candy-clouds'&&<nav className="kawaii-chat-pages" aria-label="Trang bộ thẻ"><button aria-label="Bộ thẻ trước" disabled={page===0||pending} onClick={()=>setPages({...pages,[deckKey]:page-1})}><ArrowLeft/></button><small>{page+1} / {pageCount} · {cards.length} thẻ</small><button aria-label="Bộ thẻ sau" disabled={page===pageCount-1||pending} onClick={()=>setPages({...pages,[deckKey]:page+1})}><ArrowRight/></button>{!allowedCategory&&<a href="/cards" target="_blank" rel="noopener noreferrer" aria-label="Mở Bộ thẻ 3D trong tab mới" className="text-[10px] underline">3D</a>}</nav>}
 
           </div>
         </div>

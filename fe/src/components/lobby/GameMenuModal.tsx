@@ -32,7 +32,7 @@ export function GameMenuModal({ open, onClose, onQuit, visualStyle = 'current', 
   const orbit = theme === 'emotion-orbit'
   const iconName = (Icon: typeof Layers) => Icon === Layers ? 'cards' : Icon === Box ? 'box' : Icon === BookOpen ? 'book' : 'headset'
   const menuLabel = (label: string, Icon: typeof Layers) => branded
-    ? <span className="brand-menu-label"><span className="brand-menu-icon">{orbit ? <OrbitMenuIcon name={iconName(Icon)} /> : <BrandIcon name={iconName(Icon)} />}</span><span className="brand-menu-text">{label}{orbit && Icon === Box && <span className="orbit-menu-new" aria-hidden="true">MỚI</span>}</span>{orbit ? <OrbitMenuIcon name="arrow" /> : <BrandIcon name="chevron" />}</span>
+    ? <span className="brand-menu-label"><span className="brand-menu-icon">{orbit ? <OrbitMenuIcon name={iconName(Icon)} /> : <BrandIcon name={label==='Giao diện'?'settings':iconName(Icon)} />}</span><span className="brand-menu-text">{label}{orbit && Icon === Box && <span className="orbit-menu-new" aria-hidden="true">MỚI</span>}</span>{orbit ? <OrbitMenuIcon name="arrow" /> : <BrandIcon name="chevron" />}</span>
     : label
   const harmonized = themed && visualStyle === 'sky-pink-study'
   const [showCardDeck, setShowCardDeck] = useState(false)
@@ -40,6 +40,7 @@ export function GameMenuModal({ open, onClose, onQuit, visualStyle = 'current', 
   const [showSupport, setShowSupport] = useState(false)
   const [showGuide, setShowGuide] = useState(false)
   const [showTheme, setShowTheme] = useState(false)
+  const [themeTab,setThemeTab]=useState<'theme'|'layout'>('theme')
   const preference = useThemePreference()
   const { pending: quitPending, run: confirmQuit, error: quitError } = useConfirmedAction('menu-quit', open && showQuitConfirm)
 
@@ -51,7 +52,7 @@ export function GameMenuModal({ open, onClose, onQuit, visualStyle = 'current', 
             {menuLabel('Bộ thẻ', Layers)}
           </CartoonButton>
 
-          <CartoonButton
+          {theme!=='candy-clouds'&&<CartoonButton
             color="pink"
             size="lg"
             className="w-full"
@@ -60,11 +61,13 @@ export function GameMenuModal({ open, onClose, onQuit, visualStyle = 'current', 
             badge={orbit ? undefined : 'MỚI'}
           >
             {menuLabel('Bộ thẻ 3d', Box)}
-          </CartoonButton>
+          </CartoonButton>}
 
-          <CartoonButton color={harmonized ? 'green' : themed ? 'cream' : 'purple'} size="lg" className="w-full" onClick={() => setShowGuide(true)}>
+          <CartoonButton color={theme==='candy-clouds'?'pink':harmonized ? 'green' : themed ? 'cream' : 'purple'} size="lg" className="w-full" onClick={() => setShowGuide(true)}>
             {menuLabel('Hướng dẫn', BookOpen)}
           </CartoonButton>
+
+          {theme==='candy-clouds'&&preference&&<CartoonButton color="green" size="lg" className="w-full" onClick={()=>setShowTheme(true)}>{menuLabel('Giao diện',Layers)}</CartoonButton>}
 
           {!onQuit && (
             <CartoonButton color={harmonized ? 'green' : 'orange'} size="lg" className="w-full" onClick={() => setShowSupport(true)}>
@@ -85,9 +88,9 @@ export function GameMenuModal({ open, onClose, onQuit, visualStyle = 'current', 
             </CartoonButton>
           )}
         </div>
-        {!onQuit && preference && <button className="theme-menu-link" type="button" onClick={() => setShowTheme(true)}><BrandIcon name="settings" />Giao diện</button>}
+        {!onQuit&&theme!=='candy-clouds' && preference && <button className="theme-menu-link" type="button" onClick={() => setShowTheme(true)}><BrandIcon name="settings" />Giao diện</button>}
       </CartoonModal>
-      <CartoonModal open={open && showTheme} onClose={() => setShowTheme(false)} title="Chọn giao diện"><ThemeChooser /></CartoonModal>
+      <CartoonModal open={open && showTheme} onClose={() => setShowTheme(false)} title="Chọn giao diện">{theme==='candy-clouds'&&<nav className="kawaii-tabs mb-3"><button aria-pressed={themeTab==='theme'} onClick={()=>setThemeTab('theme')}>Giao diện</button><button aria-pressed={themeTab==='layout'} onClick={()=>setThemeTab('layout')}>Bố cục bàn chơi</button></nav>}<ThemeChooser section={theme==='candy-clouds'?themeTab:'all'}/></CartoonModal>
 
       <AnimatePresence>
         {showCardDeck && (

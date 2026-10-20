@@ -34,7 +34,7 @@ describe('A control theme', () => {
     expect(screen.getByRole('button', { name: 'Tiếp tục' }).querySelector('img')).toHaveAttribute('src', '/cartoon/buttons/themes/mint-blush-v2/pill-blush.png')
     expect(screen.getByRole('button', { name: 'Gửi' }).querySelector('img')).toHaveAttribute('src', '/cartoon/buttons/pill/Green.png')
     expect(screen.getByRole('button', { name: 'Đóng' }).querySelector('img')).toHaveAttribute('src', '/cartoon/buttons/themes/mint-blush-v2/circle-blush.png')
-    expect(DEFAULT_CONTROL_THEME).toBe('emotion-orbit')
+    expect(DEFAULT_CONTROL_THEME).toBe('candy-clouds')
     expect(pillAppearance('mint-blush', 'unknown', { src: 'legacy.png', textColor: '#fff' }).src).toContain('sky-pink-a1/pill-sky-v2.png')
   })
   it('switches global chrome with the root theme and restores its previous attribute on unmount', () => {

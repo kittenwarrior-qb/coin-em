@@ -1,0 +1,204 @@
+import { test, expect, onTestFinished } from 'vitest'
+import { spawn } from 'node:child_process'
+import { randomUUID } from 'node:crypto'
+import { mkdtemp, writeFile } from 'node:fs/promises'
+import os from 'node:os'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { chromium, expect as ui } from '../../../e2e/node_modules/@playwright/test/index.mjs'
+import { createIsolatedServer } from '../helpers/isolatedServer'
+import { ChatReportStore } from '../../src/communication/ChatReportStore'
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
+test('both-theme chat invitation, real guarded send/block/report and selected admin evidence (owned loopback)', async () => {
+  const output = await mkdtemp(path.join(os.tmpdir(), 'emcoin-chat-browser-'))
+  const oldFlag = process.env.EMCOIN_ROOM_CHAT_ENABLED
+  const oldThrottle = process.env.DISABLE_RATE_LIMIT
+  process.env.EMCOIN_ROOM_CHAT_ENABLED = 'true'
+  process.env.DISABLE_RATE_LIMIT = 'false'
+  const reports = new ChatReportStore(':memory:')
+  const server = await createIsolatedServer({ chatReports: reports })
+  const vite = spawn(process.execPath, [path.join(root, 'fe/node_modules/vite/bin/vite.js'), '--host', '127.0.0.1', '--port', '0', '--clearScreen', 'false'],
+    { cwd: path.join(root, 'fe'), windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'], env: { ...process.env, VITE_API_URL: server.url } })
+  let browser: Awaited<ReturnType<typeof chromium.launch>> | undefined
+  let finished = false
+  const errors: string[] = [], resolutions: object[] = []
+  onTestFinished(async () => {
+    if (!finished && browser) {
+      let index = 0
+      for (const context of browser.contexts()) for (const page of context.pages()) {
+        await page.screenshot({ path: path.join(output, `failure-${index++}.png`), fullPage: true }).catch(() => {})
+      }
+      console.log(`Owned failed chat browser artifacts: ${output}`)
+    }
+    vite.kill(); await browser?.close(); await server.close(); reports.close()
+    if (oldFlag === undefined) delete process.env.EMCOIN_ROOM_CHAT_ENABLED; else process.env.EMCOIN_ROOM_CHAT_ENABLED = oldFlag
+    if (oldThrottle === undefined) delete process.env.DISABLE_RATE_LIMIT; else process.env.DISABLE_RATE_LIMIT = oldThrottle
+  })
+  const base = await new Promise<string>((resolve, reject) => {
+    const timeout = setTimeout(() => reject(Error('Owned chat Vite startup timeout')), 20000)
+    let logs = ''
+    const receive = (chunk: Buffer) => {
+      logs += chunk.toString().replace(/\x1b\[[0-9;]*m/g, '')
+      const match = logs.match(/http:\/\/127\.0\.0\.1:\d+\//)
+      if (match) { clearTimeout(timeout); resolve(match[0]) }
+    }
+    vite.stdout.on('data', receive); vite.stderr.on('data', receive)
+    vite.once('error', error => { clearTimeout(timeout); reject(error) })
+  })
+  browser = await chromium.launch({ headless: true })
+  for (const [theme, width] of [['emotion-orbit', 320], ['kindness-workshop', 390]] as const) {
+    const contexts = await Promise.all([0, 1].map(() => browser!.newContext({ viewport: { width, height: width === 320 ? 568 : 844 }, reducedMotion: 'reduce' })))
+    const pages = await Promise.all(contexts.map(async context => {
+      await context.route('**/*', route => ['127.0.0.1', 'localhost'].includes(new URL(route.request().url()).hostname) ? route.continue() : route.abort())
+      const page = await context.newPage(); page.on('pageerror', error => errors.push(error.message))
+      await page.goto(`${base}?theme=${theme}`, { waitUntil: 'domcontentloaded' }); return page
+    }))
+    const [host, guest] = pages
+    await host.getByTestId('btn-create-room').click({ timeout: 30000 })
+    await host.getByTestId('input-username-create').fill('QA quản trò')
+    await host.getByTestId('btn-confirm-create').click()
+    await ui(host.getByTestId('waiting-room')).toBeVisible()
+    const roomId = (await host.getByTestId('room-id').textContent())!.trim()
+    await guest.getByTestId('btn-join-room').click({ timeout: 30000 })
+    await guest.getByTestId('input-room-id').fill(roomId)
+    await guest.getByTestId('input-username-join').fill('QA khách')
+    await guest.getByTestId('btn-confirm-join').click()
+    await ui(guest.getByTestId('waiting-room')).toBeVisible()
+    await host.getByRole('button', { name: 'Mở chat phòng' }).click()
+    await host.getByText('Quản lý chat', { exact: true }).click()
+    await host.getByRole('button', { name: 'Mở chat & tạo mã mời' }).click()
+    const invitation = await host.getByLabel('Mã mời (gửi riêng cho người chơi)').inputValue()
+    expect(invitation).toMatch(/^[A-Za-z0-9_-]{43}$/)
+    await guest.getByRole('button', { name: 'Mở chat phòng' }).click()
+    await guest.getByLabel('Mã mời từ quản trò').fill(invitation)
+    await guest.getByRole('button', { name: 'Tham gia chat', exact: true }).click()
+    await ui(guest.getByLabel('Tin nhắn', { exact: true })).toBeEnabled()
+    await guest.waitForTimeout(350) // Distinct new command, respect the production 250ms throttle.
+    await guest.getByLabel('Tin nhắn', { exact: true }).fill('qa@example.invalid')
+    await guest.getByRole('button', { name: 'Gửi', exact: true }).click()
+    await ui(guest.getByText(/Tin chưa được gửi\. Hãy bỏ email/)).toBeVisible()
+    await ui(guest.getByLabel('Tin nhắn', { exact: true })).toHaveValue('qa@example.invalid')
+    await ui(host.getByText('qa@example.invalid', { exact: true })).toHaveCount(0)
+    await ui(guest.getByRole('button', { name: 'Kiểm tra lại yêu cầu' })).toHaveCount(0)
+    await guest.getByLabel('Tin nhắn', { exact: true }).fill('fuck')
+    await guest.getByRole('button', { name: 'Gửi', exact: true }).click()
+    await ui(guest.getByText(/Tin chưa được gửi\. Có từ ngữ không phù hợp/)).toBeVisible()
+    await ui(guest.getByLabel('Tin nhắn', { exact: true })).toHaveValue('fuck')
+    await ui(host.getByText('fuck', { exact: true })).toHaveCount(0)
+    await ui(guest.getByRole('button', { name: 'Kiểm tra lại yêu cầu' })).toHaveCount(0)
+    await guest.getByLabel('Tin nhắn', { exact: true }).fill('Tin thử nghiệm <script>không thực thi</script>')
+    await guest.getByRole('button', { name: 'Gửi', exact: true }).click()
+    await ui(host.getByText('Tin thử nghiệm <script>không thực thi</script>', { exact: true })).toBeVisible()
+    await host.getByRole('button', { name: 'Báo cáo', exact: true }).click()
+    await host.getByRole('button', { name: 'Gửi báo cáo', exact: true }).click()
+    await ui(host.getByText(/Đã gửi báo cáo/)).toBeVisible()
+    await host.getByText('Người chơi & an toàn', { exact: true }).click()
+    await host.getByRole('button', { name: 'Chặn với tôi', exact: true }).click()
+    await ui(host.getByRole('button', { name: 'Bỏ chặn' })).toBeVisible()
+    await ui(host.getByText('Tin thử nghiệm <script>không thực thi</script>', { exact: true })).toHaveCount(0)
+    await host.waitForTimeout(350)
+    await host.getByRole('button', { name: 'Tắt gửi tin', exact: true }).click()
+    await ui(guest.getByLabel('Tin nhắn', { exact: true })).toBeDisabled()
+    await host.waitForTimeout(350)
+    await host.getByRole('button', { name: 'Cho gửi tin', exact: true }).click()
+    await ui(guest.getByLabel('Tin nhắn', { exact: true })).toBeEnabled()
+    for (const [index, page] of pages.entries()) {
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+      await page.screenshot({ path: path.join(output, `${theme}-chat-${index}-${width}.png`), fullPage: true })
+      const storage = await page.evaluate(() => JSON.stringify({ ...localStorage, ...sessionStorage }))
+      expect(storage).not.toContain(invitation); expect(storage).not.toContain('Tin thử nghiệm')
+      // Resize simulation only: a keyboard-sized viewport must retain the draft
+      // and reach Send through genuine scrolling, not hidden ancestor scrolling.
+      const draft = page.getByLabel('Tin nhắn', { exact: true })
+      await draft.fill('Bản nháp kiểm tra vùng nhập')
+      await draft.focus()
+      await page.setViewportSize({ width, height: 300 })
+      const reachable = await page.getByRole('button', { name: 'Gửi', exact: true }).evaluate(async button => {
+        for (let parent = button.parentElement; parent; parent = parent.parentElement) {
+          if (/auto|scroll/.test(getComputedStyle(parent).overflowY)) {
+            const control = button.getBoundingClientRect(), box = parent.getBoundingClientRect()
+            parent.scrollTop += control.top - box.top - Math.max(0, (parent.clientHeight - control.height) / 2)
+          }
+        }
+        await new Promise(resolve => requestAnimationFrame(resolve))
+        const control = button.getBoundingClientRect()
+        let top = 0, bottom = innerHeight, left = 0, right = innerWidth
+        for (let parent = button.parentElement; parent; parent = parent.parentElement) {
+          const style = getComputedStyle(parent), box = parent.getBoundingClientRect()
+          if (/auto|scroll|hidden|clip/.test(style.overflowY)) { top = Math.max(top, box.top); bottom = Math.min(bottom, box.bottom) }
+          if (/auto|scroll|hidden|clip/.test(style.overflowX)) { left = Math.max(left, box.left); right = Math.min(right, box.right) }
+        }
+        const hit = document.elementFromPoint(control.x + control.width / 2, control.y + control.height / 2)
+        return control.top >= top - 1 && control.bottom <= bottom + 1 && control.left >= left - 1 && control.right <= right + 1 &&
+          !!hit && button.contains(hit) && document.documentElement.scrollHeight <= innerHeight + 1
+      })
+      expect(reachable).toBe(true)
+      await ui(draft).toHaveValue('Bản nháp kiểm tra vùng nhập')
+      await page.screenshot({ path: path.join(output, `${theme}-chat-${index}-short.png`) })
+      await page.setViewportSize({ width, height: width === 320 ? 568 : 844 })
+      await ui(draft).toHaveValue('Bản nháp kiểm tra vùng nhập')
+    }
+    await Promise.all(contexts.map(context => context.close()))
+  }
+  // Admin uses actual selected SQLite evidence but intercepted HTTP, not real auth-cookie proof.
+  for (let index = 0; index < 55; index++) {
+    const id = randomUUID(), now = Date.now()
+    reports.submit({ requestId: id, roomId: 'paged-fixture', reporterId: `fixture-${index}`, reason: 'other',
+      message: { id: randomUUID(), senderId: `sender-${index}`, senderName: `Báo cáo lưu ${index}`, text: 'Bằng chứng phân trang thử nghiệm', sentAt: now } }, now)
+    reports.resolve(id, 'resolved', randomUUID(), now)
+  }
+  for (const theme of ['emotion-orbit', 'kindness-workshop']) {
+    const context = await browser.newContext({ viewport: { width: 1366, height: 768 }, reducedMotion: 'reduce' })
+    await context.route('**/*', async route => {
+      const url = new URL(route.request().url())
+      if (!['127.0.0.1', 'localhost'].includes(url.hostname)) { await route.abort(); return }
+      if (!url.pathname.startsWith('/admin/api/')) { await route.continue(); return }
+      let body: object
+      if (url.pathname === '/admin/api/reports/search') {
+        expect(route.request().method()).toBe('POST'); expect(url.search).toBe('')
+        const query = route.request().postDataJSON()
+        body = reports.list(query.status, Date.now(), { offset: query.offset, query: query.query })
+      }
+      else if (url.pathname === '/admin/api/reports/resolve') {
+        const command = route.request().postDataJSON(); resolutions.push(command)
+        body = reports.resolve(command.id, command.status, command.requestId)
+      } else body = { rooms: [], analytics: { version: 'operational-analytics/v1', scope: 'this-process-since-start', persistent: false,
+        http: { completed: 0, clientErrors: 0, serverErrors: 0, durationBuckets: [10, 50, 100, 250, 500, 1000, 5000, null].map(upperBoundMs => ({ upperBoundMs, count: 0 })) } } }
+      await route.fulfill({ contentType: 'application/json', headers: { 'cache-control': 'no-store' }, body: JSON.stringify(body) })
+    })
+    const page = await context.newPage(); page.on('pageerror', error => errors.push(error.message))
+    await page.goto(`${base}admin?theme=${theme}`)
+    await page.getByRole('button', { name: 'Báo cáo an toàn', exact: true }).click()
+    await page.getByRole('button', { name: 'Xem báo cáo', exact: true }).first().click()
+    await ui(page.locator('.admin-report-evidence')).toHaveText('Tin thử nghiệm <script>không thực thi</script>')
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth && document.documentElement.scrollHeight <= innerHeight + 1)).toBe(true)
+    await page.screenshot({ path: path.join(output, `${theme}-report-detail.png`), fullPage: true })
+    await page.getByRole('button', { name: 'Đánh dấu đã xử lý', exact: true }).click()
+    await ui(page.getByRole('dialog')).toHaveCount(0)
+    await page.getByRole('button', { name: 'Đã xử lý', exact: true }).click()
+    await ui(page.locator('.admin-reports-table tbody tr')).toHaveCount(50)
+    await ui(page.getByRole('button', { name: 'Trang sau', exact: true })).toBeVisible()
+    await page.getByRole('button', { name: 'Trang sau', exact: true }).click()
+    await ui(page.getByRole('button', { name: 'Trang sau', exact: true })).toBeDisabled()
+    await ui(page.getByRole('button', { name: 'Trang trước', exact: true })).toBeEnabled()
+    await page.getByRole('searchbox', { name: 'Tìm báo cáo' }).fill('BÁO CÁO LƯU 54')
+    await page.getByRole('button', { name: 'Tìm kiếm', exact: true }).click()
+    await ui(page.locator('.admin-reports-table tbody tr')).toHaveCount(1)
+    await ui(page.getByText('Báo cáo lưu 54', { exact: true })).toBeVisible()
+    await ui(page.getByRole('button', { name: 'Trang trước', exact: true })).toBeDisabled()
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth && document.documentElement.scrollHeight <= innerHeight + 1)).toBe(true)
+    await page.screenshot({ path: path.join(output, `${theme}-report-search.png`), fullPage: true })
+    await page.setViewportSize({ width: 320, height: 568 })
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+    await page.screenshot({ path: path.join(output, `${theme}-report-search-320.png`), fullPage: true })
+    await context.close()
+  }
+  expect(resolutions).toHaveLength(2); expect(errors).toEqual([])
+  finished = true
+  await writeFile(path.join(output, 'report.json'), JSON.stringify({ result: 'passed', errors, themes: ['emotion-orbit', 'kindness-workshop'],
+    chatTransport: 'real-production-guarded-handlers-loopback', roomStorage: 'test-fixture-not-redis-proof', reportStorage: 'actual-in-memory-sqlite',
+    adminHttp: 'intercepted-not-auth-proof', shortChatViewport: '300px height, draft retained, genuine scroll and Send hit-test; not a physical keyboard',
+    physicalDevice: false, productionModified: false }, null, 2))
+  console.log(`Owned chat browser artifacts: ${output}`)
+}, 180000)

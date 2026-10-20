@@ -15,7 +15,7 @@ export function PwaStatus() {
   const allowed = useSyncExternalStore(subscribePwaGate, () => canUpdatePwa(pathname), () => false)
 
   useEffect(() => {
-    if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return
+    if (import.meta.env.VITE_NATIVE_APP === 'true' || !import.meta.env.PROD || !('serviceWorker' in navigator)) return
     let cancelled = false
     let ownedRegistration: ServiceWorkerRegistration | undefined
     const watched = new Set<ServiceWorker>()

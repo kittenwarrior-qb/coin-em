@@ -5,9 +5,11 @@ import { CartoonCircleButton } from '@/components/cartoon'
 import { useControlTheme } from '@/components/cartoon/controlThemeContext'
 import { isBrandTheme } from '@/components/cartoon/controlThemes'
 import { PHASE_ACTION_RENDERERS, type BoardPhaseActionsProps } from './phaseActionRenderers'
+import { CandyIcon } from '@/components/cartoon/CandyIcon'
 
 export function BoardPhaseActions(props: BoardPhaseActionsProps) {
-  const branded = isBrandTheme(useControlTheme())
+  const theme = useControlTheme()
+  const branded = isBrandTheme(theme)
   const NavButton = branded ? CartoonCircleButton : 'button'
   const locked = !props.connected || props.pending
   const committed = useRef<{ scope: string; locked: boolean } | null>(null)
@@ -35,7 +37,7 @@ export function BoardPhaseActions(props: BoardPhaseActionsProps) {
             {!branded && <EmcoinImage src="/emcoin/icons/orbit/arrowRight.svg" alt="" className="h-5 w-5 object-contain rotate-180" draggable={false} />}
           </NavButton>
           <div className="flex-1 min-w-0 text-center">
-            <div className="font-display text-[11px] text-[var(--c-gray)] leading-none">👑 Quản trò</div>
+            <div className="font-display text-[11px] text-[var(--c-gray)] leading-none">{theme === 'candy-clouds' ? <span className="candy-facilitator-label"><CandyIcon name="crown" />Quản trò</span> : '👑 Quản trò'}</div>
             <div className="font-body text-[10px] text-black/55 truncate mt-0.5">{PHASE_LABELS[props.phase] ?? props.phase}</div>
           </div>
           <NavButton type="button" {...(branded ? { iconSrc: '/emcoin/icons/orbit/arrowRight.svg', size: 'sm' as const } : {})} disabled={props.nextDisabled}

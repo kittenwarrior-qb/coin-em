@@ -61,6 +61,14 @@ fresh publication on an already initialized database, or delete volumes to retry
 
 ### Guarded frontend-only update
 
+For an explicitly UI-only release while newer backend source is pending, use
+`prepare-ui <commit>` followed by `update-ui <commit>` instead. This builds and
+transfers **only** the exact committed web image. The driver retains the actual
+running backend image in Compose, does not rebuild or restart backend/Redis,
+and keeps the same configuration, empty-room, admission barrier, HTTPS and
+rollback guards below. Unrelated dirty files outside `fe` and `deploy/emcoin`
+are not included in this UI artifact. No backend features are activated by it.
+
 After local tests/QA and GitHub merge, prepare the exact commit as above, then:
 
 ```powershell

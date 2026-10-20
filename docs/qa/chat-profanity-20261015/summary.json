@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-15",
+  "sourceCommit": "9c4a382baed2f6518ea0e56bf4581586584c4ffe",
+  "node": "v22.23.3",
+  "backend": { "files": 74, "tests": 888, "result": "passed", "typecheck": "passed", "build": "passed via real-Redis fixture" },
+  "frontend": { "files": 82, "tests": 794, "result": "passed", "lint": "passed", "productionBuild": "passed" },
+  "browser": {
+    "result": "passed",
+    "scenarios": 1,
+    "themes": ["emotion-orbit", "kindness-workshop"],
+    "widths": [320, 390],
+    "runtimeErrors": [],
+    "artifactRoot": "C:/Users/Admin/AppData/Local/Temp/emcoin-chat-browser-rbVeCr",
+    "scope": "Real guarded loopback Socket.IO; fixture room storage; in-memory SQLite; intercepted admin HTTP, not production authentication or physical-device evidence"
+  },
+  "realRedis": {
+    "result": "passed",
+    "artifactRoot": "C:/Users/Admin/AppData/Local/Temp/emcoin-chat-check-WZ8u4H",
+    "topology": "Two compiled backends, Redis adapter, loopback AOF-always Redis, shared same-host SQLite with one schema initializer",
+    "rooms": 10,
+    "seats": 100,
+    "acceptedLoadMessages": 100,
+    "deliveredLoadDeltas": 1000,
+    "rateLimitsDisabled": false,
+    "backendSourceHash": "28ddbbcfd56a5bc2ae81bfa00f331a106b7786ce3e2803b41a94455818105b56",
+    "checks": ["room isolation", "Coin/game state unchanged", "backend SIGKILL and exact receipt replay", "restored blocks/mutes/reports", "one CAS winner", "primary outage fails closed", "Redis AOF restart", "no deleted-room chat archive", "selected evidence seven-day prune"],
+    "cleanup": "Owned processes and container removed; synthetic files retained in allocated temp root"
+  },
+  "retainedFailure": "Initial repeated Unicode-property pattern classes stalled accented-input processing; source fix canonicalizes separators before small-class matching, guarded by a cold timing regression and unchanged ACK deadlines",
+  "limitations": ["Small original vocabulary, not comprehensive or contextual moderation", "Quotes of listed words also reject", "Unknown insults and inserted-letter evasions may pass", "Not malware or URL reputation scanning", "Not sustained capacity, WAN, physical-device or separate-host SQLite proof"],
+  "productionModified": false,
+  "productionChatEnabled": false,
+  "externalModerationProvider": false,
+  "storeApprovalClaimed": false
+}

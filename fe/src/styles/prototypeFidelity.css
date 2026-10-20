@@ -19,7 +19,7 @@ html[data-ui-theme="kindness-workshop"] {
   --brand-primary: #205777;
   --brand-blush: #df7465;
 }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .font-display {
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .font-display {
   font-family: 'Quicksand', sans-serif;
   font-weight: 700;
 }
@@ -38,7 +38,7 @@ html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .f
 .brand-home-settings { right: 5.4%; }
 .brand-home :is(.brand-home-help, .brand-home-settings) > button { width: 100%; height: 100%; }
 .brand-home :is(.brand-home-help, .brand-home-settings) > button > img { width: 100%; height: 100%; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .brand-home [data-ui-chrome="home-logo"] {
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .brand-home [data-ui-chrome="home-logo"] {
   position: absolute; padding: 0; margin: 0 !important;
   left: 13%; top: 22.1%; width: 74%; height: 11%;
   display: flex; align-items: center; justify-content: center;
@@ -76,48 +76,48 @@ html[data-ui-theme="kindness-workshop"] .brand-home-guide { top: 74%; left: 24%;
 .brand-home-resume { position: absolute; top: 82%; left: 12%; width: 76%; padding: 12px; color: var(--brand-ink); background: var(--brand-ivory); border: 1px solid var(--brand-edge); border-radius: 16px; }
 
 /* Shared action material, including compact pills, never the old flat backing. */
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-cartoon-surface="pill"] {
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-cartoon-surface="pill"] {
   --control-material: var(--prototype-primary);
   background: none !important; border: 0 !important; box-shadow: none !important;
   isolation: isolate; min-width: 0;
 }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-cartoon-surface="pill"]::before {
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-cartoon-surface="pill"]::before {
   content: ''; position: absolute; inset: -27% -7%; z-index: -1;
   background: var(--control-material) center / 100% 100% no-repeat;
   pointer-events: none;
 }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-cartoon-surface="pill"]:has(img[src$="secondary-v3.webp"]) { --control-material: var(--prototype-secondary); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-cartoon-surface="pill"]:has(img[src$="quiet-v3.webp"]) { --control-material: var(--prototype-quiet); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-cartoon-surface="pill"] > span:not([data-cartoon-badge]) {
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-cartoon-surface="pill"]:has(img[src$="secondary-v3.webp"]) { --control-material: var(--prototype-secondary); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-cartoon-surface="pill"]:has(img[src$="quiet-v3.webp"]) { --control-material: var(--prototype-quiet); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-cartoon-surface="pill"] > span:not([data-cartoon-badge]) {
   white-space: normal; line-height: 1.2; overflow-wrap: anywhere;
   font-size: 14px; padding-inline: 12px; text-align: center;
 }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu {
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .theme-a-menu {
   max-width: 414px !important; width: 98%;
   height: min(560px, calc(100dvh - 80px)); isolation: isolate;
 }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu::before {
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .theme-a-menu::before {
   content: ''; position: absolute; inset: 0; z-index: -1;
   background: var(--prototype-menu) center / 100% 100% no-repeat; pointer-events: none;
 }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-panel {
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .theme-a-menu-panel {
   background: transparent !important;
   border: 0; border-radius: 0; box-shadow: none;
   flex: 1; min-height: 0; margin: 112px 32px 58px;
   scrollbar-gutter: stable;
 }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-heading {
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .theme-a-menu-heading {
   top: 4%; height: 60px; left: 12%; right: 12%; background: none; pointer-events: none;
 }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-heading .theme-a-headline span { font-size: 36px; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .theme-a-menu-heading .theme-a-headline span { font-size: 36px; }
 html[data-ui-theme="emotion-orbit"] .theme-a-menu-heading .theme-a-headline { border: 0; border-radius: 0; }
 html[data-ui-theme="emotion-orbit"] .theme-a-menu-heading .theme-a-headline::after { content: ''; position: absolute; width: 32px; height: 4px; border-radius: 4px; background: var(--brand-blush); bottom: -6px; left: calc(50% - 16px); }
 html[data-ui-theme="emotion-orbit"] .theme-a-menu-heading .theme-a-headline span { font-family: 'Cookii', sans-serif; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-content { padding: 12px 12px 18px; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-actions { gap: 16px; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-actions [data-cartoon-surface="pill"] > img { height: 68px; width: 100%; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-actions [data-cartoon-surface="pill"] > span:not([data-cartoon-badge]) { font-size: 20px; padding-inline: 14px; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-actions [data-cartoon-surface="pill"] { --control-material: var(--prototype-quiet); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .theme-a-menu-content { padding: 12px 12px 18px; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .theme-a-menu-actions { gap: 16px; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .theme-a-menu-actions [data-cartoon-surface="pill"] > img { height: 68px; width: 100%; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .theme-a-menu-actions [data-cartoon-surface="pill"] > span:not([data-cartoon-badge]) { font-size: 20px; padding-inline: 14px; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .theme-a-menu-actions [data-cartoon-surface="pill"] { --control-material: var(--prototype-quiet); }
 html[data-ui-theme="emotion-orbit"] .theme-a-menu-actions [data-cartoon-surface="pill"]:has(img) { --control-material: var(--prototype-quiet) !important; }
 html[data-ui-theme="emotion-orbit"] .theme-a-menu-actions > button:nth-child(2) [data-cartoon-surface="pill"] { --control-material: var(--prototype-quiet); background-color: #e8d8e5 !important; border-radius: 45px; }
 html[data-ui-theme="emotion-orbit"] .theme-a-menu-actions > button:nth-child(2) [data-cartoon-surface="pill"]::before { opacity: .55; }
@@ -127,7 +127,7 @@ html[data-ui-theme="kindness-workshop"] .theme-a-menu-actions [data-cartoon-surf
 html[data-ui-theme="kindness-workshop"] .theme-a-menu-actions > button:nth-child(even) [data-cartoon-surface="pill"]:has(img) { --control-material: var(--prototype-secondary) !important; }
 html[data-ui-theme="kindness-workshop"] .theme-a-menu-actions [data-cartoon-surface="pill"] > img { height: 80px; }
 html[data-ui-theme="kindness-workshop"] .theme-a-menu-heading .theme-a-headline span { font-family: 'Cookii', sans-serif; font-size: 44px; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-close { top: 30px; right: 24px; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .theme-a-menu-close { top: 30px; right: 24px; }
 .brand-menu-label { gap: 10px; }
 .brand-menu-label > .brand-menu-icon { display: flex; align-items: center; width: 62px; flex: none; border-right: 1px solid currentColor; }
 .brand-menu-icon > svg { width: 38px; height: 38px; margin-right: 12px; flex: none; }
@@ -137,11 +137,11 @@ html[data-ui-theme="emotion-orbit"] .brand-menu-icon > svg { background: #d5d2f0
   position: fixed; width: min(100%, 430px); left: 50%; right: auto;
   transform: translateX(-50%); height: 100dvh; padding-inline: 0;
 }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .game-table-surface {
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .game-table-surface {
   background: none !important; overflow: visible !important;
   border: none; box-shadow: none; border-radius: 0 !important; isolation: isolate;
 }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .game-table-surface::before {
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .game-table-surface::before {
   content: ''; position: absolute; left: 50%; top: 50%;
   width: calc(100% + 110px); aspect-ratio: 1; transform: translate(-50%, -50%);
   background: var(--prototype-table) center / contain no-repeat; z-index: -1; pointer-events: none;
@@ -153,8 +153,8 @@ html[data-ui-theme="kindness-workshop"] .game-table-surface::before { width: cal
 .brand-board-heading h1 { font-size: 30px; line-height: 1.15; font-weight: 700; color: var(--brand-ink); }
 html[data-ui-theme="kindness-workshop"] .brand-board-heading h1 { display: inline-block; position: relative; isolation: isolate; padding: 12px 24px; color: #fff6df; background: none; }
 html[data-ui-theme="kindness-workshop"] .brand-board-heading h1::before { content: ''; position: absolute; inset: -28% -7%; z-index: -1; background: var(--prototype-secondary) center / 100% 100% no-repeat; pointer-events: none; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .game-player-layout { min-height: 680px; height: auto; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .game-player-layout:is([data-player-count="5"], [data-player-count="6"]) { min-height: 540px; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .game-player-layout { min-height: 680px; height: auto; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .game-player-layout:is([data-player-count="5"], [data-player-count="6"]) { min-height: 540px; }
 /* Extend each material system to live chrome outside the prototype Home/Menu. */
 html[data-ui-theme="kindness-workshop"] :is([data-ui-surface="modal"]:not(.theme-a-menu-panel), [data-ui-panel="a1"], [data-ui-surface="game-popup"], [data-ui-chrome="waiting-panel"], .site-card, .footer-card) {
   background-image: url('/cartoon/ui/themes/kindness-workshop/paper-grain.svg');
@@ -162,38 +162,38 @@ html[data-ui-theme="kindness-workshop"] :is([data-ui-surface="modal"]:not(.theme
   box-shadow: 0 5px 14px #193c4e1f;
 }
 html[data-ui-theme="emotion-orbit"] :is([data-ui-panel="a1"], [data-ui-surface="game-popup"], [data-ui-chrome="waiting-panel"]) { box-shadow: 0 8px 28px #30356824; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is([data-slot="button"]:not([data-ui-variant="ghost"]):not([data-ui-variant="link"]), .primary-action, .site-button, .site-header-play, .about-cta) {
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) :is([data-slot="button"]:not([data-ui-variant="ghost"]):not([data-ui-variant="link"]), .primary-action, .site-button, .site-header-play, .about-cta) {
   background-color: transparent; background-image: var(--prototype-primary);
   background-position: center; background-repeat: no-repeat; background-size: 113% 160%;
   border: 0; box-shadow: none; color: var(--brand-on-primary);
 }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is([data-slot="button"][data-ui-variant="secondary"], [data-slot="button"][data-ui-variant="outline"], .secondary-action) { background-image: var(--prototype-quiet); color: var(--brand-ink); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is([data-ui-chrome="circle"], .guide-chrome-close, .preview-close) { border: 1px solid var(--brand-edge); box-shadow: 0 3px 8px var(--brand-shadow); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="header"] > button { background: var(--brand-ivory); color: var(--brand-ink); border: 1px solid var(--brand-edge); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) :is([data-ui-pill], .badge-cartoon[data-ui-badge], .deck-chip, .card-chip) { border-radius: 999px; font-family: 'Quicksand', sans-serif; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="phase-nav"] > button { background: transparent; border: 0; box-shadow: none; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="preview"] > button { background: var(--brand-ivory); color: var(--brand-ink); border: 1px solid var(--brand-edge); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-testid="random-situation-fan"] { max-height: calc(100% - 80px); overflow-y: auto; overscroll-behavior-y: contain; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-testid="random-situation-fan"] > div:first-child { background: var(--brand-ivory); color: var(--brand-ink); border: 1px solid var(--brand-edge); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .own-role-panel { padding: 16px; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .own-role-panel [data-ui-chrome="header"] { padding: 12px 8px; border-radius: 14px; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="circle"][aria-label="Đóng"] { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-testid="coin-rules-guide"] { background: var(--brand-ivory); color: var(--brand-ink); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) :is([data-slot="button"][data-ui-variant="secondary"], [data-slot="button"][data-ui-variant="outline"], .secondary-action) { background-image: var(--prototype-quiet); color: var(--brand-ink); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) :is([data-ui-chrome="circle"], .guide-chrome-close, .preview-close) { border: 1px solid var(--brand-edge); box-shadow: 0 3px 8px var(--brand-shadow); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-ui-chrome="header"] > button { background: var(--brand-ivory); color: var(--brand-ink); border: 1px solid var(--brand-edge); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) :is([data-ui-pill], .badge-cartoon[data-ui-badge], .deck-chip, .card-chip) { border-radius: 999px; font-family: 'Quicksand', sans-serif; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-ui-chrome="phase-nav"] > button { background: transparent; border: 0; box-shadow: none; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-ui-chrome="preview"] > button { background: var(--brand-ivory); color: var(--brand-ink); border: 1px solid var(--brand-edge); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-testid="random-situation-fan"] { max-height: calc(100% - 80px); overflow-y: auto; overscroll-behavior-y: contain; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-testid="random-situation-fan"] > div:first-child { background: var(--brand-ivory); color: var(--brand-ink); border: 1px solid var(--brand-edge); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .own-role-panel { padding: 16px; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .own-role-panel [data-ui-chrome="header"] { padding: 12px 8px; border-radius: 14px; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-ui-chrome="circle"][aria-label="Đóng"] { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-testid="coin-rules-guide"] { background: var(--brand-ivory); color: var(--brand-ink); }
 @media (max-width: 360px) {
-  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-testid="btn-give-coin-to-ntg"] [data-cartoon-surface="pill"] { min-height: 84px; }
-  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-panel { margin-inline: 24px; }
+  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-testid="btn-give-coin-to-ntg"] [data-cartoon-surface="pill"] { min-height: 84px; }
+  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .theme-a-menu-panel { margin-inline: 24px; }
   .brand-menu-label { gap: 6px; }
   .brand-menu-label > .brand-menu-icon { width: 44px; }
   .brand-menu-icon > svg { width: 30px !important; height: 30px !important; margin-right: 8px; }
-  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-actions [data-cartoon-surface="pill"] > span:not([data-cartoon-badge]) { font-size: 16px; padding-inline: 12px; }
+  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .theme-a-menu-actions [data-cartoon-surface="pill"] > span:not([data-cartoon-badge]) { font-size: 16px; padding-inline: 12px; }
 }
 @media (max-height: 600px) {
-  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-panel { margin-top: 88px; margin-bottom: 44px; }
-  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) .theme-a-menu-content { padding: 12px 12px 18px; }
+  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .theme-a-menu-panel { margin-top: 88px; margin-bottom: 44px; }
+  html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) .theme-a-menu-content { padding: 12px 12px 18px; }
 }
 
 /* Dialogs must remain usable with a short viewport or the virtual keyboard open. */
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [role="dialog"][data-ui-surface="game-popup"] {
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [role="dialog"][data-ui-surface="game-popup"] {
   max-height: calc(100dvh - 40px);
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -201,12 +201,12 @@ html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [r
   scrollbar-gutter: stable;
   color: var(--brand-ink);
 }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [role="dialog"][data-ui-surface="game-popup"] .text-black\/65 { color: var(--brand-muted); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [role="dialog"][data-ui-surface="game-popup"] .text-black\/45 { color: var(--brand-muted); }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [role="dialog"][data-ui-surface="game-popup"] :is(.grid-cols-2, .flex.gap-2) { gap: 16px; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [role="dialog"][data-ui-surface="game-popup"] [data-cartoon-surface="pill"]::before { inset-inline: -3%; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="success-toast"] {
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [role="dialog"][data-ui-surface="game-popup"] .text-black\/65 { color: var(--brand-muted); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [role="dialog"][data-ui-surface="game-popup"] .text-black\/45 { color: var(--brand-muted); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [role="dialog"][data-ui-surface="game-popup"] :is(.grid-cols-2, .flex.gap-2) { gap: 16px; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [role="dialog"][data-ui-surface="game-popup"] [data-cartoon-surface="pill"]::before { inset-inline: -3%; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-ui-chrome="success-toast"] {
   background: var(--brand-primary); color: var(--brand-on-primary); overflow-wrap: anywhere;
 }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="success-toast"] > div { min-width: 0; }
-html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"]) [data-ui-chrome="success-toast"] .text-white\/75 { color: var(--brand-on-primary); }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-ui-chrome="success-toast"] > div { min-width: 0; }
+html:is([data-ui-theme="emotion-orbit"], [data-ui-theme="kindness-workshop"], [data-ui-theme="candy-clouds"]) [data-ui-chrome="success-toast"] .text-white\/75 { color: var(--brand-on-primary); }

@@ -12,7 +12,10 @@ Signed AAB/IPA, disclosures/rating, reviewer guide and tested deep links.
 
 ## Current evidence
 
-No native build/signing/store review or privacy form evidence.
+Android debug APK build evidence now exists in R32 (including the2026-10-16
+integrated UI candidate). No owner release-signed AAB/IPA, physical-device/store
+review, privacy-form submission or store approval evidence. Debug signing and
+local emulator checks do not satisfy this task's release gates.
 
 ## Scope
 

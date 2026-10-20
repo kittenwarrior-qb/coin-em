@@ -5,6 +5,8 @@
  *   - Còn lại                     → chia đều 2 bên (left/right), tối đa 4 mỗi bên
  */
 import type { Player } from '@/components/game/types'
+import { useControlTheme } from '@/components/cartoon/controlThemeContext'
+import { KawaiiPlayerLayout } from '@/components/kawaii/KawaiiPlayerLayout'
 
 interface LayoutSlot {
   player: Player | null
@@ -29,6 +31,8 @@ function splitSides(arr: Player[]): { left: Player[]; right: Player[] } {
 }
 
 export function PlayerLayout({ players, renderPlayer, renderCenter }: PlayerLayoutProps) {
+  const candy = useControlTheme() === 'candy-clouds'
+  if(candy)return <KawaiiPlayerLayout players={players} renderPlayer={renderPlayer} renderCenter={renderCenter}/>
   const ntg    = players.find(p => p.isNarrator) ?? players[0] ?? null
   const sender = players.find(p => p.isSender) ?? null
   const rest   = players.filter(p => p.id !== ntg?.id && p.id !== sender?.id)
@@ -36,16 +40,16 @@ export function PlayerLayout({ players, renderPlayer, renderCenter }: PlayerLayo
 
   const playerIndex = (p: Player) => players.findIndex(x => x.id === p.id)
 
-  return (
+  const content = (
     <div className="game-player-layout flex flex-col w-full h-full" data-player-count={players.length}>
 
       {/* Top — NTG */}
-      <div className="flex justify-center">
+      <div className="game-player-top flex justify-center">
         {ntg ? renderPlayer({ player: ntg, position: 'top', index: playerIndex(ntg) }) : <div className="w-14 h-14" />}
       </div>
 
       {/* Middle row: left | center | right */}
-      <div className="flex items-stretch gap-1 flex-1 min-h-0">
+      <div className="game-player-middle flex items-stretch gap-1 flex-1 min-h-0">
 
         {/* Left column */}
         <div className="game-player-side flex flex-col justify-around items-center w-20 flex-shrink-0">
@@ -64,9 +68,10 @@ export function PlayerLayout({ players, renderPlayer, renderCenter }: PlayerLayo
       </div>
 
       {/* Bottom — Sender */}
-      <div className="flex justify-center pt-3">
+      <div className="game-player-bottom flex justify-center pt-3">
         {sender ? renderPlayer({ player: sender, position: 'bottom', index: playerIndex(sender) }) : <div className="w-14 h-14" />}
       </div>
     </div>
   )
+  return content
 }

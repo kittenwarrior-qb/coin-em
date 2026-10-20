@@ -15,6 +15,7 @@ import {
 import { ROLE_TO_IMAGE } from '@/constants/cardImages'
 import { useControlTheme } from '@/components/cartoon/controlThemeContext'
 import { themeBackdrop, themeLogo, isBrandTheme } from '@/components/cartoon/controlThemes'
+import { KawaiiWaitingRoom } from '@/components/kawaii/KawaiiWaitingRoom'
 
 interface Player {
   socketId: string
@@ -146,10 +147,17 @@ export default function WaitingRoom({
 
   return (
     <CartoonScreen data-testid="waiting-room" data-ui-screen="waiting" panel={false}>
-      <div
+      {theme==='candy-clouds'?<KawaiiWaitingRoom roomId={roomId} players={players} myUserId={myUserId} hostId={hostUserId}
+        onProfile={()=>setShowProfile(true)} onLeave={()=>setShowQuit(true)} isHost={isHost} startPending={startPending}
+        startDisabled={!canStart||!isConnected||roundPending||roundDirty||!confirmedValid} onStart={onStartGame}
+        roundChoice={roundChoice} onRoundChoice={value=>{setRoundChoice(value);setRoundMessage('')}}
+        roundDisabled={!isHost||!onUpdateRoundLimit||roundPending||startPending||!isConnected} roundValid={roundValid} confirmedValid={confirmedValid}
+        roundDirty={roundDirty} roundPending={roundPending} roundMessage={roundMessage} saveRounds={()=>void saveRounds()} onAddFakePlayers={isHost?onAddFakePlayers:undefined}
+        renderDebugRole={canHostPickRoles?player=>player.userId!==hostUserId?<CartoonDropdown options={getRoleOptionsForPlayer(player)} value={players.find(item=>item.socketId===player.socketId)?.debugPreferredRole} placeholder="Chọn role" disabled={!canStart} onChange={role=>assignDebugRole(player,role)}/>:null:undefined}
+      />:<div
         className="screen-panel flex flex-col items-center overflow-y-auto pt-[88px] pb-6"
         style={{
-          height: '100dvh',
+          height: '100%',
           backgroundImage: themeBackdrop(theme, 'linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url(/capybara_wallpaper.jpg)'),
           backgroundSize: 'cover',
           backgroundPosition: 'center',
@@ -340,7 +348,7 @@ export default function WaitingRoom({
             </CartoonButton>
           </div>
         </div>
-      </div>
+      </div>}
 
       <QuitConfirmModal
         open={showQuit}

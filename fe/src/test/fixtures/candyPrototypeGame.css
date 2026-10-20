@@ -1,0 +1,124 @@
+/* Complete Kawaii study, isolated from shipping themes and the other studies. */
+.cp-phone[data-home=kawaii][data-study=refined]:not([data-screen=home]){
+ --kw-ink:#345d6b;--kw-blue:#c3e6f0;--kw-pink:#f2c7da;
+ color:var(--kw-ink);background:radial-gradient(ellipse at 90% 4%,#fff0f7,transparent 45%),#e8f7ff;
+}
+.cp-phone[data-home=kawaii][data-study=refined]:not([data-screen=home]) .cp-heading h1{color:#345d6b;-webkit-text-stroke:0;letter-spacing:-.6px}
+.cp-phone[data-home=kawaii][data-study=refined] .cp-heading-line{background:linear-gradient(90deg,#b7e1ed,#efb9d0);border-radius:4px}
+.cp-phone[data-home=kawaii][data-study=refined]:not([data-screen=home]) .cp-action{
+ position:relative;isolation:isolate;background:#c3e6f0;border:1px solid #8db7c4;border-radius:13px;
+ box-shadow:0 3px 0 #9dbfcb,inset 0 1px 0 #f8ffff;color:#345d6b;transition:transform 100ms ease,filter 140ms ease;
+}
+.cp-phone[data-home=kawaii][data-study=refined]:not([data-screen=home]) .cp-action:before{
+ content:'';position:absolute;inset:0;z-index:-1;border:14px solid transparent;border-image:url('/cartoon/ui/prototypes/kawaii/button-teal.png') 100 fill / 14px stretch;opacity:.28;filter:saturate(.65) brightness(1.1);pointer-events:none;
+}
+.cp-phone[data-home=kawaii][data-study=refined] .cp-action.pink{background:#f2c7da;border-color:#c293aa;box-shadow:0 3px 0 #c7a1b4;color:#6b465b}
+.cp-phone[data-home=kawaii][data-study=refined] .cp-action.pink:before{border-image-source:url('/cartoon/ui/prototypes/kawaii/button-pink.png')}
+.cp-phone[data-home=kawaii][data-study=refined] .cp-action.outline{background:#fbfeff;box-shadow:0 2px 0 #c8dce5;border-color:#bfd5e0}
+.cp-phone[data-home=kawaii][data-study=refined] .cp-action.outline:before{opacity:.08}
+.cp-phone[data-home=kawaii][data-study=refined] .cp-action:disabled{opacity:1;background:#e1edf3;color:#8197a3;border-color:#c4d6df;box-shadow:0 2px 0 #cadce5}
+.cp-phone[data-home=kawaii][data-study=refined] .cp-action:disabled:before{opacity:0}
+.cp-phone[data-home=kawaii][data-study=refined] .cp-action:not(:disabled):active,.cp-kawaii-dialog[data-study=refined] .cp-action:not(:disabled):active{transform:translateY(1px)}
+.cp-phone[data-home=kawaii][data-study=refined] .cp-action:focus,.cp-kawaii-dialog[data-study=refined] button:focus{outline:none}
+:root[data-kw-input=keyboard] :is(.cp-phone[data-home=kawaii],.cp-kawaii-dialog)[data-study=refined] button:focus-visible{outline:2px solid #344c70;outline-offset:2px}
+.cp-phone[data-home=kawaii][data-study=refined] :is(.cp-focus-stage,.cp-roster-panel,.cp-waiting-settings){
+ border:2px solid #fff;border-radius:22px;background:linear-gradient(140deg,#fcfeff,#f0faff 68%,#fff0f7);box-shadow:0 0 0 1px #c1deea,0 4px 0 #c4dfeb65;
+}
+.cp-phone[data-home=kawaii][data-study=refined] .cp-round-stage{
+ background:radial-gradient(circle,#fff 0%,#f1faff 65%,#e0f1f8);border-color:#bedfeb;border-bottom-color:#efc6d9;
+ box-shadow:inset 0 0 0 5px #fff,0 4px 0 #c4dfeb65;
+}
+.cp-phone[data-home=kawaii][data-study=refined] .cp-single-stage{background:linear-gradient(135deg,#fcfeff,#edf9ff 70%,#fff0f7);border-color:#c7e3ee;box-shadow:inset 0 0 0 4px #fff}
+.cp-phone[data-home=kawaii][data-study=refined] .cp-deck-label{color:#456d80;background:#f4fbff;border:1px solid #bfdbe8;box-shadow:0 2px 0 #d6eaf3;border-radius:10px}
+.cp-phone[data-home=kawaii][data-study=refined] .cp-status{color:#5b7f90}
+.cp-phone[data-home=kawaii][data-study=refined] .cp-portrait{border-color:#fff;box-shadow:0 3px 0 #c6dce6,0 0 0 1px #cfdee7;background:#f7fcff}
+.cp-phone[data-home=kawaii][data-study=refined] .sender .cp-portrait{outline:2px solid #d992b4;box-shadow:0 0 0 4px #ffe5f0,0 4px 0 #d9b6c7}
+.cp-phone[data-home=kawaii][data-study=refined] .cp-name{color:#345d6b;background:#fff;box-shadow:0 2px 0 #d2e5ed}
+.cp-phone[data-home=kawaii][data-study=refined] .cp-role{color:#6a8293}
+.cp-phone[data-home=kawaii][data-study=refined] .sender .cp-role{color:#a5527c}
+.cp-phone[data-home=kawaii][data-study=refined] .cp-tabs button{border-radius:11px;background:#f5fbfe;color:#658394;border-color:#d0e1e9}
+.cp-phone[data-home=kawaii][data-study=refined] .cp-tabs button[aria-pressed=true]{background:#cceaf3;color:#345d6b;border-color:#96bdcd;box-shadow:0 2px 0 #b7d5e2}
+.cp-phone[data-home=kawaii][data-study=refined] .cp-dock{background:#f8fcff;border-color:#fff}
+.cp-phone[data-home=kawaii][data-study=refined] .cp-journal-button>span{border-radius:11px;background:#fff;border-color:#bfd5e0;box-shadow:0 2px 0 #c6dce6}
+.cp-phone[data-home=kawaii][data-study=refined] .cp-bottom-bar{background:#f8fcff;color:#708c9b}
+.cp-phone[data-home=kawaii][data-study=refined][data-screen=waiting] .cp-roster-panel{justify-content:center;padding:18px 8px}
+.cp-phone[data-home=kawaii][data-study=refined][data-screen=waiting] .cp-roster{flex:0 1 270px}
+.cp-phone[data-home=kawaii][data-study=refined][data-screen=waiting] .cp-roster-panel.paged .cp-roster{flex:1}
+.cp-phone[data-home=kawaii][data-study=refined][data-screen=waiting] .cp-dock>.cp-action{width:100%}
+.cp-phone[data-home=kawaii][data-study=refined].cp-night{background:radial-gradient(ellipse at top,#445573,#26394e 80%);color:#e4f5ff}
+.cp-phone[data-home=kawaii][data-study=refined].cp-night :is(.cp-heading h1,.cp-heading p){color:#eef8ff}
+.cp-phone[data-home=kawaii][data-study=refined].cp-night :is(.cp-focus-stage,.cp-round-stage,.cp-single-stage){background:radial-gradient(circle,#f8fcff,#e7f1fa);color:#345d6b}
+.cp-phone[data-home=kawaii][data-study=refined].cp-night .cp-heading-line{opacity:.7}
+
+/* One dialog family: compact content panels, bounded card/chat/avatar workspaces. */
+.cp-kawaii-dialog[data-study=refined]{border:1px solid #9ecbdc;border-radius:25px;background:#effaff;box-shadow:0 4px 0 #8bbacc,0 18px 50px #24455b35;color:#345d6b}
+.cp-kawaii-dialog[data-study=refined]>.cp-dialog-head{min-height:68px;padding:22px 58px 12px 24px;justify-content:flex-start;border-bottom:0;background:#effaff}
+.cp-kawaii-dialog[data-study=refined]>.cp-dialog-head>h2{padding:0;border:0;box-shadow:none;background:none;font:700 24px/1.2 CPQuicksand,sans-serif;color:#28546b;text-align:left}
+.cp-kawaii-dialog[data-study=refined]>.cp-dialog-head>.cp-circle{position:absolute;top:19px;right:19px;border-radius:10px}
+.cp-kawaii-dialog[data-study=refined]>.cp-dialog-body{padding:6px 24px 24px;gap:14px;background:linear-gradient(#effaff,#f8fcff 65%,#fff2f8)}
+.cp-kawaii-dialog[data-study=refined]:not(:is(.panel-chat,.panel-card,.panel-inventory,.panel-avatar,.panel-menu,.panel-create,.panel-join)){
+ height:fit-content;inset:50% auto auto 50%;translate:-50% -50%;margin:0;max-height:calc(var(--screen-h) - 24px);
+}
+.cp-kawaii-dialog[data-study=refined]:not(:is(.panel-chat,.panel-card,.panel-inventory,.panel-avatar,.panel-menu,.panel-create,.panel-join))>.cp-dialog-body{flex:0 0 auto;container-type:inline-size}
+.cp-kawaii-dialog[data-study=refined]:not(:is(.panel-chat,.panel-card,.panel-inventory,.panel-avatar)) :is(.cp-panel-fill,.cp-guide-page,.cp-member-card,.cp-journal-entry){flex:0 0 auto;gap:12px;justify-content:flex-start}
+.cp-kawaii-dialog[data-study=refined] .cp-panel-fill:empty{display:none}
+.cp-kawaii-dialog[data-study=refined] :is(.cp-guide-page,.cp-member-card,.cp-journal-entry){padding:8px 0}
+.cp-kawaii-dialog[data-study=refined] .cp-detail-avatar{width:72px;height:72px;border-radius:22px;background:#f2faff;box-shadow:0 3px 0 #d2e3ed}
+.cp-kawaii-dialog[data-study=refined] .cp-action{border-radius:13px;min-height:42px;color:#345d6b}
+.cp-kawaii-dialog[data-study=refined] .cp-action.outline{background:#fff;border-color:#bfd5e0;box-shadow:0 2px 0 #c8dce5}
+.cp-kawaii-dialog[data-study=refined] :is(input,select,textarea){border:1px solid #b6cfdd;border-radius:12px;background:#fff;color:#345d6b}
+.cp-kawaii-dialog[data-study=refined] :is(.cp-coin-options button,.cp-avatar-picker button){border-radius:15px;border-color:#d0e2eb;box-shadow:0 2px 0 #d5e6ef;background:#fff}
+.cp-kawaii-dialog[data-study=refined] :is(.cp-coin-options button.active,.cp-avatar-picker button.active){background:#e5f4fa;border-color:#8db5c9;outline:1px solid #8db5c9}
+.cp-kawaii-dialog[data-study=refined] .cp-quantity .cp-circle{border-radius:12px}
+.cp-kawaii-dialog[data-study=refined].panel-menu:not([data-screen=home]){height:min(560px,calc(var(--screen-h) - 24px))}
+.cp-kawaii-dialog[data-study=refined].panel-menu:not([data-screen=home])>.cp-dialog-body{flex:1;container-type:size}
+.cp-kawaii-dialog[data-study=refined] .cp-menu-single{grid-template-columns:1fr 1fr;grid-template-rows:repeat(5,minmax(0,1fr));gap:9px}
+.cp-kawaii-dialog[data-study=refined] .cp-menu-single>button{padding:8px;border-radius:14px;gap:8px;background:#e6f4fa;border:1px solid #c0dae7;box-shadow:0 2px 0 #d1e2ec}
+.cp-kawaii-dialog[data-study=refined] .cp-menu-single>button:nth-child(even){background:#fff0f7;border-color:#e4cbd9}
+.cp-kawaii-dialog[data-study=refined] .cp-menu-single b{font-size:12px}
+.cp-kawaii-dialog[data-study=refined] .cp-menu-single small{font-size:9px;line-height:1.3;color:#718895}
+.cp-kawaii-dialog[data-study=refined] .cp-menu-icon{background:#ffffffc9;border:1px solid #d2e2eb;border-radius:10px;color:#4d7588}
+.cp-kawaii-dialog[data-study=refined] .cp-menu-icon svg{stroke-width:1.8}
+.cp-kawaii-dialog[data-study=refined].panel-chat>.cp-dialog-body{padding:0;gap:0}
+.cp-kawaii-dialog[data-study=refined] .cp-chat-heading h2{font-size:18px;color:#28546b}
+.cp-kawaii-dialog[data-study=refined] .cp-chat-bubble{border-color:#d6e7ef;box-shadow:0 2px 0 #dceaf2}
+.cp-kawaii-dialog[data-study=refined] .self .cp-chat-bubble{background:#fdebf4;border-color:#ebcbdc;box-shadow:0 2px 0 #edd8e4}
+.cp-kawaii-dialog[data-study=refined] .cp-chat-send{background:#c3e6f0;border-color:#8db7c4;box-shadow:0 2px 0 #9dbfcb}
+.cp-kawaii-dialog[data-study=refined] .cp-avatar-picker .cp-detail-avatar{width:min(100%,23cqh);height:min(100%,23cqh)}
+@media(max-height:450px){
+ .cp-kawaii-dialog[data-study=refined]>.cp-dialog-head{min-height:50px;padding:14px 54px 8px 18px}
+ .cp-kawaii-dialog[data-study=refined]>.cp-dialog-head>h2{font-size:21px}
+ .cp-kawaii-dialog[data-study=refined]>.cp-dialog-head>.cp-circle{top:10px;right:13px}
+ .cp-kawaii-dialog[data-study=refined]>.cp-dialog-body{padding:4px 18px 16px;gap:10px}
+ .cp-kawaii-dialog[data-study=refined] :is(.cp-guide-page,.cp-member-card,.cp-journal-entry){padding:0;gap:8px}
+ .cp-kawaii-dialog[data-study=refined] .cp-detail-avatar{width:45px;height:45px}
+ .cp-kawaii-dialog[data-study=refined] .cp-menu-single{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:7px}
+ .cp-kawaii-dialog[data-study=refined] .cp-menu-single>button{padding:6px;gap:5px}
+ .cp-kawaii-dialog[data-study=refined] .cp-menu-single small{display:none}
+ .cp-kawaii-dialog[data-study=refined] .cp-menu-single b{font-size:11px}
+ .cp-kawaii-dialog[data-study=refined] .cp-menu-icon{width:26px;height:26px}
+ .cp-kawaii-dialog[data-study=refined] .cp-menu-icon svg{width:17px;height:17px}
+ .cp-kawaii-dialog[data-study=refined].panel-gift>.cp-dialog-body:has(.cp-coin-options){display:grid;grid-template-columns:1fr 1fr;gap:8px 14px}
+ .cp-kawaii-dialog[data-study=refined].panel-gift .cp-hint{grid-column:1/-1}
+ .cp-kawaii-dialog[data-study=refined].panel-gift .cp-coin-options{grid-row:2/4;align-items:center;gap:5px}
+ .cp-kawaii-dialog[data-study=refined].panel-gift .cp-coin-options button{padding:8px 3px}
+ .cp-kawaii-dialog[data-study=refined].panel-gift .cp-coin-options .cp-coin-art{width:30px;height:30px}
+ .cp-phone[data-home=kawaii][data-study=refined][data-screen=waiting] .cp-roster-panel{padding:6px}
+ .cp-kawaii-dialog[data-study=refined].panel-chat-settings .cp-panel-fill{display:grid;grid-template-columns:28px 1fr 1fr;gap:8px;align-items:center}
+ .cp-kawaii-dialog[data-study=refined].panel-chat-settings .cp-panel-fill>.cp-hero-icon{width:26px!important;height:26px!important}
+ .cp-kawaii-dialog[data-study=refined].panel-chat-settings .cp-panel-fill>.cp-action{min-height:38px;font-size:11px;padding:6px;gap:5px}
+}
+@media(prefers-reduced-motion:no-preference){
+ .cp-phone[data-home=kawaii][data-study=refined] :is(.cp-focus-stage,.cp-round-board,.cp-waiting-settings){animation:kw-room-enter 320ms both}
+ @keyframes kw-room-enter{from{opacity:0;translate:0 4px}70%{opacity:1;translate:0 -1px}to{opacity:1;translate:0 0}}
+}
+/* Visible viewport when a phone keyboard is open: retain field, count and CTA. */
+@media(max-height:300px){
+ .cp-kawaii-dialog[data-study=refined].panel-response>.cp-dialog-head{min-height:43px;padding:10px 50px 7px 16px}
+ .cp-kawaii-dialog[data-study=refined].panel-response>.cp-dialog-body{gap:5px;padding:3px 16px 12px}
+ .cp-kawaii-dialog[data-study=refined].panel-response .cp-hint{font-size:9px;line-height:1.3}
+ .cp-kawaii-dialog[data-study=refined].panel-response label{gap:4px;font-size:11px}
+ .cp-kawaii-dialog[data-study=refined].panel-response textarea{height:56px;line-height:18px;padding:7px 9px}
+ .cp-kawaii-dialog[data-study=refined].panel-response .cp-dialog-body>small{display:block;font-size:9px}
+ .cp-kawaii-dialog[data-study=refined].panel-response .cp-action{min-height:34px;padding:6px;font-size:11px}
+}

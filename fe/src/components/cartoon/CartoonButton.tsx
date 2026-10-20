@@ -62,13 +62,14 @@ export const CartoonButton = forwardRef<HTMLButtonElement, CartoonButtonProps>(
         disabled={blocked}
         aria-busy={pending ? true : callerBusy}
         // Squash on press — scaleX widens, scaleY flattens like pressing a ball
-        whileTap={animate ? isBrandTheme(theme) ? { scale: 0.98 } : CONTROL_MOTION.pill.press : undefined}
+        whileTap={animate ? theme==='candy-clouds'?{y:1}:isBrandTheme(theme) ? { scale: 0.98 } : CONTROL_MOTION.pill.press : undefined}
         // Subtle inflate on hover — ball swells slightly
-        whileHover={animate ? isBrandTheme(theme) ? { y: -1 } : CONTROL_MOTION.pill.hover : undefined}
+        whileHover={animate&&theme!=='candy-clouds' ? isBrandTheme(theme) ? { y: -1 } : CONTROL_MOTION.pill.hover : undefined}
         // Bouncy return: spring overshoots → scaleX dips, scaleY rises → "stretch" phase
-        transition={CONTROL_MOTION.pill.return}
+        transition={theme==='candy-clouds'?{duration:.1,ease:'easeOut'}:CONTROL_MOTION.pill.return}
         {...(props as React.ComponentPropsWithoutRef<typeof motion.button>)}
         data-control-theme={themed ? theme : 'legacy'}
+        data-kawaii-tone={theme==='candy-clouds'?color:undefined}
       >
         <span data-cartoon-surface="pill" className="relative inline-flex max-w-full items-center justify-center">
         <EmcoinImage
@@ -126,7 +127,7 @@ export const CartoonCircleButton = forwardRef<HTMLButtonElement, CartoonCircleBu
     const { src, textColor, themed, shadow } = circleAppearance(theme, color, CIRCLE_SRCS[color] ?? CIRCLE_SRCS.blue)
     const Icon = iconSrc ? UI_ICONS[iconSrc as keyof typeof UI_ICONS] : undefined
     const brandIcons: Record<string, BrandIconName> = { '/emcoin/icons/orbit/help.svg': 'help', '/emcoin/icons/orbit/settings.svg': 'settings', '/emcoin/icons/orbit/book.svg': 'book', '/emcoin/icons/orbit/close.svg': 'close' }
-    const brandIcon = (theme === 'kindness-workshop' || (theme === 'emotion-orbit' && iconSrc === '/emcoin/icons/orbit/help.svg')) && iconSrc ? brandIcons[iconSrc] : undefined
+    const brandIcon = (theme === 'candy-clouds' || theme === 'kindness-workshop' || (theme === 'emotion-orbit' && iconSrc === '/emcoin/icons/orbit/help.svg')) && iconSrc ? brandIcons[iconSrc] : undefined
     const reduceMotion = useReducedMotion()
     const { blocked, animate } = controlState(disabled, pending, reduceMotion)
 
@@ -143,12 +144,13 @@ export const CartoonCircleButton = forwardRef<HTMLButtonElement, CartoonCircleBu
         disabled={blocked}
         aria-busy={pending ? true : callerBusy}
         // Circle = more pronounced blob squash (like a water balloon)
-        whileTap={animate ? isBrandTheme(theme) ? { scale: 0.96 } : CONTROL_MOTION.circle.press : undefined}
-        whileHover={animate ? isBrandTheme(theme) ? { y: -1 } : CONTROL_MOTION.circle.hover : undefined}
+        whileTap={animate ? theme==='candy-clouds'?{y:1}:isBrandTheme(theme) ? { scale: 0.96 } : CONTROL_MOTION.circle.press : undefined}
+        whileHover={animate&&theme!=='candy-clouds' ? isBrandTheme(theme) ? { y: -1 } : CONTROL_MOTION.circle.hover : undefined}
         // Lower damping for circle = more wobble oscillations = more "blob" feel
-        transition={CONTROL_MOTION.circle.return}
+        transition={theme==='candy-clouds'?{duration:.1,ease:'easeOut'}:CONTROL_MOTION.circle.return}
         {...(props as React.ComponentPropsWithoutRef<typeof motion.button>)}
         data-control-theme={themed ? theme : 'legacy'}
+        data-kawaii-shape={theme==='candy-clouds'?'tool':undefined}
       >
         <EmcoinImage
           src={src}
@@ -158,7 +160,7 @@ export const CartoonCircleButton = forwardRef<HTMLButtonElement, CartoonCircleBu
           draggable={false}
         />
         <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          {brandIcon ? <span role={iconAlt ? 'img' : undefined} aria-label={iconAlt || undefined} style={{ display: 'contents' }}><BrandIcon name={brandIcon} style={{ width: iconSize, height: iconSize }} /></span> : themed && Icon ? <Icon aria-hidden={!iconAlt} aria-label={iconAlt || undefined} style={{ width: iconSize, height: iconSize }} strokeWidth={2.6} /> : iconSrc ? (
+          {brandIcon ? <span role={iconAlt ? 'img' : undefined} aria-label={iconAlt || undefined} style={{ display: 'contents' }}><BrandIcon name={brandIcon} style={{ width: iconSize, height: iconSize }} /></span> : themed && Icon ? <Icon aria-hidden={!iconAlt} aria-label={iconAlt || undefined} style={{ width: iconSize, height: iconSize }} strokeWidth={theme === 'candy-clouds' ? 1.8 : 2.6} /> : iconSrc ? (
             <EmcoinImage
               src={iconSrc}
               alt={iconAlt}

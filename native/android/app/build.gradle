@@ -1,0 +1,89 @@
+apply plugin: 'com.android.application'
+
+// Explicit, temporary, local-only QA inputs must never reach debug/release builds.
+def qaRootValue = providers.gradleProperty('emcoinQaRoot').orNull
+def qaTasks = gradle.startParameter.taskNames.collect { it.tokenize(':').last() }
+def qaRequested = qaTasks.contains('assembleStaging')
+if (qaRootValue && (!qaRequested || qaTasks.any { it != 'assembleStaging' })) {
+    throw new GradleException('QA inputs are only allowed for assembleStaging')
+}
+if (qaRequested && !qaRootValue) throw new GradleException('assembleStaging requires an owned emcoinQaRoot')
+def qaRoot = qaRootValue ? new File(qaRootValue).canonicalFile : null
+if (qaRoot) {
+    if (qaRoot.parentFile.canonicalFile != new File(System.getProperty('java.io.tmpdir')).canonicalFile ||
+        !qaRoot.name.startsWith('emcoin-native-stage-') || java.nio.file.Files.isSymbolicLink(new File(qaRootValue).toPath())) {
+        throw new GradleException('Refusing QA inputs outside an owned temporary root')
+    }
+    def receipt = new groovy.json.JsonSlurper().parse(new File(qaRoot, 'qa.json'))
+    if (receipt.profile != 'emcoin-local-android/v1' || receipt.applicationId != 'cloud.emcoin.app.staging' ||
+        !(receipt.api ==~ /https:\/\/10\.0\.2\.2:[1-9][0-9]{3,4}/)) {
+        throw new GradleException('Invalid local Android QA receipt')
+    }
+}
+
+android {
+    namespace = "cloud.emcoin.app"
+    compileSdk = rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "cloud.emcoin.app"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+    }
+    buildTypes {
+        staging {
+            initWith debug
+            applicationIdSuffix '.staging'
+            versionNameSuffix '-local-qa'
+            matchingFallbacks = ['debug']
+            resValue 'string', 'app_name', 'EmCoin QA'
+            resValue 'string', 'title_activity_main', 'EmCoin QA'
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    if (qaRoot) {
+        sourceSets {
+            main.assets.srcDirs = [new File(qaRoot, 'assets')]
+            staging.res.srcDirs = [new File(qaRoot, 'res')]
+        }
+    }
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'
+
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
+    }
+} catch(Exception e) {
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+}

@@ -16,7 +16,7 @@ import { EmcoinImage } from '@/components/cartoon/EmcoinImage'
 
 import { useId, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { CartoonCircleButton } from './CartoonButton'
 import { cn } from '@/lib/utils'
 import { usePopupLifecycle } from '@/features/overlays/usePopupLifecycle'
@@ -56,6 +56,8 @@ export function CartoonModal({
   initialFocus,
 }: CartoonModalProps) {
   const theme = useControlTheme()
+  const reduced=useReducedMotion()
+  const kawaii=theme==='candy-clouds'
   const themed = theme !== 'legacy'
   const menu = themed && appearance === 'menu'
   const [portalTarget, setPortalTarget] = useState<Element | null>(null)
@@ -81,7 +83,7 @@ export function CartoonModal({
           transition={{ duration: 0.18 }}
           className={`${portalTarget === document.body ? 'fixed' : 'absolute'} inset-0 z-50 flex items-center justify-center px-4`}
           data-testid="cartoon-modal-overlay"
-          style={{ background: 'rgba(0,0,0,0.35)', willChange: 'opacity', paddingTop: 'max(48px, env(safe-area-inset-top))', paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
+          style={{ background: 'rgba(0,0,0,0.35)', willChange: 'opacity', paddingTop: kawaii?'max(12px, env(safe-area-inset-top))':'max(48px, env(safe-area-inset-top))', paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
           onClick={persistent ? undefined : onClose}
         >
           {/* Wrapper — scale only (no opacity change here, backdrop handles fade) */}
@@ -92,18 +94,18 @@ export function CartoonModal({
             aria-labelledby={title ? titleId : undefined}
             aria-label={title ? undefined : 'Hộp thoại'}
             tabIndex={-1}
-            initial={{ scale: 0.85 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0.92, transition: { duration: 0.12, ease: 'easeIn' } }}
-            transition={{ type: 'spring', stiffness: 340, damping: 26 }}
+            initial={{ scale: kawaii?reduced?1:.97:.85, y:kawaii&&!reduced?6:0 }}
+            animate={{ scale: kawaii&&!reduced?[.97,1.006,1]:1, y:0 }}
+            exit={{ scale: kawaii?reduced?1:.98:.92, y:kawaii&&!reduced?4:0, transition: { duration: kawaii&&reduced?0:.12, ease: 'easeIn' } }}
+            transition={kawaii?{duration:reduced?0:.28,ease:'easeOut'}:{ type: 'spring', stiffness: 340, damping: 26 }}
             onClick={(e) => e.stopPropagation()}
-            className={cn('relative w-full max-h-full min-h-0 flex flex-col', menu && 'theme-a-menu', className)}
+            className={cn('relative w-full max-h-full min-h-0 flex flex-col', menu && 'theme-a-menu', kawaii&&'kawaii-modal', className)}
             style={{ maxWidth: '23rem', transformOrigin: 'center', willChange: 'transform' }}
           >
 
             {/* ── Headline Flag — nhô lên trên panel, căn giữa ── */}
             {title && (
-              <div className={cn('absolute -top-10 left-0 right-0 flex justify-center z-10 pointer-events-none', menu && 'theme-a-menu-heading')}>
+              <div className={cn('absolute -top-10 left-0 right-0 flex justify-center z-10 pointer-events-none', menu && 'theme-a-menu-heading',kawaii&&'kawaii-modal-title')}>
                 <div className={cn('relative flex items-center justify-center', themed && 'theme-a-headline')} style={{ height: 80 }}>
                   {!themed && <EmcoinImage
                     src="/cartoon/ui/Headline-Flag.png"
@@ -126,14 +128,14 @@ export function CartoonModal({
                 borderImage: menu ? undefined : themePanel(theme),
               }}
             >
-              <div className={cn(title ? 'pt-13 pb-5 px-5' : 'p-5', menu && 'theme-a-menu-content')}>
+              <div data-ui-modal-content className={cn(title ? 'pt-13 pb-5 px-5' : 'p-5', menu && 'theme-a-menu-content')}>
                 {children}
               </div>
             </div>
 
             {/* ── Close Button — blue-teal, ngoài panel góc trên phải ── */}
             {!hideClose && onClose && (
-              <div className={cn('absolute -top-[1px] -right-[1px] z-30', menu && 'theme-a-menu-close')}>
+              <div className={cn('absolute -top-[1px] -right-[1px] z-30', menu && 'theme-a-menu-close',kawaii&&'kawaii-modal-close')}>
                 <CartoonCircleButton
                   color="blue-teal"
                   size="sm"
