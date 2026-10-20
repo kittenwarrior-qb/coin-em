@@ -9,6 +9,20 @@ import { PlayerLayout } from '@/components/game/PlayerLayout'
 import { chooseBoardLayout } from '@/features/theme/boardLayout'
 import type { Player } from '@/components/game/types'
 import { handlePlatformBack } from '@/features/overlays/usePopupLifecycle'
+import { KawaiiHome } from '@/components/kawaii/KawaiiHome'
+
+it('pauses background motion independently of real home actions',()=>{
+ const onJoin=vi.fn(),onCreate=vi.fn(),onMenu=vi.fn(),onGuide=vi.fn(),onResume=vi.fn()
+ const {container}=render(<KawaiiHome {...{onJoin,onCreate,onMenu,onGuide,onResume}} resumeCount={0}/>)
+ fireEvent.click(screen.getByRole('button',{name:'Tạm dừng chuyển động nền'}))
+ expect(container.querySelector('.kawaii-home')).toHaveAttribute('data-motion-paused','true')
+ fireEvent.click(screen.getByRole('button',{name:'Logo EmCoin'}))
+ expect(onJoin).not.toHaveBeenCalled();expect(onCreate).not.toHaveBeenCalled()
+ fireEvent.click(screen.getByRole('button',{name:'Bật chuyển động nền'}))
+ expect(container.querySelector('.kawaii-home')).not.toHaveAttribute('data-motion-paused')
+ fireEvent.click(screen.getByRole('button',{name:'Tìm phòng'}));fireEvent.click(screen.getByRole('button',{name:'Tạo phòng'}))
+ expect(onJoin).toHaveBeenCalledOnce();expect(onCreate).toHaveBeenCalledOnce()
+})
 
 afterEach(async()=>{cleanup();await waitFor(()=>expect(handlePlatformBack()).toBe(false));localStorage.clear()})
 const longText='A'.repeat(90)+'B'.repeat(90)+'C'.repeat(90)+'D'.repeat(90)+'E'.repeat(90)+'F'.repeat(50)

@@ -22,6 +22,31 @@ try{
    await page.waitForTimeout(delay)
    expect(await page.evaluate(()=>document.documentElement.scrollHeight<=innerHeight+2&&document.documentElement.scrollWidth<=innerWidth+2)).toBe(true)
   }
+  await expect(join).toHaveCSS('opacity','1')
+  await expect(page.locator('.kawaii-logo')).toHaveCSS('opacity','1')
+  await page.locator('#home-logo').evaluate(image=>image.decode())
+  await page.screenshot({path:path.join(output,`${width}-${reducedMotion}-home.png`)})
+  const float=page.locator('.kawaii-logo-float')
+  if(reducedMotion==='reduce'){
+   expect(await float.evaluate(el=>el.getAnimations().length)).toBe(0)
+   expect(await page.locator('.kawaii-clouds').evaluate(el=>el.getAnimations({subtree:true}).length)).toBe(0)
+   await expect(page.getByRole('button',{name:'Tạm dừng chuyển động nền'})).toHaveCount(0)
+  }else{
+   const levitation=await float.evaluate(async el=>{
+    const animation=el.getAnimations()[0];animation.pause();animation.currentTime=3000
+    await new Promise(resolve=>requestAnimationFrame(resolve))
+    const y=new DOMMatrix(getComputedStyle(el).transform).m42
+    animation.play();return y
+   })
+   expect(levitation).toBeCloseTo(-5,1)
+   await page.getByRole('button',{name:'Tạm dừng chuyển động nền'}).click()
+   const paused=await page.locator('.kawaii-home').evaluate(el=>[...el.querySelectorAll('.kawaii-logo-float,.kawaii-cloud-back,.kawaii-cloud-front')].map(node=>getComputedStyle(node).animationPlayState))
+   expect(paused).toEqual(['paused','paused','paused'])
+   await page.getByRole('button',{name:'Bật chuyển động nền'}).click()
+   expect(await float.evaluate(el=>getComputedStyle(el).animationPlayState)).toBe('running')
+   await page.getByRole('button',{name:'Logo EmCoin',exact:true}).click()
+   await expect(page.locator('#home-logo')).toHaveCount(1)
+  }
   await join.hover()
   await page.waitForTimeout(120)
   const hover=await join.evaluate(el=>({shine:getComputedStyle(el,'::after').animationName,opacity:Number(getComputedStyle(el,'::after').opacity),icon:getComputedStyle(el.querySelector('svg')).transform}))

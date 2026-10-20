@@ -9,7 +9,13 @@ html[data-ui-theme=candy-clouds] .screen-panel:has(>.kawaii-home){overflow:hidde
 .kawaii-home-tools>button:last-child{background:#fbe4ef;box-shadow:0 3px 0 #c8a8b9}
 .kawaii-home-tools svg,.kawaii-tool svg{width:23px;height:23px;stroke-width:1.8}
 .kawaii-home-core{width:100%;display:flex;flex-direction:column;align-items:center;gap:clamp(28px,6cqh,60px);padding:55px 30px 110px;z-index:1}
-.kawaii-logo{width:min(88%,330px);padding:0;background:none;border:0}
+.kawaii-logo{position:relative;width:min(88%,330px);padding:0;background:none;border:0;cursor:pointer;touch-action:manipulation;border-radius:24px}
+.kawaii-logo-float{position:relative;display:block}
+.kawaii-logo-float>img{filter:drop-shadow(0 3px 1px #567e8e30) drop-shadow(0 10px 8px #6497ac26)}
+.kawaii-logo:after{content:'';position:absolute;left:27%;right:27%;bottom:-13px;height:10px;border-radius:50%;background:#7ba4b933;filter:blur(5px);pointer-events:none}
+.kawaii-logo:active .kawaii-logo-float>img{filter:drop-shadow(0 2px 1px #567e8e38) drop-shadow(0 4px 5px #6497ac26)}
+.kawaii-motion-toggle{position:absolute;z-index:2;right:16px;bottom:max(12px,env(safe-area-inset-bottom));width:36px;height:36px;display:grid;place-items:center;border:1px solid #b6cfdd;border-radius:12px;background:#fff9;box-shadow:0 2px 0 #c5dbe566;color:#52778d;cursor:pointer}
+.kawaii-motion-toggle>svg{width:16px;height:16px;stroke-width:1.8}
 .kawaii-logo img{display:block;width:100%;height:auto!important;max-height:32cqh;object-fit:contain}
 .kawaii-home-actions{width:min(100%,270px);display:grid;gap:25px}
 .kawaii-button{position:relative;isolation:isolate;min-height:66px;display:grid;grid-template-columns:28px 1fr 28px;align-items:center;column-gap:8px;padding:0 17px;border:1px solid #7cabb9;border-radius:16px;background:#c3e6f0;box-shadow:0 3px 0 #91b7c4;color:#345d6b;font:700 23px/1.2 Quicksand,sans-serif}
@@ -159,6 +165,14 @@ html[data-ui-theme=candy-clouds] .room-chat-messages>li.is-self{background:#fdeb
  html[data-ui-theme=candy-clouds] .kawaii-modal-title{padding:12px 48px 6px 16px}html[data-ui-theme=candy-clouds] .kawaii-modal-title .font-display{font-size:20px}html[data-ui-theme=candy-clouds] .kawaii-modal-close{top:10px!important;right:12px!important}html[data-ui-theme=candy-clouds] .kawaii-modal [data-ui-modal-content]{padding:4px 16px 14px}html[data-ui-theme=candy-clouds] .kawaii-modal .theme-a-menu-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 }
 @media(prefers-reduced-motion:no-preference){
+ .kawaii-logo-float{animation:kawaii-levitate 6s ease-in-out infinite}
+ .kawaii-logo:after{animation:kawaii-ground-shadow 6s ease-in-out infinite}
+ .kawaii-cloud-back{animation:kawaii-cloud-slide 24s ease-in-out infinite alternate}
+ .kawaii-cloud-front{animation:kawaii-cloud-slide 32s ease-in-out -9s infinite alternate-reverse}
+ .kawaii-home[data-motion-paused=true] :is(.kawaii-logo-float,.kawaii-cloud-back,.kawaii-cloud-front),.kawaii-home[data-motion-paused=true] .kawaii-logo:after{animation-play-state:paused}
+ @keyframes kawaii-levitate{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+ @keyframes kawaii-ground-shadow{0%,100%{transform:scaleX(1);opacity:1}50%{transform:scaleX(.88);opacity:.65}}
+ @keyframes kawaii-cloud-slide{from{transform:translateX(-20px)}to{transform:translateX(20px)}}
  .kawaii-home-actions>.kawaii-button{animation:kawaii-arrive 420ms 90ms both}.kawaii-home-actions>.kawaii-button:nth-child(2){animation-delay:150ms}.kawaii-logo{animation:kawaii-brand-arrive 480ms both}.kawaii-home button{transition:filter 120ms ease,translate 100ms ease}
  @keyframes kawaii-arrive{0%{opacity:0;translate:0 -5px}65%{opacity:1;translate:0 0}83%{translate:0 -1.5px}100%{opacity:1;translate:0 0}}
  @keyframes kawaii-brand-arrive{0%{opacity:0;scale:.975}65%{opacity:1;scale:1.012}85%{scale:.998}100%{opacity:1;scale:1}}
