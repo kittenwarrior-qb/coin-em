@@ -6,6 +6,8 @@ import { usePendingNavigationGuard } from '@/features/overlays/usePopupLifecycle
 import { subscribeNativeForeground } from '@/features/platform/nativeEvents'
 import { chatRequest, invitationCode, parseChatMessage, parseChatView, uuid, type ChatIntent, type ChatView } from './chatClient'
 import './roomChat.css'
+import { useControlTheme } from '@/components/cartoon/controlThemeContext'
+import { KawaiiChat } from './KawaiiChat'
 
 type Operation = { event: 'chat_command' | 'report_chat_message'; payload: Record<string, unknown> }
 const errorCopy = (error: unknown) => {
@@ -26,6 +28,7 @@ export function RoomChatPanel({ socket, roomId, userId, connected, players, onBu
   players: { userId?: string; name: string; isFake?: boolean }[]; onBusy: (busy: boolean) => void
 }) {
   const textId = useId()
+  const theme=useControlTheme()
   const [view, setView] = useState<ChatView | null>(null), [open, setOpen] = useState(false)
   const [text, setText] = useState(''), [invite, setInvite] = useState(''), [hostInvite, setHostInvite] = useState('')
   const [error, setError] = useState(''), [pending, setPending] = useState(false), [retry, setRetry] = useState<Operation | null>(null)
@@ -135,7 +138,7 @@ export function RoomChatPanel({ socket, roomId, userId, connected, players, onBu
   if (!view && !open && !retry) return null
   return <>
     <button type="button" className="room-chat-launch" aria-label="Mở chat phòng" disabled={pending} onClick={() => setOpen(true)}><MessageCircle aria-hidden="true" /><span>Chat</span></button>
-    <CartoonModal open={open} title="Chat phòng" persistent={pending || !!retry} hideClose={pending || !!retry} onClose={() => { if (!pending && !retry) setOpen(false) }} className="room-chat-modal">
+    {theme==='candy-clouds'?<KawaiiChat open={open} close={()=>{if(!pending&&!retry)setOpen(false)}} view={view} userId={userId} players={players} blocked={blocked} pending={pending} connected={connected} retry={!!retry} onRetry={()=>{if(retry)void execute(retry)}} error={error} text={text} setText={setText} invite={invite} setInvite={setInvite} hostInvite={hostInvite} command={command} reportId={reportId} setReportId={setReportId} reason={reason} setReason={setReason} report={()=>void execute({event:'report_chat_message',payload:{roomId,messageId:reportId,reason,requestId:crypto.randomUUID()}})}/>:<CartoonModal open={open} title="Chat phòng" persistent={pending || !!retry} hideClose={pending || !!retry} onClose={() => { if (!pending && !retry) setOpen(false) }} className="room-chat-modal">
       <div className="room-chat-content">
         <p className="room-chat-note"><ShieldCheck aria-hidden="true" />Chỉ người được mời. Không gửi link, email, số điện thoại hay thông tin riêng tư. Bạn có thể chặn hoặc báo cáo tin nhắn.</p>
         {!connected && <p role="status">Mất kết nối. Chat sẽ tải lại khi mạng ổn định.</p>}
@@ -168,6 +171,6 @@ export function RoomChatPanel({ socket, roomId, userId, connected, players, onBu
             {view.isHost && <button disabled={blocked} onClick={() => command({ kind: 'mute', targetId: p.userId!, value: !view.safetyMuted?.includes(p.userId!) })}>{view.safetyMuted?.includes(p.userId!) ? 'Cho gửi tin' : 'Tắt gửi tin'}</button>}</div>)}</details>
         </>}
       </div>
-    </CartoonModal>
+    </CartoonModal>}
   </>
 }

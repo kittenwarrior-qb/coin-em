@@ -1,0 +1,23 @@
+{
+  "protocolBootstrapSimulated": true,
+  "results": [
+    {
+      "width": 390,
+      "height": 844,
+      "theme": "candy-clouds",
+      "home": true,
+      "overflow": false,
+      "broken": [],
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "theme": "candy-clouds",
+      "home": true,
+      "overflow": false,
+      "broken": [],
+      "errors": []
+    }
+  ]
+}

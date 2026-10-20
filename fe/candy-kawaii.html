@@ -1,0 +1,7 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/><title>EmCoin · Kawaii prototype</title></head><body><div id="root"></div><script type="module">
+const query = new URLSearchParams(location.search)
+for (const [key,value] of Object.entries({home:'kawaii',study:'refined',brand:'coin',screen:'home'})) if (!query.has(key)) query.set(key,value)
+history.replaceState(null,'',`${location.pathname}?${query}`)
+if (import.meta.env.DEV) import('/src/test/fixtures/CandyPrototypes.tsx')
+</script></body></html>

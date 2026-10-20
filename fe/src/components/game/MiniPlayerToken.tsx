@@ -239,7 +239,7 @@ export function MiniPlayerToken({
                 : { duration: 1.6, repeat: Infinity, ease: 'easeInOut' }
               }
               style={{
-                inset: -8,
+                inset: theme==='candy-clouds'?-3:-8,
                 borderColor: actionTargetColor,
                 background: 'transparent',
               }}
@@ -261,7 +261,7 @@ export function MiniPlayerToken({
               name={player.name}
               avatarIndex={displayAvatarIdx}
               bgIndex={displayBgIdx}
-              borderColor={borderColor}
+              borderColor={theme==='candy-clouds'&&!isActionTarget&&!isSelectedActionTarget?(player.isSender?'#d992b4':player.isNarrator?'#b6d3e2':'#d8e3eb'):borderColor}
               countdownColor={countdownColor}
               showCountdown={showCountdown}
               countdownKey={countdownKey}
@@ -278,11 +278,11 @@ export function MiniPlayerToken({
               animate={{
                 opacity: [0, 0.95, 0],
                 scale: [0.65, 1, 0.85],
-                x: [28, 34, 40],
-                y: [-2, -14, -28],
+                x: theme==='candy-clouds'?[0,2,4]:[28, 34, 40],
+                y: theme==='candy-clouds'?[-2,-4,-8]:[-2, -14, -28],
               }}
               transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 1.2, ease: 'easeOut' }}
-              style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.25))' }}
+              style={{ ...(theme==='candy-clouds'?{top:0,right:0,width:18,height:18}:{}),filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.25))' }}
               draggable={false}
             />
           )}
@@ -295,8 +295,9 @@ export function MiniPlayerToken({
               transition={{ type: 'spring', stiffness: 420, damping: 18 }}
               className="absolute z-20 h-8 w-8 object-contain pointer-events-none"
               style={{
-                top: 8,
-                [actionIconSide]: -24,
+                top: theme==='candy-clouds'?4:8,
+                [actionIconSide]: theme==='candy-clouds'?-2:-24,
+                ...(theme==='candy-clouds'?{width:20,height:20}:{}),
                 filter: 'drop-shadow(0 3px 4px rgba(0,0,0,0.25))',
               }}
             />
@@ -310,8 +311,9 @@ export function MiniPlayerToken({
               transition={{ type: 'spring', stiffness: 420, damping: 18 }}
               className="absolute z-30 h-7 w-7 object-contain pointer-events-none"
               style={{
-                bottom: -8,
-                left: -8,
+                bottom: theme==='candy-clouds'?-2:-8,
+                left: theme==='candy-clouds'?-2:-8,
+                ...(theme==='candy-clouds'?{width:20,height:20}:{}),
                 filter: 'drop-shadow(0 3px 4px rgba(0,0,0,0.28))',
               }}
               draggable={false}
@@ -337,6 +339,7 @@ export function MiniPlayerToken({
               style={{
                 top: '50%',
                 left: '50%',
+                ...(theme==='candy-clouds'?{width:22,height:22}:{}),
                 transform: 'translate(-50%, -50%)',
                 filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.35))',
               }}
@@ -346,7 +349,7 @@ export function MiniPlayerToken({
           {player.isMe && (
             <div
               className="absolute"
-              style={{ bottom: -24, right: -3 }}
+              style={{ bottom: theme === 'candy-clouds' ? 0 : -24, right: theme === 'candy-clouds' ? -8 : -3 }}
               onClick={handlePhotoBadgeClick}
             >
               <CartoonCircleButton

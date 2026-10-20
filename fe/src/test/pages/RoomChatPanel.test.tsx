@@ -21,6 +21,29 @@ function setup(initial = view()) {
 }
 afterEach(cleanup)
 describe('room chat UI', () => {
+  it('keeps the real acknowledgement and uncertain retry protocol in the Kawaii presentation', async () => {
+    const s=setup()
+    render(<ControlThemeProvider theme="candy-clouds"><RoomChatPanel {...s.props}/></ControlThemeProvider>)
+    fireEvent.click(await screen.findByRole('button',{name:'Mở chat phòng'}))
+    expect(await screen.findByText('<img onerror=alert(1)>')).toBeInTheDocument()
+    expect(document.querySelector('.kawaii-chat-bubble img')).toBeNull()
+    fireEvent.click(screen.getByRole('button',{name:'Soạn tin'}))
+    fireEvent.change(screen.getByLabelText('Tin nhắn'),{target:{value:'Tin từ giao diện Kawaii'}})
+    s.emitWithAck.mockRejectedValueOnce(Error('operation timed out'))
+    fireEvent.click(screen.getByRole('button',{name:'Gửi'}))
+    await screen.findByText(/Chưa xác nhận được kết quả/)
+    fireEvent.click(screen.getByRole('button',{name:'Xem chat và bản nháp'}))
+    expect(screen.getByLabelText('Tin nhắn')).toHaveValue('Tin từ giao diện Kawaii')
+    const first=s.emitWithAck.mock.calls.find(([event])=>event==='chat_command')!
+    expect(first[1]).toMatchObject({roomId:'fixture',kind:'send',text:'Tin từ giao diện Kawaii',expectedRevision:1})
+    expect(screen.getByRole('button',{name:'Gửi'})).toBeDisabled()
+    fireEvent.click(screen.getByRole('button',{name:'Xem trạng thái kết nối / yêu cầu'}))
+    s.emitWithAck.mockResolvedValueOnce({success:true,replayed:true,data:view({revision:2})})
+    fireEvent.click(screen.getByRole('button',{name:'Kiểm tra lại yêu cầu'}))
+    await waitFor(()=>expect(screen.getByLabelText('Tin nhắn')).toHaveValue(''))
+    const calls=s.emitWithAck.mock.calls.filter(([event])=>event==='chat_command')
+    expect(calls).toHaveLength(2);expect(calls[1][1]).toEqual(calls[0][1])
+  })
   it.each([
     ['CHAT_CONTACT_NOT_ALLOWED', 'Hãy bỏ email hoặc số điện thoại'],
     ['CHAT_LINK_NOT_ALLOWED', 'Chat phòng không nhận đường dẫn'],

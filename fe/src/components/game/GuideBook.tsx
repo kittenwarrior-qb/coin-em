@@ -3,6 +3,8 @@ import { AnimatePresence, motion, type PanInfo } from 'framer-motion'
 import { useRef, useState } from 'react'
 import { usePopupLifecycle } from '@/features/overlays/usePopupLifecycle'
 import { CoinRulesGuide } from './CoinRulesGuide'
+import { useControlTheme } from '@/components/cartoon/controlThemeContext'
+import { X } from 'lucide-react'
 
 const SLIDES = [
   '/tutorial/1.webp',
@@ -23,6 +25,7 @@ interface GuideBookProps {
 
 
 export function GuideBook({ onClose }: GuideBookProps) {
+  const kawaii=useControlTheme()==='candy-clouds'
   const [current, setCurrent] = useState(0)
   const [direction, setDirection] = useState(0)
   const [showCoinRules, setShowCoinRules] = useState(true)
@@ -50,7 +53,7 @@ export function GuideBook({ onClose }: GuideBookProps) {
       aria-modal="true"
       aria-label="Hướng dẫn"
       tabIndex={-1}
-      className="absolute inset-0 z-[200] flex items-center justify-center bg-black/60"
+      className={`absolute inset-0 z-[200] flex items-center justify-center bg-black/60 ${kawaii?'kawaii-guide':''}`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -75,7 +78,7 @@ export function GuideBook({ onClose }: GuideBookProps) {
             aria-label="Đóng hướng dẫn"
             style={{ fontFamily: 'system-ui', fontSize: 20, color: 'rgba(255,255,255,0.7)' }}
           >
-            ×
+            {kawaii?<X/>:'×'}
           </button>
         </div>
 

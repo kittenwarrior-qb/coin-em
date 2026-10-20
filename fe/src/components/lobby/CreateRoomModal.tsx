@@ -20,7 +20,9 @@ const DEFAULT_DECKS: CardDeckSelection = {
 }
 
 export function CreateRoomModal({ open, onClose, onCreate }: CreateRoomModalProps) {
-  const headingInk = useControlTheme() !== 'legacy' ? 'var(--brand-ink)' : '#2f76ac'
+  const theme=useControlTheme(),kawaii=theme==='candy-clouds'
+  const headingInk = theme !== 'legacy' ? 'var(--brand-ink)' : '#2f76ac'
+  const [entryStep,setEntryStep]=useState(0)
   const [userName, setUserName] = useState('')
   const [decks, setDecks] = useState<CardDeckSelection>(DEFAULT_DECKS)
   const { pending, run, error } = useConfirmedAction('create', open)
@@ -44,18 +46,20 @@ export function CreateRoomModal({ open, onClose, onCreate }: CreateRoomModalProp
   }
 
   return (
-    <CartoonModal open={open} onClose={pending ? undefined : onClose} persistent={pending} hideClose={pending} title="Tạo phòng" data-testid="modal-create">
+    <CartoonModal open={open} onClose={pending ? undefined : onClose} persistent={pending} hideClose={pending} title="Tạo phòng" className={kawaii?'kawaii-entry-create':undefined} data-testid="modal-create">
       <fieldset disabled={pending} className="flex min-w-0 flex-col gap-4 border-0 p-0">
+        {kawaii&&<nav className="kawaii-tabs"><button type="button" aria-pressed={entryStep===0} onClick={()=>setEntryStep(0)}>Tên của bạn</button><button type="button" aria-pressed={entryStep===1} onClick={()=>setEntryStep(1)}>Bộ thẻ</button></nav>}
+        {(!kawaii||entryStep===0)&&
         <CartoonInput
           label="Tên của bạn"
           data-testid="input-username-create"
           value={userName}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUserName(e.target.value)}
           placeholder="Nhập tên"
-        />
+        />}
 
         {/* Card deck selection */}
-        <div className="flex flex-col gap-3">
+        {(!kawaii||entryStep===1)&&<div className={`flex flex-col gap-3 ${kawaii?'kawaii-entry-decks':''}`}>
           {/* Situation */}
           <div>
             <p className="font-display text-sm mb-2" style={{ color: headingInk }}>Thẻ Tình huống</p>
@@ -76,9 +80,9 @@ export function CreateRoomModal({ open, onClose, onCreate }: CreateRoomModalProp
               <CartoonCheckbox label="Nâng cao" data-testid="checkbox-emotion-advanced" checked={decks.emotion.advanced} onChange={() => toggleEmotion('advanced')} />
             </div>
           </div>
-        </div>
+        </div>}
 
-        <CartoonButton
+        {kawaii&&entryStep===0?<CartoonButton disabled={!userName.trim()} onClick={()=>setEntryStep(1)}>Tiếp tục</CartoonButton>:<CartoonButton
           color="yellow"
           size="lg"
           disabled={!userName.trim()}
@@ -87,7 +91,7 @@ export function CreateRoomModal({ open, onClose, onCreate }: CreateRoomModalProp
           data-testid="btn-confirm-create"
         >
           Tạo phòng
-        </CartoonButton>
+        </CartoonButton>}
       </fieldset>
       {(error || confirmationError) && <p role="alert" className="font-body text-sm">{error || confirmationError}</p>}
     </CartoonModal>

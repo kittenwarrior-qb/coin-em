@@ -57,7 +57,7 @@ export const CONTROL_THEMES = {
 } as const satisfies Record<string, ControlTheme>
 
 export type ControlThemeId = keyof typeof CONTROL_THEMES
-export const DEFAULT_CONTROL_THEME: ControlThemeId = 'emotion-orbit'
+export const DEFAULT_CONTROL_THEME: ControlThemeId = 'candy-clouds'
 
 export function isBrandTheme(theme: ControlThemeId) {
   return theme === 'emotion-orbit' || theme === 'kindness-workshop' || theme === 'candy-clouds'
@@ -65,12 +65,13 @@ export function isBrandTheme(theme: ControlThemeId) {
 
 /** Only new non-card art has material variants. Never rewrite arbitrary image URLs. */
 export function themeArtUrl(theme: ControlThemeId, src: string | undefined) {
+  if (theme === 'candy-clouds' && src && /^\/emcoin\/icons\/orbit\/(lock|check|arrowRight|arrowLeft|heal|connect|compass|sleep|facilitator|storyteller|gift|photo)\.svg$/.test(src)) return src.replace('/orbit/', '/candy/')
   return theme === 'kindness-workshop' && src?.startsWith('/emcoin/') ? src.replace('/orbit/', '/paper/') : src
 }
 
 /** Owner-approved theme wordmarks; card identities remain independent. */
 export function themeLogo(theme: ControlThemeId) {
-  if (theme === 'candy-clouds') return '/logo.svg'
+  if (theme === 'candy-clouds') return '/cartoon/ui/themes/candy-clouds/coin-mark.webp'
   return isBrandTheme(theme) ? `/cartoon/ui/themes/${theme}/logo-v2.webp` : '/emcoin_logo.png'
 }
 

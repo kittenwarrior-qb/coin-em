@@ -11,18 +11,19 @@ import { fileURLToPath } from 'node:url'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const [mode, sha] = process.argv.slice(2)
-if (!['prepare', 'deploy', 'update-web'].includes(mode) || !/^[a-f0-9]{40}$/.test(sha ?? '')) throw Error('Usage: node deploy/emcoin/manual-release.mjs prepare|deploy|update-web <verified 40-character commit>')
+if (!['prepare', 'deploy', 'update-web', 'prepare-ui', 'update-ui'].includes(mode) || !/^[a-f0-9]{40}$/.test(sha ?? '')) throw Error('Usage: node deploy/emcoin/manual-release.mjs prepare|deploy|update-web|prepare-ui|update-ui <verified 40-character commit>')
 const run = (bin, args, cwd = root) => execFileSync(bin, args, { cwd, stdio: 'inherit', windowsHide: true })
 const capture = (bin, args) => execFileSync(bin, args, { cwd: root, encoding: 'utf8', windowsHide: true }).trim()
 const release = path.join(root, 'tmp', 'manual-releases', sha)
-const images = [`emcoin/backend:${sha}`, `emcoin/web:${sha}`]
+const uiOnly = mode === 'prepare-ui' || mode === 'update-ui'
+const images = uiOnly ? [`emcoin/web:${sha}`] : [`emcoin/backend:${sha}`, `emcoin/web:${sha}`]
 async function compressed(bin, args, destination) {
   const child = spawn(bin, args, { cwd: root, stdio: ['ignore', 'pipe', 'inherit'], windowsHide: true })
   const done = new Promise((resolve, reject) => { child.once('error', reject); child.once('exit', code => code === 0 ? resolve() : reject(Error(`${bin} failed (${code})`))) })
   await Promise.all([pipeline(child.stdout, createGzip(), createWriteStream(destination, { flags: 'wx' })), done])
 }
-if (mode === 'prepare') {
-  if (capture('git', ['rev-parse', 'HEAD']) !== sha || capture('git', ['diff', '--name-only', 'HEAD'])) throw Error('Require exact committed HEAD with no tracked edits')
+if (mode === 'prepare' || mode === 'prepare-ui') {
+  if (capture('git', ['rev-parse', 'HEAD']) !== sha || capture('git', ['diff', '--name-only', 'HEAD', ...(uiOnly ? ['--', 'fe', 'deploy/emcoin'] : [])])) throw Error('Require exact committed HEAD with no release-source tracked edits')
   run('git', ['cat-file', '-e', `${sha}^{commit}`])
   const owned = await mkdtemp(path.join(os.tmpdir(), 'emcoin-release-source-'))
   const archive = path.join(owned, 'source.tar')
@@ -30,7 +31,8 @@ if (mode === 'prepare') {
   const source = path.join(owned, 'source'); await mkdir(source)
   run('tar', ['-xf', archive, '-C', source])
   for (const [index, context, dockerfile] of [[0, 'be', 'be/Dockerfile.prod'], [1, 'fe', 'deploy/emcoin/web.Dockerfile']]) {
-    const args = ['build', '--label', `org.opencontainers.image.revision=${sha}`, '-f', path.join(source, dockerfile), '-t', images[index]]
+    if (uiOnly && index === 0) continue
+    const args = ['build', '--label', `org.opencontainers.image.revision=${sha}`, '-f', path.join(source, dockerfile), '-t', `emcoin/${index === 0 ? 'backend' : 'web'}:${sha}`]
     if (index === 1) args.push('--build-arg', 'VITE_API_URL=https://app.emcoin.cloud')
     args.push(path.join(source, context)); run('docker', args)
   }
@@ -53,6 +55,6 @@ if (mode === 'prepare') {
   run(scp, [...options, ...['release-images.tar.gz', 'release-config.tar.gz', 'SHA256SUMS'].map(file => path.join(release, file)), `${target}:${incoming}/`])
   // Run a verified file, not bash -s: a child with open stdin can consume the
   // remainder of a piped deployment script (notably compose run).
-  const driver = mode === 'update-web' ? 'deploy-web-update.sh' : 'deploy-release.sh'
-  run(ssh, [...options, target, `cd ${incoming} && sha256sum -c SHA256SUMS && tar -xzf release-config.tar.gz deploy/emcoin/${driver} && bash deploy/emcoin/${driver} ${sha}`])
+  const driver = mode === 'update-web' || mode === 'update-ui' ? 'deploy-web-update.sh' : 'deploy-release.sh'
+  run(ssh, [...options, target, `cd ${incoming} && sha256sum -c SHA256SUMS && tar -xzf release-config.tar.gz deploy/emcoin/${driver} && bash deploy/emcoin/${driver} ${sha}${uiOnly ? ' ui-only' : ''}`])
 }

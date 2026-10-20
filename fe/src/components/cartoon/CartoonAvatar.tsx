@@ -4,6 +4,7 @@ import { AVATAR_ICONS, AVATAR_BG_COLORS } from './avatarConfig'
 import { useControlTheme } from './controlThemeContext'
 import { isBrandTheme } from './controlThemes'
 import { BrandAvatarFrame } from './BrandAvatarFrame'
+import { CandyAvatarFrame } from './CandyAvatarFrame'
 
 const MASK = 'url(/cartoon/ui/Circle-Cartoon.png)'
 const MASK_SIZE = '100% 100%'
@@ -36,10 +37,13 @@ export function CartoonAvatar({
   const theme = useControlTheme()
   const branded = isBrandTheme(theme)
   const workshop = theme === 'kindness-workshop'
-  const roleTones: Record<string, string> = workshop
+  const candy = theme === 'candy-clouds'
+  const roleTones: Record<string, string> = candy
+    ? { '#FFB830': '#E6BD72', '#FF6B9D': '#DF99B6', '#29B6F6': '#85BBD5', '#62C76D': '#99B8A0', '#7D7F8C': '#9AAABE', '#3FA7F5': '#85BBD5', '#A66CFF': '#B0A4CA', '#F59E42': '#E6BD72' }
+    : workshop
     ? { '#FFB830': '#e5b45d', '#FF6B9D': '#d97b6d', '#29B6F6': '#286081', '#62C76D': '#82a37b', '#7D7F8C': '#8997a4', '#3FA7F5': '#286081', '#A66CFF': '#8596a8', '#F59E42': '#e5b45d' }
     : { '#FFB830': '#9395cd', '#FF6B9D': '#d983a2', '#29B6F6': '#555fa4', '#62C76D': '#9795ca', '#7D7F8C': '#9297b3', '#3FA7F5': '#555fa4', '#A66CFF': '#9795ca', '#F59E42': '#d983a2' }
-  const tone = roleTones[borderColor] ?? (workshop ? ['#d97b6d', '#e5b45d', '#286081', '#82a37b'][Math.abs(avatarIndex ?? colorIndex) % 4] : ['#555fa4', '#9395cd', '#d983a2'][Math.abs(avatarIndex ?? colorIndex) % 3])
+  const tone = roleTones[borderColor] ?? (candy ? ['#85BBD5', '#DF99B6', '#E6BD72'][Math.abs(avatarIndex ?? colorIndex) % 3] : workshop ? ['#d97b6d', '#e5b45d', '#286081', '#82a37b'][Math.abs(avatarIndex ?? colorIndex) % 4] : ['#555fa4', '#9395cd', '#d983a2'][Math.abs(avatarIndex ?? colorIndex) % 3])
   const mask = theme !== 'legacy' ? undefined : MASK
   const radius = theme !== 'legacy' ? '48% 52% 50% 46%' : undefined
   const aIdx = (avatarIndex ?? colorIndex) % AVATAR_ICONS.length
@@ -78,7 +82,7 @@ export function CartoonAvatar({
           WebkitMaskImage: mask, WebkitMaskSize: MASK_SIZE,
         } as React.CSSProperties}
       />
-      {branded && <BrandAvatarFrame workshop={workshop} tone={tone} />}
+      {candy ? <CandyAvatarFrame tone={tone} /> : branded && <BrandAvatarFrame workshop={workshop} tone={tone} />}
       {/* Color fill */}
       <div
         className={cn('absolute inset-0', branded && 'brand-avatar-fill')}

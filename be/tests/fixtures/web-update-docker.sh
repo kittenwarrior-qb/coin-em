@@ -15,6 +15,7 @@ case "$1" in
   if test "$TEST_CASE" = occupied || test "$TEST_CASE" = storage-unavailable || { test "$TEST_CASE" = race && test -f "$state/frozen"; }; then exit 1; fi
   echo empty >> "$state/events" ;;
  compose)
+  test "$EMCOIN_BACKEND_IMAGE" = "emcoin/backend:$old"
   for arg in "$@"; do
    if test "$arg" = stop; then touch "$state/frozen"; echo stop-web >> "$state/events"; exit 0; fi
    if test "$arg" = up; then test "${*: -1}" = web; echo "up-$EMCOIN_WEB_IMAGE" >> "$state/events"; exit 0; fi

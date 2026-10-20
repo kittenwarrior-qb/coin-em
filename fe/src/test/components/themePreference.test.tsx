@@ -10,10 +10,17 @@ import { CartoonButton } from '@/components/cartoon/CartoonButton'
 beforeEach(() => { localStorage.clear(); window.history.replaceState(null, '', '/'); delete document.documentElement.dataset.uiTheme })
 afterEach(() => { cleanup(); vi.restoreAllMocks(); localStorage.clear(); window.history.replaceState(null, '', '/') })
 describe('published UI themes only', () => {
+  it('defaults new visitors to Candy Clouds and preserves explicit saved themes', () => {
+    expect(initialTheme('', false, localStorage)).toBe('candy-clouds')
+    localStorage.setItem(THEME_STORAGE_KEY, 'emotion-orbit')
+    expect(initialTheme('', false, localStorage)).toBe('emotion-orbit')
+    localStorage.setItem(THEME_STORAGE_KEY, 'kindness-workshop')
+    expect(initialTheme('', false, localStorage)).toBe('kindness-workshop')
+  })
   it('ignores old/unknown themes in production, retaining only validated preferences', () => {
     for (const value of ['legacy', 'mint-blush', 'unknown', '<script>']) {
       localStorage.setItem(THEME_STORAGE_KEY, value)
-      expect(initialTheme(`?theme=${value}`, false, localStorage)).toBe('emotion-orbit')
+      expect(initialTheme(`?theme=${value}`, false, localStorage)).toBe('candy-clouds')
     }
     localStorage.setItem(THEME_STORAGE_KEY, 'kindness-workshop')
     expect(initialTheme('?theme=legacy', false, localStorage)).toBe('kindness-workshop')
@@ -23,7 +30,7 @@ describe('published UI themes only', () => {
   it('accepts a public Workshop link and tolerates storage being blocked', () => {
     const blocked = { getItem: () => { throw new Error('synthetic-storage-denied') } }
     expect(initialTheme('?theme=kindness-workshop', false, blocked)).toBe('kindness-workshop')
-    expect(initialTheme('', false, blocked)).toBe('emotion-orbit')
+    expect(initialTheme('', false, blocked)).toBe('candy-clouds')
   })
   it('changes materials without remounting children or changing router/popup state and restores on reload', () => {
     const mounted = vi.fn(), unmounted = vi.fn()

@@ -54,7 +54,7 @@ export function TableBoard({ selectedCards, phase, revealSituation, previewSitua
               {status}
             </div>
           )}
-          <div className="flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden">
+          <div data-ui-chrome="table-card-area" className="flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden">
             <CenterBoard selectedCards={selectedCards} phase={phase} revealSituation={revealSituation} previewSituationCard={previewSituationCard} onCardClick={onCardClick} />
           </div>
           {actions && (

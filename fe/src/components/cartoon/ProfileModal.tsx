@@ -6,6 +6,7 @@ import { CartoonButton, CartoonCircleButton } from './CartoonButton'
 import { CartoonInput } from './CartoonInput'
 import { AVATAR_ICONS, AVATAR_BG_COLORS, AVATAR_BORDER_COLORS } from './avatarConfig'
 import { useControlTheme } from './controlThemeContext'
+import { ArrowLeft, ArrowRight } from 'lucide-react'
 
 interface ProfileModalProps {
   open: boolean
@@ -26,6 +27,7 @@ export function ProfileModal({
   const [avatarIdx, setAvatarIdx] = useState(currentAvatarIndex)
   const [bgIdx, setBgIdx] = useState(currentBgIndex)
   const [customColor, setCustomColor] = useState('#FFD6E0')
+  const [profileTab,setProfileTab]=useState(0),[avatarPage,setAvatarPage]=useState(0)
   const { pending, run, error } = useConfirmedAction('profile', open)
   const wasOpen = useRef(open)
   useEffect(() => {
@@ -47,8 +49,12 @@ export function ProfileModal({
   }
 
   return (
-    <CartoonModal open={open} onClose={pending ? undefined : onClose} persistent={pending} hideClose={pending} title="Hồ sơ">
-      <fieldset disabled={pending || !open} className="flex flex-col gap-4 min-w-0">
+    <CartoonModal open={open} onClose={pending ? undefined : onClose} persistent={pending} hideClose={pending} title="Hồ sơ" className={theme==='candy-clouds'?'kawaii-profile':undefined}>
+      {theme==='candy-clouds'?<fieldset disabled={pending||!open} className="kawaii-profile-body">
+        <nav className="kawaii-tabs">{['Thông tin','Chân dung','Màu nền'].map((label,index)=><button type="button" key={label} aria-pressed={profileTab===index} onClick={()=>setProfileTab(index)}>{label}</button>)}</nav>
+        {profileTab===0?<><div className="kawaii-profile-preview"><EmcoinImage src={AVATAR_ICONS[avatarIdx%AVATAR_ICONS.length]} alt="Chân dung của bạn" style={{background:bg,borderColor:border}}/><div>{lockName?<b>{name}</b>:<CartoonInput label="Tên của bạn" value={name} onChange={e=>setName(e.target.value)}/>}<p>{currentRole}</p></div></div></>:profileTab===1?<><div className="kawaii-profile-avatars">{AVATAR_ICONS.slice(avatarPage*6,avatarPage*6+6).map((src,index)=><button type="button" key={src} aria-label={`Chọn chân dung ${avatarPage*6+index+1}`} aria-pressed={avatarIdx===avatarPage*6+index} onClick={()=>setAvatarIdx(avatarPage*6+index)}><EmcoinImage src={src} alt=""/></button>)}</div><nav className="kawaii-chat-pages" aria-label="Trang chân dung"><button type="button" aria-label="Chân dung trước" disabled={avatarPage===0} onClick={()=>setAvatarPage(avatarPage-1)}><ArrowLeft/></button><small>{avatarPage+1} / {Math.ceil(AVATAR_ICONS.length/6)}</small><button type="button" aria-label="Chân dung sau" disabled={avatarPage>=Math.ceil(AVATAR_ICONS.length/6)-1} onClick={()=>setAvatarPage(avatarPage+1)}><ArrowRight/></button></nav></>:<div className="kawaii-profile-colors">{[...AVATAR_BG_COLORS,'#ffffff'].map((color,index)=><button type="button" key={index} aria-label={`Màu nền ${index+1}`} aria-pressed={bgIdx===index} style={{background:color}} onClick={()=>setBgIdx(index)}/>)}<label>Màu khác<input type="color" aria-label="Chọn màu nền khác" value={customColor} onChange={event=>{setCustomColor(event.target.value);setBgIdx(13)}}/></label></div>}
+        {error&&<p role="alert">{error}</p>}<CartoonButton pending={pending} disabled={!name.trim()||!open} className="w-full" onClick={handleSave}>Lưu</CartoonButton>
+      </fieldset>:<fieldset disabled={pending || !open} className="flex flex-col gap-4 min-w-0">
 
         {/* Avatar preview + name */}
         <div className="flex items-center gap-4 rounded-2xl px-3 py-3" style={{ background: theme !== 'legacy' ? 'var(--brand-mint-soft)' : '#e6f9ff' }}>
@@ -186,7 +192,7 @@ export function ProfileModal({
         <CartoonButton color="teal" size="md" className="w-full" pending={pending} disabled={!name.trim() || !open} onClick={handleSave}>
           Lưu
         </CartoonButton>
-      </fieldset>
+      </fieldset>}
     </CartoonModal>
   )
 }

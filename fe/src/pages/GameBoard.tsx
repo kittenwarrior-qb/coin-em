@@ -163,6 +163,18 @@ function ConfirmedGameBoard(props: GameBoardProps) {
     boardSelectedCards
   } = useBoardController(props)
 
+  const boardActions = <BoardPhaseActions scope={actionScope} phase={activePhase} capabilities={capabilities}
+    connected={isConnected} pending={phaseActionPending} isNarrator={isNarrator}
+    isSender={Boolean(myPlayer?.isSender)} isSelfcareTurn={isMySelfcareTurn}
+    finiteCoins={Boolean(roomState.coinCycle)} rewardsConfirmed={hasConfirmedNtgRewards}
+    emotionSelected={Boolean(selectedCards.emotion)} reflectionCount={selectedCards.reflections.length}
+    selfcareSelected={Boolean(selectedCards.selfcare)} previous={previousPhase} next={nextPhase}
+    nextDisabled={isNarratorNextDisabled} checkpointLocked={isCoinCheckpointLocked}
+    onNavigate={(direction,targetPhase)=>setPhaseNavigation({direction,targetPhase})}
+    onOpenInventory={openInventory} onAdvance={handleAdvance}
+    onOpenGiveCoin={()=>setShowGiveCoinPicker(true)} onOpenTargetedCoin={()=>setShowNtgTargetedCoinPicker(true)}
+    onOpenLegacyRewards={()=>setShowNtgRewardPicker(true)}/>
+
   return (
     <div className="screen-cartoon" style={{ overflow: 'hidden' }}>
       <div
@@ -189,16 +201,16 @@ function ConfirmedGameBoard(props: GameBoardProps) {
 
         {/* Night background — slides up from bottom on night phases, slides back down on day */}
         <motion.div
-          className="absolute inset-0 z-0 pointer-events-none"
+          className="game-night-backdrop absolute inset-0 z-0 pointer-events-none"
           style={{
             backgroundImage: theme !== 'legacy' ? `linear-gradient(${theme === 'emotion-orbit' ? 'rgba(28,32,76,.78),rgba(35,38,77,.86)' : 'rgba(20,46,63,.78),rgba(24,50,66,.86)'}), ${themeBackdrop(theme, '')}` : 'url(/ingame_dark_background.webp)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
           }}
-          animate={{ y: isNight ? '0%' : '100%' }}
+          animate={theme==='candy-clouds'?{y:'0%',opacity:isNight?1:0}:{ y: isNight ? '0%' : '100%' }}
           transition={{ duration: 1.6, ease: [0.4, 0, 0.2, 1] }}
-          initial={{ y: '100%' }}
+          initial={theme==='candy-clouds'?{y:'0%',opacity:0}:{ y: '100%' }}
         />
 
         {/* Coin display — top left */}
@@ -317,20 +329,7 @@ function ConfirmedGameBoard(props: GameBoardProps) {
                     </div>
                   ) : null
                 }
-                actions={
-                  <BoardPhaseActions scope={actionScope} phase={activePhase} capabilities={capabilities}
-                    connected={isConnected} pending={phaseActionPending} isNarrator={isNarrator}
-                    isSender={Boolean(myPlayer?.isSender)} isSelfcareTurn={isMySelfcareTurn}
-                    finiteCoins={Boolean(roomState.coinCycle)} rewardsConfirmed={hasConfirmedNtgRewards}
-                    emotionSelected={Boolean(selectedCards.emotion)} reflectionCount={selectedCards.reflections.length}
-                    selfcareSelected={Boolean(selectedCards.selfcare)} previous={previousPhase} next={nextPhase}
-                    nextDisabled={isNarratorNextDisabled} checkpointLocked={isCoinCheckpointLocked}
-                    onNavigate={(direction, targetPhase) => setPhaseNavigation({ direction, targetPhase })}
-                    onOpenInventory={openInventory} onAdvance={handleAdvance}
-                    onOpenGiveCoin={() => setShowGiveCoinPicker(true)}
-                    onOpenTargetedCoin={() => setShowNtgTargetedCoinPicker(true)}
-                    onOpenLegacyRewards={() => setShowNtgRewardPicker(true)} />
-                }
+                actions={theme==='candy-clouds'?undefined:boardActions}
               />
             )}
             renderPlayer={({ player, position, index }) => {
@@ -400,6 +399,8 @@ function ConfirmedGameBoard(props: GameBoardProps) {
             }}
           />
         </div>
+
+        {theme==='candy-clouds'&&<footer className="kawaii-game-dock" aria-label="Thao tác trong ván">{boardActions}</footer>}
 
         {/* Center celebration — plays handshake-confetti Rive when a phase completes */}
         <PhaseCelebration runId={celebrationRun} />

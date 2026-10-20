@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
+import { useControlTheme } from '@/components/cartoon/controlThemeContext'
 import { CardFaceImage } from './CardFaceImage'
 import { cardImageFit, pdfCardAspect } from '@/features/game/catalog/cardImageLayout'
 
@@ -26,6 +27,7 @@ export function FlipCard({
   onClose,
 }: FlipCardProps) {
   const [flipped, setFlipped] = useState(initialFlipped)
+  const kawaii=useControlTheme()==='candy-clouds',reduced=useReducedMotion()
 
   // Reset flip when card changes
   useEffect(() => {
@@ -48,7 +50,7 @@ export function FlipCard({
     WebkitBackfaceVisibility: 'hidden',
     borderRadius: radius,
     overflow: 'hidden',
-    filter: 'drop-shadow(6px 6px 0 #1A1A1A)',
+    filter: kawaii?'drop-shadow(0 4px 0 #b7d1df)':'drop-shadow(6px 6px 0 #1A1A1A)',
   }
   const imageStyle: React.CSSProperties = {
     display: 'block',
@@ -59,9 +61,9 @@ export function FlipCard({
 
   return (
     <motion.div
-      initial={{ scale: 0.5, y: 100 }}
+      initial={kawaii?{scale:reduced?1:.96,y:reduced?0:12}: { scale: 0.5, y: 100 }}
       animate={{ scale: 1, y: 0 }}
-      exit={{ scale: 0.5, y: 100 }}
+      exit={kawaii?{scale:reduced?1:.7,rotateX:reduced?0:55,opacity:0,transition:{duration:reduced?0:.22}}:{ scale: 0.5, y: 100 }}
       drag={onClose ? 'y' : false}
       dragConstraints={{ top: 0, bottom: 0 }}
       dragElastic={0.2}
@@ -77,7 +79,7 @@ export function FlipCard({
       <motion.div
         initial={{ rotateY: initialFlipped ? 180 : 0 }}
         animate={{ rotateY: flipped ? 180 : 0 }}
-        transition={{ duration: 0.7, ease: 'easeInOut' }}
+        transition={{ duration: reduced?0:kawaii?.38:.7, ease: 'easeInOut' }}
         style={{
           transformStyle: 'preserve-3d',
           position: 'relative',

@@ -1,5 +1,5 @@
 import { EmcoinImage } from '@/components/cartoon/EmcoinImage'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { motion, useIsPresent } from 'framer-motion'
 import type { CardData } from '@/stores/types'
 import type { GameLogEntry } from '@/components/game/types'
@@ -7,7 +7,7 @@ import { usePopupLifecycle } from '@/features/overlays/usePopupLifecycle'
 import { useControlTheme } from '@/components/cartoon/controlThemeContext'
 import { isBrandTheme } from '@/components/cartoon/controlThemes'
 import { CartoonCircleButton } from '@/components/cartoon'
-import { BookOpen } from 'lucide-react'
+import { BookOpen, ArrowLeft, ArrowRight } from 'lucide-react'
 
 interface Props {
   currentRound: number
@@ -19,7 +19,10 @@ interface Props {
 
 /** Presentation only: consumes recipient-visible rows, never reconstructs private logs. */
 export function HistoryModal({ currentRound, logs, pending, onClose, onPreview }: Props) {
-  const branded = isBrandTheme(useControlTheme())
+  const theme=useControlTheme(),branded = isBrandTheme(theme)
+  const [page,setPage]=useState(0)
+  const chunks=logs.flatMap(log=>Array.from({length:Math.max(1,Math.ceil(log.item.detail.length/120))},(_,part)=>({...log,item:{...log.item,detail:log.item.detail.slice(part*120,(part+1)*120)}})))
+  const current=Math.min(page,Math.max(0,chunks.length-1)),rows=theme==='candy-clouds'?chunks.slice(current,current+1):logs
   const dialogRef = useRef<HTMLDivElement>(null)
   const present = useIsPresent()
   const locked = pending || !present
@@ -29,7 +32,7 @@ export function HistoryModal({ currentRound, logs, pending, onClose, onPreview }
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="absolute inset-0 z-[65] flex items-end justify-center bg-black/55 backdrop-blur-sm px-3 pb-4"
+      className={`absolute inset-0 z-[65] flex items-end justify-center bg-black/55 backdrop-blur-sm px-3 pb-4 ${theme==='candy-clouds'?'kawaii-history':''}`}
       onClick={locked ? undefined : onClose}
     >
       <motion.div
@@ -67,7 +70,7 @@ export function HistoryModal({ currentRound, logs, pending, onClose, onPreview }
             </div>
           ) : (
             <div className="flex flex-col gap-2">
-              {logs.map(({ entry, item }, index) => {
+              {rows.map(({ entry, item }, index) => {
                 return (
                   <div data-ui-chrome="history-entry" key={`${entry.timestamp}-${entry.type}-${index}`} className="rounded-2xl bg-[var(--c-sky-mist)] px-3 py-2">
                     <div className="flex items-start gap-2">
@@ -87,7 +90,7 @@ export function HistoryModal({ currentRound, logs, pending, onClose, onPreview }
                             data-testid={`history-card-${item.card.id}`}
                             disabled={locked}
                           >
-                            <EmcoinImage src={item.card.frontImage} alt={item.card.id} className="h-full w-full object-cover" draggable={false} />
+                            {theme==='candy-clouds'?<span>Xem thẻ</span>:<EmcoinImage src={item.card.frontImage} alt={item.card.id} className="h-full w-full object-cover" draggable={false} />}
                           </button>
                         )}
                       </div>
@@ -98,6 +101,7 @@ export function HistoryModal({ currentRound, logs, pending, onClose, onPreview }
             </div>
           )}
         </div>
+        {theme==='candy-clouds'&&<nav className="kawaii-chat-pages" aria-label="Trang nhật ký"><button aria-label="Nhật ký trước" disabled={current===0} onClick={()=>setPage(current-1)}><ArrowLeft/></button><small>{current+1} / {Math.max(1,chunks.length)}</small><button aria-label="Nhật ký sau" disabled={current>=chunks.length-1} onClick={()=>setPage(current+1)}><ArrowRight/></button></nav>}
       </motion.div>
     </motion.div>
   )
