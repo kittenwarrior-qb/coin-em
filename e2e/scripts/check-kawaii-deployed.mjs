@@ -8,7 +8,7 @@ await mkdir(output,{recursive:true})
 const browser=await chromium.launch(),results=[]
 try {
  for(const [width,height] of [[320,568],[390,844],[844,390],[1440,900]]) {
-  const context=await browser.newContext({viewport:{width,height},serviceWorkers:'block'})
+  const context=await browser.newContext({viewport:{width,height}})
   const page=await context.newPage(),errors=[]
   page.on('pageerror',error=>errors.push(error.message))
   const measure=async screen=>{
@@ -21,7 +21,7 @@ try {
    expect(state.theme).toBe('candy-clouds');expect(state.overflow).toBe(false);expect(state.broken).toEqual([]);expect(errors).toEqual([])
   }
   // No query override and no stored preference: verify the actual default.
-  await page.goto(base,{waitUntil:'networkidle'})
+  await page.goto(base,{waitUntil:'domcontentloaded'})
   await page.getByTestId('btn-join-room').waitFor({timeout:60000})
   await page.evaluate(async()=>{await document.fonts.ready;await Promise.all([...document.images].map(image=>image.decode().catch(()=>{})))})
   await measure('home')
@@ -41,10 +41,26 @@ try {
   await page.getByRole('button',{name:'Cài đặt',exact:true}).click()
   await page.getByRole('dialog',{name:'Menu',exact:true}).waitFor()
   await measure('menu')
+  if(width===390) {
+   await page.getByRole('button',{name:'Bộ thẻ',exact:true}).click()
+   const catalog=page.getByRole('dialog',{name:'Bộ thẻ',exact:true})
+   await catalog.getByTestId('inventory-scroll').locator('img').first().waitFor()
+   await catalog.getByTestId('inventory-scroll').locator('img').evaluateAll(async images=>{await Promise.all(images.map(image=>image.decode()))})
+   await measure('catalog')
+   await catalog.getByRole('button',{name:'Đóng',exact:true}).click()
+   await catalog.waitFor({state:'detached'})
+   await page.getByRole('button',{name:'Giao diện',exact:true}).click()
+   await page.getByRole('dialog',{name:'Chọn giao diện',exact:true}).waitFor()
+   await measure('theme-chooser')
+   await page.getByRole('radio',{name:/Vòng Cảm Xúc/}).check()
+   await page.reload({waitUntil:'domcontentloaded'})
+   await expect(page.locator('html')).toHaveAttribute('data-ui-theme','emotion-orbit')
+   results.push({screen:'saved-old-theme',width,height,theme:'emotion-orbit',preservedAfterReload:true,errors:[...errors]})
+  }
   await context.close()
  }
- const context=await browser.newContext({serviceWorkers:'block'}),page=await context.newPage()
- await page.goto(`${base}/admin`,{waitUntil:'networkidle'})
+ const context=await browser.newContext(),page=await context.newPage()
+ await page.goto(`${base}/admin`,{waitUntil:'domcontentloaded'})
  await expect(page.getByRole('button',{name:'Đăng nhập',exact:true})).toBeVisible()
  await context.close()
 } finally {

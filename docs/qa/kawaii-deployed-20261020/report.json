@@ -1,0 +1,213 @@
+{
+  "base": "https://app.emcoin.cloud",
+  "realNetwork": true,
+  "roomMutations": false,
+  "results": [
+    {
+      "screen": "home",
+      "width": 320,
+      "height": 568,
+      "theme": "candy-clouds",
+      "overflow": false,
+      "broken": [],
+      "errors": []
+    },
+    {
+      "screen": "create-name",
+      "width": 320,
+      "height": 568,
+      "theme": "candy-clouds",
+      "overflow": false,
+      "broken": [],
+      "errors": []
+    },
+    {
+      "screen": "create-decks",
+      "width": 320,
+      "height": 568,
+      "theme": "candy-clouds",
+      "overflow": false,
+      "broken": [],
+      "errors": []
+    },
+    {
+      "screen": "join",
+      "width": 320,
+      "height": 568,
+      "theme": "candy-clouds",
+      "overflow": false,
+      "broken": [],
+      "errors": []
+    },
+    {
+      "screen": "menu",
+      "width": 320,
+      "height": 568,
+      "theme": "candy-clouds",
+      "overflow": false,
+      "broken": [],
+      "errors": []
+    },
+    {
+      "screen": "home",
+      "width": 390,
+      "height": 844,
+      "theme": "candy-clouds",
+      "overflow": false,
+      "broken": [],
+      "errors": []
+    },
+    {
+      "screen": "create-name",
+      "width": 390,
+      "height": 844,
+      "theme": "candy-clouds",
+      "overflow": false,
+      "broken": [],
+      "errors": []
+    },
+    {
+      "screen": "create-decks",
+      "width": 390,
+      "height": 844,
+      "theme": "candy-clouds",
+      "overflow": false,
+      "broken": [],
+      "errors": []
+    },
+    {
+      "screen": "join",
+      "width": 390,
+      "height": 844,
+      "theme": "candy-clouds",
+      "overflow": false,
+      "broken": [],
+      "errors": []
+    },
+    {
+      "screen": "menu",
+      "width": 390,
+      "height": 844,
+      "theme": "candy-clouds",
+      "overflow": false,
+      "broken": [],
+      "errors": []
+    },
+    {
+      "screen": "catalog",
+      "width": 390,
+      "height": 844,
+      "theme": "candy-clouds",
+      "overflow": false,
+      "broken": [],
+      "errors": []
+    },
+    {
+      "screen": "theme-chooser",
+      "width": 390,
+      "height": 844,
+      "theme": "candy-clouds",
+      "overflow": false,
+      "broken": [],
+      "errors": []
+    },
+    {
+      "screen": "saved-old-theme",
+      "width": 390,
+      "height": 844,
+      "theme": "emotion-orbit",
+      "preservedAfterReload": true,
+      "errors": []
+    },
+    {
+      "screen": "home",
+      "width": 844,
+      "height": 390,
+      "theme": "candy-clouds",
+      "overflow": false,
+      "broken": [],
+      "errors": []
+    },
+    {
+      "screen": "create-name",
+      "width": 844,
+      "height": 390,
+      "theme": "candy-clouds",
+      "overflow": false,
+      "broken": [],
+      "errors": []
+    },
+    {
+      "screen": "create-decks",
+      "width": 844,
+      "height": 390,
+      "theme": "candy-clouds",
+      "overflow": false,
+      "broken": [],
+      "errors": []
+    },
+    {
+      "screen": "join",
+      "width": 844,
+      "height": 390,
+      "theme": "candy-clouds",
+      "overflow": false,
+      "broken": [],
+      "errors": []
+    },
+    {
+      "screen": "menu",
+      "width": 844,
+      "height": 390,
+      "theme": "candy-clouds",
+      "overflow": false,
+      "broken": [],
+      "errors": []
+    },
+    {
+      "screen": "home",
+      "width": 1440,
+      "height": 900,
+      "theme": "candy-clouds",
+      "overflow": false,
+      "broken": [],
+      "errors": []
+    },
+    {
+      "screen": "create-name",
+      "width": 1440,
+      "height": 900,
+      "theme": "candy-clouds",
+      "overflow": false,
+      "broken": [],
+      "errors": []
+    },
+    {
+      "screen": "create-decks",
+      "width": 1440,
+      "height": 900,
+      "theme": "candy-clouds",
+      "overflow": false,
+      "broken": [],
+      "errors": []
+    },
+    {
+      "screen": "join",
+      "width": 1440,
+      "height": 900,
+      "theme": "candy-clouds",
+      "overflow": false,
+      "broken": [],
+      "errors": []
+    },
+    {
+      "screen": "menu",
+      "width": 1440,
+      "height": 900,
+      "theme": "candy-clouds",
+      "overflow": false,
+      "broken": [],
+      "errors": []
+    }
+  ]
+}
