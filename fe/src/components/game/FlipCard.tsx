@@ -61,14 +61,16 @@ export function FlipCard({
 
   return (
     <motion.div
-      initial={kawaii?{scale:reduced?1:.96,y:reduced?0:12}: { scale: 0.5, y: 100 }}
-      animate={{ scale: 1, y: 0 }}
+      initial={kawaii?{scale:reduced?1:.82,y:reduced?0:18,rotateX:reduced?0:48,opacity:reduced?1:0}: { scale: 0.5, y: 100 }}
+      animate={{ scale: 1, y: 0, ...(kawaii?{rotateX:0,opacity:1}:{}) }}
+      transition={kawaii?{duration:reduced?0:.3,ease:[.22,1,.36,1]}:undefined}
       exit={kawaii?{scale:reduced?1:.7,rotateX:reduced?0:55,opacity:0,transition:{duration:reduced?0:.22}}:{ scale: 0.5, y: 100 }}
       drag={onClose ? 'y' : false}
       dragConstraints={{ top: 0, bottom: 0 }}
       dragElastic={0.2}
       onDragEnd={onClose ? (_, info) => { if (info.offset.y > 100) onClose() } : undefined}
       className="relative"
+      data-card-motion={kawaii?'fold':undefined}
       style={{
         perspective: '1000px',
         width,

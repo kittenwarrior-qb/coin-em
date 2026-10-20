@@ -159,11 +159,42 @@ html[data-ui-theme=candy-clouds] .room-chat-messages>li.is-self{background:#fdeb
  html[data-ui-theme=candy-clouds] .kawaii-modal-title{padding:12px 48px 6px 16px}html[data-ui-theme=candy-clouds] .kawaii-modal-title .font-display{font-size:20px}html[data-ui-theme=candy-clouds] .kawaii-modal-close{top:10px!important;right:12px!important}html[data-ui-theme=candy-clouds] .kawaii-modal [data-ui-modal-content]{padding:4px 16px 14px}html[data-ui-theme=candy-clouds] .kawaii-modal .theme-a-menu-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 }
 @media(prefers-reduced-motion:no-preference){
- .kawaii-home-actions{animation:kawaii-arrive 420ms 70ms both}.kawaii-logo{animation:kawaii-brand-arrive 480ms both}.kawaii-home button{transition:filter 120ms ease,translate 100ms ease}.kawaii-home button:hover{filter:brightness(1.025)}
+ .kawaii-home-actions>.kawaii-button{animation:kawaii-arrive 420ms 90ms both}.kawaii-home-actions>.kawaii-button:nth-child(2){animation-delay:150ms}.kawaii-logo{animation:kawaii-brand-arrive 480ms both}.kawaii-home button{transition:filter 120ms ease,translate 100ms ease}
  @keyframes kawaii-arrive{0%{opacity:0;translate:0 -5px}65%{opacity:1;translate:0 0}83%{translate:0 -1.5px}100%{opacity:1;translate:0 0}}
  @keyframes kawaii-brand-arrive{0%{opacity:0;scale:.975}65%{opacity:1;scale:1.012}85%{scale:.998}100%{opacity:1;scale:1}}
 }
 @media(prefers-reduced-motion:reduce){.kawaii-home button{transition:none}.kawaii-button:active{translate:none}}
+
+/* Prototype interaction fidelity: single-pass shine, icon lift and menu cadence.
+   Only optical layers move; no added layout space or perpetual idle bounce. */
+html[data-ui-theme=candy-clouds] :is(.kawaii-button,[data-cartoon-surface=pill]):after{content:'';position:absolute;inset:1px;border-radius:inherit;pointer-events:none;opacity:0;background:linear-gradient(110deg,transparent 38%,#ffffff80 50%,transparent 62%);background-size:250% 100%;background-position:100% 0}
+@media(prefers-reduced-motion:no-preference){
+ html[data-ui-theme=candy-clouds] :is(.kawaii-button>svg,.brand-menu-icon,.kawaii-home-tools svg){transition:transform 160ms ease-out;transform-origin:center}
+ html[data-ui-theme=candy-clouds] .kawaii-button:active{box-shadow:0 1px 0 #91b7c4}
+ html[data-ui-theme=candy-clouds] .kawaii-button.pink:active{box-shadow:0 1px 0 #c7a1b4}
+ html[data-ui-theme=candy-clouds] :is(.kawaii-button:active,.cartoon-control:not(:disabled):active>[data-cartoon-surface=pill]):after,
+ html[data-ui-theme=candy-clouds][data-kawaii-input=keyboard] :is(.kawaii-button:focus-visible,.cartoon-control:not(:disabled):focus-visible>[data-cartoon-surface=pill]):after{animation:kawaii-button-sheen 420ms ease-out}
+ html[data-ui-theme=candy-clouds] .kawaii-modal .theme-a-menu-actions>.cartoon-control{animation:kawaii-menu-reveal 220ms ease-out backwards}
+ html[data-ui-theme=candy-clouds] .kawaii-modal .theme-a-menu-actions>.cartoon-control:nth-child(2){animation-delay:35ms}
+ html[data-ui-theme=candy-clouds] .kawaii-modal .theme-a-menu-actions>.cartoon-control:nth-child(3){animation-delay:70ms}
+ html[data-ui-theme=candy-clouds] .kawaii-modal .theme-a-menu-actions>.cartoon-control:nth-child(4){animation-delay:105ms}
+ @keyframes kawaii-button-sheen{0%{background-position:100% 0;opacity:0}25%{opacity:.55}100%{background-position:0 0;opacity:0}}
+ @keyframes kawaii-menu-reveal{from{opacity:0;translate:0 3px}to{opacity:1;translate:0 0}}
+ html[data-ui-theme=candy-clouds] .kawaii-catalog [data-testid=inventory-scroll]>.grid>div{animation:kawaii-card-deal 260ms ease-out backwards}
+ html[data-ui-theme=candy-clouds] .kawaii-catalog [data-testid=inventory-scroll]>.grid>div:nth-child(2){animation-delay:45ms}
+ html[data-ui-theme=candy-clouds] .kawaii-catalog [data-testid=inventory-scroll]>.grid>div:nth-child(3){animation-delay:90ms}
+ @keyframes kawaii-card-deal{from{opacity:0;translate:0 5px;scale:.98}to{opacity:1;translate:0 0;scale:1}}
+}
+@media(prefers-reduced-motion:no-preference) and (hover:hover) and (pointer:fine){
+ html[data-ui-theme=candy-clouds] :is(.kawaii-button:hover,.cartoon-control:not(:disabled):hover>[data-cartoon-surface=pill]):after{animation:kawaii-button-sheen 420ms ease-out}
+ html[data-ui-theme=candy-clouds] .kawaii-button:hover:not(:active)>svg,
+ html[data-ui-theme=candy-clouds] .cartoon-control:hover:not(:disabled):not(:active) .brand-menu-icon{transform:translateY(-1px) rotate(-3deg)}
+ html[data-ui-theme=candy-clouds] .kawaii-home-tools>button:hover:not(:active)>svg{transform:rotate(-6deg)}
+ html[data-ui-theme=candy-clouds] .kawaii-home button:hover{filter:brightness(1.025)}
+}
+@media(prefers-reduced-motion:reduce){
+ html[data-ui-theme=candy-clouds] :is(.kawaii-button,.kawaii-logo,.kawaii-button>svg,.brand-menu-icon,.kawaii-home-tools svg,.kawaii-button:after,[data-cartoon-surface=pill]:after,.theme-a-menu-actions>.cartoon-control){animation:none!important;transition:none!important}
+}
 
 /* Paginated live chat and real catalog, not scrollable demo screenshots. */
 html[data-ui-theme=candy-clouds] .kawaii-chat-modal{height:min(580px,calc(100dvh - 80px))}

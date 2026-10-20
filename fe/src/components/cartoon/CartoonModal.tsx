@@ -94,10 +94,10 @@ export function CartoonModal({
             aria-labelledby={title ? titleId : undefined}
             aria-label={title ? undefined : 'Hộp thoại'}
             tabIndex={-1}
-            initial={{ scale: kawaii?reduced?1:.985:.85 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0.92, transition: { duration: 0.12, ease: 'easeIn' } }}
-            transition={kawaii?{duration:reduced?0:.23,ease:'easeOut'}:{ type: 'spring', stiffness: 340, damping: 26 }}
+            initial={{ scale: kawaii?reduced?1:.97:.85, y:kawaii&&!reduced?6:0 }}
+            animate={{ scale: kawaii&&!reduced?[.97,1.006,1]:1, y:0 }}
+            exit={{ scale: kawaii?reduced?1:.98:.92, y:kawaii&&!reduced?4:0, transition: { duration: kawaii&&reduced?0:.12, ease: 'easeIn' } }}
+            transition={kawaii?{duration:reduced?0:.28,ease:'easeOut'}:{ type: 'spring', stiffness: 340, damping: 26 }}
             onClick={(e) => e.stopPropagation()}
             className={cn('relative w-full max-h-full min-h-0 flex flex-col', menu && 'theme-a-menu', kawaii&&'kawaii-modal', className)}
             style={{ maxWidth: '23rem', transformOrigin: 'center', willChange: 'transform' }}

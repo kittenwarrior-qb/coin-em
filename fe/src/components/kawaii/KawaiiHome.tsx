@@ -12,7 +12,7 @@ export function KawaiiHome({onJoin,onCreate,onMenu,onGuide,onResume,resumeCount}
   <nav className="kawaii-home-tools" aria-label="Trợ giúp và cài đặt"><button onClick={onGuide} aria-label="Hướng dẫn"><BookOpen/></button><button onClick={onMenu} aria-label="Cài đặt"><Settings/></button></nav>
   <div className="kawaii-home-core">
    <motion.button className="kawaii-logo" aria-label="Logo EmCoin" onClick={()=>setReaction(v=>v+1)}>
-    <motion.img key={reaction} id="home-logo" src="/cartoon/ui/themes/candy-clouds/coin-mark.webp" alt="EmCoin" animate={!reduced&&reaction?{rotate:[0,-1.5,0]}:undefined} transition={{duration:.2}}/>
+    <motion.img key={reaction} id="home-logo" src="/cartoon/ui/themes/candy-clouds/coin-mark.webp" alt="EmCoin" animate={!reduced&&reaction?{rotate:[0,-2,1,0],scale:[1,1.018,.998,1]}:undefined} transition={{duration:.36,ease:'easeOut'}}/>
    </motion.button>
    <div className="kawaii-home-actions"><button className="kawaii-button" data-testid="btn-join-room" onClick={onJoin}><HomeIcon/><span>Tìm phòng</span></button><button className="kawaii-button pink" data-testid="btn-create-room" onClick={onCreate}><HomeIcon create/><span>Tạo phòng</span></button></div>
    {resumeCount>0&&<button className="kawaii-resume" onClick={onResume}>Tiếp tục phòng ({resumeCount})</button>}
